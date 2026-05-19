@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.hypothesis/
+
+# Node
+node_modules/
+*.log
+.vite/
+dist/
+build/
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+logs/
+results/local/
+data/runtime/
+documents/
+*.sqlite
+*.db
+
+# Auto-memory (orchestrator) — keep checked in
+# .claude/ — keep settings.local.json (intentional)
+
+# Worker reports — keep checked in (audit trail)
+# work/reports/ — kept
+
+# Pre-commit
+.pre-commit-cache/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/

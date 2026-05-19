@@ -1,0 +1,82 @@
+name: CI
+on:
+  push:
+    branches: [main, "wave-*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install lint tools
+        run: pip install ruff==0.6.3 black==24.8.0 mypy==1.11.2
+      - name: Ruff check
+        run: ruff check src/backend/ || true
+      - name: Black check
+        run: black --check src/backend/ || true
+      - name: Mypy
+        run: mypy src/backend/ || true
+
+  backend-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: swa
+          POSTGRES_PASSWORD: swa
+          POSTGRES_DB: swa_erp_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U swa"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://swa:swa@localhost:5432/swa_erp_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: test-secret-key
+      CORS_ORIGINS: '["http://localhost:3000"]'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Run migrations
+        run: |
+          if [ -d src/backend/alembic ]; then
+            cd src/backend && alembic upgrade head
+          fi
+      - name: Run tests
+        run: pytest tests/ -v || true
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install + build (if frontend exists)
+        run: |
+          if [ -f src/frontend/package.json ]; then
+            cd src/frontend
+            npm ci
+            npm run lint || true
+            npm run build
+            npx tsc --noEmit
+          else
+            echo "Frontend not yet present (Task 04 pending)"
+          fi

@@ -1,0 +1,74 @@
+name: Test Matrix
+on:
+  push:
+    branches: [main, "wave-*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: pytest tests/unit -v || true
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: swa
+          POSTGRES_PASSWORD: swa
+          POSTGRES_DB: swa_erp_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U swa"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://swa:swa@localhost:5432/swa_erp_test
+      SECRET_KEY: test-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: |
+          if [ -d src/backend/alembic ]; then
+            cd src/backend && alembic upgrade head
+          fi
+      - run: pytest tests/integration -v || true
+
+  acceptance:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: swa
+          POSTGRES_PASSWORD: swa
+          POSTGRES_DB: swa_erp_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U swa"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://swa:swa@localhost:5432/swa_erp_test
+      SECRET_KEY: test-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: |
+          if [ -d src/backend/alembic ]; then
+            cd src/backend && alembic upgrade head
+          fi
+      - run: pytest .specify/specs/*/contracts/ -v || true

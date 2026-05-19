@@ -1,0 +1,27 @@
+name: new-wave
+description: Full lifecycle of a vertical wave from PRD to merged + shipped.
+parameters:
+  wave_number: required
+steps:
+  - command: /plan
+    args: "wave-{{wave_number}}"
+    note: "writes spec/plan/tasks/contracts"
+  - command: /dispatch
+    args: "wave-{{wave_number}}"
+    note: "writes self-contained task files into work/wave-N/"
+  - human: "Open OpenCode CLI windows (one per task). Paste WORKER_PROMPT.md, then a task file. Run."
+  - human: "Wait for reports to appear in work/reports/wave-{{wave_number}}/"
+  - loop:
+      for_each: "report in work/reports/wave-{{wave_number}}/*.report.md"
+      do:
+        - command: /review
+          args: "{{report}}"
+        - on_approve:
+            command: /merge
+            args: "{{report}}"
+        - on_revise:
+            human: "Rewrite task brief and redispatch"
+  - command: /ship
+    args: "wave-{{wave_number}}"
+  - command: /reflect
+    note: "capture lessons before next wave"

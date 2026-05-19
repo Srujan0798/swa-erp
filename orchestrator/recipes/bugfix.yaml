@@ -1,0 +1,14 @@
+name: bugfix
+description: Reproduce → fix → verify for a bug in shipped code.
+parameters:
+  description: required
+steps:
+  - human: "Confirm bug exists in current main. Reproduce locally."
+  - command: /plan
+    note: "Write a hotfix task file (single-task wave)"
+  - command: /dispatch
+    note: "Dispatch to one worker. Brief includes: reproduce, fix, regression test."
+  - command: /review
+  - on_approve:
+      command: /merge
+      note: "Tag as bugfix in CHANGELOG"
