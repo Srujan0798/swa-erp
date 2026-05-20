@@ -3,9 +3,9 @@
 ## Wave dependency graph
 
 ```
-wave-1 (Foundation)
+wave-1 (Foundation) ✅ SHIPPED
   │
-  ├──→ wave-2 (Clients + Projects)
+  ├──→ wave-2 (Clients + Projects) ← READY TO DISPATCH
   │      │
   │      ├──→ wave-3 (Quotation/BOQ workflow)
   │      ├──→ wave-4 (Task management)
@@ -27,8 +27,8 @@ wave-1 (Foundation)
 
 | Wave | Name | Status | Tasks | Notes |
 |---|---|---|---|---|
-| 1 | Foundation | **READY TO DISPATCH** | 0/5 | spec written; task files in work/wave-1/ |
-| 2 | Clients + Projects | pending | — | depends on wave-1 |
+| 1 | Foundation | **SHIPPED** ✅ | 5/5 | Merged to main; all tests pass; CI green |
+| 2 | Clients + Projects | **READY TO DISPATCH** | 0/5 | spec + task files ready |
 | 3 | Quotation/BOQ workflow | pending | — | depends on wave-2 |
 | 4 | Task management | pending | — | depends on wave-2 |
 | 5 | Vendors + Inventory | pending | — | depends on wave-2 |
@@ -38,54 +38,48 @@ wave-1 (Foundation)
 
 ## Wave details
 
-### Wave 1 — Foundation
-**Goal:** Bootable backend + frontend with auth, RBAC, users, app shell. No business features yet.
-**Tasks (5):**
-1. Backend skeleton — FastAPI app, config, db session, Alembic
-2. Auth + RBAC — JWT, bcrypt, roles, login/refresh/reset endpoints
-3. Users API — CRUD users, role assignment
-4. Frontend shell — Vite + React + Tailwind + shadcn/ui, router, auth flow
-5. CI + Docker — workflows, Dockerfile, docker-compose for dev
-
-**Acceptance:**
-- `make dev` brings up backend + frontend + postgres + redis
-- Login flow works end-to-end
-- `pytest tests/` passes
-- CI green on first push
+### Wave 1 — Foundation ✅
+**Goal:** Bootable backend + frontend with auth, RBAC, users, app shell.
+**Shipped:** `df1b779` on `main`
 
 ### Wave 2 — Clients + Projects (core)
 **Goal:** Manage clients and projects. CRM-lite + project lifecycle.
-**Tasks (~6):** clients API, projects API, lifecycle transitions, dashboard page, client/project list/detail pages, search & pagination.
+**Tasks (5):**
+1. Clients API — Client + Contact models, CRUD, search, pagination
+2. Projects API — Project model, CRUD, search, status filter, team assignment
+3. Lifecycle + Stats Service — state machine, transitions, audit, /projects/stats
+4. Dashboard Frontend — stats cards, recent projects/clients, quick actions
+5. Clients + Projects UI — list/detail pages, forms, search, status filters, lifecycle buttons
+
+**Acceptance:**
+- `pytest tests/wave-2/` passes 100%
+- PM can create client → create project → assign team → transition status end-to-end
+- Dashboard shows real project stats
+- CI green on push
 
 ### Wave 3 — Quotation / BOQ Workflow
 **Goal:** Upload BOQ files (JSON/Excel), version them, generate and send quotes.
-**Tasks (~5):** BOQ parser (JSON + Excel), BOQ versioning, quote generation, PDF export, send-to-client.
 
 ### Wave 4 — Task Management
 **Goal:** Per-project tasks with assignees, dependencies, statuses.
-**Tasks (~4):** tasks API, dependency graph, assignment notifications, task UI (kanban + list).
 
 ### Wave 5 — Vendors + Inventory
 **Goal:** Vendor database, materials catalog, vendor-RFQ workflow.
-**Tasks (~5):** vendors API, materials catalog, vendor-RFQ generation, comparison view, vendor portal stub.
 
 ### Wave 6 — Documents + Compliance
 **Goal:** Document storage + compliance checklists (NBC/ECBC/IGBC/IS).
-**Tasks (~5):** document upload/versioning, checklist data model (versioned per standard), checklist UI, audit trail per checklist item, document linking to projects.
 
 ### Wave 7 — Time + Financials
 **Goal:** Timesheets, invoicing, project P&L.
-**Tasks (~5):** timesheets API, invoice generation, GST-aware totals, payment tracking, project P&L view.
 
 ### Wave 8 — Reports + Deliverables
 **Goal:** Dashboards (utilization, project health, revenue forecast) + final deliverables.
-**Tasks (~5):** dashboard widgets, exports (Excel/PDF), final technical report, slide deck, demo video script.
 
 ## Current activity
 
-**Active wave:** wave-1
-**Next action:** dispatch `work/wave-1/01-*.md` through `05-*.md` to OpenCode CLI workers in parallel windows.
+**Active wave:** wave-2
+**Next action:** dispatch `work/wave-2/01-*.md` through `05-*.md` to OpenCode CLI workers in parallel windows.
 
 ## Changelog (waves shipped)
 
-_None yet — wave-1 in progress._
+- **wave-1** — `df1b779` — Backend skeleton, Auth + RBAC, Users API, Frontend shell, CI + Docker

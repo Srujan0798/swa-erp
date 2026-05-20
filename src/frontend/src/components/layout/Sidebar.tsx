@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users } from "lucide-react";
+import { LayoutDashboard, Users, Building2, FolderKanban } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/clients", icon: Building2, label: "Clients" },
+  { to: "/projects", icon: FolderKanban, label: "Projects" },
   { to: "/users", icon: Users, label: "Users", adminOnly: true },
 ];
 

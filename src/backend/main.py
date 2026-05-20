@@ -2,7 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.backend.api.auth import router as auth_router
+from src.backend.api.clients import router as clients_router
 from src.backend.api.health import router as health_router
+from src.backend.api.lifecycle import router as lifecycle_router
+from src.backend.api.projects import router as projects_router
 from src.backend.api.users import router as users_router
 from src.backend.core.config import settings
 from src.backend.core.middleware import RequestIdMiddleware
@@ -18,5 +21,7 @@ app.add_middleware(
 )
 app.include_router(health_router)
 app.include_router(auth_router)
-app.include_router(users_router)
+app.include_router(clients_router)
+app.include_router(lifecycle_router)
+app.include_router(projects_router)
 app.include_router(users_router)

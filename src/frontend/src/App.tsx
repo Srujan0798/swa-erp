@@ -4,6 +4,12 @@ import { AppShell } from "@/components/layout/AppShell";
 import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { UsersPage } from "@/pages/UsersPage";
+import { ClientsPage } from "@/pages/ClientsPage";
+import { ClientDetailPage } from "@/pages/ClientDetailPage";
+import { NewClientPage } from "@/pages/NewClientPage";
+import { ProjectsPage } from "@/pages/ProjectsPage";
+import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
+import { NewProjectPage } from "@/pages/NewProjectPage";
 
 function App() {
   return (
@@ -25,6 +31,12 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/clients/:id" element={<ClientDetailPage />} />
+        <Route path="/clients/new" element={<NewClientPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailPage />} />
+        <Route path="/projects/new" element={<NewProjectPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

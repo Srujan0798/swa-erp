@@ -7,6 +7,13 @@ import type {
   UserCreate,
   UserUpdate,
   User,
+  ProjectListResponse,
+  ProjectStats,
+  ClientListResponse,
+  Project,
+  Client,
+  Contact,
+  ProjectStatus,
 } from "@/types/api";
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "./auth";
 
@@ -85,11 +92,12 @@ export const api = {
 
   me: () => request<User>("/api/auth/me"),
 
-  listUsers: (params?: { page?: number; page_size?: number; q?: string }) => {
+  listUsers: (params?: { page?: number; page_size?: number; q?: string; role?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.page_size) searchParams.set("page_size", String(params.page_size));
     if (params?.q) searchParams.set("q", params.q);
+    if (params?.role) searchParams.set("role", params.role);
     const query = searchParams.toString();
     return request<UserListResponse>(`/api/users${query ? `?${query}` : ""}`);
   },
@@ -110,6 +118,70 @@ export const api = {
 
   deleteUser: (id: string) =>
     request<void>(`/api/users/${id}`, { method: "DELETE" }),
+
+  getProjectStats: () => request<ProjectStats>("/api/projects/stats"),
+
+  listProjects: (params?: { page?: number; page_size?: number; q?: string; status?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.q) searchParams.set("q", params.q);
+    if (params?.status) searchParams.set("status", params.status);
+    const query = searchParams.toString();
+    return request<ProjectListResponse>(`/api/projects${query ? `?${query}` : ""}`);
+  },
+
+  getProject: (id: string) => request<Project>(`/api/projects/${id}`),
+
+  createProject: (data: Partial<Project>) =>
+    request<Project>("/api/projects", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateProject: (id: string, data: Partial<Project>) =>
+    request<Project>(`/api/projects/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  transitionProject: (id: string, status: ProjectStatus) =>
+    request<Project>(`/api/projects/${id}/transition`, {
+      method: "POST",
+      body: JSON.stringify({ to_status: status }),
+    }),
+
+  listClients: (params?: { page?: number; page_size?: number; q?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.q) searchParams.set("q", params.q);
+    const query = searchParams.toString();
+    return request<ClientListResponse>(`/api/clients${query ? `?${query}` : ""}`);
+  },
+
+  getClient: (id: string) => request<Client>(`/api/clients/${id}`),
+
+  createClient: (data: Partial<Client>) =>
+    request<Client>("/api/clients", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateClient: (id: string, data: Partial<Client>) =>
+    request<Client>(`/api/clients/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteContact: (clientId: string, contactId: string) =>
+    request<void>(`/api/clients/${clientId}/contacts/${contactId}`, { method: "DELETE" }),
+
+  addContact: (clientId: string, data: Partial<Contact>) =>
+    request<Contact>(`/api/clients/${clientId}/contacts`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 export { ApiError };

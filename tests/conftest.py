@@ -7,6 +7,7 @@ from src.backend.core.security import hash_password
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
+import src.backend.models  # noqa: F401 - registers all models with Base.metadata
 from src.backend.models.user import User
 
 TEST_DATABASE_URL = "postgresql://swa:swa@localhost:5432/swa_erp_test"
@@ -19,15 +20,22 @@ TestingSessionLocal = sessionmaker(
 
 def _reset_tables():
     with engine.connect() as conn:
-        conn.execute(
-            text("TRUNCATE TABLE audit_log, refresh_tokens, users RESTART IDENTITY CASCADE")
-        )
+        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
+        existing = {r[0] for r in result}
+        tables = [t for t in Base.metadata.tables.keys() if t in existing]
+        if tables:
+            conn.execute(text(f"TRUNCATE TABLE {', '.join(tables)} RESTART IDENTITY CASCADE"))
         conn.commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
+    Base.metadata.drop_all(bind=engine, checkfirst=True)
     Base.metadata.create_all(bind=engine)
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
+        created = [r[0] for r in result]
+        print(f"[setup_test_db] Created tables: {created}")
     yield
     Base.metadata.drop_all(bind=engine)
 
@@ -100,6 +108,31 @@ async def authed_pm_client(client_with_db, pm_user):
     r = await client_with_db.post(
         "/api/auth/login",
         json={"email": "pm@swa.co.in", "password": "pm123!"},
+    )
+    token = r.json()["access_token"]
+    client_with_db.headers["Authorization"] = f"Bearer {token}"
+    return client_with_db
+
+
+@pytest.fixture(scope="function")
+def viewer_user(db_session):
+    u = User(
+        email="viewer@swa.co.in",
+        name="Viewer",
+        password_hash=hash_password("viewer123!"),
+        role="viewer",
+    )
+    db_session.add(u)
+    db_session.commit()
+    db_session.refresh(u)
+    return u
+
+
+@pytest.fixture(scope="function")
+async def authed_viewer_client(client_with_db, viewer_user):
+    r = await client_with_db.post(
+        "/api/auth/login",
+        json={"email": "viewer@swa.co.in", "password": "viewer123!"},
     )
     token = r.json()["access_token"]
     client_with_db.headers["Authorization"] = f"Bearer {token}"

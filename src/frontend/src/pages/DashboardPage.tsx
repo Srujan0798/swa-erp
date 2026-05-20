@@ -1,35 +1,21 @@
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatsCards } from "@/components/dashboard/StatsCards";
+import { RecentProjects } from "@/components/dashboard/RecentProjects";
+import { RecentClients } from "@/components/dashboard/RecentClients";
+import { QuickActions } from "@/components/dashboard/QuickActions";
 
 export function DashboardPage() {
-  const { user } = useAuth();
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to SWA ERP</p>
+        <p className="text-muted-foreground">Overview of your projects and clients</p>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Welcome to SWA ERP</CardTitle>
-          <CardDescription>Your internal ERP system for SWA Consultancy</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p>
-              <strong>Name:</strong> {user?.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {user?.email}
-            </p>
-            <p>
-              <strong>Role:</strong> {user?.role}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <QuickActions />
+      <StatsCards />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RecentProjects />
+        <RecentClients />
+      </div>
     </div>
   );
 }

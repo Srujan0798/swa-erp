@@ -6,7 +6,7 @@ test("admin can log in and reach dashboard", async ({ page }) => {
   await page.getByLabel("Password").fill("admin123!");
   await page.getByRole("button", { name: /sign in/i }).click();
   await expect(page).toHaveURL(/\/dashboard/);
-  await expect(page.getByRole("heading", { name: /welcome to swa erp/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /dashboard/i })).toBeVisible();
 });
 
 test("invalid credentials show error", async ({ page }) => {
