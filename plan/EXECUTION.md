@@ -27,8 +27,9 @@ wave-1 (Foundation) ✅ SHIPPED
 
 | Wave | Name | Status | Tasks | Notes |
 |---|---|---|---|---|
-| 1 | Foundation | **SHIPPED** ✅ | 5/5 | Merged to main; all tests pass; CI green |
-| 2 | Clients + Projects | **READY TO DISPATCH** | 0/5 | spec + task files ready |
+| 1 | Foundation | **SHIPPED** ✅ | 5/5 | `df1b779` on main |
+| 2 | Clients + Projects | **SHIPPED** ✅ | 5/5 | `d1e3017` on main; 52 tests pass |
+| 3 | Quotation / BOQ workflow | **READY TO DISPATCH** | 0/5 | spec + task files ready |
 | 3 | Quotation/BOQ workflow | pending | — | depends on wave-2 |
 | 4 | Task management | pending | — | depends on wave-2 |
 | 5 | Vendors + Inventory | pending | — | depends on wave-2 |
@@ -77,8 +78,13 @@ wave-1 (Foundation) ✅ SHIPPED
 
 ## Current activity
 
-**Active wave:** wave-2
-**Next action:** dispatch `work/wave-2/01-*.md` through `05-*.md` to OpenCode CLI workers in parallel windows.
+**Active wave:** wave-3
+**Next action:** dispatch `work/wave-3/01-*.md` through `05-*.md` to worker agents in parallel windows.
+
+## Changelog (waves shipped)
+
+- **wave-1** — `df1b779` — Backend skeleton, Auth + RBAC, Users API, Frontend shell, CI + Docker
+- **wave-2** — `d1e3017` — Clients + Contacts, Projects, Lifecycle transitions, Dashboard, Stats
 
 ## Changelog (waves shipped)
 
