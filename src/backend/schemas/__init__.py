@@ -16,6 +16,21 @@ from src.backend.schemas.auth import (
 from src.backend.schemas.auth import (
     UserPublic as UserPublic,
 )
+from src.backend.schemas.boq import (
+    BOQCreate as BOQCreate,
+)
+from src.backend.schemas.boq import (
+    BOQItemCreate as BOQItemCreate,
+)
+from src.backend.schemas.boq import (
+    BOQItemRead as BOQItemRead,
+)
+from src.backend.schemas.boq import (
+    BOQListResponse as BOQListResponse,
+)
+from src.backend.schemas.boq import (
+    BOQRead as BOQRead,
+)
 from src.backend.schemas.client import (
     ClientCreate as ClientCreate,
 )
@@ -37,6 +52,24 @@ from src.backend.schemas.contact import (
 from src.backend.schemas.contact import (
     ContactUpdate as ContactUpdate,
 )
+from src.backend.schemas.document import (
+    DocumentCreate as DocumentCreate,
+)
+from src.backend.schemas.document import (
+    DocumentFolderCreate as DocumentFolderCreate,
+)
+from src.backend.schemas.document import (
+    DocumentFolderListResponse as DocumentFolderListResponse,
+)
+from src.backend.schemas.document import (
+    DocumentFolderRead as DocumentFolderRead,
+)
+from src.backend.schemas.document import (
+    DocumentListResponse as DocumentListResponse,
+)
+from src.backend.schemas.document import (
+    DocumentRead as DocumentRead,
+)
 from src.backend.schemas.project import (
     ProjectCreate as ProjectCreate,
 )
@@ -55,6 +88,11 @@ from src.backend.schemas.project import (
 
 __all__ = [
     "AccessTokenResponse",
+    "BOQCreate",
+    "BOQItemCreate",
+    "BOQItemRead",
+    "BOQListResponse",
+    "BOQRead",
     "ClientCreate",
     "ClientListResponse",
     "ClientRead",
@@ -62,6 +100,12 @@ __all__ = [
     "ContactCreate",
     "ContactRead",
     "ContactUpdate",
+    "DocumentCreate",
+    "DocumentFolderCreate",
+    "DocumentFolderListResponse",
+    "DocumentFolderRead",
+    "DocumentListResponse",
+    "DocumentRead",
     "LoginRequest",
     "MessageResponse",
     "ProjectCreate",

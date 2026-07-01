@@ -16,7 +16,11 @@ def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
 
-def create_access_token(user_id: uuid.UUID, role: str) -> str:
+def create_access_token(user_id: uuid.UUID | str, role: str | None = None) -> str:
+    if isinstance(user_id, dict):
+        payload_in = user_id
+        user_id = uuid.UUID(payload_in["sub"]) if "sub" in payload_in else uuid.uuid4()
+        role = role or payload_in.get("role", "viewer")
     now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),

@@ -30,14 +30,18 @@ def _reset_tables():
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
-    Base.metadata.drop_all(bind=engine, checkfirst=True)
+    with engine.begin() as conn:
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
     Base.metadata.create_all(bind=engine)
     with engine.connect() as conn:
         result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
         created = [r[0] for r in result]
         print(f"[setup_test_db] Created tables: {created}")
     yield
-    Base.metadata.drop_all(bind=engine)
+    with engine.begin() as conn:
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
 
 
 @pytest.fixture(scope="function")

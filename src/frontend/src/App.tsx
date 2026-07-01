@@ -10,6 +10,11 @@ import { NewClientPage } from "@/pages/NewClientPage";
 import { ProjectsPage } from "@/pages/ProjectsPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { NewProjectPage } from "@/pages/NewProjectPage";
+import { DocumentsPage } from "@/pages/DocumentsPage";
+import { VendorsPage } from "@/pages/VendorsPage";
+import { VendorDetailPage } from "@/pages/VendorDetailPage";
+import { NewVendorPage } from "@/pages/NewVendorPage";
+import { CompliancePage } from "@/pages/CompliancePage";
 
 function App() {
   return (
@@ -32,11 +37,16 @@ function App() {
           }
         />
         <Route path="/clients" element={<ClientsPage />} />
-        <Route path="/clients/:id" element={<ClientDetailPage />} />
         <Route path="/clients/new" element={<NewClientPage />} />
+        <Route path="/clients/:id" element={<ClientDetailPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/projects/:id" element={<ProjectDetailPage />} />
         <Route path="/projects/new" element={<NewProjectPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailPage />} />
+        <Route path="/vendors" element={<VendorsPage />} />
+        <Route path="/vendors/new" element={<NewVendorPage />} />
+        <Route path="/vendors/:id" element={<VendorDetailPage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/compliance" element={<CompliancePage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

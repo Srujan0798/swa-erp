@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
@@ -30,9 +30,10 @@ def get_current_user(
     return user
 
 
-def require_role(required: Role) -> Callable[[User], User]:
+def require_role(required: Role | Iterable[Role]) -> Callable[[User], User]:
     def _checker(user: User = Depends(get_current_user)) -> User:  # noqa: B008
-        if not role_includes(Role(user.role), required):
+        roles = {required} if isinstance(required, Role) else set(required)
+        if not any(role_includes(Role(user.role), r) for r in roles):
             raise HTTPException(status_code=403, detail="Insufficient role")
         return user
 
