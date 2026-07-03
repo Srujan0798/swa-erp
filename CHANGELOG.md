@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-07-03
+### Added
+- Wave-3: Quotation / BOQ Workflow — BOQ upload (JSON/Excel), versioning, quote generation, PDF export, frontend UI
+- Wave-3 acceptance tests: 5/5 passing
+
 ## [Unreleased]
 ### Added
 - Initial project structure generated from OS-Setup v1.1
@@ -18,4 +23,5 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Repository initialized.
 
-[Unreleased]: ../../compare/v0.0.0...HEAD
+[0.2.0]: ../../compare/v0.1.0...v0.2.0
+[Unreleased]: ../../compare/v0.2.0...HEAD
