@@ -13,9 +13,15 @@ from src.backend.db.repositories.document_repo import (
     get_latest_version,
     get_version_chain,
     list_documents,
-    move_documents as repo_move_documents,
-    rename_folder as repo_rename_folder,
     search_documents,
+)
+from src.backend.db.repositories.document_repo import (
+    move_documents as repo_move_documents,
+)
+from src.backend.db.repositories.document_repo import (
+    rename_folder as repo_rename_folder,
+)
+from src.backend.db.repositories.document_repo import (
     update_document as repo_update_document,
 )
 from src.backend.schemas.document import (

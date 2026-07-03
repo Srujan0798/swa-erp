@@ -4,7 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.backend.api.auth import router as auth_router
 from src.backend.api.boqs import router as boqs_router
 from src.backend.api.clients import router as clients_router
-from src.backend.api.compliance import projects_compliance_router, router as compliance_router
+from src.backend.api.compliance import projects_compliance_router
+from src.backend.api.compliance import router as compliance_router
 from src.backend.api.documents import router as documents_router
 from src.backend.api.exports import router as exports_router
 from src.backend.api.health import router as health_router
@@ -14,7 +15,8 @@ from src.backend.api.materials import router as materials_router
 from src.backend.api.project_pnl import router as project_pnl_router
 from src.backend.api.projects import router as projects_router
 from src.backend.api.quotes import router as quotes_router
-from src.backend.api.reports import dashboard_router, router as reports_router
+from src.backend.api.reports import dashboard_router
+from src.backend.api.reports import router as reports_router
 from src.backend.api.rfqs import router as rfqs_router
 from src.backend.api.tasks import router as tasks_router
 from src.backend.api.time_tracking import time_entries_router, timesheets_router

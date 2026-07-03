@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from src.backend.models.material import Material, MaterialCategory
 
-
 # --- Category ---
 
 

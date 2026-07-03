@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -8,7 +8,7 @@ from src.backend.models.rfq import RFQ, RFQItem
 
 
 def get_next_rfq_number(db: Session) -> str:
-    year = datetime.now(timezone.utc).year
+    year = datetime.now(UTC).year
     prefix = f"RFQ-{year}-"
     result = (
         db.query(func.max(RFQ.rfq_number))
@@ -188,6 +188,6 @@ def soft_delete(db: Session, rfq_id: uuid.UUID) -> bool:
     rfq = db.query(RFQ).filter(RFQ.id == rfq_id, RFQ.deleted_at.is_(None)).first()
     if not rfq:
         return False
-    rfq.deleted_at = datetime.now(timezone.utc)
+    rfq.deleted_at = datetime.now(UTC)
     db.commit()
     return True

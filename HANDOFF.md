@@ -4,10 +4,10 @@
 Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't require re-explaining the project. This file lets the new session catch up in < 5 minutes.
 
 ## Current state
-- **Active wave:** wave-3 (Quotation / BOQ Workflow)
-- **Status:** Wave 1 ✅ SHIPPED, Wave 2 ✅ SHIPPED, Wave 3 spec + tasks ready to dispatch
-- **Last completed:** Wave 2 at commit `d1e3017` (52 tests pass)
-- **Next action:** Dispatch wave-3 tasks (5 task files in `work/wave-3/`)
+- **Active wave:** wave-4 (Task Management)
+- **Status:** Wave 1 ✅ SHIPPED, Wave 2 ✅ SHIPP SHIPPED, Wave 4 spec + tasks ready to dispatch
+- **Last completed:** Wave 3 at commit `f49eac1` (97 tests pass)
+- **Next action:** Dispatch wave-4 tasks (task files in `work/wave-4/`)
 - **KleenHand cleanup:** COMPLETED — 142 sessions merged into ULTIMATE_HANDOFF.md, stale sessions cleaned
 - **Open decisions:** see `docs/decisions/` (most recent first)
 

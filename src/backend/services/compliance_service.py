@@ -12,7 +12,6 @@ from src.backend.db.repositories.compliance_repo import (
     get_compliance_summary,
     get_project_compliance_item,
     get_project_compliance_items,
-    get_standard_by_name,
     get_standards,
     review_project_compliance_item,
     seed_checklist_items,

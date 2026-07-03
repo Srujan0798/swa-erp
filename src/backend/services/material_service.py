@@ -6,20 +6,28 @@ from sqlalchemy.orm import Session
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.material_repo import (
     create_category as repo_create_category,
+)
+from src.backend.db.repositories.material_repo import (
     create_material as repo_create_material,
+)
+from src.backend.db.repositories.material_repo import (
     delete_category as repo_delete_category,
+)
+from src.backend.db.repositories.material_repo import (
     get_all_categories,
-    get_category_by_id,
     get_by_id,
-    get_by_code,
+    get_category_by_id,
     has_children,
     has_materials,
     list_materials,
     soft_delete,
+)
+from src.backend.db.repositories.material_repo import (
     update_category as repo_update_category,
+)
+from src.backend.db.repositories.material_repo import (
     update_material as repo_update_material,
 )
-
 
 # --- Category ---
 
@@ -29,7 +37,6 @@ def create_category(
     data: dict[str, Any],
     actor_id: uuid.UUID,
 ) -> MaterialCategory:
-    from src.backend.models.material import MaterialCategory
 
     category = repo_create_category(db, data)
 

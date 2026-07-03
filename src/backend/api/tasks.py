@@ -5,13 +5,11 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
-
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.task import (
     MyTasksResponse,
     TaskAssign,
-    TaskAssignResponse,
     TaskBulkStatusUpdate,
     TaskCommentCreate,
     TaskCommentRead,
@@ -33,8 +31,8 @@ from src.backend.services.task_service import (
     get_task_service,
     list_my_tasks_service,
     list_tasks_service,
-    transition_task_service,
     reorder_task_service,
+    transition_task_service,
     unassign_task_service,
     update_task_service,
 )

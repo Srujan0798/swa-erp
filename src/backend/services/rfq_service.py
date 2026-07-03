@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -11,18 +11,15 @@ from src.backend.db.repositories.rfq_repo import (
     get_by_id,
     get_next_rfq_number,
     list_by_project,
-    list_by_vendor,
-    soft_delete,
     update_item_rates,
     update_status,
 )
 from src.backend.schemas.rfq import (
     RFQCompareMaterial,
     RFQCompareVendor,
-    RFQListResponse,
     RFQListItem,
+    RFQListResponse,
     RFQRead,
-    RFQResponseItem,
 )
 
 
@@ -33,9 +30,6 @@ def _enforce_transition(rfq, to_status: str) -> None:
 
 
 def _to_read(rfq) -> RFQRead:
-    from src.backend.models.material import Material
-    from src.backend.models.user import User
-    from src.backend.models.vendor import Vendor
 
     items = []
     for item in rfq.items:
@@ -115,7 +109,7 @@ def send_rfq(db: Session, rfq_id: uuid.UUID, sent_by: uuid.UUID) -> RFQRead:
     _enforce_transition(rfq, "sent")
 
     before_json = {"status": rfq.status}
-    update_status(db, rfq_id, "sent", sent_at=datetime.now(timezone.utc))
+    update_status(db, rfq_id, "sent", sent_at=datetime.now(UTC))
 
     create_entry(
         db,
@@ -144,7 +138,7 @@ def receive_response(
 
     before_json = {"status": rfq.status}
     update_status(
-        db, rfq_id, "responded", responded_at=datetime.now(timezone.utc)
+        db, rfq_id, "responded", responded_at=datetime.now(UTC)
     )
     update_item_rates(db, rfq_id, items_data)
 
@@ -196,7 +190,7 @@ def award_rfq(db: Session, rfq_id: uuid.UUID, awarded_by: uuid.UUID) -> RFQRead:
     _enforce_transition(rfq, "awarded")
 
     before_json = {"status": rfq.status}
-    update_status(db, rfq_id, "awarded", awarded_at=datetime.now(timezone.utc))
+    update_status(db, rfq_id, "awarded", awarded_at=datetime.now(UTC))
 
     create_entry(
         db,

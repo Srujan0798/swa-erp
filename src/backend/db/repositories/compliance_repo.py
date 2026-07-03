@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -199,7 +200,7 @@ def get_project_compliance_items(
 
 
 def get_project_compliance_item(
-    db: Session, 
+    db: Session,
     item_id: uuid.UUID | None = None,
     project_id: uuid.UUID | None = None,
     checklist_item_id: uuid.UUID | None = None
@@ -231,13 +232,13 @@ def update_project_compliance_item(
 def review_project_compliance_item(
     db: Session, item_id: uuid.UUID, reviewed_by: uuid.UUID
 ) -> ProjectComplianceItem | None:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     item = get_project_compliance_item(db, item_id)
     if not item:
         return None
     item.reviewed_by = reviewed_by
-    item.reviewed_at = datetime.now(timezone.utc)
+    item.reviewed_at = datetime.now(UTC)
     db.commit()
     db.refresh(item)
     return item

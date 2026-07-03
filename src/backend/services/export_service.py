@@ -6,7 +6,6 @@ from decimal import Decimal
 from fpdf import FPDF
 from sqlalchemy.orm import Session
 
-from src.backend.db.repositories.boq_repo import get_by_id as get_boq_by_id
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.repositories.task_repo import get_task_counts_by_project, list_by_project

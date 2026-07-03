@@ -29,9 +29,8 @@ wave-1 (Foundation) ✅ SHIPPED
 |---|---|---|---|---|
 | 1 | Foundation | **SHIPPED** ✅ | 5/5 | `df1b779` on main |
 | 2 | Clients + Projects | **SHIPPED** ✅ | 5/5 | `d1e3017` on main; 52 tests pass |
-| 3 | Quotation / BOQ workflow | **READY TO DISPATCH** | 0/5 | spec + task files ready |
-| 3 | Quotation/BOQ workflow | pending | — | depends on wave-2 |
-| 4 | Task management | pending | — | depends on wave-2 |
+| 3 | Quotation / BOQ workflow | **SHIPPED** ✅ | 5/5 | `f49eac1` on main; 97 tests pass |
+| 4 | Task management | **READY TO DISPATCH** | 0/5 | spec + task files ready |
 | 5 | Vendors + Inventory | pending | — | depends on wave-2 |
 | 6 | Documents + Compliance | pending | — | depends on wave-2 (independent of 3,4,5) |
 | 7 | Time + Financials | pending | — | depends on wave-2 (independent of 3,4,5,6) |

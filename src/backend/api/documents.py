@@ -1,4 +1,3 @@
-import os
 import uuid
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, status
@@ -24,7 +23,6 @@ from src.backend.services.document_service import (
     create_new_version,
     delete_folder_service,
     get_document,
-    get_folder_service,
     get_version_history,
     list_project_documents,
     list_project_folders,
