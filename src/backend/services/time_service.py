@@ -182,6 +182,16 @@ def generate_timesheet_service(
     return _timesheet_to_read(timesheet, db, include_entries=True)
 
 
+def _create_audit_log(db: Session, timesheet_id: uuid.UUID, action: str, performed_by: uuid.UUID):
+    from src.backend.models.time_tracking import TimesheetAuditLog
+    log = TimesheetAuditLog(
+        timesheet_id=timesheet_id,
+        action=action,
+        performed_by=performed_by,
+    )
+    db.add(log)
+
+
 def submit_timesheet_service(
     db: Session,
     timesheet_id: uuid.UUID,
@@ -196,6 +206,7 @@ def submit_timesheet_service(
         raise HTTPException(status_code=422, detail="Only draft timesheets can be submitted")
 
     ts.status = "submitted"
+    _create_audit_log(db, timesheet_id, "submitted", user_id)
     db.commit()
     db.refresh(ts)
     return _timesheet_to_read(ts, db, include_entries=True)
@@ -217,6 +228,7 @@ def approve_timesheet_service(
     from datetime import datetime as _dt
 
     ts.approved_at = _dt.utcnow()
+    _create_audit_log(db, timesheet_id, "approved", manager_id)
     db.commit()
     db.refresh(ts)
     return _timesheet_to_read(ts, db, include_entries=True)
@@ -238,6 +250,7 @@ def reject_timesheet_service(
     from datetime import datetime as _dt
 
     ts.approved_at = _dt.utcnow()
+    _create_audit_log(db, timesheet_id, "rejected", manager_id)
     db.commit()
     db.refresh(ts)
     return _timesheet_to_read(ts, db, include_entries=True)

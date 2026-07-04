@@ -2,6 +2,8 @@
 import pytest
 from datetime import date, timedelta
 
+from src.backend.db.session import get_db
+
 pytestmark = pytest.mark.asyncio
 
 
@@ -158,9 +160,10 @@ async def test_delete_time_entry(authed_admin_client, db_session):
 async def test_generate_timesheet(authed_admin_client, db_session):
     project_id = await _setup_project(authed_admin_client)
     today = date.today()
-    # Create entries for this week
+    # Create entries for this week (Mon, Tue, Wed)
+    monday = today - timedelta(days=today.weekday())
     for i in range(3):
-        d = today - timedelta(days=today.weekday() + i)
+        d = monday + timedelta(days=i)
         await authed_admin_client.post(
             "/api/time-entries",
             json={
@@ -278,6 +281,9 @@ async def test_cannot_edit_entry_in_approved_week(authed_admin_client, db_sessio
 async def test_non_owner_cannot_update_entry(
     authed_pm_client, authed_admin_client, db_session
 ):
+    from httpx import ASGITransport, AsyncClient
+    from src.backend.main import app as _app
+
     project_id = await _setup_project(authed_admin_client)
     today = date.today().isoformat()
     r = await authed_admin_client.post(
@@ -290,9 +296,16 @@ async def test_non_owner_cannot_update_entry(
         },
     )
     entry_id = r.json()["id"]
-    # PM tries to update admin's entry
-    r2 = await authed_pm_client.patch(
-        f"/api/time-entries/{entry_id}",
-        json={"description": "Hacked"},
-    )
-    assert r2.status_code == 403
+    # PM tries to update admin's entry — use a separate client
+    async with AsyncClient(transport=ASGITransport(app=_app), base_url="http://test") as pm_client:
+        _app.dependency_overrides[get_db] = lambda: db_session
+        r_login = await pm_client.post(
+            "/api/auth/login",
+            json={"email": "pm@swa.co.in", "password": "pm123!"},
+        )
+        pm_client.headers["Authorization"] = f"Bearer {r_login.json()['access_token']}"
+        r2 = await pm_client.patch(
+            f"/api/time-entries/{entry_id}",
+            json={"description": "Hacked"},
+        )
+        assert r2.status_code == 403

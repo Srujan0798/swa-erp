@@ -134,7 +134,7 @@ def add_project_cost(
     cost = create_project_cost(db, cost_data)
     user = get_user_by_id(db, user_id)
     return ProjectCostRead(
-        **ProjectCostRead.model_validate(cost).model_dump(),
+        **ProjectCostRead.model_validate(cost).model_dump(exclude={"created_by_name"}),
         created_by_name=user.name if user else None,
     )
 
@@ -155,7 +155,7 @@ def list_project_costs_service(
     for cost in items:
         user = get_user_by_id(db, cost.created_by)
         reads.append(ProjectCostRead(
-            **ProjectCostRead.model_validate(cost).model_dump(),
+            **ProjectCostRead.model_validate(cost).model_dump(exclude={"created_by_name"}),
             created_by_name=user.name if user else None,
         ))
     return ProjectCostListResponse(items=reads, total=total, page=pg, page_size=ps)

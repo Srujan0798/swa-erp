@@ -120,7 +120,7 @@ async def test_pnl_revenue_from_invoices(authed_admin_client, db_session):
     r2 = await authed_admin_client.get(f"/api/projects/{project_id}/pnl")
     assert r2.status_code == 200
     pnl = r2.json()
-    assert float(pnl["total_revenue"]) == 100000.0
+    assert float(pnl["total_revenue"]) == 118000.0  # 100000 subtotal + 18% GST
 
 
 async def test_pnl_excludes_unpaid_invoices(authed_admin_client, db_session):
@@ -240,11 +240,11 @@ async def test_margin_calculation(authed_admin_client, db_session):
     )
     r2 = await authed_admin_client.get(f"/api/projects/{project_id}/pnl")
     pnl = r2.json()
-    assert float(pnl["total_revenue"]) == 200000.0
+    assert float(pnl["total_revenue"]) == 236000.0  # 200000 subtotal + 18% GST
     assert float(pnl["total_costs"]) == 50000.0
-    assert float(pnl["net_profit"]) == 150000.0
-    # margin = (150000 / 200000) * 100 = 75%
-    assert float(pnl["margin_pct"]) == 75.0
+    assert float(pnl["net_profit"]) == 186000.0
+    # margin = (186000 / 236000) * 100 = 78.81%
+    assert float(pnl["margin_pct"]) == 78.81
 
 
 async def test_pnl_non_billable_excluded(authed_admin_client, db_session):

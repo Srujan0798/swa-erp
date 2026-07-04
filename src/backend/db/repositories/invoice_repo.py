@@ -78,15 +78,14 @@ def update_invoice_status(
 def generate_invoice_number(db: Session) -> str:
     now = datetime.utcnow()
     prefix = f"INV-{now:%Y%m}-"
-    max_seq = db.query(func.max(Invoice.id)).filter(
+    last_invoice = db.query(Invoice).filter(
         Invoice.invoice_number.like(f"{prefix}%"),
         Invoice.deleted_at.is_(None),
-    ).scalar()
-    if max_seq is None:
-        seq = 1
+    ).order_by(Invoice.invoice_number.desc()).first()
+    if last_invoice:
+        seq = int(last_invoice.invoice_number.split("-")[-1]) + 1
     else:
-        last_invoice = db.query(Invoice).filter(Invoice.id == max_seq).first()
-        seq = int(last_invoice.invoice_number.split("-")[-1]) + 1 if last_invoice else 1
+        seq = 1
     return f"{prefix}{seq:04d}"
 
 
