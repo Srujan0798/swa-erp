@@ -10,6 +10,7 @@ from src.backend.models.user import User
 from src.backend.schemas.task import (
     MyTasksResponse,
     TaskAssign,
+    TaskAssignResponse,
     TaskBulkStatusUpdate,
     TaskCommentCreate,
     TaskCommentRead,
@@ -29,6 +30,7 @@ from src.backend.services.task_service import (
     delete_task_service,
     get_task_counts_service,
     get_task_service,
+    get_project_task_stats_service,
     list_my_tasks_service,
     list_tasks_service,
     reorder_task_service,
@@ -38,9 +40,6 @@ from src.backend.services.task_service import (
 )
 
 router = APIRouter(tags=["tasks"])
-
-
-# --- Task 01: CRUD ---
 
 
 @router.post(
@@ -83,6 +82,30 @@ def task_stats_endpoint(
     return get_task_counts_service(db, project_id)
 
 
+# IMPORTANT: /api/tasks/my-tasks MUST be defined BEFORE /api/tasks/{task_id}
+# FastAPI matches routes in order; otherwise "my-tasks" matches as a task_id UUID
+@router.get("/api/tasks/my-tasks")
+def my_tasks_endpoint(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    status: str | None = None,
+    priority: str | None = None,
+) -> MyTasksResponse:
+    return list_my_tasks_service(db, current_user.id, page, page_size, status, priority)
+
+
+@router.post("/api/tasks/bulk-status", response_model=int)
+def bulk_update_status_endpoint(
+    body: TaskBulkStatusUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> int:
+    count = bulk_update_status_service(db, body.task_ids, body.new_status, current_user.id)
+    return count
+
+
 @router.get("/api/tasks/{task_id}", response_model=TaskRead)
 def get_task_endpoint(
     task_id: uuid.UUID,
@@ -95,31 +118,73 @@ def get_task_endpoint(
     return task
 
 
-@router.patch("/api/tasks/{task_id}", response_model=TaskRead)
-def update_task_endpoint(
+@router.post("/api/tasks/{task_id}/transition", response_model=TaskRead)
+def transition_task_endpoint(
     task_id: uuid.UUID,
-    body: TaskUpdate,
+    body: TaskTransition,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> TaskRead:
-    task = update_task_service(db, task_id, body, current_user.id)
+    task = transition_task_service(db, task_id, body.to_status, current_user.id)
     if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404, detail="Task not found or invalid transition")
     return task
 
 
-@router.delete("/api/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task_endpoint(
+@router.post("/api/tasks/{task_id}/reorder", response_model=TaskRead)
+def reorder_task_endpoint(
+    task_id: uuid.UUID,
+    body: TaskReorder,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> TaskRead:
+    task = reorder_task_service(db, task_id, body.status, body.sort_order, current_user.id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found or invalid transition")
+    return task
+
+
+@router.post("/api/tasks/{task_id}/assign", response_model=TaskAssignResponse)
+def assign_task_endpoint(
+    task_id: uuid.UUID,
+    body: TaskAssign,
+    current_user: User = Depends(require_role(Role.PM)),
+    db: Session = Depends(get_db),
+) -> TaskAssignResponse:
+    task = get_task_service(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    assignee = db.query(User).filter(User.id == body.assignee_id, User.is_active.is_(True)).first()
+    if not assignee:
+        raise HTTPException(status_code=400, detail="Assignee not found or inactive")
+    result = assign_task_service(db, task_id, body.assignee_id, current_user.id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Could not assign task")
+    return TaskAssignResponse(
+        task_id=result.id,
+        assignee_id=result.assignee_id,
+        assignee_name=result.assignee_name,
+    )
+
+
+@router.delete("/api/tasks/{task_id}/assign", response_model=TaskRead)
+def unassign_task_endpoint(
     task_id: uuid.UUID,
     current_user: User = Depends(require_role(Role.PM)),
     db: Session = Depends(get_db),
-) -> None:
-    success = delete_task_service(db, task_id, current_user.id)
-    if not success:
+) -> TaskRead:
+    task = get_task_service(db, task_id)
+    if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    if not task.assignee_id:
+        raise HTTPException(status_code=400, detail="Task is not assigned to anyone")
+    result = unassign_task_service(db, task_id, current_user.id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Could not unassign task")
+    return result
 
 
-@router.post("/api/tasks/{task_id}/comments", response_model=TaskCommentRead, status_code=status.HTTP_201_CREATED)
+@router.post("/api/tasks/{task_id}/comments", response_model=TaskCommentRead)
 def add_comment_endpoint(
     task_id: uuid.UUID,
     body: TaskCommentCreate,
@@ -132,102 +197,14 @@ def add_comment_endpoint(
     return comment
 
 
-@router.get("/api/tasks/{task_id}/comments", response_model=list[TaskCommentRead])
-def list_comments_endpoint(
+@router.get("/api/projects/{project_id}/tasks/{task_id}/debug", response_model=dict)
+def debug_task_endpoint(
+    project_id: uuid.UUID,
     task_id: uuid.UUID,
     _: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> list[TaskCommentRead]:
-    from src.backend.db.repositories.task_repo import list_comments
-
-    items = list_comments(db, task_id)
-    return [TaskCommentRead(**item) for item in items]
-
-
-# --- Task 02: Transitions ---
-
-
-@router.post("/api/tasks/{task_id}/transition", response_model=TaskRead)
-def transition_task_endpoint(
-    task_id: uuid.UUID,
-    body: TaskTransition,
-    current_user: User = Depends(require_role(Role.PM)),
-    db: Session = Depends(get_db),
-) -> TaskRead:
-    task = transition_task_service(db, task_id, body.to_status.value, current_user.id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
-
-
-@router.post("/api/tasks/{task_id}/reorder", response_model=TaskRead)
-def reorder_task_endpoint(
-    task_id: uuid.UUID,
-    body: TaskReorder,
-    current_user: User = Depends(require_role(Role.PM)),
-    db: Session = Depends(get_db),
-) -> TaskRead:
-    task = reorder_task_service(
-        db, task_id, body.status.value, body.sort_order, current_user.id
-    )
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
-
-
-@router.post("/api/tasks/bulk-status")
-def bulk_status_endpoint(
-    body: TaskBulkStatusUpdate,
-    current_user: User = Depends(require_role(Role.PM)),
-    db: Session = Depends(get_db),
 ) -> dict:
-    count = bulk_update_status_service(
-        db, body.task_ids, body.new_status.value, current_user.id
-    )
-    return {"updated": count}
-
-
-# --- Task 03: Assignment ---
-
-
-@router.post("/api/tasks/{task_id}/assign", response_model=TaskRead)
-def assign_task_endpoint(
-    task_id: uuid.UUID,
-    body: TaskAssign,
-    current_user: User = Depends(require_role(Role.PM)),
-    db: Session = Depends(get_db),
-) -> TaskRead:
-    task = assign_task_service(db, task_id, body.assignee_id, current_user.id)
-    if task is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Task not found or assignee is invalid/inactive",
-        )
-    return task
-
-
-@router.delete("/api/tasks/{task_id}/assign", response_model=TaskRead)
-def unassign_task_endpoint(
-    task_id: uuid.UUID,
-    current_user: User = Depends(require_role(Role.PM)),
-    db: Session = Depends(get_db),
-) -> TaskRead:
-    task = unassign_task_service(db, task_id, current_user.id)
-    if task is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Task not found or task has no assignee",
-        )
-    return task
-
-
-@router.get("/api/tasks/my-tasks", response_model=MyTasksResponse)
-def my_tasks_endpoint(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=20, ge=1, le=100),
-    status: str | None = None,
-    priority: str | None = None,
-) -> MyTasksResponse:
-    return list_my_tasks_service(db, current_user.id, page, page_size, status, priority)
+    data = get_task_service(db, task_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return data.model_dump()

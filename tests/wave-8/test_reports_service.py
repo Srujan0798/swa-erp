@@ -74,7 +74,7 @@ def _seed_task(db, project_id, user_id, due_date=None, status="todo"):
         title=f"Task {tid.hex[:6]}",
         status=status,
         assignee_id=user_id,
-        created_by=user_id,
+        reporter_id=user_id,
         due_date=due_date,
     )
     db.add(t)

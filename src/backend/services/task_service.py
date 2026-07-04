@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.backend.core.task_workflow import validate_transition
@@ -45,10 +46,10 @@ def _task_read(db: Session, task) -> TaskRead:
         priority=t.priority,
         assignee_id=t.assignee_id,
         assignee_name=data["assignee_name"],
-        created_by=t.created_by,
+        created_by=t.reporter_id,
         created_by_name=data["creator_name"],
         due_date=t.due_date,
-        sort_order=t.sort_order,
+        sort_order=t.position,
         comment_count=data["comment_count"],
         created_at=t.created_at,
         updated_at=t.updated_at,
@@ -65,7 +66,7 @@ def create_task_service(
         db,
         project_id=project_id,
         title=body.title,
-        created_by=created_by,
+        reporter_id=created_by,
         description=body.description,
         priority=body.priority.value if body.priority else "medium",
         assignee_id=body.assignee_id,
@@ -96,10 +97,10 @@ def get_task_service(db: Session, task_id: uuid.UUID) -> TaskRead | None:
         priority=t.priority,
         assignee_id=t.assignee_id,
         assignee_name=data["assignee_name"],
-        created_by=t.created_by,
+        created_by=t.reporter_id,
         created_by_name=data["creator_name"],
         due_date=t.due_date,
-        sort_order=t.sort_order,
+        sort_order=t.position,
         comment_count=data["comment_count"],
         created_at=t.created_at,
         updated_at=t.updated_at,
@@ -116,9 +117,7 @@ def list_tasks_service(
     priority: str | None = None,
 ) -> tuple[list[TaskRead], int, int, int]:
     items, total = list_by_project(db, project_id, page, page_size, status, assignee_id, priority)
-    reads = []
-    for item in items:
-        reads.append(TaskRead(**item))
+    reads = [_task_read(db, item) for item in items]
     return reads, total, page, page_size
 
 
@@ -131,7 +130,7 @@ def list_my_tasks_service(
     priority: str | None = None,
 ) -> MyTasksResponse:
     items, total = list_tasks_by_assignee(db, user_id, page, page_size, status, priority)
-    reads = [TaskRead(**item) for item in items]
+    reads = [_task_read(db, item) for item in items]
     stats_data = get_task_counts_by_user(db, user_id)
     stats = TaskStatsResponse(**stats_data)
     return MyTasksResponse(items=reads, total=total, stats=stats)
@@ -235,7 +234,8 @@ def transition_task_service(
     old_status = task.status
     validate_transition(old_status, to_status)
 
-    task = update_task(db, task, status=to_status)
+    task.status = to_status
+    db.flush()
 
     create_entry(
         db,
@@ -246,6 +246,7 @@ def transition_task_service(
         before_json={"old_status": old_status},
         after_json={"new_status": to_status},
     )
+    db.commit()
 
     return _task_read(db, task)
 

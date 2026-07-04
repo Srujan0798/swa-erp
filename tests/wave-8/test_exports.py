@@ -45,7 +45,7 @@ def _add_task(db_session, project_id, title, status, created_by):
         project_id=project_id,
         title=title,
         status=status,
-        created_by=created_by,
+        reporter_id=created_by,
     )
     db_session.add(t)
     db_session.commit()

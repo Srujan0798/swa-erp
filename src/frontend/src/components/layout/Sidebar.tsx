@@ -8,6 +8,7 @@ import {
   FileText,
   Truck,
   ShieldCheck,
+  CheckSquare2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -15,6 +16,7 @@ const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/clients", icon: Building2, label: "Clients" },
   { to: "/projects", icon: FolderKanban, label: "Projects" },
+  { to: "/tasks", icon: CheckSquare2, label: "Tasks" },
   { to: "/vendors", icon: Truck, label: "Vendors" },
   { to: "/documents", icon: FileText, label: "Documents" },
   { to: "/compliance", icon: ShieldCheck, label: "Compliance" },

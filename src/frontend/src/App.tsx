@@ -5,16 +5,18 @@ import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { UsersPage } from "@/pages/UsersPage";
 import { ClientsPage } from "@/pages/ClientsPage";
-import { ClientDetailPage } from "@/pages/ClientDetailPage";
 import { NewClientPage } from "@/pages/NewClientPage";
 import { ProjectsPage } from "@/pages/ProjectsPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { NewProjectPage } from "@/pages/NewProjectPage";
-import { DocumentsPage } from "@/pages/DocumentsPage";
 import { VendorsPage } from "@/pages/VendorsPage";
 import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import { NewVendorPage } from "@/pages/NewVendorPage";
+import { DocumentsPage } from "@/pages/DocumentsPage";
 import { CompliancePage } from "@/pages/CompliancePage";
+import { TasksPage } from "@/pages/TasksPage";
+import { TaskDetailPage } from "@/pages/TaskDetailPage";
+import { ClientDetailPage } from "@/pages/ClientDetailPage";
 
 function App() {
   return (
@@ -47,6 +49,8 @@ function App() {
         <Route path="/vendors/:id" element={<VendorDetailPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/compliance" element={<CompliancePage />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/tasks/:id" element={<TaskDetailPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

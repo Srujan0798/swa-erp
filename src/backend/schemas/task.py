@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class TaskStatus(StrEnum):
@@ -16,6 +16,15 @@ class TaskPriority(StrEnum):
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
+
+
+class TaskFilter(BaseModel):
+    status: str | None = None
+    assignee_id: uuid.UUID | None = None
+    priority: str | None = None
+    due_before: date | None = None
+    due_after: date | None = None
+    search: str | None = None
 
 
 class TaskCreate(BaseModel):
@@ -51,6 +60,37 @@ class TaskRead(BaseModel):
     comment_count: int = 0
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def coerce_priority(cls, v):
+        _priority_names = {0: "low", 1: "low", 2: "medium", 3: "high", 4: "critical"}
+        if isinstance(v, int):
+            return _priority_names.get(v, "medium")
+        return v
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_orm_fields(cls, data):
+        if hasattr(data, "_sa_instance_state"):
+            mapped = {}
+            for col in data.__table__.columns:
+                mapped[col.name] = getattr(data, col.name)
+            if "reporter_id" in mapped:
+                mapped["created_by"] = mapped.pop("reporter_id")
+            if "position" in mapped:
+                mapped["sort_order"] = mapped.pop("position")
+            assignee = getattr(data, "assignee", None)
+            reporter = getattr(data, "reporter", None)
+            comments = getattr(data, "comments", None)
+            if assignee and hasattr(assignee, "name"):
+                mapped["assignee_name"] = assignee.name
+            if reporter and hasattr(reporter, "name"):
+                mapped["created_by_name"] = reporter.name
+            if comments is not None:
+                mapped["comment_count"] = len(comments)
+            return mapped
+        return data
 
 
 class TaskListResponse(BaseModel):

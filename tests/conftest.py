@@ -8,6 +8,8 @@ from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
 import src.backend.models  # noqa: F401 - registers all models with Base.metadata
+from src.backend.models.client import Client
+from src.backend.models.project import Project
 from src.backend.models.user import User
 
 TEST_DATABASE_URL = "postgresql://swa:swa@localhost:5432/swa_erp_test"
@@ -97,6 +99,87 @@ def pm_user(db_session):
 
 
 @pytest.fixture(scope="function")
+def viewer_user(db_session):
+    u = User(
+        email="viewer@swa.co.in",
+        name="Viewer",
+        password_hash=hash_password("viewer123!"),
+        role="viewer",
+    )
+    db_session.add(u)
+    db_session.commit()
+    db_session.refresh(u)
+    return u
+
+
+@pytest.fixture(scope="function")
+def designer_user(db_session):
+    u = User(
+        email="designer@swa.co.in",
+        name="Designer",
+        password_hash=hash_password("designer123!"),
+        role="designer",
+    )
+    db_session.add(u)
+    db_session.commit()
+    db_session.refresh(u)
+    return u
+
+
+@pytest.fixture(scope="function")
+def client_factory(db_session):
+    created = []
+
+    def _create(name="Test Client", code="TC-1"):
+        c = Client(name=name, code=code, primary_email=f"{code}@test.com")
+        db_session.add(c)
+        db_session.commit()
+        db_session.refresh(c)
+        created.append(c)
+        return c
+
+    return _create
+
+
+@pytest.fixture(scope="function")
+def test_project(db_session, client_factory):
+    client = client_factory()
+    p = Project(client_id=client.id, name="Test Project", code="TP-1")
+    db_session.add(p)
+    db_session.commit()
+    db_session.refresh(p)
+    return p
+
+
+@pytest.fixture(scope="function")
+def test_pm_user(db_session):
+    u = User(
+        email="test_pm@swa.co.in",
+        name="Test PM",
+        password_hash=hash_password("test_pm123!"),
+        role="pm",
+    )
+    db_session.add(u)
+    db_session.commit()
+    db_session.refresh(u)
+    return u
+
+
+@pytest.fixture(scope="function")
+def test_designer_user(db_session):
+    u = User(
+        email="test_designer@swa.co.in",
+        name="Test Designer",
+        password_hash=hash_password("test_designer123!"),
+        role="designer",
+    )
+    db_session.add(u)
+    db_session.commit()
+    db_session.refresh(u)
+    return u
+
+
+@pytest.fixture(scope="function")
 async def authed_admin_client(client_with_db, admin_user):
     r = await client_with_db.post(
         "/api/auth/login",
@@ -137,6 +220,17 @@ async def authed_viewer_client(client_with_db, viewer_user):
     r = await client_with_db.post(
         "/api/auth/login",
         json={"email": "viewer@swa.co.in", "password": "viewer123!"},
+    )
+    token = r.json()["access_token"]
+    client_with_db.headers["Authorization"] = f"Bearer {token}"
+    return client_with_db
+
+
+@pytest.fixture(scope="function")
+async def authed_designer_client(client_with_db, designer_user):
+    r = await client_with_db.post(
+        "/api/auth/login",
+        json={"email": "designer@swa.co.in", "password": "designer123!"},
     )
     token = r.json()["access_token"]
     client_with_db.headers["Authorization"] = f"Bearer {token}"

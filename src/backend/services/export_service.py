@@ -311,7 +311,7 @@ def export_demo_package(db: Session, project_id: uuid.UUID) -> dict:
         .all()
     )
 
-    tasks, _ = list_by_project(db, project_id, page=1, page_size=50)
+    tasks, _ = list_by_project(db, project_id, page=1, page_size=50, status=None, assignee_id=None, priority=None)
 
     team = []
     if pm:
@@ -351,11 +351,11 @@ def export_demo_package(db: Session, project_id: uuid.UUID) -> dict:
         ],
         "tasks": [
             {
-                "id": str(task["id"]),
-                "title": task["title"],
-                "status": task["status"],
-                "priority": task.get("priority"),
-                "due_date": str(task["due_date"]) if task.get("due_date") else None,
+                "id": str(task.id),
+                "title": task.title,
+                "status": task.status,
+                "priority": task.priority,
+                "due_date": str(task.due_date) if task.due_date else None,
             }
             for task in tasks
         ],
