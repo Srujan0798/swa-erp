@@ -28,6 +28,7 @@ from src.backend.db.repositories.material_repo import (
 from src.backend.db.repositories.material_repo import (
     update_material as repo_update_material,
 )
+from src.backend.models.material import Material, MaterialCategory
 
 # --- Category ---
 
@@ -123,7 +124,6 @@ def delete_category(
     before = _category_to_dict(category)
 
     success = repo_delete_category(db, category_id)
-
     if success:
         create_entry(
             db,
@@ -255,7 +255,6 @@ def delete_material(
         return False
 
     before = _material_to_dict(material)
-
     success = soft_delete(db, material_id)
 
     if success:

@@ -144,6 +144,11 @@ def delete_folder(db: Session, folder_id: uuid.UUID) -> bool:
     folder = get_folder_by_id(db, folder_id)
     if not folder:
         return False
+    # Soft-delete all documents in this folder first
+    db.query(Document).filter(
+        Document.folder_id == folder_id,
+        Document.is_active.is_(True),
+    ).update({"is_active": False})
     db.delete(folder)
     db.commit()
     return True

@@ -37,7 +37,7 @@ class TimeEntryRead(BaseModel):
     project_id: uuid.UUID
     task_id: uuid.UUID | None
     user_id: uuid.UUID
-    date: date
+    date: _date
     hours: Decimal
     description: str
     is_billable: bool
@@ -58,8 +58,8 @@ class TimesheetRead(BaseModel):
 
     id: uuid.UUID
     user_id: uuid.UUID
-    week_start: date
-    week_end: date
+    week_start: _date
+    week_end: _date
     status: TimesheetStatus
     total_hours: Decimal
     billable_hours: Decimal

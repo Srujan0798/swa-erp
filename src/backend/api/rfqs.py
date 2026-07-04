@@ -23,6 +23,7 @@ from src.backend.services.rfq_service import (
     create_rfq_with_items,
     get_rfq,
     list_project_rfqs,
+    mark_compared,
     receive_response,
     send_rfq,
 )
@@ -126,6 +127,19 @@ def respond_rfq_endpoint(
             {"item_id": i.item_id, "vendor_rate": i.vendor_rate} for i in body
         ]
         return receive_response(db, rfq_id, items_data, responded_by=current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+@router.post(
+    "/api/rfqs/{rfq_id}/compare",
+    response_model=RFQRead,
+)
+def compare_rfq_endpoint(
+    rfq_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> RFQRead:
+    try:
+        return mark_compared(db, rfq_id, compared_by=current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 

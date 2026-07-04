@@ -155,6 +155,29 @@ def receive_response(
     return get_rfq(db, rfq_id)
 
 
+def mark_compared(db: Session, rfq_id: uuid.UUID, compared_by: uuid.UUID) -> RFQRead:
+    rfq = get_by_id(db, rfq_id)
+    if not rfq:
+        msg = "RFQ not found"
+        raise ValueError(msg)
+    _enforce_transition(rfq, "compared")
+
+    before_json = {"status": rfq.status}
+    update_status(db, rfq_id, "compared")
+
+    create_entry(
+        db,
+        action="rfq.compare",
+        entity_type="rfq",
+        entity_id=rfq_id,
+        user_id=compared_by,
+        before_json=before_json,
+        after_json={"status": "compared"},
+    )
+
+    return get_rfq(db, rfq_id)
+
+
 def compare_rfq(
     db: Session,
     project_id: uuid.UUID,

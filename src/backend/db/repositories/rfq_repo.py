@@ -155,9 +155,12 @@ def compare_vendors(
     project_id: uuid.UUID,
     material_ids: list[uuid.UUID] | None = None,
 ) -> list[dict]:
+    from src.backend.models.vendor import Vendor
+
     query = (
-        db.query(RFQ, RFQItem, "vendors.name")
+        db.query(RFQ, RFQItem, Vendor.name)
         .join(RFQItem, RFQItem.rfq_id == RFQ.id)
+        .join(Vendor, Vendor.id == RFQ.vendor_id)
         .filter(
             RFQ.project_id == project_id,
             RFQ.deleted_at.is_(None),

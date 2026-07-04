@@ -1,6 +1,11 @@
 from src.backend.models.audit_log import AuditLog
 from src.backend.models.boq import BOQ, BOQItem
 from src.backend.models.client import Client
+from src.backend.models.compliance import (
+    ComplianceChecklistItem,
+    ComplianceStandard,
+    ProjectComplianceItem,
+)
 from src.backend.models.contact import Contact
 from src.backend.models.document import Document, DocumentFolder
 from src.backend.models.invoice import Invoice, InvoiceItem
@@ -21,12 +26,15 @@ __all__ = [
     "AuditLog",
     "BOQItem",
     "Client",
+    "ComplianceChecklistItem",
+    "ComplianceStandard",
     "Contact",
     "Document",
     "DocumentFolder",
     "Invoice",
     "InvoiceItem",
     "Project",
+    "ProjectComplianceItem",
     "Quote",
     "QuoteItem",
     "RFQItem",

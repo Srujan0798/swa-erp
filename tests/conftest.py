@@ -26,8 +26,14 @@ def _reset_tables():
         existing = {r[0] for r in result}
         tables = [t for t in Base.metadata.tables.keys() if t in existing]
         if tables:
-            conn.execute(text(f"TRUNCATE TABLE {', '.join(tables)} RESTART IDENTITY CASCADE"))
+            try:
+                conn.execute(text(f"TRUNCATE TABLE {', '.join(tables)} RESTART IDENTITY CASCADE"))
+            except Exception:
+                conn.rollback()
+                for t in tables:
+                    conn.execute(text(f"DROP TABLE IF EXISTS {t} CASCADE"))
         conn.commit()
+    Base.metadata.create_all(bind=engine)
 
 
 @pytest.fixture(scope="session", autouse=True)
