@@ -33,7 +33,7 @@ test.describe("BOQ & Quote flow", () => {
     await page.getByRole("combobox").first().click();
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: /create quote/i }).click();
-    await expect(page.getByText("Draft")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Draft").first()).toBeVisible({ timeout: 10000 });
   });
 
   test("quote approval workflow", async ({ page }) => {
