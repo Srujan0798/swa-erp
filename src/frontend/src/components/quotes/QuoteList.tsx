@@ -83,7 +83,7 @@ export function QuoteList({ projectId, onViewQuote }: QuoteListProps) {
                       <TableCell>{quote.created_by_name ?? "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
-                          <Button variant="ghost" size="icon" onClick={() => onViewQuote(quote.id)}>
+                          <Button variant="ghost" size="icon" aria-label="View quote" onClick={() => onViewQuote(quote.id)}>
                             <Eye className="h-4 w-4" />
                           </Button>
                           {quote.status === "rejected" && (user?.role === "admin" || user?.role === "pm") && (

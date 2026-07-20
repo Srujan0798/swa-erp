@@ -12,7 +12,7 @@ test.describe("BOQ & Quote flow", () => {
   test("admin can upload BOQ and generate quote", async ({ page }) => {
     await page.goto("http://localhost:3000/projects");
     const projectRow = page.locator("table tbody tr").first();
-    await projectRow.getByRole("button", { name: /view|open|details/i }).first().click();
+    await projectRow.getByRole("link", { name: /view|open|details/i }).first().click();
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/);
 
     await page.getByRole("tab", { name: /boqs/i }).click();
@@ -20,11 +20,9 @@ test.describe("BOQ & Quote flow", () => {
     await page.locator('input[type="file"]').setInputFiles({
       name: "test-boq.json",
       mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify({
-        items: [
-          { line_number: 1, description: "Civil Works", unit: "sqm", quantity: 100, rate: 500 },
-        ],
-      })),
+      buffer: Buffer.from(JSON.stringify([
+        { line_number: 1, description: "Civil Works", unit: "sqm", quantity: 100, rate: 500 },
+      ])),
     });
     await page.getByRole("button", { name: /upload boq/i }).click();
     await expect(page.getByText("v1")).toBeVisible({ timeout: 10000 });
@@ -41,7 +39,7 @@ test.describe("BOQ & Quote flow", () => {
   test("quote approval workflow", async ({ page }) => {
     await page.goto("http://localhost:3000/projects");
     const projectRow = page.locator("table tbody tr").first();
-    await projectRow.getByRole("button", { name: /view|open|details/i }).first().click();
+    await projectRow.getByRole("link", { name: /view|open|details/i }).first().click();
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/);
 
     await page.getByRole("tab", { name: /quotes/i }).click();

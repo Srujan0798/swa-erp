@@ -55,7 +55,6 @@ def _quote_to_enriched_dict(quote: Any, db: Session) -> dict[str, Any]:
         "id": quote.id,
         "project_id": quote.project_id,
         "boq_id": quote.boq_id,
-        "code": quote.code,
         "version_number": quote.version_number,
         "status": quote.status,
         "subtotal": quote.subtotal,
