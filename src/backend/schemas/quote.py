@@ -55,7 +55,7 @@ class QuoteRead(BaseModel):
     id: uuid.UUID
     project_id: uuid.UUID
     boq_id: uuid.UUID
-    code: str | None
+    code: str | None = None
     version_number: int
     status: str
     subtotal: Decimal
