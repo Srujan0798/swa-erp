@@ -11,11 +11,20 @@ This file describes the API at a higher level. The OpenAPI spec is the source of
 - **Auth:** `Authorization: Bearer <jwt>` for all endpoints except `/api/auth/login`, `/api/auth/refresh`, `/healthz`, `/readyz`
 - **Content type:** `application/json` for requests and responses (except file uploads which use `multipart/form-data`)
 - **Pagination:** `?page=1&page_size=20`; default 20, max 100. Response includes `{items, total, page, page_size}`
-- **Errors:** `{detail: string, code?: string, request_id: string}` with appropriate HTTP status
+- **Errors:** `{detail: string}` — FastAPI's default shape. **Corrected 2026-07-21**: this line
+  previously claimed `{detail, code, request_id}`; no custom exception handler is registered
+  (`src/backend/main.py`), so `code` doesn't exist in the body at all, and `request_id` is only
+  ever a response *header*, not a body field — see the next line.
 - **Request ID:** every response includes `X-Request-ID` header (echoes the request's, or generates one)
 - **Dates:** ISO 8601 with `Z` suffix in responses; accepts ISO 8601 in requests
 
 ## Surface by wave
+
+**Corrected 2026-07-21**: a full-project audit found several endpoint paths below were wrong
+(don't match the real routers) and this list never got updated past wave-4. The endpoint list
+below is corrected where wrong, but **treat `http://localhost:8000/docs` (Swagger UI) as the
+actual source of truth**, not this file — it's generated directly from the live route
+definitions and can't drift the way hand-maintained lists like this one did.
 
 ### Wave 1 — Foundation
 - `POST /api/auth/login`
@@ -36,18 +45,27 @@ This file describes the API at a higher level. The OpenAPI spec is the source of
 - `POST /api/projects/{id}/transition` (lifecycle state change)
 
 ### Wave 3 — Quotation/BOQ
-- `POST /api/projects/{id}/boq/upload` (multipart, JSON or Excel)
-- `GET /api/projects/{id}/boq/versions`
+- `POST /api/projects/{project_id}/boqs` (multipart, JSON or Excel — **corrected**: was
+  `/boq/upload`, real router is `src/backend/api/boqs.py:26`)
+- `GET /api/projects/{project_id}/boqs` (**corrected**: was `/boq/versions`,
+  `src/backend/api/boqs.py:70`)
 - `POST /api/quotes` (generate from BOQ)
 - `POST /api/quotes/{id}/send`
 - `GET /api/quotes/{id}/pdf`
 
 ### Wave 4 — Tasks
-- `GET/POST/PATCH/DELETE /api/tasks`
+- `GET/POST /api/projects/{project_id}/tasks` (**corrected**: nested under project, not a flat
+  `/api/tasks` — see `src/backend/api/tasks.py`)
+- **No PATCH or DELETE on tasks exist** (**corrected**: this file previously claimed both did)
 - `POST /api/tasks/{id}/assign`
-- `POST /api/tasks/{id}/depends-on`
+- **`/api/tasks/{id}/depends-on` does not exist** (**corrected**: this file previously claimed
+  it did — a `TaskDependency` model exists but is never exposed via any API route; this is a
+  real gap, not a doc error alone, worth a future task if dependency management via API is
+  actually needed)
 
-### Wave 5+ — see future spec files
+### Waves 5-21 — see `http://localhost:8000/docs` (Swagger UI)
+Not hand-listed here — the module list in `plan/ARCHITECTURE.md` names every router; the live
+Swagger UI has the exact, always-current route/schema detail for each one.
 
 ## Auth flow (full)
 

@@ -6,17 +6,20 @@
 - **DB:** SQLAlchemy 2 declarative; Alembic migrations for every schema change
 - **Tests:** pytest for backend, Playwright for E2E, Vitest for frontend units
 
-## Data
-- **Raw uploads:** `data/raw/` (immutable; never modified)
-- **Samples:** `data/samples/` (small fixtures for dev/demo)
-- **Synthetic:** `data/synthetic/` (generated for testing)
-- **Seed data:** `data/seed/` (initial dev data; not for prod)
-- **BOQ uploads (runtime):** stored under MinIO bucket `boq-uploads/` (prod) or `data/runtime/boq/` (dev)
+## Data (runtime storage — as actually implemented)
 
-## Documents (runtime)
-- **Drawings:** `documents/<project_id>/drawings/v<N>/`
-- **Specs:** `documents/<project_id>/specs/`
-- **Signed:** `documents/<project_id>/signed/`
+**Corrected 2026-07-21** — this section previously described a `data/` directory structure and
+MinIO integration that were never built; a full-project audit confirmed no `data/` directory
+exists at all and there is zero MinIO code anywhere in `src/backend` (grep confirms). What's
+actually real:
+- **All uploads (BOQs, documents, everything)**: flat `uploads/<id>/` directory at repo root —
+  see `src/backend/services/boq_service.py` (`UPLOAD_DIR = Path("uploads/boqs")`) and
+  `src/backend/services/document_service.py` (`f"uploads/{project_id}"`). This is local
+  filesystem only in the current implementation; MinIO/S3 was a planned future migration, never
+  built. `uploads/` is gitignored (see root `.gitignore`).
+- No `data/raw/`, `data/samples/`, `data/synthetic/`, `data/seed/`, or `documents/<project_id>/`
+  structure exists — remove any references to these paths if found elsewhere, they describe an
+  unbuilt plan, not the real system.
 
 ## Models (if ML — not in current scope)
 - N/A for SWA ERP (no ML modules)
@@ -33,7 +36,13 @@
 ## Money
 - ALL money fields: `Decimal(18, 2)` in DB; `Decimal` in Python; string in JSON ("99999999.99")
 - Currency: INR default; multi-currency-ready via `currency` column where applicable
-- GST: stored separately (`amount`, `gst_amount`, `total_amount`); HSN/SAC code per line
+- GST: **not yet implemented as of 2026-07-21** — `Invoice`/`InvoiceItem` currently only have a
+  generic `tax_rate`/`tax_amount` pair (defaults to 18%, numerically GST-shaped but not
+  GST-specific), no `gst_amount` field, no HSN/SAC code per line, no GSTIN captured on the
+  invoice itself. Client and Vendor models do store a `gst_number` (their own registration
+  number) but Invoice never references it. This line previously described the target design as
+  already built — it wasn't; see `work/wave-18/01-security-hardening.md` item 4 for the actual
+  fix in progress.
 
 ## Dates and times
 - DB: `TIMESTAMPTZ`, always UTC

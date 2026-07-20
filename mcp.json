@@ -2,11 +2,11 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/srujansai/Desktop/swa-erp"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
     },
     "git": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/Users/srujansai/Desktop/swa-erp"]
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."]
     },
     "postgres": {
       "command": "npx",

@@ -79,11 +79,17 @@ alembic upgrade head   # apply
   ```
 
 ## Production deployment (later wave)
-Documented in `docs/deployment.md` when wave-8 ships.
+Documented in `docs/deployment.md` (rewritten 2026-07-21 — no longer a wave-8 placeholder).
 
 ## Backups
-- Postgres: `pg_dump swa_erp > backup-YYYY-MM-DD.sql` (daily; later via cron)
-- File uploads: rsync `documents/` to backup volume
+**Corrected 2026-07-21**: check `work/reports/wave-19/` before trusting this section — wave-19
+(`scripts/backup_db.sh`, `backup_files.sh`, `restore_db.sh`, `docs/runbook_backup_restore.md`)
+was scoped to build real backup automation but had not landed as of this correction (no
+`work/reports/wave-19/` report exists yet, none of those scripts exist in `scripts/`). Until
+that lands, backups are manual only:
+- Postgres: `pg_dump swa_erp > backup-YYYY-MM-DD.sql` (manual; wave-19 automates this)
+- File uploads: the real directory is `uploads/` at repo root, not `documents/` (see
+  `docs/conventions.md`'s 2026-07-21 correction) — manually copy/rsync this until wave-19 lands
 - Audit log: never deleted; archived to cold storage after N years (TBD by legal)
 
 ## Health checks

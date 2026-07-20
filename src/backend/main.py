@@ -15,6 +15,7 @@ from src.backend.api.inquiries import router as inquiries_router
 from src.backend.api.invoices import router as invoices_router
 from src.backend.api.lifecycle import router as lifecycle_router
 from src.backend.api.materials import router as materials_router
+from src.backend.api.notifications import router as notifications_router
 from src.backend.api.project_pnl import router as project_pnl_router
 from src.backend.api.projects import router as projects_router
 from src.backend.api.quotes import router as quotes_router
@@ -29,9 +30,11 @@ from src.backend.api.users import router as users_router
 from src.backend.api.vendors import router as vendors_router
 from src.backend.core.config import settings
 from src.backend.core.middleware import RequestIdMiddleware
+from src.backend.core.rate_limit import install_auth_rate_limiter
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 app.add_middleware(RequestIdMiddleware)
+install_auth_rate_limiter(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -52,6 +55,7 @@ app.include_router(inquiries_router)
 app.include_router(invoices_router)
 app.include_router(lifecycle_router)
 app.include_router(materials_router)
+app.include_router(notifications_router)
 app.include_router(project_pnl_router)
 app.include_router(projects_compliance_router)
 app.include_router(projects_router)

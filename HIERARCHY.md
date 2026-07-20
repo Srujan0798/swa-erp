@@ -20,14 +20,16 @@
 | `src/backend/` | workers | FastAPI backend (api, core, db, models, schemas, services, workers) |
 | `src/frontend/` | workers | React + Vite frontend |
 | `tests/` | workers | unit/integration/e2e/golden/fuzz/performance/security |
-| `data/` | workers + scripts | seed data, fixtures, sample uploads |
-| `deliverables/` | orchestrator + workers | paper, patent, report, slides, demo |
+| `deliverables/` | orchestrator + workers | admin/user guides, architecture summary — built wave-21 |
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
-| `prompts/` | orchestrator | evolving worker prompt history (current/archive) |
 | `attic/` | nobody (frozen) | superseded work, never deleted |
-| `scripts/` | workers + orchestrator | automation utilities |
-| `config/` | workers | runtime config |
-| `schema/` | workers | JSON Schema / Pydantic definitions |
+| `scripts/` | workers + orchestrator | automation utilities (import tool, backup scripts) |
+
+**Corrected 2026-07-21**: `data/`, `prompts/`, `config/`, and `schema/` were listed here from the
+generic project template but were never actually instantiated for this project — none of these
+four directories exist in the repo. Runtime uploads actually live in a flat `uploads/` directory
+at repo root (see `docs/conventions.md`). Removed from the table above rather than leaving
+entries for directories that don't exist.
 | `.github/workflows/` | CI | automated checks (ci, test, security) |
 | `.claude/` | Claude Code | settings.local.json (minimal) |
 
@@ -50,9 +52,15 @@ src/backend/
 ├── models/           # SQLAlchemy ORM models
 ├── schemas/          # Pydantic request/response models
 ├── services/         # business logic (no FastAPI deps)
-├── workers/          # Celery tasks
 └── main.py           # FastAPI app entry
 ```
+**Corrected 2026-07-21**: `workers/` (Celery tasks) was listed here but never built —
+`celery==5.4.0` is a listed dependency in `requirements.txt` and mentioned in the tech-stack
+line of several docs, but there is no Celery app, no `@task`, and no worker service in either
+compose file anywhere in this codebase (confirmed by a full-project audit). It's an unused
+dependency, not implemented infrastructure — remove references to a working Celery pipeline
+elsewhere in this repo's docs if you find them, or file a real task to build it if background
+jobs are actually needed.
 
 ## Frontend module layout
 ```

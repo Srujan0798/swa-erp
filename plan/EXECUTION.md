@@ -48,6 +48,15 @@ wave-1 (Foundation) ✅ SHIPPED
 | 19 | Backup + restore + ops scripts | ready to dispatch | 0/1 | `work/wave-19/`; closes a Meeting-2-requested gap that was never built |
 | 20 | Production config templates | ready to dispatch | 0/1 | `work/wave-20/`; placeholders marked for each pending IT answer, ready for instant swap |
 | 21 | Handover documentation package | ready to dispatch | 0/1 | `work/wave-21/`; admin guide, user guide, the architecture summary Viraj asked for in Meeting 2 and never got |
+| 22 | Critical RBAC and auth gaps | ready to dispatch | 0/1 | `work/wave-22/`; found by 2026-07-21 four-agent audit: unauthenticated materials endpoints, zero RBAC on financial modules, core-chain access-matrix mismatches |
+| 23 | Correctness bugs | ready to dispatch | 0/1 | `work/wave-23/`; fabricated financial PDF numbers, money-as-float, fake soft-delete on Task, missing Project version column |
+| 24 | Dead code + missing UI wiring | ready to dispatch | 0/1 | `work/wave-24/`; dead debug endpoint, broken New User button, Tokens/DocumentReference UI built but unreachable, notification stubs |
+| 25 | (docs truth pass) — DONE inline, no task file | ✅ SHIPPED | — | fixed directly by the orchestrator 2026-07-21: `docs/api.md`, `docs/conventions.md`, `docs/deployment.md`, `docs/runbook.md`, `HIERARCHY.md`, `orchestrator/rules/security.md`, `docs/SCOPE_GUARD.md`, `orchestrator/memory/MEMORY.md` |
+
+**Waves 22-24 all found by a 2026-07-21 four-agent full-project traceability audit** that read
+every backend module, every frontend page, and every current doc line-by-line against
+`resources/MEETINGS_MASTER.md`'s actual requirements — not a surface pass. Like 17-21, none of
+22-24 depend on Viraj's or IT's still-open answers.
 
 **Waves 17-21 are all independent of the two remaining external blockers** (Viraj's 3 open
 decisions in `docs/decisions/0002-core-id-chain-gap.md`, IT's 8 answers in `docs/IT_BRIEF.md`) —

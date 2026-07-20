@@ -33,7 +33,7 @@ generic CRM above:
 - Excel → ERP one-time import tooling (dry-run by default, idempotent, wave-13)
 - Independent verification of the whole stack (real Docker boot, E2E, migration-chain integrity — wave-12)
 
-## IN scope — infra/quality hardening (waves 14-16, in progress)
+## IN scope — infra/quality hardening (waves 14-16 — SHIPPED, corrected 2026-07-21)
 - Docker Compose auto-migration on boot + fixing the dual-Postgres seed-script bug (wave-14)
 - Fixing the 2 failing Playwright E2E selectors (wave-15)
 - Sweeping remaining models (Material, Contact, ComplianceItem, etc.) for the same

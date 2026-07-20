@@ -5,6 +5,7 @@ from src.backend.api.clients import router as clients_router
 from src.backend.api.document_references import router as document_references_router
 from src.backend.api.inquiries import router as inquiries_router
 from src.backend.api.lifecycle import router as lifecycle_router
+from src.backend.api.notifications import router as notifications_router
 from src.backend.api.projects import router as projects_router
 from src.backend.api.sustainability_metrics import router as sustainability_metrics_router
 from src.backend.api.tasks import router as tasks_router
@@ -20,6 +21,7 @@ __all__ = [
     "document_references_router",
     "inquiries_router",
     "lifecycle_router",
+    "notifications_router",
     "projects_router",
     "sustainability_metrics_router",
     "tasks_router",

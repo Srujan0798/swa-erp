@@ -1,25 +1,37 @@
 # Deployment
 
+**Rewritten 2026-07-21** — this file was a generic-VPS placeholder ("Hetzner/DigitalOcean, k8s
+later") left over from project kickoff, describing a hypothetical target that has nothing to do
+with the actual deployment target. The real target, confirmed with the client (Meeting 2, see
+`resources/MEETINGS_MASTER.md`), is their own on-premises Windows Server, not a cloud VPS.
+
 ## Dev (now)
-See `runbook.md` for local dev setup via docker-compose.
+See `runbook.md` for local dev setup via `docker-compose.yml`.
 
-## Staging / Production (filled in by wave-8)
+## Production — real target, not the old placeholder
 
-Placeholder. To be designed in wave-8 (Reports + Deliverables) once we know real load patterns from staging tests.
+The actual target is: **on-premises Windows Server, 128GB RAM, VPN-only access, 100+
+concurrent users** (per Meeting 2). This is not staging/prod-on-a-VPS the way the old version of
+this file assumed — there is no cloud hosting decision to make, it's already been made.
 
-### Target architecture (tentative)
-- Single VPS (4 vCPU / 8GB RAM / 100GB SSD) on Hetzner or DigitalOcean
-- Docker Compose with reverse proxy (Caddy or Nginx + Certbot for SSL)
-- Postgres on same VPS with daily pg_dump to S3-compatible storage (e.g., Backblaze B2)
-- Redis on same VPS (data is non-critical; queue jobs lost-OK)
-- MinIO on same VPS for documents (mountable to host filesystem)
-- Sentry SaaS for error tracking
-- Uptime monitoring via Uptime Kuma or BetterStack
+The real production config work is done, not "to be designed later":
+- **`docker-compose.prod.yml`** — production-shaped compose file (separate from the dev
+  `docker-compose.yml`), built in wave-20
+- **`.env.production.example`** — production environment template, with every value that
+  depends on the client's IT team's answers explicitly marked `# PENDING IT ANSWER`
+- **`docs/DEPLOYMENT_CHECKLIST.md`** — the actual step-by-step deployment runbook, built in wave-20
+- **`docs/IT_BRIEF.md`** — the 8 specific infra questions still blocking the final values in the
+  files above (Docker Engine vs Desktop, Linux-container availability, free ports, TLS
+  approach, internal hostname, where Postgres/Redis run, deploy access model) — already sent to
+  the client's IT contact, awaiting reply as of this writing
+- **`docs/decisions/0003-it-server-call-brief.md`** — the reasoning behind each of those 8 questions
 
-### When to migrate to k8s
-- > 100 concurrent users
-- > 5,000 projects
-- Multi-region needed
-- Team larger than 5 engineers
+Check `work/reports/wave-20/` to confirm these actually landed before trusting this list — this
+file describes what wave-20 was scoped to build, verify against the report before relying on it.
 
-Until then: docker-compose is sufficient.
+## What's genuinely still undecided
+Nothing architectural — the stack (FastAPI/Postgres/Redis/React, Docker-based) was decided at
+kickoff (`docs/decisions/0001-tech-stack.md`) and never changed. What's pending is purely
+server-specific facts only the client's IT team can supply — see `docs/IT_BRIEF.md`'s 8
+questions. There is no "when to migrate to k8s" decision to make; this is a single on-prem
+server for one company's internal team, not a cloud service planning for horizontal scale.

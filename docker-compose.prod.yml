@@ -1,0 +1,115 @@
+# Production deployment compose file for SWA ERP.
+#
+# SELF-CONTAINED TEMPLATE. Every IT-dependent value below is a clearly marked
+# placeholder. The moment docs/IT_BRIEF.md's 8 answers land, updating this is a
+# find-and-replace, not a rebuild. Do NOT edit the dev docker-compose.yml — this
+# file is intentionally separate.
+#
+# Run with the production env file:
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# (plain `docker compose -f docker-compose.prod.yml config` also validates today,
+#  with placeholder values substituted in.)
+
+# PENDING IT ANSWER (docs/IT_BRIEF.md Q1): confirm Docker Engine vs Docker Desktop
+#   availability on the target Windows Server (free Engine is fine).
+# PENDING IT ANSWER (Q2): confirm Linux containers via WSL2 are available.
+# (compose `version` key is intentionally omitted — it is obsolete in current
+#  Docker Compose and is ignored.)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-swa}
+      # PENDING IT ANSWER (Q7): confirm postgres stays in-compose vs native Windows
+      #   service. If native, remove this whole `postgres` service and point
+      #   DATABASE_URL at the native host.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_change_before_prod}
+      POSTGRES_DB: ${POSTGRES_DB:-swa_erp}
+    # PENDING IT ANSWER (Q3): replace these port mappings with IT-confirmed free
+    #   ports. Default 5432 shown as placeholder.
+    ports: ["5432:5432"]
+    volumes:
+      - swa_erp_prod_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-swa} -d ${POSTGRES_DB:-swa_erp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    # PENDING IT ANSWER (Q3): replace with IT-confirmed free port (default 6379
+    #   shown as placeholder).
+    # PENDING IT ANSWER (Q7): confirm redis stays in-compose vs native Windows.
+    ports: ["6379:6379"]
+    volumes:
+      - swa_erp_prod_redisdata:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-swa}:${POSTGRES_PASSWORD:-changeme_change_before_prod}@postgres:5432/${POSTGRES_DB:-swa_erp}
+      APP_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["alembic", "-c", "src/backend/alembic.ini", "upgrade", "heads"]
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-swa}:${POSTGRES_PASSWORD:-changeme_change_before_prod}@postgres:5432/${POSTGRES_DB:-swa_erp}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-REPLACE_ME_IN_ENV_FILE}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      # PENDING IT ANSWER (Q6): CORS_ORIGINS above must become the real internal
+      #   hostname staff use (e.g. ["https://erp.swa.local"]).
+      APP_ENV: production
+      DEBUG: "false"
+    # PENDING IT ANSWER (Q3): replace with IT-confirmed free port (default 8000).
+    ports: ["8000:8000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    # PENDING IT ANSWER (Q3): replace host port 3000 with IT-confirmed free port.
+    # PENDING IT ANSWER (Q4): TLS termination. Below serves plain HTTP as a
+    #   placeholder. Once Q4 is answered (internal CA vs self-signed):
+    #     - drop a cert+key into the frontend image / mounted volume, and
+    #     - update src/frontend/nginx.conf to `listen 443 ssl` + `ssl_certificate`.
+    #   The app itself (React SPA) needs no code change for HTTPS — only nginx.
+    ports: ["3000:80"]
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  swa_erp_prod_pgdata:
+  swa_erp_prod_redisdata:
