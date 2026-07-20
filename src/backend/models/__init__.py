@@ -9,6 +9,7 @@ from src.backend.models.compliance import (
 )
 from src.backend.models.contact import Contact
 from src.backend.models.document import Document, DocumentFolder
+from src.backend.models.document_reference import DocumentReference
 from src.backend.models.inquiry import Inquiry
 from src.backend.models.invoice import Invoice, InvoiceItem
 from src.backend.models.material import Material, MaterialCategory
@@ -21,6 +22,7 @@ from src.backend.models.rfq import RFQ, RFQItem
 from src.backend.models.sustainability_metric import SustainabilityMetric
 from src.backend.models.task import Task, TaskComment
 from src.backend.models.time_tracking import TimeEntry, Timesheet, TimesheetAuditLog
+from src.backend.models.token import Token
 from src.backend.models.user import User
 from src.backend.models.vendor import Vendor, VendorContact
 
@@ -35,22 +37,28 @@ __all__ = [
     "Contact",
     "Document",
     "DocumentFolder",
+    "DocumentReference",
     "Inquiry",
     "Invoice",
     "InvoiceItem",
+    "Material",
+    "MaterialCategory",
     "Project",
     "ProjectComplianceItem",
+    "ProjectCost",
     "Quote",
     "QuoteItem",
     "RFQItem",
     "ReferenceCounter",
+    "RefreshToken",
     "ServiceAgreement",
     "SustainabilityMetric",
-    "RefreshToken",
     "Task",
     "TaskComment",
     "TimeEntry",
     "Timesheet",
+    "TimesheetAuditLog",
+    "Token",
     "User",
     "Vendor",
     "VendorContact",

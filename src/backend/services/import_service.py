@@ -1,0 +1,669 @@
+from __future__ import annotations
+
+import datetime as dt
+from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from src.backend.models import (
+    Client,
+    DocumentReference,
+    Inquiry,
+    Project,
+    ServiceAgreement,
+    SustainabilityMetric,
+    TimeEntry,
+    Token,
+    User,
+)
+
+
+# --------------------------------------------------------------------------- #
+# Result container
+# --------------------------------------------------------------------------- #
+@dataclass
+class ImportResult:
+    sheet_type: str
+    total_rows: int = 0
+    created: int = 0
+    updated: int = 0
+    skipped: int = 0
+    errors: list[dict] = field(default_factory=list)
+
+    def add_error(self, row: int, message: str) -> None:
+        self.errors.append({"row": row, "message": message})
+
+    @property
+    def ok(self) -> bool:
+        return not self.errors
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "sheet_type": self.sheet_type,
+            "total_rows": self.total_rows,
+            "created": self.created,
+            "updated": self.updated,
+            "skipped": self.skipped,
+            "errors": self.errors,
+            "ok": self.ok,
+        }
+
+
+# --------------------------------------------------------------------------- #
+# Parsing helpers
+# --------------------------------------------------------------------------- #
+def _txt(value: Any) -> str | None:
+    if value is None:
+        return None
+    s = str(value).strip()
+    return s or None
+
+
+def _parse_date(value: Any) -> dt.date | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, dt.datetime):
+        return value.date()
+    if isinstance(value, dt.date):
+        return value
+    s = str(value).strip()
+    if s == "" or s.upper() == "N/A":
+        return None
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"):
+        try:
+            return dt.datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f"unrecognized date: {s}")
+
+
+def _parse_decimal(value: Any) -> Decimal | None:
+    if value is None:
+        return None
+    s = str(value).strip().replace(",", "")
+    if s == "" or s.upper() == "N/A":
+        return None
+    try:
+        return Decimal(s)
+    except InvalidOperation:
+        raise ValueError(f"not a number: {s}") from None
+
+
+def _parse_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    s = str(value).strip().replace(",", "")
+    if s == "" or s.upper() == "N/A":
+        return None
+    try:
+        return int(float(s))
+    except ValueError:
+        raise ValueError(f"not an integer: {s}") from None
+
+
+def _parse_bool(value: Any) -> bool | None:
+    if value is None:
+        return None
+    s = str(value).strip().lower()
+    if s in ("", "n/a"):
+        return None
+    if s in ("yes", "true", "y", "1"):
+        return True
+    if s in ("no", "false", "n", "0"):
+        return False
+    raise ValueError(f"not a boolean: {s}")
+
+
+# --------------------------------------------------------------------------- #
+# FK resolvers
+# --------------------------------------------------------------------------- #
+def _client_by_code(s: Session, code: str) -> Client | None:
+    return s.scalar(select(Client).where(Client.code == code))
+
+
+def _client_by_name(s: Session, name: str) -> Client | None:
+    return s.scalar(select(Client).where(Client.name == name))
+
+
+def _inquiry_by_ref(s: Session, ref: str) -> Inquiry | None:
+    return s.scalar(select(Inquiry).where(Inquiry.reference_id == ref))
+
+
+def _agreement_by_ref(s: Session, ref: str) -> ServiceAgreement | None:
+    return s.scalar(select(ServiceAgreement).where(ServiceAgreement.reference_id == ref))
+
+
+def _project_by_code(s: Session, code: str) -> Project | None:
+    return s.scalar(select(Project).where(Project.code == code))
+
+
+def _token_by_ref(s: Session, ref: str) -> Token | None:
+    return s.scalar(select(Token).where(Token.reference_id == ref))
+
+
+def _resolve_user_by_name(s: Session, name: str) -> User | None:
+    return s.scalar(select(User).where(User.name == name))
+
+
+def _doc_by_ref(s: Session, reference_id: str) -> DocumentReference | None:
+    return s.scalar(
+        select(DocumentReference).where(DocumentReference.reference_id == reference_id)
+    )
+
+
+def _ensure_import_user(s: Session) -> User:
+    user = s.scalar(select(User).where(User.email == "import@swa.local"))
+    if user is None:
+        user = User(
+            email="import@swa.local",
+            password_hash="imported",
+            name="Data Import",
+            role="employee",
+        )
+        s.add(user)
+        s.flush()
+    return user
+
+
+# --------------------------------------------------------------------------- #
+# Sheet reader
+# --------------------------------------------------------------------------- #
+def _find_header_index(rows: list[list[Any]], signatures: list[str]) -> int:
+    lowered = [sig.lower() for sig in signatures]
+    for i, row in enumerate(rows):
+        cells = ["" if c is None else str(c).strip().lower() for c in row]
+        if all(any(sig in cell for cell in cells) for sig in lowered):
+            return i
+    raise ValueError(f"header row not found (expected columns: {signatures})")
+
+
+def read_rows(file_path: str, signatures: list[str], key_field: str) -> list[dict]:
+    import openpyxl
+
+    wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+    ws = wb.active
+    rows = [list(r) for r in ws.iter_rows(values_only=True)]
+    hdr_idx = _find_header_index(rows, signatures)
+    header = [("" if c is None else str(c).strip()) for c in rows[hdr_idx]]
+    while header and header[-1] == "":
+        header.pop()
+
+    data: list[dict] = []
+    for r in rows[hdr_idx + 1 :]:
+        if r is None:
+            continue
+        cells = [("" if c is None else c) for c in r]
+        if len(cells) < len(header):
+            cells = cells + [""] * (len(header) - len(cells))
+        record = {header[i]: cells[i] for i in range(len(header))}
+        # skip stray duplicate header rows
+        cell_texts = [str(v).strip().lower() for v in record.values()]
+        if any(t == sig.lower() for t in cell_texts for sig in signatures):
+            continue
+        # skip blank / key-less rows
+        if not _txt(record.get(key_field)):
+            continue
+        data.append(record)
+    return data
+
+
+# --------------------------------------------------------------------------- #
+# Per-sheet importers
+# --------------------------------------------------------------------------- #
+def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            code = _txt(d.get("Client ID"))
+            name = _txt(d.get("Client Name"))
+            if not code:
+                result.add_error(i, "missing Client ID")
+                continue
+            if not name:
+                result.add_error(i, "missing Client Name")
+                continue
+            email = _txt(d.get("Email")) or f"{code.lower()}@import.local"
+            client = _client_by_code(s, code)
+            if client is not None:
+                client.name = name
+                client.primary_email = email
+                client.industry = _txt(d.get("Industry"))
+                client.primary_phone = _txt(d.get("Phone"))
+                client.address = _txt(d.get("Billing Address"))
+                client.client_status = _txt(d.get("Client Status")) or "Active"
+                client.notes = _txt(d.get("Notes"))
+                client.first_lead_id = _txt(d.get("First Lead ID"))
+                fi = _txt(d.get("First Inquiry ID"))
+                if fi:
+                    inq = _inquiry_by_ref(s, fi)
+                    if inq is None:
+                        result.add_error(i, f"Inquiry {fi} not found")
+                    else:
+                        client.first_inquiry_id = inq.id
+                result.updated += 1
+            else:
+                client = Client(
+                    code=code,
+                    name=name,
+                    primary_email=email,
+                    industry=_txt(d.get("Industry")),
+                    primary_phone=_txt(d.get("Phone")),
+                    address=_txt(d.get("Billing Address")),
+                    client_status=_txt(d.get("Client Status")) or "Active",
+                    notes=_txt(d.get("Notes")),
+                    first_lead_id=_txt(d.get("First Lead ID")),
+                    country="India",
+                    is_active=True,
+                )
+                fi = _txt(d.get("First Inquiry ID"))
+                if fi:
+                    inq = _inquiry_by_ref(s, fi)
+                    if inq is None:
+                        result.add_error(i, f"Inquiry {fi} not found")
+                    else:
+                        client.first_inquiry_id = inq.id
+                s.add(client)
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_inquiries(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            reference_id = _txt(d.get("Inquiry ID"))
+            if not reference_id:
+                result.add_error(i, "missing Inquiry ID")
+                continue
+            inquiry_date = _parse_date(d.get("Inquiry Date"))
+            if inquiry_date is None:
+                result.add_error(i, "missing or invalid Inquiry Date")
+                continue
+            client_name = _txt(d.get("Client Name"))
+            status = _txt(d.get("Status")) or "New"
+            client = _client_by_name(s, client_name) if client_name else None
+            inquiry = _inquiry_by_ref(s, reference_id)
+            values = dict(
+                inquiry_date=inquiry_date,
+                inquiry_type=_txt(d.get("Inquiry Type")),
+                inquiry_source=_txt(d.get("Inquiry Source")),
+                client_name=client_name or "",
+                requirement_summary=_txt(d.get("Requirement Summary")),
+                estimated_value=_parse_decimal(d.get("Estimated Value")),
+                priority=_txt(d.get("Priority")),
+                status=status,
+                notes=_txt(d.get("Notes")),
+                converted_client_id=client.id if client else None,
+            )
+            if inquiry is not None:
+                for k, v in values.items():
+                    setattr(inquiry, k, v)
+                result.updated += 1
+            else:
+                s.add(Inquiry(reference_id=reference_id, **values))
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_agreements(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            reference_id = _txt(d.get("Agreement ID"))
+            if not reference_id:
+                result.add_error(i, "missing Agreement ID")
+                continue
+            client = _client_by_name(s, _txt(d.get("Client Name")))
+            if client is None:
+                client = _client_by_code(s, _txt(d.get("Client ID")))
+            if client is None:
+                result.add_error(i, "client not found (Client Name / Client ID)")
+                continue
+            service_name = _txt(d.get("Service Name"))
+            if not service_name:
+                result.add_error(i, "missing Service Name")
+                continue
+            start_date = _parse_date(d.get("Start Date"))
+            if start_date is None:
+                result.add_error(i, "missing or invalid Start Date")
+                continue
+            inquiry = _inquiry_by_ref(s, _txt(d.get("Inquiry ID"))) if _txt(
+                d.get("Inquiry ID")
+            ) else None
+            agreement = _agreement_by_ref(s, reference_id)
+            values = dict(
+                client_id=client.id,
+                inquiry_id=inquiry.id if inquiry else None,
+                service_name=service_name,
+                start_date=start_date,
+                end_date=_parse_date(d.get("End Date")),
+                total_tokens=_parse_int(d.get("Total Tokens")),
+                status=_txt(d.get("Status")) or "Active",
+                notes=_txt(d.get("Notes")),
+            )
+            if agreement is not None:
+                for k, v in values.items():
+                    setattr(agreement, k, v)
+                result.updated += 1
+            else:
+                s.add(ServiceAgreement(reference_id=reference_id, **values))
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_tokens(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            reference_id = _txt(d.get("Token ID"))
+            if not reference_id:
+                result.add_error(i, "missing Token ID")
+                continue
+            agreement = _agreement_by_ref(s, _txt(d.get("Agreement ID")))
+            if agreement is None:
+                result.add_error(i, f"Agreement {_txt(d.get('Agreement ID'))} not found")
+                continue
+            token_date = _parse_date(d.get("Date"))
+            if token_date is None:
+                result.add_error(i, "missing or invalid Date")
+                continue
+            values: dict[str, Any] = dict(
+                agreement_id=agreement.id,
+                token_date=token_date,
+                token_type=_txt(d.get("Token Type")),
+                description=_txt(d.get("Description")),
+                token_status=_txt(d.get("Token Status")) or "In Progress",
+                client_employee_name=_txt(d.get("Client Employee Name")),
+            )
+            tu = _parse_int(d.get("Tokens Used"))
+            if tu is not None:
+                values["tokens_used"] = tu
+            emp = _txt(d.get("Swa Employee Name/Team Leader"))
+            if emp:
+                u = _resolve_user_by_name(s, emp)
+                if u is not None:
+                    values["swa_employee_id"] = u.id
+            po = _txt(d.get("Project Owner"))
+            if po:
+                u = _resolve_user_by_name(s, po)
+                if u is not None:
+                    values["project_owner_id"] = u.id
+            token = _token_by_ref(s, reference_id)
+            if token is not None:
+                for k, v in values.items():
+                    setattr(token, k, v)
+                result.updated += 1
+            else:
+                s.add(Token(reference_id=reference_id, **values))
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_document_references(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            reference_id = _txt(d.get("Doc Ref No")) or _txt(d.get("DRN"))
+            if not reference_id:
+                result.add_error(i, "missing Doc Ref No / DRN")
+                continue
+            assoc = _txt(d.get("Associated Project/Token ID")) or _txt(
+                d.get("Associated Project ID")
+            )
+            project = _project_by_code(s, assoc) if assoc else None
+            token = None
+            if project is None and assoc:
+                token = _token_by_ref(s, assoc)
+            if project is None and token is not None:
+                result.add_error(i, "document reference requires an associated Project (token only)")
+                continue
+            if project is None:
+                result.add_error(i, f"Project {assoc} not found")
+                continue
+            doc_date = _parse_date(d.get("Date"))
+            if doc_date is None:
+                result.add_error(i, "missing or invalid Date")
+                continue
+            document_type = _txt(d.get("Document Type"))
+            if not document_type:
+                result.add_error(i, "missing Document Type")
+                continue
+            values: dict[str, Any] = dict(
+                project_id=project.id,
+                token_id=token.id if token else None,
+                doc_date=doc_date,
+                document_type=document_type,
+                type_=_txt(d.get("Type")),
+                user_ref=_txt(d.get("User")),
+                description=_txt(d.get("Description")),
+                revision=_txt(d.get("Revision")) or "R0",
+                status=_txt(d.get("Status")) or "Draft",
+                remarks=_txt(d.get("Remarks")),
+            )
+            author = _txt(d.get("Author"))
+            if author:
+                u = _resolve_user_by_name(s, author)
+                if u is not None:
+                    values["author_id"] = u.id
+            docref = _doc_by_ref(s, reference_id)
+            if docref is not None:
+                for k, v in values.items():
+                    setattr(docref, k, v)
+                result.updated += 1
+            else:
+                s.add(DocumentReference(reference_id=reference_id, **values))
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_projects(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            code = _txt(d.get("Project ID"))
+            if not code:
+                result.add_error(i, "missing Project ID")
+                continue
+            client = _client_by_code(s, _txt(d.get("Client ID")))
+            if client is None:
+                result.add_error(i, f"Client {_txt(d.get('Client ID'))} not found")
+                continue
+            name = _txt(d.get("Project Name"))
+            if not name:
+                result.add_error(i, "missing Project Name")
+                continue
+            project = _project_by_code(s, code)
+            values = dict(
+                client_id=client.id,
+                name=name,
+                description=_txt(d.get("Notes")),
+                status=_txt(d.get("Status Updates")) or "Lead",
+                start_date=_parse_date(d.get("Start date")),
+                target_end_date=_parse_date(d.get("End date")),
+            )
+            if project is not None:
+                for k, v in values.items():
+                    setattr(project, k, v)
+                result.updated += 1
+            else:
+                s.add(Project(code=code, **values))
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> None:
+    user = _ensure_import_user(s)
+    for i, d in enumerate(rows, start=2):
+        try:
+            ref = _txt(d.get("Reference ID"))
+            if not ref:
+                result.add_error(i, "missing Reference ID")
+                continue
+            project = _project_by_code(s, ref)
+            if project is None:
+                token = _token_by_ref(s, ref)
+                docref = _doc_by_ref(s, ref) if token is None else None
+                if token is not None:
+                    result.add_error(i, "time log references a Token without a Project")
+                    continue
+                if docref is not None and docref.project_id is not None:
+                    project = s.get(Project, docref.project_id)
+                if project is None:
+                    result.add_error(i, f"Reference {ref} not found (Project/Token/Doc)")
+                    continue
+            entry_date = _parse_date(d.get("Date"))
+            if entry_date is None:
+                result.add_error(i, "missing or invalid Date")
+                continue
+            hours = _parse_decimal(d.get("Hours Logged"))
+            if hours is None:
+                result.add_error(i, "missing Hours Logged")
+                continue
+            description = _txt(d.get("Activity Type")) or "Imported time log"
+            remarks = _txt(d.get("Remarks (optional)"))
+            if remarks:
+                description = f"{description} — {remarks}"
+            employee = _txt(d.get("Employee Name"))
+            if employee:
+                description = f"[{employee}] {description}"
+            billable = _parse_decimal(d.get("Billable Hours")) or Decimal("0")
+            exists = s.scalar(
+                select(TimeEntry).where(
+                    TimeEntry.project_id == project.id,
+                    TimeEntry.user_id == user.id,
+                    TimeEntry.date == entry_date,
+                    TimeEntry.description == description,
+                    TimeEntry.hours == hours,
+                )
+            )
+            if exists is not None:
+                result.skipped += 1
+                continue
+            s.add(
+                TimeEntry(
+                    project_id=project.id,
+                    user_id=user.id,
+                    date=entry_date,
+                    hours=hours,
+                    description=description,
+                    is_billable=billable > 0,
+                )
+            )
+            result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+def _import_sustainability(s: Session, rows: list[dict], result: ImportResult) -> None:
+    for i, d in enumerate(rows, start=2):
+        try:
+            reference_id = _txt(d.get("Reference ID"))
+            if not reference_id:
+                result.add_error(i, "missing Reference ID")
+                continue
+            project = _project_by_code(s, reference_id)
+            if project is None:
+                result.add_error(i, f"Project {reference_id} not found")
+                continue
+            metric = s.scalar(
+                select(SustainabilityMetric).where(
+                    SustainabilityMetric.reference_id == reference_id
+                )
+            )
+            values = dict(
+                project_id=project.id,
+                recorded_date=_parse_date(d.get("Date")) or dt.date.today(),
+                compliant_with_green_standards=_parse_bool(
+                    d.get("Compliant with Green Standards")
+                ),
+                energy_saved_kwh=_parse_decimal(d.get("Total Energy Saved (kWh)")),
+                co2_avoided_tco2e=_parse_decimal(d.get("CO2 emissions avoided (tCO2e)")),
+                lifecycle_cost_savings_inr=_parse_decimal(
+                    d.get("Lifecycle Cost savings delivered (INR)")
+                ),
+                insulation_efficiency_ratio=_parse_decimal(
+                    d.get("Insulation Efficiency (Actual/Expected)")
+                ),
+                payback_period_months=_parse_decimal(d.get("Payback Period (Months)")),
+                notes=_txt(d.get("Notes")),
+            )
+            if metric is not None:
+                for k, v in values.items():
+                    setattr(metric, k, v)
+                result.updated += 1
+            else:
+                s.add(SustainabilityMetric(reference_id=reference_id, **values))
+                result.created += 1
+        except Exception as e:
+            result.add_error(i, str(e))
+
+
+# --------------------------------------------------------------------------- #
+# Dispatch
+# --------------------------------------------------------------------------- #
+SHEET_CONFIG: dict[str, dict[str, Any]] = {
+    "clients": {
+        "signatures": ["Client ID", "Client Name"],
+        "key_field": "Client ID",
+        "fn": _import_clients,
+    },
+    "inquiries": {
+        "signatures": ["Inquiry ID"],
+        "key_field": "Inquiry ID",
+        "fn": _import_inquiries,
+    },
+    "agreements": {
+        "signatures": ["Agreement ID"],
+        "key_field": "Agreement ID",
+        "fn": _import_agreements,
+    },
+    "tokens": {
+        "signatures": ["Token ID"],
+        "key_field": "Token ID",
+        "fn": _import_tokens,
+    },
+    "document_references": {
+        "signatures": ["Doc Ref No"],
+        "key_field": "Doc Ref No",
+        "fn": _import_document_references,
+    },
+    "projects": {
+        "signatures": ["Project ID"],
+        "key_field": "Project ID",
+        "fn": _import_projects,
+    },
+    "time_logs": {
+        "signatures": ["Reference ID", "Hours Logged"],
+        "key_field": "Reference ID",
+        "fn": _import_time_logs,
+    },
+    "sustainability": {
+        "signatures": ["Reference ID"],
+        "key_field": "Reference ID",
+        "fn": _import_sustainability,
+    },
+}
+
+
+def import_sheet(
+    session: Session, sheet_type: str, file_path: str, commit: bool = False
+) -> ImportResult:
+    if sheet_type not in SHEET_CONFIG:
+        raise ValueError(f"unknown sheet_type: {sheet_type}")
+    cfg = SHEET_CONFIG[sheet_type]
+    result = ImportResult(sheet_type=sheet_type)
+    try:
+        rows = read_rows(file_path, cfg["signatures"], cfg["key_field"])
+        result.total_rows = len(rows)
+        cfg["fn"](session, rows, result)
+        if commit:
+            session.commit()
+        else:
+            session.rollback()
+    except Exception as e:
+        session.rollback()
+        result.add_error(0, f"Fatal: {e}")
+    return result

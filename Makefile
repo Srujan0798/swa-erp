@@ -63,6 +63,17 @@ dispatch:
 	@echo "Open Claude Code or Kimi in the project root and run:"
 	@echo "  /dispatch wave-$(wave)"
 
+import-data:
+	@if [ -z "$(file)" ] || [ -z "$(type)" ]; then \
+		echo "Usage: make import-data file=<path.xlsx> type=<clients|inquiries|agreements|tokens|document_references|projects|time_logs|sustainability> [commit=1]"; \
+		exit 1; \
+	fi
+	@if [ "$(commit)" = "1" ]; then \
+		python3 scripts/import_excel.py $(type) $(file) --commit; \
+	else \
+		python3 scripts/import_excel.py $(type) $(file) --dry-run; \
+	fi
+
 ship:
 	@echo "Open Claude Code or Kimi in the project root and run:"
 	@echo "  /ship wave-$(wave)"

@@ -7,6 +7,7 @@ from src.backend.api.boqs import router as boqs_router
 from src.backend.api.clients import router as clients_router
 from src.backend.api.compliance import projects_compliance_router
 from src.backend.api.compliance import router as compliance_router
+from src.backend.api.document_references import router as document_references_router
 from src.backend.api.documents import router as documents_router
 from src.backend.api.exports import router as exports_router
 from src.backend.api.health import router as health_router
@@ -23,6 +24,7 @@ from src.backend.api.rfqs import router as rfqs_router
 from src.backend.api.sustainability_metrics import router as sustainability_metrics_router
 from src.backend.api.tasks import router as tasks_router
 from src.backend.api.time_tracking import time_entries_router, timesheets_router
+from src.backend.api.tokens import router as tokens_router
 from src.backend.api.users import router as users_router
 from src.backend.api.vendors import router as vendors_router
 from src.backend.core.config import settings
@@ -43,6 +45,7 @@ app.include_router(agreements_router)
 app.include_router(boqs_router)
 app.include_router(clients_router)
 app.include_router(compliance_router)
+app.include_router(document_references_router)
 app.include_router(documents_router)
 app.include_router(exports_router)
 app.include_router(inquiries_router)
@@ -60,5 +63,6 @@ app.include_router(sustainability_metrics_router)
 app.include_router(tasks_router)
 app.include_router(time_entries_router)
 app.include_router(timesheets_router)
+app.include_router(tokens_router)
 app.include_router(users_router)
 app.include_router(vendors_router)
