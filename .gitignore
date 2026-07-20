@@ -17,6 +17,7 @@ htmlcov/
 
 # Node
 node_modules/
+node_modules
 *.log
 .vite/
 dist/
