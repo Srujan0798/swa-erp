@@ -12,7 +12,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision: str = "0011"
-down_revision: str | None = "0005"
+down_revision: str | None = "0010"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -145,25 +145,25 @@ def upgrade() -> None:
         standards_table,
         [
             {
-                "id": sa.text("'a1111111-1111-1111-1111-111111111111'::uuid"),
+                "id": "a1111111-1111-1111-1111-111111111111",
                 "name": "NBC",
                 "version": "2016",
                 "description": "National Building Code of India",
             },
             {
-                "id": sa.text("'b2222222-2222-2222-2222-222222222222'::uuid"),
+                "id": "b2222222-2222-2222-2222-222222222222",
                 "name": "ECBC",
                 "version": "2017",
                 "description": "Energy Conservation Building Code",
             },
             {
-                "id": sa.text("'c3333333-3333-3333-3333-333333333333'::uuid"),
+                "id": "c3333333-3333-3333-3333-333333333333",
                 "name": "IGBC",
                 "version": "2011",
                 "description": "Indian Green Building Council",
             },
             {
-                "id": sa.text("'d4444444-4444-4444-4444-444444444444'::uuid"),
+                "id": "d4444444-4444-4444-4444-444444444444",
                 "name": "IS",
                 "version": "2021",
                 "description": "Indian Standards — Fire Codes",
