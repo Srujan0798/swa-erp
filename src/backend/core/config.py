@@ -1,4 +1,8 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DEFAULT_SECRET_KEY = "change-me"
+INSECURE_SECRET_KEYS = {"change-me", "replace-with-openssl-rand-hex-32", ""}
 
 
 class Settings(BaseSettings):
@@ -14,6 +18,19 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TTL_MIN: int = 60
     JWT_REFRESH_TTL_DAYS: int = 30
+
+    AUTH_RATE_LIMIT_PER_MIN: int = 5
+
+    @model_validator(mode="after")
+    def _validate_production_secrets(self) -> "Settings":
+        if self.APP_ENV.lower() != "dev" and self.SECRET_KEY in INSECURE_SECRET_KEYS:
+            raise ValueError(
+                "SECRET_KEY is set to an insecure default value but APP_ENV is "
+                f"'{self.APP_ENV}'. Refusing to start. Generate a strong secret with: "
+                "python3 -c \"import secrets; print(secrets.token_hex(32))\" "
+                "and set it in the environment or .env file."
+            )
+        return self
 
 
 settings = Settings()

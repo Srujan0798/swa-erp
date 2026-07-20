@@ -6,6 +6,8 @@ export interface Invoice {
   subtotal: number;
   tax_rate: number;
   tax_amount: number;
+  gst_percent: number;
+  gst_amount: number;
   total: number;
   currency: string;
   due_date: string | null;

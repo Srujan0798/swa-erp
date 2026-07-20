@@ -16,11 +16,15 @@ from src.backend.db.repositories.invoice_repo import (
 from src.backend.models.time_tracking import TimeEntry
 
 
-def _compute_totals(items_data: list[dict[str, Any]], tax_rate: Decimal) -> tuple[Decimal, Decimal, Decimal]:
+def _compute_totals(
+    items_data: list[dict[str, Any]], tax_rate: Decimal
+) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal]:
     subtotal = sum(Decimal(str(item["quantity"])) * Decimal(str(item["rate"])) for item in items_data)
-    tax_amount = subtotal * tax_rate / Decimal("100")
-    total = subtotal + tax_amount
-    return subtotal, tax_amount, total
+    gst_percent = tax_rate
+    gst_amount = (subtotal * gst_percent / Decimal("100")).quantize(Decimal("0.01"))
+    tax_amount = gst_amount
+    total = subtotal + gst_amount
+    return subtotal, tax_amount, total, gst_percent, gst_amount
 
 
 def _invoice_to_read(invoice: Any, db: Session) -> dict[str, Any]:
@@ -52,6 +56,8 @@ def _invoice_to_read(invoice: Any, db: Session) -> dict[str, Any]:
         "subtotal": invoice.subtotal,
         "tax_rate": invoice.tax_rate,
         "tax_amount": invoice.tax_amount,
+        "gst_percent": invoice.gst_percent,
+        "gst_amount": invoice.gst_amount,
         "total": invoice.total,
         "currency": invoice.currency,
         "due_date": invoice.due_date,
@@ -80,7 +86,7 @@ def create_invoice_service(
         if "amount" not in item:
             item["amount"] = Decimal(str(item["quantity"])) * Decimal(str(item["rate"]))
 
-    subtotal, tax_amount, total = _compute_totals(items_data, tax_rate)
+    subtotal, tax_amount, total, gst_percent, gst_amount = _compute_totals(items_data, tax_rate)
 
     invoice_data = {
         "project_id": project_id,
@@ -89,6 +95,8 @@ def create_invoice_service(
         "subtotal": subtotal,
         "tax_rate": tax_rate,
         "tax_amount": tax_amount,
+        "gst_percent": gst_percent,
+        "gst_amount": gst_amount,
         "total": total,
         "currency": "INR",
         "due_date": due_date,

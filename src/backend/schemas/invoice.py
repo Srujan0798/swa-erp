@@ -49,6 +49,8 @@ class InvoiceRead(BaseModel):
     subtotal: Decimal
     tax_rate: Decimal
     tax_amount: Decimal
+    gst_percent: Decimal
+    gst_amount: Decimal
     total: Decimal
     currency: str
     due_date: date | None

@@ -103,7 +103,17 @@ export function InvoicesPage() {
             <div className="space-y-2 text-sm">
               <div><div className="text-xs text-muted-foreground">Status</div><div>{detail.status}</div></div>
               <div className="flex justify-between"><span className="text-xs text-muted-foreground">Subtotal</span><span>₹{detail.subtotal.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-xs text-muted-foreground">GST (tax)</span><span>₹{detail.tax_amount.toLocaleString()}</span></div>
+              <div className="flex justify-between">
+                <span className="text-xs text-muted-foreground">
+                  GST @ {(() => {
+                    const gstPct = (detail as { gst_percent?: number }).gst_percent;
+                    return gstPct !== undefined ? `${gstPct}%` : `${detail.tax_rate}%`;
+                  })()}
+                </span>
+                <span>₹{(
+                  (detail as { gst_amount?: number }).gst_amount ?? detail.tax_amount
+                ).toLocaleString()}</span>
+              </div>
               <div className="flex justify-between font-medium border-t pt-2"><span>Total</span><span>₹{detail.total.toLocaleString()}</span></div>
             </div>
           ) : <p className="text-sm text-muted-foreground">Loading...</p>}
