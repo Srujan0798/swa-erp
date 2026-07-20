@@ -35,11 +35,23 @@ wave-1 (Foundation) ✅ SHIPPED
 | 6 | Documents + Compliance | **SHIPPED** ✅ | — | bulk commit `ed71fac`, no per-task reports filed |
 | 7 | Time + Financials | **SHIPPED** ✅ | — | bulk commit `ed71fac`, self-reported 42/42 |
 | 8 | Reports + Deliverables | **SHIPPED** ✅ | — | `58864df`, self-reported 26/26 |
-| 9 | **Core ID chain (Inquiry/Agreement/Token/DocRef)** | 🚀 **READY TO DISPATCH** | 0/5 | closes the real client-requested MVP gap — see `docs/decisions/0002-core-id-chain-gap.md`. Waves 1-8 built a generic CRM, not this. Task 00 (shared ID generator) must land before 01-03; task order is strict: 00 → 01 → 02 → 03 → 04. |
-| 10 | Sustainability metrics | ready to dispatch | 0/1 | `work/wave-10/` |
-| 11 | Reconcile dangling frontend work | ready to dispatch | 0/1 | `work/wave-11/`; 8 modified + 8 untracked files sitting uncommitted |
-| 12 | Independent verification (tests, Docker, E2E) | ready to dispatch | 0/1 | `work/wave-12/`; nothing has been independently confirmed — wave-15 deploy attempt was blocked, never completed |
-| 13 | Excel → ERP data migration importer | ready to dispatch (after 9+10) | 0/1 | `work/wave-13/` |
+| 9 | Core ID chain (Inquiry/Agreement/Token/DocRef) | **SHIPPED** ✅ | 5/5 | closed the real client-requested MVP gap, see `docs/decisions/0002-core-id-chain-gap.md`. `c3367fa` |
+| 10 | Sustainability metrics | **SHIPPED** ✅ | 1/1 | `a155000` |
+| 11 | Reconcile dangling frontend work | **SHIPPED** ✅ | 1/1 | `4e0655d` |
+| 12 | Independent verification (tests, Docker, E2E) | **SHIPPED** ✅ | 1/1 | `9852ec0`; 324/324 tests, found + fixed real migration/model drift, Docker never actually worked before this |
+| 13 | Excel → ERP data migration importer | **SHIPPED** ✅ | 1/1 | `466d8ae` |
+| 14 | Docker Compose auto-migration + seed fix | **SHIPPED** ✅ | 1/1 | `ab0a786` |
+| 15 | E2E test fixes | **SHIPPED** ✅ | 1/1 | `4be7536`; 7/7 E2E, also fixed a real `quote.code` 500 in production code |
+| 16 | Model/migration drift sweep | **SHIPPED** ✅ | 1/1 | `d5b2790`; found 2 more missing tables (notifications, timesheet_audit_log) |
+| 17 | Mount notifications router | ready to dispatch | 0/1 | `work/wave-17/`; small wiring gap flagged by wave-16 |
+| 18 | Security hardening (secrets, rate limiting, GST on invoices) | ready to dispatch | 0/1 | `work/wave-18/`; does not depend on Viraj/IT answers |
+| 19 | Backup + restore + ops scripts | ready to dispatch | 0/1 | `work/wave-19/`; closes a Meeting-2-requested gap that was never built |
+| 20 | Production config templates | ready to dispatch | 0/1 | `work/wave-20/`; placeholders marked for each pending IT answer, ready for instant swap |
+| 21 | Handover documentation package | ready to dispatch | 0/1 | `work/wave-21/`; admin guide, user guide, the architecture summary Viraj asked for in Meeting 2 and never got |
+
+**Waves 17-21 are all independent of the two remaining external blockers** (Viraj's 3 open
+decisions in `docs/decisions/0002-core-id-chain-gap.md`, IT's 8 answers in `docs/IT_BRIEF.md`) —
+they can all be dispatched and completed now, in parallel, while waiting on those replies.
 
 **Note on waves 4-8:** these were committed in one mega-commit (`ed71fac`) rather than the
 per-task worker/report process this file describes — `work/reports/` is empty for waves 5, 6,
