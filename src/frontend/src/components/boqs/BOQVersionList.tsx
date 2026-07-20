@@ -18,7 +18,7 @@ export function BOQVersionList({ projectId, onViewItems }: BOQVersionListProps) 
 
   const handleDelete = (id: string) => {
     if (confirm("Delete this BOQ version? This cannot be undone.")) {
-      deleteMutation.mutate({ id, projectId });
+      deleteMutation.mutate(id);
     }
   };
 
@@ -55,7 +55,7 @@ export function BOQVersionList({ projectId, onViewItems }: BOQVersionListProps) 
                     <TableCell className="font-mono">v{boq.version_number}</TableCell>
                     <TableCell>{boq.file_name}</TableCell>
                     <TableCell>{boq.item_count ?? "—"}</TableCell>
-                    <TableCell>{boq.parsed_by_name ?? "—"}</TableCell>
+                    <TableCell>{boq.parsed_by ?? "—"}</TableCell>
                     <TableCell>{new Date(boq.parsed_at).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">

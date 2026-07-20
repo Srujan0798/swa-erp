@@ -10,6 +10,7 @@ import { BOQItemTable } from "@/components/boqs/BOQItemTable";
 import { QuoteList } from "@/components/quotes/QuoteList";
 import { QuoteBuilder } from "@/components/quotes/QuoteBuilder";
 import { QuoteDetail } from "@/components/quotes/QuoteDetail";
+import { SustainabilityManager } from "@/pages/SustainabilityPage";
 
 type View =
   | { tab: "overview" }
@@ -17,7 +18,8 @@ type View =
   | { tab: "boqs-items"; boqId: string }
   | { tab: "quotes" }
   | { tab: "quotes-builder" }
-  | { tab: "quotes-detail"; quoteId: string };
+  | { tab: "quotes-detail"; quoteId: string }
+  | { tab: "sustainability" };
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +27,14 @@ export function ProjectDetailPage() {
 
   if (!id) return null;
 
-  const activeTab = view.tab.startsWith("boqs") ? "boqs" : view.tab.startsWith("quotes") ? "quotes" : "overview";
+  const activeTab =
+    view.tab.startsWith("boqs")
+      ? "boqs"
+      : view.tab.startsWith("quotes")
+        ? "quotes"
+        : view.tab === "sustainability"
+          ? "sustainability"
+          : "overview";
 
   return (
     <div className="space-y-6">
@@ -51,6 +60,7 @@ export function ProjectDetailPage() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="boqs">BOQs</TabsTrigger>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
+            <TabsTrigger value="sustainability">Sustainability</TabsTrigger>
           </TabsList>
         </div>
 
@@ -99,6 +109,10 @@ export function ProjectDetailPage() {
               />
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="sustainability">
+          <SustainabilityManager projectId={id} />
         </TabsContent>
       </Tabs>
     </div>

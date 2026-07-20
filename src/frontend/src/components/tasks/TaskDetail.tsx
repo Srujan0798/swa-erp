@@ -25,12 +25,6 @@ import { Trash2, Send, MessageSquare } from "lucide-react";
 import type { Task, TaskStatus, TaskPriority } from "@/types/api";
 import { taskKeys } from "@/lib/queryKeys";
 
-const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
-  { value: "todo", label: "Todo" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "done", label: "Done" },
-];
-
 const PRIORITY_OPTIONS: { value: TaskPriority; label: string; className: string }[] = [
   { value: "low", label: "Low", className: "bg-gray-100 text-gray-700" },
   { value: "medium", label: "Medium", className: "bg-blue-100 text-blue-700" },

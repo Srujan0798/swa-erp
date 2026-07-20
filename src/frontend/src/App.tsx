@@ -14,9 +14,15 @@ import { VendorDetailPage } from "@/pages/VendorDetailPage";
 import { NewVendorPage } from "@/pages/NewVendorPage";
 import { DocumentsPage } from "@/pages/DocumentsPage";
 import { CompliancePage } from "@/pages/CompliancePage";
+import { SustainabilityPage } from "@/pages/SustainabilityPage";
 import { TasksPage } from "@/pages/TasksPage";
 import { TaskDetailPage } from "@/pages/TaskDetailPage";
 import { ClientDetailPage } from "@/pages/ClientDetailPage";
+import { InvoicesPage } from "@/pages/InvoicesPage";
+import { MaterialsPage } from "@/pages/MaterialsPage";
+import { RFQsPage } from "@/pages/RFQsPage";
+import { ReportsPage } from "@/pages/ReportsPage";
+import TimeTrackingPage from "@/pages/TimeTrackingPage";
 
 function App() {
   return (
@@ -49,8 +55,14 @@ function App() {
         <Route path="/vendors/:id" element={<VendorDetailPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/compliance" element={<CompliancePage />} />
+        <Route path="/sustainability" element={<SustainabilityPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/tasks/:id" element={<TaskDetailPage />} />
+        <Route path="/invoices" element={<InvoicesPage />} />
+        <Route path="/materials" element={<MaterialsPage />} />
+        <Route path="/rfqs" element={<RFQsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/time-tracking" element={<TimeTrackingPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

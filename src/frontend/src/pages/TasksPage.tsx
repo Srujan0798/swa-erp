@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { TaskDetail } from "@/components/tasks/TaskDetail";
@@ -12,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/lib/api";
-import { taskKeys } from "@/lib/queryKeys";
 import { useToast } from "@/hooks/useToast";
 import {
   Plus,
@@ -22,7 +23,7 @@ import {
   MessageSquare,
   Trash2,
 } from "lucide-react";
-import type { Task, TaskStatus, TaskPriority, TaskListResponse, TaskComment } from "@/types/api";
+import type { TaskStatus, TaskPriority } from "@/types/api";
 
 export function TasksPage() {
   const queryClient = useQueryClient();
@@ -36,20 +37,14 @@ export function TasksPage() {
   const [newPriority, setNewPriority] = useState<TaskPriority>("medium");
   const [newDueDate, setNewDueDate] = useState<string>("");
   const [newAssigneeId, setNewAssigneeId] = useState<string>("");
-  const [newStatus, setNewStatus] = useState<TaskStatus | null>(null);
-  const [newSearch, setNewSearch] = useState("");
-  const [newAssignee, setNewAssignee] = useState<string>("");
 
   const tasksQuery = useQuery({
-    queryKey: taskKeys.listsForProject(projectId),
+    queryKey: ["tasks", "list", projectId],
     enabled: !!projectId,
     queryFn: async () => {
       const data = await api.listTasks(projectId!, {
         page: 1,
         page_size: 50,
-        status: newStatus || undefined,
-        assignee_id: newAssignee || undefined,
-        priority: undefined,
       });
       return data;
     },
@@ -60,18 +55,7 @@ export function TasksPage() {
     queryFn: () => api.getMyTasks({ page: 1, page_size: 50 }),
   });
 
-  const { data: users = [] } = useQuery({
-    queryKey: ["users-short"],
-    queryFn: async () => {
-      const data = await api.listUsers({ page: 1, page_size: 200 });
-      return data.items;
-    },
-  });
-
-  const projectOptions = [
-    { value: "p1", label: "Project Alpha" },
-    { value: "p2", label: "Project Beta" },
-  ];
+  const selectedTask = selectedTaskId ? tasksQuery.data?.items.find((t) => t.id === selectedTaskId) : null;
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -92,7 +76,7 @@ export function TasksPage() {
       setNewPriority("medium");
       setNewDueDate("");
       setNewAssigneeId("");
-      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
     },
   });
 
@@ -101,11 +85,9 @@ export function TasksPage() {
     onSuccess: () => {
       toast({ title: "Task deleted" });
       setSelectedTaskId(null);
-      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
     },
   });
-
-  const selectedTask = selectedTaskId ? tasksQuery.data?.items.find((t) => t.id === selectedTaskId) : null;
 
   return (
     <div className="space-y-4">
@@ -140,15 +122,14 @@ export function TasksPage() {
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
               <SelectContent>
-                {projectOptions.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-                ))}
+                <SelectItem value="p1">Project Alpha</SelectItem>
+                <SelectItem value="p2">Project Beta</SelectItem>
               </SelectContent>
             </Select>
             <Input
-              value={newSearch}
+              value={newTitle}
               placeholder="Search..."
-              onChange={(e) => setNewSearch(e.target.value)}
+              onChange={(e) => setNewTitle(e.target.value)}
             />
             <Button variant="outline" onClick={() => {}}>
               <Filter className="mr-2 h-4 w-4" /> Filter
@@ -162,15 +143,9 @@ export function TasksPage() {
           )}
           {projectId && (
             <KanbanBoard
-              projectId={projectId}
               tasks={tasksQuery.data?.items ?? []}
-              loading={tasksQuery.isLoading}
-              error={tasksQuery.isError ? (tasksQuery.error as Error)?.message ?? "Failed to load tasks" : undefined}
-              onRetry={() => tasksQuery.refetch()}
-              onSearch={newSearch}
-              onAssigneeFilter={newAssignee}
-              onStatusFilter={newStatus ?? undefined}
-              onOpenTask={(task) => setSelectedTaskId(task.id)}
+              isLoading={tasksQuery.isLoading}
+              onTaskClick={(t) => setSelectedTaskId(t.id)}
             />
           )}
         </TabsContent>
@@ -246,9 +221,8 @@ export function TasksPage() {
                   <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
-                  {projectOptions.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
-                  ))}
+                  <SelectItem value="p1">Project Alpha</SelectItem>
+                  <SelectItem value="p2">Project Beta</SelectItem>
                 </SelectContent>
               </Select>
             </div>

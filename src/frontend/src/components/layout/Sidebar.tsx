@@ -9,6 +9,12 @@ import {
   Truck,
   ShieldCheck,
   CheckSquare2,
+  Leaf,
+  Receipt,
+  Package,
+  Send,
+  BarChart3,
+  Clock,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -20,6 +26,12 @@ const navItems = [
   { to: "/vendors", icon: Truck, label: "Vendors" },
   { to: "/documents", icon: FileText, label: "Documents" },
   { to: "/compliance", icon: ShieldCheck, label: "Compliance" },
+  { to: "/sustainability", icon: Leaf, label: "Sustainability" },
+  { to: "/invoices", icon: Receipt, label: "Invoices" },
+  { to: "/materials", icon: Package, label: "Materials" },
+  { to: "/rfqs", icon: Send, label: "RFQs" },
+  { to: "/reports", icon: BarChart3, label: "Reports" },
+  { to: "/time-tracking", icon: Clock, label: "Time Tracking" },
   { to: "/users", icon: Users, label: "Users", adminOnly: true },
 ];
 

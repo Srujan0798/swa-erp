@@ -190,44 +190,6 @@ export interface BOQItemListResponse {
   page_size: number;
 }
 
-export interface BOQ {
-  id: string;
-  project_id: string;
-  version_number: number;
-  file_name: string;
-  file_path: string;
-  parsed_by_name: string | null;
-  parsed_at: string;
-  notes: string | null;
-  item_count?: number;
-}
-
-export interface BOQItem {
-  id: string;
-  boq_id: string;
-  line_number: number;
-  category: string | null;
-  description: string;
-  specification: string | null;
-  unit: string;
-  quantity: number;
-  rate: number;
-  amount: number;
-}
-
-export interface BOQListResponse {
-  items: BOQ[];
-  total: number;
-  page: number;
-  page_size: number;
-}
-
-export interface BOQItemListResponse {
-  items: BOQItem[];
-  total: number;
-  page: number;
-  page_size: number;
-}
 
 export type QuoteStatus = "draft" | "pending_approval" | "approved" | "sent" | "accepted" | "rejected";
 
@@ -544,3 +506,34 @@ export interface RFQRespondPayload {
 export interface RFQAwardPayload {
   notes?: string;
 }
+
+export interface SustainabilityMetric {
+  id: string;
+  project_id: string;
+  reference_id: string | null;
+  recorded_date: string | null;
+  compliant_with_green_standards: boolean | null;
+  energy_saved_kwh: number | null;
+  co2_avoided_tco2e: number | null;
+  lifecycle_cost_savings_inr: number | null;
+  insulation_efficiency_ratio: number | null;
+  payback_period_months: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SustainabilityMetricCreate {
+  project_id: string;
+  reference_id?: string | null;
+  recorded_date?: string | null;
+  compliant_with_green_standards?: boolean | null;
+  energy_saved_kwh?: number | null;
+  co2_avoided_tco2e?: number | null;
+  lifecycle_cost_savings_inr?: number | null;
+  insulation_efficiency_ratio?: number | null;
+  payback_period_months?: number | null;
+  notes?: string | null;
+}
+
+export type SustainabilityMetricUpdate = Partial<SustainabilityMetricCreate>;

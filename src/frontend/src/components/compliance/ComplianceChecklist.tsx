@@ -24,7 +24,7 @@ import {
   useReviewComplianceItem,
 } from "@/hooks/useCompliance";
 import { useCurrentUser } from "@/hooks/useAuth";
-import type { ComplianceStatus, ProjectComplianceItem } from "@/types/compliance";
+import type { ProjectComplianceItem } from "@/types/compliance";
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "all", label: "All" },

@@ -39,6 +39,9 @@ import type {
   RFQRespondPayload,
   RFQAwardPayload,
   RFQCompareItem,
+  SustainabilityMetric,
+  SustainabilityMetricCreate,
+  SustainabilityMetricUpdate,
 } from "@/types/api";
 import type {
   DocumentItem,
@@ -71,13 +74,6 @@ import type {
   ProjectCostCreate,
   ProjectCostListResponse,
 } from "@/types/financial";
-import type {
-  ProjectHealthReport,
-  UtilizationReport,
-  RevenueForecast,
-  ClientSummary,
-  ExecutiveKPIs,
-} from "@/types/api";
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "./auth";
 
 class ApiError extends Error {
@@ -739,6 +735,32 @@ export const api = {
     const query = searchParams.toString();
     return request<RFQCompareItem[]>(`/api/projects/${projectId}/rfqs/compare${query ? `?${query}` : ""}`);
   },
+
+  listSustainabilityMetrics: (projectId: string, referenceId?: string) => {
+    const searchParams = new URLSearchParams();
+    if (referenceId) searchParams.set("reference_id", referenceId);
+    const query = searchParams.toString();
+    return request<SustainabilityMetric[]>(
+      `/api/projects/${projectId}/sustainability/metrics${query ? `?${query}` : ""}`
+    );
+  },
+
+  createSustainabilityMetric: (projectId: string, data: SustainabilityMetricCreate) =>
+    request<SustainabilityMetric>(`/api/projects/${projectId}/sustainability/metrics`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateSustainabilityMetric: (projectId: string, metricId: string, data: SustainabilityMetricUpdate) =>
+    request<SustainabilityMetric>(`/api/projects/${projectId}/sustainability/metrics/${metricId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteSustainabilityMetric: (projectId: string, metricId: string) =>
+    request<void>(`/api/projects/${projectId}/sustainability/metrics/${metricId}`, {
+      method: "DELETE",
+    }),
 };
 
 export { ApiError };
