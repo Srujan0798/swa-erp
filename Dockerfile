@@ -18,6 +18,7 @@ ENV PATH=/root/.local/bin:$PATH \
     PYTHONPATH=/app \
     PYTHONUNBUFFERED=1
 COPY src/backend ./src/backend
+COPY scripts ./scripts
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
     CMD curl -f http://localhost:8000/healthz || exit 1

@@ -57,7 +57,7 @@ migrate:
 	cd src/backend && alembic revision --autogenerate -m "$(name)"
 
 migrate-up:
-	cd src/backend && alembic upgrade head
+	alembic -c src/backend/alembic.ini upgrade heads
 
 dispatch:
 	@echo "Open Claude Code or Kimi in the project root and run:"
