@@ -18,7 +18,11 @@ IT person can answer, not to re-derive the architecture from scratch.
 - PDF generation: WeasyPrint (HTML→PDF)
 - Excel import/export: openpyxl
 - Backend: FastAPI (Python 3.11), internal REST only, no paid external APIs
-- Auth: JWT (RS256 in prod) + RBAC
+- Auth: JWT — **correction 2026-07-21: HS256 only, RS256 was never actually implemented**
+  despite being listed here and in the original architecture plan; verified by grep, no RS256
+  code path exists anywhere. HS256 with a properly-set `SECRET_KEY` (see wave-18) is adequate
+  for this single-backend-instance deployment; don't tell IT RS256 is happening unless it
+  actually gets built first.
 
 You are not asking IT to choose the stack. It's chosen. You're asking them to fit it onto their
 box and tell you the constraints.

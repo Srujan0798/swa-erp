@@ -9,18 +9,32 @@ Build an internal ERP system for SWA Consultancy Pvt. Ltd. (Ahmedabad-based insu
 
 **Problem:** SWA's project volume is growing fast (~750 projects in 3 years). Without a unified system, project data lives in spreadsheets, email threads, and team members' heads. As Project 1 (rfq2boq) accelerates bid intake, downstream operations become the bottleneck: tracking which projects are at which stage, who's assigned to what, what materials are needed, what compliance was checked, what hours were billed, how much was invoiced, and which projects are profitable.
 
-## Scope (MVP — Wave 1–4)
+## Scope
+
+**Corrected 2026-07-21** — this section originally called waves 1-4 "MVP," which predates the
+discovery (documented in `docs/decisions/0002-core-id-chain-gap.md`) that the client's actual
+requested MVP is the Inquiry→Agreement→Token→DocumentReference chain, not the generic CRM built
+in waves 1-8. `docs/SCOPE_GUARD.md` was already corrected to reflect this; this file wasn't,
+creating a contradiction between two current docs. See `docs/SCOPE_GUARD.md` for the live,
+authoritative scope list — this section is kept only as a historical record of the original plan.
+
+### Original plan (waves 1-4, as first scoped — see docs/SCOPE_GUARD.md for what's actually true now)
 1. **Auth + RBAC** — admin, PM, designer, auditor, vendor (later), client (later)
 2. **Client database** — accounts, contacts, project history per client
 3. **Project tracking** — lifecycle (Lead → Quote → Awarded → Design → Vendor → Execution → Validation → Closed), milestones, status
 4. **Quotation/BOQ workflow** — upload BOQ (JSON/Excel from any source), versions, approvals, send to client
 5. **Task management** — per-project tasks, assignees, deps, status, due dates
 
-## Scope (Full — Wave 5–8)
+### Original plan (waves 5-8, as first scoped)
 6. **Vendor management + Inventory** — vendor DB, materials catalog, RFQ-to-vendor, comparisons
 7. **Documents + compliance** — drawings/specs upload, NBC/ECBC/IGBC/IS fire code checklists per project
 8. **Time tracking + financials** — timesheets, billable/non-billable, invoicing, payments, project P&L
 9. **Reports + dashboards** — utilization, project health, revenue forecast, compliance status
+
+### What actually turned out to be the client-requested MVP (waves 9-10)
+Inquiry → Client → Service Agreement → Token → Document Reference → Time Log, plus post-project
+Sustainability metrics — see `resources/MEETINGS_MASTER.md` for the full requirement and
+`docs/SCOPE_GUARD.md` for current status.
 
 ## Non-goals
 - **Not a CAD tool.** No drawing creation; only document storage + annotations.

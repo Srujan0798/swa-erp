@@ -99,14 +99,13 @@ and 8 despite the code existing. Treat "SHIPPED" above as "code exists and compi
 
 ## Current activity
 
-**Active wave:** wave-3
-**Next action:** dispatch `work/wave-3/01-*.md` through `05-*.md` to worker agents in parallel windows.
+**This section was stale** (leftover from wave-3, never updated across 13 subsequent waves —
+directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY.md` and a
+2026-07-21 full-project audit for why this matters). The status table above this section is the
+current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
+instead of duplicating it here.
 
-## Changelog (waves shipped)
-
-- **wave-1** — `df1b779` — Backend skeleton, Auth + RBAC, Users API, Frontend shell, CI + Docker
-- **wave-2** — `d1e3017` — Clients + Contacts, Projects, Lifecycle transitions, Dashboard, Stats
-
-## Changelog (waves shipped)
-
-- **wave-1** — `df1b779` — Backend skeleton, Auth + RBAC, Users API, Frontend shell, CI + Docker
+**Active wave:** none — waves 1-17 shipped or ready-to-dispatch, waves 18-25 staged for
+production-readiness work (security, correctness, docs-truth, handover), see status table above.
+**Next action:** dispatch whichever of waves 17-25 aren't yet complete; see `work/wave-N/` for
+task briefs and `work/reports/wave-N/` for what's already landed.
