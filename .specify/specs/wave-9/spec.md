@@ -2,7 +2,7 @@
 
 ## Why this wave exists
 Waves 1-8 built a generic Client/Project/BOQ/Task/Vendor/Time/Invoice CRM. The client's actual
-requested MVP (`resources/MEETING_1_CLEAN.md`, `resources/MEETING_2_CLEAN.md`) is a specific
+requested MVP (`resources/MEETINGS_MASTER.md`) is a specific
 numbered-ID chain used company-wide for tracking work: Inquiry → Client → Service Agreement →
 Token → Document Reference (DBR/KDR/Reforge) → Time Log. None of Inquiry, ServiceAgreement,
 Token, or DocumentReference exist in the codebase (verified by grep, 2026-07-20). This wave

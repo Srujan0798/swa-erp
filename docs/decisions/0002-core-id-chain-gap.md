@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-20 (revised same day — first pass relied on the sanitized meeting summaries
 and the old verbal numeric codes; this revision is grounded in the raw transcripts
-`resources/meeting 1.md` / `meeting 2.md` and the actual source files in
+`resources/MEETINGS_MASTER.md` (raw transcripts archived at `docs/historical/meetings/`) and the actual source files in
 `resources/ERP_Sheets_Extracted/ERP Sheets/*.xlsx`.)
 
 ## Context
