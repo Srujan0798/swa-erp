@@ -5,7 +5,6 @@ import pytest
 from pydantic import ValidationError
 
 from src.backend.models.client import Client
-from src.backend.models.document_reference import DocumentReference
 from src.backend.models.project import Project
 from src.backend.models.token import Token
 from src.backend.models.user import User
@@ -22,7 +21,6 @@ from src.backend.services.document_reference_service import (
     soft_delete_document_reference_service,
     update_document_reference_service,
 )
-from tests.conftest import TestingSessionLocal
 
 
 def _seed_user(db, role="pm"):
@@ -432,7 +430,7 @@ class TestDocumentReferenceApi:
     async def test_create_endpoint_with_only_project(
         self, authed_pm_client, db_session
     ):
-        actor = _seed_user(db_session)
+        _seed_user(db_session)
         client_obj = _seed_client(db_session)
         project = _seed_project(db_session, client_obj)
         r = await authed_pm_client.post(
@@ -458,7 +456,7 @@ class TestDocumentReferenceApi:
     async def test_create_endpoint_dbr_kdr_sequential(
         self, authed_pm_client, db_session
     ):
-        actor = _seed_user(db_session)
+        _seed_user(db_session)
         client_obj = _seed_client(db_session)
         project = _seed_project(db_session, client_obj)
         r1 = await authed_pm_client.post(

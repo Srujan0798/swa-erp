@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ContactForm } from "@/components/clients/ContactForm";
+import { AgreementsTab } from "@/components/agreements/AgreementsTab";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 
 export function ClientDetailPage() {
@@ -157,6 +158,8 @@ export function ClientDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AgreementsTab clientId={client.id} />
     </div>
   );
 }

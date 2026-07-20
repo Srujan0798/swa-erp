@@ -21,10 +21,10 @@ __all__ = [
     "inquiries_router",
     "lifecycle_router",
     "projects_router",
+    "sustainability_metrics_router",
     "tasks_router",
     "time_entries_router",
     "timesheets_router",
     "tokens_router",
     "users_router",
-    "sustainability_metrics_router",
 ]

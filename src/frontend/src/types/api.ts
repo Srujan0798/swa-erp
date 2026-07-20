@@ -537,3 +537,244 @@ export interface SustainabilityMetricCreate {
 }
 
 export type SustainabilityMetricUpdate = Partial<SustainabilityMetricCreate>;
+
+export type InquiryStatus = "New" | "Contacted" | "Converted" | "Dropped";
+
+export interface Inquiry {
+  id: string;
+  reference_id: string;
+  inquiry_date: string;
+  inquiry_type: string | null;
+  inquiry_source: string | null;
+  client_name: string;
+  requirement_summary: string | null;
+  estimated_value: number | null;
+  priority: string | null;
+  status: string;
+  owner_id: string | null;
+  technical_lead_id: string | null;
+  notes: string | null;
+  converted_client_id: string | null;
+  converted_project_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InquiryListResponse {
+  items: Inquiry[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface InquiryCreate {
+  inquiry_date: string;
+  inquiry_type?: string;
+  inquiry_source?: string;
+  client_name: string;
+  requirement_summary?: string;
+  estimated_value?: number;
+  priority?: string;
+  status?: string;
+  owner_id?: string;
+  technical_lead_id?: string;
+  notes?: string;
+}
+
+export interface InquiryUpdate {
+  inquiry_date?: string;
+  inquiry_type?: string;
+  inquiry_source?: string;
+  client_name?: string;
+  requirement_summary?: string;
+  estimated_value?: number;
+  priority?: string;
+  status?: string;
+  owner_id?: string;
+  technical_lead_id?: string;
+  notes?: string;
+}
+
+export interface InquiryCandidateClient {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export interface InquiryConvertPayload {
+  project_name: string;
+  project_code?: string;
+  project_description?: string;
+  project_status?: string;
+  pm_id?: string;
+  designer_id?: string;
+  auditor_id?: string;
+  location?: string;
+  estimated_value?: number;
+  start_date?: string;
+  target_end_date?: string;
+  client_id?: string;
+  client_address?: string;
+  client_city?: string;
+  client_state?: string;
+  client_pincode?: string;
+  client_country?: string;
+  client_industry?: string;
+  client_gst_number?: string;
+  client_primary_email?: string;
+  client_primary_phone?: string;
+}
+
+export interface InquiryConvertResponse {
+  inquiry: Inquiry;
+  client_id: string;
+  project_id: string;
+}
+
+export type ServiceAgreementStatus = "Active" | "Completed" | "Cancelled";
+
+export interface ServiceAgreement {
+  id: string;
+  reference_id: string;
+  client_id: string;
+  inquiry_id: string | null;
+  service_name: string;
+  start_date: string;
+  end_date: string | null;
+  total_tokens: number | null;
+  status: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceAgreementListResponse {
+  items: ServiceAgreement[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface ServiceAgreementCreate {
+  client_id: string;
+  inquiry_id?: string;
+  service_name: string;
+  start_date: string;
+  end_date?: string;
+  total_tokens?: number;
+  status?: string;
+  notes?: string;
+}
+
+export interface ServiceAgreementUpdate {
+  service_name?: string;
+  start_date?: string;
+  end_date?: string;
+  total_tokens?: number;
+  status?: string;
+  notes?: string;
+}
+
+export type TokenStatus = "In Progress" | "Completed" | "Cancelled";
+
+export interface Token {
+  id: string;
+  reference_id: string;
+  agreement_id: string;
+  token_date: string;
+  token_type: string | null;
+  description: string | null;
+  token_status: string;
+  tokens_used: number;
+  swa_employee_id: string | null;
+  project_owner_id: string | null;
+  client_employee_name: string | null;
+  project_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TokenListResponse {
+  items: Token[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface TokenCreate {
+  agreement_id: string;
+  token_date: string;
+  token_type?: string;
+  description?: string;
+  token_status?: string;
+  tokens_used?: number;
+  swa_employee_id?: string;
+  project_owner_id?: string;
+  client_employee_name?: string;
+  project_id?: string;
+}
+
+export interface TokenUpdate {
+  token_date?: string;
+  token_type?: string;
+  description?: string;
+  token_status?: string;
+  tokens_used?: number;
+  swa_employee_id?: string;
+  project_owner_id?: string;
+  client_employee_name?: string;
+  project_id?: string;
+}
+
+export type DocumentReferenceStatus = "Draft" | "Issued" | "Approved" | "Superseded";
+
+export interface DocumentReference {
+  id: string;
+  reference_id: string;
+  project_id: string;
+  token_id: string | null;
+  doc_date: string;
+  document_type: string;
+  type: string | null;
+  author_id: string | null;
+  user_ref: string | null;
+  description: string | null;
+  revision: string;
+  status: string;
+  remarks: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentReferenceListResponse {
+  items: DocumentReference[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface DocumentReferenceCreate {
+  project_id: string;
+  token_id?: string;
+  doc_date: string;
+  document_type: string;
+  type?: string;
+  author_id?: string;
+  user_ref?: string;
+  description?: string;
+  revision?: string;
+  status?: string;
+  remarks?: string;
+}
+
+export interface DocumentReferenceUpdate {
+  doc_date?: string;
+  document_type?: string;
+  type?: string;
+  author_id?: string;
+  user_ref?: string;
+  description?: string;
+  revision?: string;
+  status?: string;
+  remarks?: string;
+}

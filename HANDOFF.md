@@ -4,12 +4,23 @@
 Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't require re-explaining the project. This file lets the new session catch up in < 5 minutes.
 
 ## Current state
-- **Active wave:** wave-4 (Task Management)
-- **Status:** Wave 1 ✅ SHIPPED, Wave 2 ✅ SHIPP SHIPPED, Wave 4 spec + tasks ready to dispatch
-- **Last completed:** Wave 3 at commit `f49eac1` (97 tests pass)
-- **Next action:** Dispatch wave-4 tasks (task files in `work/wave-4/`)
+- **Active wave:** wave-9 through wave-13 (see below) — dispatched 2026-07-20
+- **Status:** Waves 1-8 ✅ SHIPPED (committed in bulk at `ed71fac`, see `plan/EXECUTION.md`).
+  **BUT**: waves 1-8 built a generic Client/Project/BOQ/Task/Vendor/Time/Invoice CRM, NOT the
+  specific Inquiry→Agreement→Token→DocumentReference chain the client actually asked for in
+  Meeting 1/2. That chain does not exist in code — see `docs/decisions/0002-core-id-chain-gap.md`.
+- **Last completed:** wave-8 (reports/KPIs/exports), commit `58864df`
+- **Next action:** dispatch wave-9 tasks in strict order `work/wave-9/00 → 01 → 02 → 03 → 04`
+  (00 is the shared ID generator every other task depends on) — the core ID-chain gap, this is
+  the highest-priority remaining work. Waves 10-13 can run in parallel/after (see roadmap below).
+- **Uncommitted at handoff time:** 8 modified + 8 untracked frontend files — dangling
+  wave-5/7/8 frontend work never committed. Covered by wave-11 task.
+- **Never independently verified:** all "N/N tests passing" claims are self-reported in commit
+  messages; Docker/E2E was never confirmed working (wave-15 blocked, no docker daemon). Covered
+  by wave-12 task.
 - **KleenHand cleanup:** COMPLETED — 142 sessions merged into ULTIMATE_HANDOFF.md, stale sessions cleaned
-- **Open decisions:** see `docs/decisions/` (most recent first)
+- **Open decisions:** see `docs/decisions/` (most recent first) — `0002-core-id-chain-gap.md` has
+  10 open questions for Viraj, defaults are in use so dev work isn't blocked
 
 ## Where to start a new session
 1. Read this file
@@ -43,12 +54,18 @@ That's it. No project memory needed.
 ## Wave roadmap recap
 1. Foundation (auth, users, roles, base data model, shell) — ✅ SHIPPED `df1b779`
 2. Clients + Projects core (CRM-lite, project CRUD) — ✅ SHIPPED `d1e3017`
-3. Quotation/BOQ workflow (upload BOQ, quote versions, approvals) — 🚀 **READY TO DISPATCH**
-4. Task management (per-project tasks, assignments, deps) — pending
-5. Vendor + Inventory (vendor DB, materials catalog, RFQ-to-vendor) — pending
-6. Documents + compliance tracking (NBC/ECBC/IGBC/IS checklist) — pending
-7. Time tracking + financials (timesheets, invoicing, project P&L) — pending
-8. Reports + dashboards + deliverables (paper/report/slides/demo) — pending
+3. Quotation/BOQ workflow (upload BOQ, quote versions, approvals) — ✅ SHIPPED `f49eac1`
+4. Task management (per-project tasks, assignments, deps) — ✅ SHIPPED (`ed71fac` bulk commit)
+5. Vendor + Inventory (vendor DB, materials catalog, RFQ-to-vendor) — ✅ SHIPPED (`ed71fac`)
+6. Documents + compliance tracking (NBC/ECBC/IGBC/IS checklist) — ✅ SHIPPED (`ed71fac`)
+7. Time tracking + financials (timesheets, invoicing, project P&L) — ✅ SHIPPED (`ed71fac`)
+8. Reports + dashboards + deliverables (paper/report/slides/demo) — ✅ SHIPPED `58864df`
+9. **Core ID chain — Inquiry, Service Agreement, Token, Document Reference** — 🚀 READY TO
+   DISPATCH, highest priority, closes the real client-requested MVP gap (`work/wave-9/`)
+10. Sustainability metrics — ready to dispatch, depends on nothing new (`work/wave-10/`)
+11. Reconcile dangling uncommitted frontend work — ready to dispatch (`work/wave-11/`)
+12. Independent verification (real test run, Docker, E2E) — ready to dispatch (`work/wave-12/`)
+13. Excel → ERP data migration importer — ready to dispatch, depends on wave-9+10 (`work/wave-13/`)
 
 ## Key project context
 - **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Celery, Redis / React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query

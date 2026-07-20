@@ -42,6 +42,24 @@ import type {
   SustainabilityMetric,
   SustainabilityMetricCreate,
   SustainabilityMetricUpdate,
+  Inquiry,
+  InquiryListResponse,
+  InquiryCreate,
+  InquiryUpdate,
+  InquiryConvertPayload,
+  InquiryConvertResponse,
+  ServiceAgreement,
+  ServiceAgreementListResponse,
+  ServiceAgreementCreate,
+  ServiceAgreementUpdate,
+  Token,
+  TokenListResponse,
+  TokenCreate,
+  TokenUpdate,
+  DocumentReference,
+  DocumentReferenceListResponse,
+  DocumentReferenceCreate,
+  DocumentReferenceUpdate,
 } from "@/types/api";
 import type {
   DocumentItem,
@@ -761,6 +779,126 @@ export const api = {
     request<void>(`/api/projects/${projectId}/sustainability/metrics/${metricId}`, {
       method: "DELETE",
     }),
+
+  listInquiries: (params?: { page?: number; page_size?: number; q?: string; status?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.q) searchParams.set("q", params.q);
+    if (params?.status) searchParams.set("status", params.status);
+    const query = searchParams.toString();
+    return request<InquiryListResponse>(`/api/inquiries${query ? `?${query}` : ""}`);
+  },
+
+  getInquiry: (id: string) => request<Inquiry>(`/api/inquiries/${id}`),
+
+  createInquiry: (data: InquiryCreate) =>
+    request<Inquiry>("/api/inquiries", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateInquiry: (id: string, data: InquiryUpdate) =>
+    request<Inquiry>(`/api/inquiries/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteInquiry: (id: string) =>
+    request<void>(`/api/inquiries/${id}`, { method: "DELETE" }),
+
+  convertInquiry: (id: string, data: InquiryConvertPayload) =>
+    request<InquiryConvertResponse>(`/api/inquiries/${id}/convert`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  listAgreements: (params?: { page?: number; page_size?: number; client_id?: string; inquiry_id?: string; status?: string; q?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.client_id) searchParams.set("client_id", params.client_id);
+    if (params?.inquiry_id) searchParams.set("inquiry_id", params.inquiry_id);
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.q) searchParams.set("q", params.q);
+    const query = searchParams.toString();
+    return request<ServiceAgreementListResponse>(`/api/service-agreements${query ? `?${query}` : ""}`);
+  },
+
+  getAgreement: (id: string) => request<ServiceAgreement>(`/api/service-agreements/${id}`),
+
+  createAgreement: (data: ServiceAgreementCreate) =>
+    request<ServiceAgreement>("/api/service-agreements", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateAgreement: (id: string, data: ServiceAgreementUpdate) =>
+    request<ServiceAgreement>(`/api/service-agreements/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteAgreement: (id: string) =>
+    request<void>(`/api/service-agreements/${id}`, { method: "DELETE" }),
+
+  listTokens: (params?: { page?: number; page_size?: number; agreement_id?: string; project_id?: string; status?: string; q?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.agreement_id) searchParams.set("agreement_id", params.agreement_id);
+    if (params?.project_id) searchParams.set("project_id", params.project_id);
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.q) searchParams.set("q", params.q);
+    const query = searchParams.toString();
+    return request<TokenListResponse>(`/api/tokens${query ? `?${query}` : ""}`);
+  },
+
+  getToken: (id: string) => request<Token>(`/api/tokens/${id}`),
+
+  createToken: (data: TokenCreate) =>
+    request<Token>("/api/tokens", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateToken: (id: string, data: TokenUpdate) =>
+    request<Token>(`/api/tokens/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteToken: (id: string) =>
+    request<void>(`/api/tokens/${id}`, { method: "DELETE" }),
+
+  listDocumentReferences: (params?: { page?: number; page_size?: number; project_id?: string; token_id?: string; document_type?: string; q?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.project_id) searchParams.set("project_id", params.project_id);
+    if (params?.token_id) searchParams.set("token_id", params.token_id);
+    if (params?.document_type) searchParams.set("document_type", params.document_type);
+    if (params?.q) searchParams.set("q", params.q);
+    const query = searchParams.toString();
+    return request<DocumentReferenceListResponse>(`/api/document-references${query ? `?${query}` : ""}`);
+  },
+
+  getDocumentReference: (id: string) => request<DocumentReference>(`/api/document-references/${id}`),
+
+  createDocumentReference: (data: DocumentReferenceCreate) =>
+    request<DocumentReference>("/api/document-references", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateDocumentReference: (id: string, data: DocumentReferenceUpdate) =>
+    request<DocumentReference>(`/api/document-references/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteDocumentReference: (id: string) =>
+    request<void>(`/api/document-references/${id}`, { method: "DELETE" }),
 };
 
 export { ApiError };

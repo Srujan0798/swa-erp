@@ -1,6 +1,3 @@
-import pytest
-
-
 async def test_create_sustainability_metric(authed_pm_client, test_project):
     project_id = str(test_project.id)
     payload = {

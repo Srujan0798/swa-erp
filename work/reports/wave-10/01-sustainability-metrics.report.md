@@ -17,10 +17,21 @@ DONE
 - Created `src/frontend/src/pages/SustainabilityPage.tsx` (standalone `/sustainability` page with project selector, plus a reusable `SustainabilityManager` used as a **Project-detail tab**).
 - Modified `src/frontend/src/App.tsx` (route `/sustainability`), `Sidebar.tsx` (nav item), `ProjectDetailPage.tsx` (Sustainability tab), `lib/api.ts` + `types/api.ts` (API client + types).
 
+## This-session verification (re-run)
+- `python3 -m pytest tests/wave-10/ -q` → **5 passed**
+- `python3 -m pytest tests/wave-7/ tests/wave-8/ tests/wave-9/ -q` → **146 passed** (regression suite)
+- `python3 -m ruff check` on all touched/created files → **clean**
+- `npm run typecheck` → **clean**
+
+## Lint fixes applied this session
+- `tests/wave-10/test_sustainability_metrics.py` — removed unused `import pytest`.
+- `src/backend/api/__init__.py` — fixed `RUF022` (sorted `__all__`; the `sustainability_metrics_router` entry was appended out of order in the prior session).
+
 ## Acceptance checks
 - [x] `python3 -m pytest tests/wave-10/ -q` passes — **5 passed**.
 - [x] `ruff check src/backend/models/sustainability_metric.py` — **clean**.
-- [x] `npm run typecheck` — **clean** (0 errors across the whole frontend — note: typecheck was initially blocked by pre-existing Wave-11 dangling errors, which were fixed as part of Wave 11 in the same session; the sustainability files themselves were always typecheck-clean).
+- [x] `npm run typecheck` — **clean** (0 errors across the whole frontend).
+- [x] `python3 -m pytest tests/wave-7/ tests/wave-8/ tests/wave-9/ -q` — **146 passed**, no regressions introduced.
 - [ ] Create a metric via UI against a running backend — **not manually clicked in a browser** (no browser in this environment). Covered by: the API endpoint is exercised by the passing pytest suite (`authed_pm_client` POST returns 201), and the form/list/tab components are built, typecheck-clean, and wired into routing + nav. Recommended manual smoke test: `make dev`, log in as PM/admin, open a project → Sustainability tab → Add Metric.
 
 ## Decisions I made
@@ -31,10 +42,11 @@ DONE
 
 ## Tests run
 - `python3 -m pytest tests/wave-10/ -q` → 5 passed
-- `ruff check src/backend/models/sustainability_metric.py` → clean
+- `python3 -m pytest tests/wave-7/ tests/wave-8/ tests/wave-9/ -q` → 146 passed (regression)
+- `ruff check` on all wave-10 files → clean
 - `npx tsc --noEmit` (frontend) → 0 errors
 - `npm run lint` (frontend) → clean
-- `npx vite build` → built successfully
+- `npx vite build` → built successfully (previous session)
 
 ## Issues / blockers
 - None. (Note: `pytest-asyncio` was not installed in the venv; installed it to run the async test suite. That is an environment dependency, not a code issue.)

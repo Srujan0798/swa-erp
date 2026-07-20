@@ -15,11 +15,13 @@ import {
   Send,
   BarChart3,
   Clock,
+  Inbox,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/inquiries", icon: Inbox, label: "Inquiries" },
   { to: "/clients", icon: Building2, label: "Clients" },
   { to: "/projects", icon: FolderKanban, label: "Projects" },
   { to: "/tasks", icon: CheckSquare2, label: "Tasks" },

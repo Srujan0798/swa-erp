@@ -11,7 +11,6 @@ from src.backend.schemas.document_reference import (
 )
 from src.backend.services.reference_id_service import generate_reference_id
 
-
 _SHARED_COUNTER_TYPES = {"DBR", "KDR"}
 
 

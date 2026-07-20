@@ -23,6 +23,8 @@ import { MaterialsPage } from "@/pages/MaterialsPage";
 import { RFQsPage } from "@/pages/RFQsPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import TimeTrackingPage from "@/pages/TimeTrackingPage";
+import { InquiriesPage } from "@/pages/InquiriesPage";
+import { InquiryDetailPage } from "@/pages/InquiryDetailPage";
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
         <Route path="/rfqs" element={<RFQsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/time-tracking" element={<TimeTrackingPage />} />
+        <Route path="/inquiries" element={<InquiriesPage />} />
+        <Route path="/inquiries/:id" element={<InquiryDetailPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

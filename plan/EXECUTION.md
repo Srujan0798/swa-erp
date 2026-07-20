@@ -30,11 +30,21 @@ wave-1 (Foundation) ✅ SHIPPED
 | 1 | Foundation | **SHIPPED** ✅ | 5/5 | `df1b779` on main |
 | 2 | Clients + Projects | **SHIPPED** ✅ | 5/5 | `d1e3017` on main; 52 tests pass |
 | 3 | Quotation / BOQ workflow | **SHIPPED** ✅ | 5/5 | `f49eac1` on main; 97 tests pass |
-| 4 | Task management | **READY TO DISPATCH** | 0/5 | spec + task files ready |
-| 5 | Vendors + Inventory | pending | — | depends on wave-2 |
-| 6 | Documents + Compliance | pending | — | depends on wave-2 (independent of 3,4,5) |
-| 7 | Time + Financials | pending | — | depends on wave-2 (independent of 3,4,5,6) |
-| 8 | Reports + Deliverables | pending | — | depends on all above |
+| 4 | Task management | **SHIPPED** ✅ | — | bulk commit `ed71fac`, self-reported 109/109 |
+| 5 | Vendors + Inventory | **SHIPPED** ✅ | — | bulk commit `ed71fac`, no per-task reports filed |
+| 6 | Documents + Compliance | **SHIPPED** ✅ | — | bulk commit `ed71fac`, no per-task reports filed |
+| 7 | Time + Financials | **SHIPPED** ✅ | — | bulk commit `ed71fac`, self-reported 42/42 |
+| 8 | Reports + Deliverables | **SHIPPED** ✅ | — | `58864df`, self-reported 26/26 |
+| 9 | **Core ID chain (Inquiry/Agreement/Token/DocRef)** | 🚀 **READY TO DISPATCH** | 0/5 | closes the real client-requested MVP gap — see `docs/decisions/0002-core-id-chain-gap.md`. Waves 1-8 built a generic CRM, not this. Task 00 (shared ID generator) must land before 01-03; task order is strict: 00 → 01 → 02 → 03 → 04. |
+| 10 | Sustainability metrics | ready to dispatch | 0/1 | `work/wave-10/` |
+| 11 | Reconcile dangling frontend work | ready to dispatch | 0/1 | `work/wave-11/`; 8 modified + 8 untracked files sitting uncommitted |
+| 12 | Independent verification (tests, Docker, E2E) | ready to dispatch | 0/1 | `work/wave-12/`; nothing has been independently confirmed — wave-15 deploy attempt was blocked, never completed |
+| 13 | Excel → ERP data migration importer | ready to dispatch (after 9+10) | 0/1 | `work/wave-13/` |
+
+**Note on waves 4-8:** these were committed in one mega-commit (`ed71fac`) rather than the
+per-task worker/report process this file describes — `work/reports/` is empty for waves 5, 6,
+and 8 despite the code existing. Treat "SHIPPED" above as "code exists and compiles", not as
+"acceptance criteria were checked task-by-task." Wave-12 exists specifically to close that gap.
 
 ## Wave details
 
