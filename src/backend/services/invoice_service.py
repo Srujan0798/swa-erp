@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -19,7 +19,9 @@ from src.backend.models.time_tracking import TimeEntry
 def _compute_totals(
     items_data: list[dict[str, Any]], tax_rate: Decimal
 ) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal]:
-    subtotal = sum(Decimal(str(item["quantity"])) * Decimal(str(item["rate"])) for item in items_data)
+    subtotal = sum(
+        Decimal(str(item["quantity"])) * Decimal(str(item["rate"])) for item in items_data
+    )
     gst_percent = tax_rate
     gst_amount = (subtotal * gst_percent / Decimal("100")).quantize(Decimal("0.01"))
     tax_amount = gst_amount
@@ -36,17 +38,19 @@ def _invoice_to_read(invoice: Any, db: Session) -> dict[str, Any]:
 
     items = []
     for item in invoice.items:
-        items.append({
-            "id": item.id,
-            "invoice_id": item.invoice_id,
-            "description": item.description,
-            "quantity": item.quantity,
-            "rate": item.rate,
-            "amount": item.amount,
-            "category": item.category,
-            "time_entry_id": item.time_entry_id,
-            "created_at": item.created_at,
-        })
+        items.append(
+            {
+                "id": item.id,
+                "invoice_id": item.invoice_id,
+                "description": item.description,
+                "quantity": item.quantity,
+                "rate": item.rate,
+                "amount": item.amount,
+                "category": item.category,
+                "time_entry_id": item.time_entry_id,
+                "created_at": item.created_at,
+            }
+        )
 
     return {
         "id": invoice.id,
@@ -115,13 +119,17 @@ def generate_from_time_entries(
     start_date: date,
     end_date: date,
 ) -> dict[str, Any]:
-    entries = db.query(TimeEntry).filter(
-        TimeEntry.project_id == project_id,
-        TimeEntry.date >= start_date,
-        TimeEntry.date <= end_date,
-        TimeEntry.is_billable.is_(True),
-        TimeEntry.deleted_at.is_(None),
-    ).all()
+    entries = (
+        db.query(TimeEntry)
+        .filter(
+            TimeEntry.project_id == project_id,
+            TimeEntry.date >= start_date,
+            TimeEntry.date <= end_date,
+            TimeEntry.is_billable.is_(True),
+            TimeEntry.deleted_at.is_(None),
+        )
+        .all()
+    )
 
     if not entries:
         raise ValueError("No billable time entries found for the given date range")
@@ -131,14 +139,16 @@ def generate_from_time_entries(
     items_data: list[dict[str, Any]] = []
     for entry in entries:
         amount = entry.hours * rate_per_hour
-        items_data.append({
-            "description": f"Services — {entry.hours}h @ {rate_per_hour}/h",
-            "quantity": entry.hours,
-            "rate": rate_per_hour,
-            "amount": amount,
-            "category": "time",
-            "time_entry_id": entry.id,
-        })
+        items_data.append(
+            {
+                "description": f"Services — {entry.hours}h @ {rate_per_hour}/h",
+                "quantity": entry.hours,
+                "rate": rate_per_hour,
+                "amount": amount,
+                "category": "time",
+                "time_entry_id": entry.id,
+            }
+        )
 
     return create_invoice_service(
         db,
@@ -168,11 +178,10 @@ def update_invoice_status_service(
     allowed = valid_transitions.get(invoice.status, [])
     if new_status not in allowed:
         raise ValueError(
-            f"Cannot transition from '{invoice.status}' to '{new_status}'. "
-            f"Allowed: {allowed}"
+            f"Cannot transition from '{invoice.status}' to '{new_status}'. " f"Allowed: {allowed}"
         )
 
-    paid_at = datetime.utcnow() if new_status == "paid" else None
+    paid_at = datetime.now(tz=UTC) if new_status == "paid" else None
     updated = update_invoice_status(db, invoice_id, new_status, paid_at=paid_at)
     return _invoice_to_read(updated, db)
 
@@ -200,5 +209,7 @@ def list_invoices_service(
     page: int = 1,
     page_size: int = 20,
 ) -> tuple[list[dict[str, Any]], int, int, int]:
-    items, total, pg, ps = list_invoices(db, project_id, status=status, page=page, page_size=page_size)
+    items, total, pg, ps = list_invoices(
+        db, project_id, status=status, page=page, page_size=page_size
+    )
     return [_invoice_to_read(i, db) for i in items], total, pg, ps

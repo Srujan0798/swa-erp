@@ -158,11 +158,15 @@ def generate_quote(
     if boq.project_id != project_id:
         raise ValueError("BOQ does not belong to this project")
 
-    boq_items = db.query(BOQItem).filter(BOQItem.boq_id == boq_id).order_by(BOQItem.line_number).all()
+    boq_items = (
+        db.query(BOQItem).filter(BOQItem.boq_id == boq_id).order_by(BOQItem.line_number).all()
+    )
 
     items_data = []
     for boq_item in boq_items:
-        amount = (boq_item.quantity * boq_item.rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        amount = (boq_item.quantity * boq_item.rate).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
         items_data.append(
             {
                 "boq_item_id": boq_item.id,
@@ -296,13 +300,20 @@ def submit_quote(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dict[
 def approve_quote(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dict[str, Any]:
     from datetime import datetime as dt
 
-    return _transition(db, quote_id, "approved", actor_id, approved_by=actor_id, approved_at=dt.utcnow())
+    return _transition(
+        db,
+        quote_id,
+        "approved",
+        actor_id,
+        approved_by=actor_id,
+        approved_at=dt.now(dt.timezone.utc),
+    )
 
 
 def send_quote(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dict[str, Any]:
     from datetime import datetime as dt
 
-    return _transition(db, quote_id, "sent", actor_id, sent_at=dt.utcnow())
+    return _transition(db, quote_id, "sent", actor_id, sent_at=dt.now(dt.timezone.utc))
 
 
 def respond_quote(
@@ -319,7 +330,7 @@ def respond_quote(
         response,
         actor_id,
         client_response=response,
-        client_response_at=dt.utcnow(),
+        client_response_at=dt.now(dt.timezone.utc),
         client_response_notes=notes,
     )
 

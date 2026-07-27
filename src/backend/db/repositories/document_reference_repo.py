@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -37,10 +37,7 @@ def list_document_references(
     total = query.count()
     offset = (page - 1) * page_size
     items = (
-        query.order_by(DocumentReference.created_at.desc())
-        .offset(offset)
-        .limit(page_size)
-        .all()
+        query.order_by(DocumentReference.created_at.desc()).offset(offset).limit(page_size).all()
     )
     return list(items), total
 
@@ -75,9 +72,7 @@ def create(db: Session, data: dict[str, Any]) -> DocumentReference:
     return doc_ref
 
 
-def update(
-    db: Session, doc_ref: DocumentReference, data: dict[str, Any]
-) -> DocumentReference:
+def update(db: Session, doc_ref: DocumentReference, data: dict[str, Any]) -> DocumentReference:
     for k, v in data.items():
         if v is not None:
             setattr(doc_ref, k, v)
@@ -87,7 +82,7 @@ def update(
 
 
 def soft_delete(db: Session, doc_ref: DocumentReference) -> DocumentReference:
-    doc_ref.deleted_at = datetime.utcnow()
+    doc_ref.deleted_at = datetime.now(tz=UTC)
     db.commit()
     db.refresh(doc_ref)
     return doc_ref

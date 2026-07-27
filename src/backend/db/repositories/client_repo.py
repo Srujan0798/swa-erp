@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -17,7 +17,9 @@ def list_clients(
     if q:
         search = f"%{q}%"
         query = query.filter(
-            Client.name.ilike(search) | Client.code.ilike(search) | Client.primary_email.ilike(search)
+            Client.name.ilike(search)
+            | Client.code.ilike(search)
+            | Client.primary_email.ilike(search)
         )
 
     total = query.count()
@@ -71,7 +73,7 @@ def update(db: Session, client: Client) -> Client:
 
 
 def soft_delete(db: Session, client: Client) -> Client:
-    client.deleted_at = datetime.utcnow()
+    client.deleted_at = datetime.now(tz=UTC)
     db.commit()
     db.refresh(client)
     return client

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -49,7 +49,9 @@ def get_by_id(db: Session, agreement_id: uuid.UUID) -> ServiceAgreement | None:
 def get_by_reference_id(db: Session, reference_id: str) -> ServiceAgreement | None:
     return (
         db.query(ServiceAgreement)
-        .filter(ServiceAgreement.reference_id == reference_id, ServiceAgreement.deleted_at.is_(None))
+        .filter(
+            ServiceAgreement.reference_id == reference_id, ServiceAgreement.deleted_at.is_(None)
+        )
         .first()
     )
 
@@ -72,7 +74,7 @@ def update(db: Session, agreement: ServiceAgreement, data: dict[str, Any]) -> Se
 
 
 def soft_delete(db: Session, agreement: ServiceAgreement) -> ServiceAgreement:
-    agreement.deleted_at = datetime.utcnow()
+    agreement.deleted_at = datetime.now(tz=UTC)
     db.commit()
     db.refresh(agreement)
     return agreement

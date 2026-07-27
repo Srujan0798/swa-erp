@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -39,10 +39,14 @@ def create_boq(
 
 
 def get_next_version_number(db: Session, project_id: uuid.UUID) -> int:
-    result = db.query(func.max(BOQ.version_number)).filter(
-        BOQ.project_id == project_id,
-        BOQ.deleted_at.is_(None),
-    ).scalar()
+    result = (
+        db.query(func.max(BOQ.version_number))
+        .filter(
+            BOQ.project_id == project_id,
+            BOQ.deleted_at.is_(None),
+        )
+        .scalar()
+    )
     return (result or 0) + 1
 
 
@@ -77,7 +81,7 @@ def soft_delete(db: Session, boq_id: uuid.UUID) -> bool:
     boq = db.query(BOQ).filter(BOQ.id == boq_id, BOQ.deleted_at.is_(None)).first()
     if not boq:
         return False
-    boq.deleted_at = datetime.utcnow()
+    boq.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True
 
@@ -104,19 +108,21 @@ def list_versions_with_counts(
     result = []
     for v in versions:
         item_count = count_items(db, v.id)
-        result.append({
-            "id": v.id,
-            "project_id": v.project_id,
-            "version_number": v.version_number,
-            "file_name": v.file_name,
-            "file_path": v.file_path,
-            "parsed_by": v.parsed_by,
-            "parsed_at": v.parsed_at,
-            "notes": v.notes,
-            "is_active": v.is_active,
-            "created_at": v.created_at,
-            "item_count": item_count,
-        })
+        result.append(
+            {
+                "id": v.id,
+                "project_id": v.project_id,
+                "version_number": v.version_number,
+                "file_name": v.file_name,
+                "file_path": v.file_path,
+                "parsed_by": v.parsed_by,
+                "parsed_at": v.parsed_at,
+                "notes": v.notes,
+                "is_active": v.is_active,
+                "created_at": v.created_at,
+                "item_count": item_count,
+            }
+        )
 
     return result, total
 

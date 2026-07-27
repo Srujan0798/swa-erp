@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -21,10 +21,14 @@ def create_quote(db: Session, data: dict[str, Any], items: list[dict[str, Any]])
 
 
 def get_by_id(db: Session, quote_id: uuid.UUID) -> Quote | None:
-    return db.query(Quote).filter(
-        Quote.id == quote_id,
-        Quote.deleted_at.is_(None),
-    ).first()
+    return (
+        db.query(Quote)
+        .filter(
+            Quote.id == quote_id,
+            Quote.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def get_with_items(db: Session, quote_id: uuid.UUID) -> Quote | None:
@@ -76,7 +80,7 @@ def soft_delete(db: Session, quote_id: uuid.UUID) -> bool:
     quote = get_by_id(db, quote_id)
     if not quote:
         return False
-    quote.deleted_at = datetime.utcnow()
+    quote.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True
 

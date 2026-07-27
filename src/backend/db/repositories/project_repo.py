@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -38,10 +38,14 @@ def list_projects(
 
 
 def get_by_id(db: Session, project_id: uuid.UUID) -> Project | None:
-    return db.query(Project).filter(
-        Project.id == project_id,
-        Project.deleted_at.is_(None),
-    ).first()
+    return (
+        db.query(Project)
+        .filter(
+            Project.id == project_id,
+            Project.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def create_project(db: Session, data: dict[str, Any]) -> Project:
@@ -70,7 +74,7 @@ def soft_delete_project(db: Session, project_id: uuid.UUID) -> bool:
     project = get_by_id(db, project_id)
     if not project:
         return False
-    project.deleted_at = datetime.utcnow()
+    project.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True
 

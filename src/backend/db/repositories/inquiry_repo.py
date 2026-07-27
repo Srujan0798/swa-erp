@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -34,11 +34,7 @@ def list_inquiries(
 
 
 def get_by_id(db: Session, inquiry_id: uuid.UUID) -> Inquiry | None:
-    return (
-        db.query(Inquiry)
-        .filter(Inquiry.id == inquiry_id, Inquiry.deleted_at.is_(None))
-        .first()
-    )
+    return db.query(Inquiry).filter(Inquiry.id == inquiry_id, Inquiry.deleted_at.is_(None)).first()
 
 
 def get_by_reference_id(db: Session, reference_id: str) -> Inquiry | None:
@@ -67,7 +63,7 @@ def update(db: Session, inquiry: Inquiry, data: dict[str, Any]) -> Inquiry:
 
 
 def soft_delete(db: Session, inquiry: Inquiry) -> Inquiry:
-    inquiry.deleted_at = datetime.utcnow()
+    inquiry.deleted_at = datetime.now(tz=UTC)
     db.commit()
     db.refresh(inquiry)
     return inquiry

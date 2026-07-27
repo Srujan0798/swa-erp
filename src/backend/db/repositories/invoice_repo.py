@@ -1,8 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.backend.models.invoice import Invoice, InvoiceItem
@@ -26,10 +25,14 @@ def create_invoice(
 
 
 def get_invoice_by_id(db: Session, invoice_id: uuid.UUID) -> Invoice | None:
-    return db.query(Invoice).filter(
-        Invoice.id == invoice_id,
-        Invoice.deleted_at.is_(None),
-    ).first()
+    return (
+        db.query(Invoice)
+        .filter(
+            Invoice.id == invoice_id,
+            Invoice.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def get_invoice_with_items(db: Session, invoice_id: uuid.UUID) -> Invoice | None:
@@ -76,12 +79,17 @@ def update_invoice_status(
 
 
 def generate_invoice_number(db: Session) -> str:
-    now = datetime.utcnow()
+    now = datetime.now(tz=UTC)
     prefix = f"INV-{now:%Y%m}-"
-    last_invoice = db.query(Invoice).filter(
-        Invoice.invoice_number.like(f"{prefix}%"),
-        Invoice.deleted_at.is_(None),
-    ).order_by(Invoice.invoice_number.desc()).first()
+    last_invoice = (
+        db.query(Invoice)
+        .filter(
+            Invoice.invoice_number.like(f"{prefix}%"),
+            Invoice.deleted_at.is_(None),
+        )
+        .order_by(Invoice.invoice_number.desc())
+        .first()
+    )
     if last_invoice:
         seq = int(last_invoice.invoice_number.split("-")[-1]) + 1
     else:
@@ -93,6 +101,6 @@ def soft_delete_invoice(db: Session, invoice_id: uuid.UUID) -> bool:
     invoice = get_invoice_by_id(db, invoice_id)
     if not invoice:
         return False
-    invoice.deleted_at = datetime.utcnow()
+    invoice.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True

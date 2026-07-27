@@ -99,7 +99,9 @@ def create_time_entry_service(
     week_start = _get_week_start(data.date)
     ts = get_timesheet_by_user_week(db, user_id, week_start)
     if ts and ts.status == "approved":
-        raise HTTPException(status_code=422, detail="Cannot add entry to an approved timesheet week")
+        raise HTTPException(
+            status_code=422, detail="Cannot add entry to an approved timesheet week"
+        )
 
     entry = create_time_entry(db, {**data.model_dump(), "user_id": user_id})
     return _entry_to_read(entry, db)
@@ -120,7 +122,9 @@ def update_time_entry_service(
     week_start = _get_week_start(entry.date)
     ts = get_timesheet_by_user_week(db, entry.user_id, week_start)
     if ts and ts.status == "approved":
-        raise HTTPException(status_code=422, detail="Cannot edit entry in an approved timesheet week")
+        raise HTTPException(
+            status_code=422, detail="Cannot edit entry in an approved timesheet week"
+        )
 
     update_data = data.model_dump(exclude_unset=True)
     if "hours" in update_data:
@@ -144,7 +148,9 @@ def delete_time_entry_service(
     week_start = _get_week_start(entry.date)
     ts = get_timesheet_by_user_week(db, entry.user_id, week_start)
     if ts and ts.status == "approved":
-        raise HTTPException(status_code=422, detail="Cannot delete entry in an approved timesheet week")
+        raise HTTPException(
+            status_code=422, detail="Cannot delete entry in an approved timesheet week"
+        )
 
     return soft_delete_time_entry(db, entry_id)
 
@@ -159,9 +165,13 @@ def list_time_entries_service(
     page_size: int = 20,
 ) -> TimeEntryListResponse:
     items, total, pg, ps = list_time_entries(
-        db, project_id=project_id, user_id=user_id,
-        start_date=start_date, end_date=end_date,
-        page=page, page_size=page_size,
+        db,
+        project_id=project_id,
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+        page=page,
+        page_size=page_size,
     )
     return TimeEntryListResponse(
         items=[_entry_to_read(e, db) for e in items],
@@ -184,6 +194,7 @@ def generate_timesheet_service(
 
 def _create_audit_log(db: Session, timesheet_id: uuid.UUID, action: str, performed_by: uuid.UUID):
     from src.backend.models.time_tracking import TimesheetAuditLog
+
     log = TimesheetAuditLog(
         timesheet_id=timesheet_id,
         action=action,
@@ -227,7 +238,7 @@ def approve_timesheet_service(
     ts.approved_by = manager_id
     from datetime import datetime as _dt
 
-    ts.approved_at = _dt.utcnow()
+    ts.approved_at = _dt.now(_dt.timezone.utc)
     _create_audit_log(db, timesheet_id, "approved", manager_id)
     db.commit()
     db.refresh(ts)
@@ -249,7 +260,7 @@ def reject_timesheet_service(
     ts.approved_by = manager_id
     from datetime import datetime as _dt
 
-    ts.approved_at = _dt.utcnow()
+    ts.approved_at = _dt.now(_dt.timezone.utc)
     _create_audit_log(db, timesheet_id, "rejected", manager_id)
     db.commit()
     db.refresh(ts)
@@ -263,7 +274,9 @@ def list_timesheets_service(
     page: int = 1,
     page_size: int = 20,
 ) -> TimesheetListResponse:
-    items, total, pg, ps = list_timesheets(db, user_id=user_id, status=status, page=page, page_size=page_size)
+    items, total, pg, ps = list_timesheets(
+        db, user_id=user_id, status=status, page=page, page_size=page_size
+    )
     return TimesheetListResponse(
         items=[_timesheet_to_read(t, db) for t in items],
         total=total,

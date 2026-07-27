@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -50,18 +50,11 @@ def delete_category(db: Session, category_id: uuid.UUID) -> bool:
 
 
 def has_children(db: Session, category_id: uuid.UUID) -> bool:
-    return (
-        db.query(MaterialCategory)
-        .filter(MaterialCategory.parent_id == category_id)
-        .count()
-        > 0
-    )
+    return db.query(MaterialCategory).filter(MaterialCategory.parent_id == category_id).count() > 0
 
 
 def has_materials(db: Session, category_id: uuid.UUID) -> bool:
-    return (
-        db.query(Material).filter(Material.category_id == category_id).count() > 0
-    )
+    return db.query(Material).filter(Material.category_id == category_id).count() > 0
 
 
 # --- Material ---
@@ -77,9 +70,7 @@ def create_material(db: Session, data: dict[str, Any]) -> Material:
 
 def get_by_id(db: Session, material_id: uuid.UUID) -> Material | None:
     return (
-        db.query(Material)
-        .filter(Material.id == material_id, Material.deleted_at.is_(None))
-        .first()
+        db.query(Material).filter(Material.id == material_id, Material.deleted_at.is_(None)).first()
     )
 
 
@@ -120,9 +111,7 @@ def list_materials(
     return items, total, page, page_size
 
 
-def update_material(
-    db: Session, material_id: uuid.UUID, data: dict[str, Any]
-) -> Material | None:
+def update_material(db: Session, material_id: uuid.UUID, data: dict[str, Any]) -> Material | None:
     material = get_by_id(db, material_id)
     if not material:
         return None
@@ -138,6 +127,6 @@ def soft_delete(db: Session, material_id: uuid.UUID) -> bool:
     material = get_by_id(db, material_id)
     if not material:
         return False
-    material.deleted_at = datetime.utcnow()
+    material.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True

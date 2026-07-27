@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -18,10 +18,14 @@ def create_project_cost(db: Session, data: dict[str, Any]) -> ProjectCost:
 
 
 def get_cost_by_id(db: Session, cost_id: uuid.UUID) -> ProjectCost | None:
-    return db.query(ProjectCost).filter(
-        ProjectCost.id == cost_id,
-        ProjectCost.deleted_at.is_(None),
-    ).first()
+    return (
+        db.query(ProjectCost)
+        .filter(
+            ProjectCost.id == cost_id,
+            ProjectCost.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def list_project_costs(
@@ -50,7 +54,7 @@ def soft_delete_cost(db: Session, cost_id: uuid.UUID) -> bool:
     cost = get_cost_by_id(db, cost_id)
     if not cost:
         return False
-    cost.deleted_at = datetime.utcnow()
+    cost.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True
 

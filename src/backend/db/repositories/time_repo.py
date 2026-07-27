@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -16,10 +16,14 @@ def create_time_entry(db: Session, data: dict[str, Any]) -> TimeEntry:
 
 
 def get_time_entry_by_id(db: Session, entry_id: uuid.UUID) -> TimeEntry | None:
-    return db.query(TimeEntry).filter(
-        TimeEntry.id == entry_id,
-        TimeEntry.deleted_at.is_(None),
-    ).first()
+    return (
+        db.query(TimeEntry)
+        .filter(
+            TimeEntry.id == entry_id,
+            TimeEntry.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def update_time_entry(db: Session, entry_id: uuid.UUID, data: dict[str, Any]) -> TimeEntry | None:
@@ -38,7 +42,7 @@ def soft_delete_time_entry(db: Session, entry_id: uuid.UUID) -> bool:
     entry = get_time_entry_by_id(db, entry_id)
     if not entry:
         return False
-    entry.deleted_at = datetime.utcnow()
+    entry.deleted_at = datetime.now(tz=UTC)
     db.commit()
     return True
 
@@ -70,27 +74,39 @@ def list_time_entries(
     return items, total, page, page_size
 
 
-def list_user_entries_for_week(db: Session, user_id: uuid.UUID, week_start: date) -> list[TimeEntry]:
+def list_user_entries_for_week(
+    db: Session, user_id: uuid.UUID, week_start: date
+) -> list[TimeEntry]:
     from datetime import timedelta
 
     week_end = week_start + timedelta(days=6)
-    return db.query(TimeEntry).filter(
-        TimeEntry.user_id == user_id,
-        TimeEntry.date >= week_start,
-        TimeEntry.date <= week_end,
-        TimeEntry.deleted_at.is_(None),
-    ).all()
+    return (
+        db.query(TimeEntry)
+        .filter(
+            TimeEntry.user_id == user_id,
+            TimeEntry.date >= week_start,
+            TimeEntry.date <= week_end,
+            TimeEntry.deleted_at.is_(None),
+        )
+        .all()
+    )
 
 
 def get_timesheet_by_id(db: Session, timesheet_id: uuid.UUID) -> Timesheet | None:
     return db.query(Timesheet).filter(Timesheet.id == timesheet_id).first()
 
 
-def get_timesheet_by_user_week(db: Session, user_id: uuid.UUID, week_start: date) -> Timesheet | None:
-    return db.query(Timesheet).filter(
-        Timesheet.user_id == user_id,
-        Timesheet.week_start == week_start,
-    ).first()
+def get_timesheet_by_user_week(
+    db: Session, user_id: uuid.UUID, week_start: date
+) -> Timesheet | None:
+    return (
+        db.query(Timesheet)
+        .filter(
+            Timesheet.user_id == user_id,
+            Timesheet.week_start == week_start,
+        )
+        .first()
+    )
 
 
 def create_or_update_timesheet(

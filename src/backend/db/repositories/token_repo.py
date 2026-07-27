@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -40,11 +40,7 @@ def list_tokens(
 
 
 def get_by_id(db: Session, token_id: uuid.UUID) -> Token | None:
-    return (
-        db.query(Token)
-        .filter(Token.id == token_id, Token.deleted_at.is_(None))
-        .first()
-    )
+    return db.query(Token).filter(Token.id == token_id, Token.deleted_at.is_(None)).first()
 
 
 def get_by_reference_id(db: Session, reference_id: str) -> Token | None:
@@ -73,7 +69,7 @@ def update(db: Session, token: Token, data: dict[str, Any]) -> Token:
 
 
 def soft_delete(db: Session, token: Token) -> Token:
-    token.deleted_at = datetime.utcnow()
+    token.deleted_at = datetime.now(tz=UTC)
     db.commit()
     db.refresh(token)
     return token

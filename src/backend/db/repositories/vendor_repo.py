@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -36,11 +36,7 @@ def create_vendor(
 
 
 def get_by_id(db: Session, vendor_id: uuid.UUID) -> Vendor | None:
-    return (
-        db.query(Vendor)
-        .filter(Vendor.id == vendor_id, Vendor.deleted_at.is_(None))
-        .first()
-    )
+    return db.query(Vendor).filter(Vendor.id == vendor_id, Vendor.deleted_at.is_(None)).first()
 
 
 def get_by_code(db: Session, code: str) -> Vendor | None:
@@ -82,7 +78,7 @@ def update_vendor(db: Session, vendor: Vendor) -> Vendor:
 
 
 def soft_delete(db: Session, vendor: Vendor) -> Vendor:
-    vendor.deleted_at = datetime.utcnow()
+    vendor.deleted_at = datetime.now(tz=UTC)
     db.commit()
     db.refresh(vendor)
     return vendor
