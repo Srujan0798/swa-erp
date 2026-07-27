@@ -8,7 +8,7 @@ DONE
 - Created `src/backend/services/reference_id_service.py` (40 lines) — `generate_reference_id(db, entity_type)` using a single-statement `INSERT ... ON CONFLICT (entity_type, year) DO UPDATE SET last_seq = reference_counters.last_seq + 1 RETURNING last_seq`, plus a `get_current_seq` helper
 - Created `src/backend/alembic/versions/0015_add_reference_counters.py` (38 lines) — wires into the existing chain (`down_revision = "0014"`); the existing 0018 sustainability migration already declares `down_revision = "0015"`, so the chain is consistent
 - Created `tests/wave-9/test_reference_id_service.py` (115 lines) — 10 tests covering: basic generation, monotonic increment, format, isolation between types, year keying, and a 50-thread concurrency test that asserts gapless, unique, sequential IDs (`TKN-001..TKN-050`)
-- Modified `src/backend/models/__init__.py` — exported `ReferenceCounter` so it is registered with `Base.metadata` via the existing `import src.backend.models` in `tests/conftest.py` and `src/backend/alembic/env.py`
+- Modified `src/backend/models/__init__.py` — exported `ReferenceCounter` so it is registered with the SQLAlchemy Base metadata through the existing model import in `tests/conftest.py` and `src/backend/alembic/env.py`
 
 ## Acceptance checks
 - [x] `python3 -m pytest tests/wave-9/test_reference_id_service.py -q` — passed (10/10 in ~1.1s, evidence below)

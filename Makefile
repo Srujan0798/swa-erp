@@ -1,4 +1,4 @@
-.PHONY: help install dev test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean
+.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db
 
 help:
 	@echo "swa-erp commands:"
@@ -16,6 +16,9 @@ help:
 	@echo "  make migrate-up        — apply migrations"
 	@echo "  make dispatch wave=N   — reminder to open orchestrator"
 	@echo "  make ship wave=N       — reminder to open orchestrator"
+	@echo "  make backup-db         — pg_dump → ./backups/db/ (30-day retention)"
+	@echo "  make backup-files      — tar ./uploads/ → ./backups/files/ (90-day retention)"
+	@echo "  make restore-db file=<path> — DESTRUCTIVE restore, prompts for confirmation"
 	@echo "  make clean             — remove caches"
 
 install:
@@ -84,3 +87,16 @@ clean:
 	find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name node_modules -exec rm -rf {} + 2>/dev/null || true
+
+backup-db:
+	./scripts/backup_db.sh
+
+backup-files:
+	./scripts/backup_files.sh
+
+restore-db:
+	@if [ -z "$(file)" ]; then \
+		echo "Usage: make restore-db file=<path-to-backup.sql.gz>"; \
+		exit 1; \
+	fi
+	./scripts/restore_db.sh "$(file)"

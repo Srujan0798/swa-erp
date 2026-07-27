@@ -50,6 +50,10 @@
 ## Ruff Result
 All checks passed (0 errors across all Task 04 files).
 
+## Acceptance
+- [x] `python3 -m ruff check src/backend/models/quote.py src/backend/core/quote_workflow.py src/backend/schemas/quote.py src/backend/db/repositories/quote_repo.py src/backend/services/quote_service.py src/backend/services/pdf_service.py src/backend/api/quotes.py src/backend/main.py` — clean (0 errors)
+- [x] `python3 -m pytest tests/wave-3/ -q` — all tests passed
+
 ## Integration Notes
 - Task 03 was implemented in parallel; the service layer (`quote_service.py`, `quote_repo.py`) already existed when Task 04 ran
 - Added `code` field to the enriched dict in the service for schema compatibility

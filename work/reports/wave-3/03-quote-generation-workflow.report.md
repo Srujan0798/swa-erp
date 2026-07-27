@@ -28,4 +28,7 @@ All checks passed on all 7 files. Full backend scan shows only 2 pre-existing er
 - **BOQ Integration**: `generate_quote()` queries BOQ items directly from DB (no relationship on BOQ model), copies rates/quantities
 - **Clone**: `clone_quote()` copies source quote + items into a new draft quote
 
+## Evidence
+- [x] `python3 -m ruff check src/backend/models/quote.py src/backend/core/quote_workflow.py src/backend/schemas/quote.py src/backend/db/repositories/quote_repo.py src/backend/services/quote_service.py src/backend/alembic/versions/0005_add_quotes.py src/backend/models/__init__.py` — All checks passed
+
 ## No Issues

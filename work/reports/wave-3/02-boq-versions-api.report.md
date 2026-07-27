@@ -23,6 +23,10 @@
 ## Ruff Result
 All checks passed!
 
+## Acceptance
+- [x] `python3 -m pytest tests/wave-3/test_boq_versions.py -q` — 5 passed
+- [x] `python3 -m ruff check` on all touched files — clean
+
 ## Notes
 - Task 01 created the base BOQ files in parallel. Task 02 extensions were layered on top.
 - Field naming follows Task 01 conventions: `version_number`, `file_name`, `parsed_by`, `parsed_at`, `rate` (not `unit_rate`).

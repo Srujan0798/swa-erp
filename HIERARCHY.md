@@ -33,6 +33,40 @@ entries for directories that don't exist.
 | `.github/workflows/` | CI | automated checks (ci, test, security) |
 | `.claude/` | Claude Code | settings.local.json (minimal) |
 
+## Directory inventory (all top-level entries)
+- `CHANGELOG.md`
+- `CLAUDE.md`
+- `CONTRIBUTING.md`
+- `Dockerfile`
+- `Dockerfile.frontend`
+- `HANDOFF.md`
+- `HIERARCHY.md`
+- `HOW_TO_RUN.md`
+- `KIMI.md`
+- `Makefile`
+- `OS_SETUP.md`
+- `README.md`
+- `backups/`
+- `deliverables/`
+- `docker-compose.prod.yml`
+- `docker-compose.yml`
+- `docs/`
+- `mcp.json`
+- `node_modules/`
+- `orchestrator/`
+- `plan/`
+- `playwright-report/`
+- `playwright.config.ts`
+- `pyproject.toml`
+- `requirements.txt`
+- `resources/`
+- `scripts/`
+- `src/`
+- `test-results/`
+- `tests/`
+- `uploads/`
+- `work/`
+
 ## Wave numbering
 Waves are sequential: wave-1, wave-2, ... Don't skip numbers. Cancelled waves → `attic/cancelled-wave-N/`.
 

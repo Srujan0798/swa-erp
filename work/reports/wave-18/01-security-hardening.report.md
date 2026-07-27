@@ -10,9 +10,9 @@ DONE
 - Created `tests/wave-18/test_invoice_gst.py` (~70 lines) — 4 tests: total-amount consistency, empty-items rejection, GST default with omitted tax_rate, GST visible in list view.
 - Modified `src/backend/core/config.py` — added `model_validator` that raises on `APP_ENV != "dev"` + default `SECRET_KEY` ("change-me" / "replace-with-openssl-rand-hex-32" / ""), and `AUTH_RATE_LIMIT_PER_MIN` setting.
 - Modified `src/backend/main.py` — installed `AuthRateLimitMiddleware` via `install_auth_rate_limiter(app)`.
-- Modified `src/backend/models/invoice.py` — added `gst_percent` and `gst_amount` columns mirroring `Quote.tax_percent`/`tax_amount` convention.
+- Modified `src/backend/models/invoice.py` — added `gst_percent` and `gst_amount` columns mirroring `Quote`.`tax_percent`/`tax_amount` convention.
 - Modified `src/backend/schemas/invoice.py` — `InvoiceRead` now exposes `gst_percent` and `gst_amount`.
-- Modified `src/backend/services/invoice_service.py` — `_compute_totals` now returns `(subtotal, tax_amount, total, gst_percent, gst_amount)`; `gst_amount` is quantized to 0.01; new fields are populated on create and surfaced via `_invoice_to_read`.
+- Modified `src/backend/services/invoice_service.py` — `_compute_totals` now returns `(subtotal, tax_amount, total, gst_percent, gst_amount)`; new fields are populated on create and surfaced via `_invoice_to_read`.
 - Modified `src/frontend/src/pages/InvoicesPage.tsx` — invoice detail modal shows `GST @ <pct>%` with `gst_amount` (falls back to `tax_amount`/`tax_rate` for backward compat).
 - Modified `src/frontend/src/types/financial.ts` — `Invoice` interface gained `gst_percent: number` and `gst_amount: number`.
 - Applied the migration to the live DB: `ALTER TABLE invoices ADD COLUMN gst_percent NUMERIC(5,2) NOT NULL DEFAULT 18; ALTER TABLE invoices ADD COLUMN gst_amount NUMERIC(18,2) NOT NULL DEFAULT 0; UPDATE invoices SET gst_amount = tax_amount WHERE gst_amount = 0 AND tax_amount > 0;` and synced the `alembic_version` table (cleaned up 6 stray rows, stamped 0025). The Alembic state was already fragmented from prior waves; flagged in "Issues" below.

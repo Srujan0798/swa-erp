@@ -15,7 +15,7 @@ DONE
 - Created `src/frontend/src/components/sustainability/SustainabilityForm.tsx` and `SustainabilityList.tsx`.
 - Created `src/frontend/src/hooks/useSustainability.ts`.
 - Created `src/frontend/src/pages/SustainabilityPage.tsx` (standalone `/sustainability` page with project selector, plus a reusable `SustainabilityManager` used as a **Project-detail tab**).
-- Modified `src/frontend/src/App.tsx` (route `/sustainability`), `Sidebar.tsx` (nav item), `ProjectDetailPage.tsx` (Sustainability tab), `lib/api.ts` + `types/api.ts` (API client + types).
+- Modified `src/frontend/src/App.tsx` (route `/sustainability`), `Sidebar.tsx` (nav item), `ProjectDetailPage.tsx` (Sustainability tab), `lib/api.ts`, `types/api.ts` (API client + types).
 
 ## This-session verification (re-run)
 - `python3 -m pytest tests/wave-10/ -q` → **5 passed**
