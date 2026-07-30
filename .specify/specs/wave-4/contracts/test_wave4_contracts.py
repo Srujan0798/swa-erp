@@ -1,9 +1,8 @@
-import pytest
-from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 # Wave-4 Contract Tests — Task Management
 # Run: pytest .specify/specs/wave-4/contracts/ -v
+
 
 class TestTasksAPI:
     """Task CRUD API contracts."""
@@ -13,7 +12,7 @@ class TestTasksAPI:
         r = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Review BOQ"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 201
         data = r.json()
@@ -25,7 +24,7 @@ class TestTasksAPI:
 
     def test_create_task_full(self, client, pm_token, project_id, designer_id):
         """Create task with all fields."""
-        due = (datetime.utcnow() + timedelta(days=7)).isoformat()
+        due = (datetime.now(tz=UTC) + timedelta(days=7)).isoformat()
         r = client.post(
             f"/api/projects/{project_id}/tasks",
             json={
@@ -34,9 +33,9 @@ class TestTasksAPI:
                 "assignee_id": str(designer_id),
                 "due_date": due,
                 "priority": 2,
-                "estimated_hours": 4.5
+                "estimated_hours": 4.5,
             },
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 201
         data = r.json()
@@ -49,7 +48,7 @@ class TestTasksAPI:
         r = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Nope"},
-            headers={"Authorization": f"Bearer {viewer_token}"}
+            headers={"Authorization": f"Bearer {viewer_token}"},
         )
         assert r.status_code == 403
 
@@ -58,13 +57,10 @@ class TestTasksAPI:
         create = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Get Me"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         task_id = create.json()["id"]
-        r = client.get(
-            f"/api/tasks/{task_id}",
-            headers={"Authorization": f"Bearer {pm_token}"}
-        )
+        r = client.get(f"/api/tasks/{task_id}", headers={"Authorization": f"Bearer {pm_token}"})
         assert r.status_code == 200
         assert r.json()["title"] == "Get Me"
 
@@ -75,12 +71,12 @@ class TestTasksAPI:
             client.post(
                 f"/api/projects/{project_id}/tasks",
                 json={"title": f"Task {status}", "status": status},
-                headers={"Authorization": f"Bearer {pm_token}"}
+                headers={"Authorization": f"Bearer {pm_token}"},
             )
         # Filter by status
         r = client.get(
             f"/api/projects/{project_id}/tasks?status=done",
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 200
         tasks = r.json()
@@ -92,7 +88,7 @@ class TestTasksAPI:
         create = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Lock Me"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         task = create.json()
         task_id = task["id"]
@@ -102,7 +98,7 @@ class TestTasksAPI:
         r1 = client.patch(
             f"/api/tasks/{task_id}",
             json={"title": "Updated", "version": version},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r1.status_code == 200
         assert r1.json()["version"] == version + 1
@@ -111,7 +107,7 @@ class TestTasksAPI:
         r2 = client.patch(
             f"/api/tasks/{task_id}",
             json={"title": "Stale", "version": version},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r2.status_code == 409
 
@@ -120,19 +116,13 @@ class TestTasksAPI:
         create = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Delete Me"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         task_id = create.json()["id"]
-        r = client.delete(
-            f"/api/tasks/{task_id}",
-            headers={"Authorization": f"Bearer {pm_token}"}
-        )
+        r = client.delete(f"/api/tasks/{task_id}", headers={"Authorization": f"Bearer {pm_token}"})
         assert r.status_code == 204
         # Verify gone
-        r2 = client.get(
-            f"/api/tasks/{task_id}",
-            headers={"Authorization": f"Bearer {pm_token}"}
-        )
+        r2 = client.get(f"/api/tasks/{task_id}", headers={"Authorization": f"Bearer {pm_token}"})
         assert r2.status_code == 404
 
 
@@ -144,18 +134,18 @@ class TestTaskDependencies:
         a = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Task A"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
         b = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Task B"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         r = client.post(
             f"/api/tasks/{b['id']}/dependencies",
             json={"depends_on_task_id": a["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 201
         dep = r.json()
@@ -167,36 +157,36 @@ class TestTaskDependencies:
         a = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "A"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
         b = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "B"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
         c = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "C"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         # A -> B
         client.post(
             f"/api/tasks/{b['id']}/dependencies",
             json={"depends_on_task_id": a["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         # B -> C
         client.post(
             f"/api/tasks/{c['id']}/dependencies",
             json={"depends_on_task_id": b["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         # C -> A (creates cycle) -> should fail
         r = client.post(
             f"/api/tasks/{a['id']}/dependencies",
             json={"depends_on_task_id": c["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 400
         assert "cycle" in r.json()["detail"].lower()
@@ -206,26 +196,26 @@ class TestTaskDependencies:
         a = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "A"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
         b = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "B"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         # B depends on A
         client.post(
             f"/api/tasks/{b['id']}/dependencies",
             json={"depends_on_task_id": a["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
 
         # Try to move B to in_progress while A is todo -> should fail
         r = client.patch(
             f"/api/tasks/{b['id']}",
             json={"status": "in_progress", "version": 1},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 400
         assert "blocked" in r.json()["detail"].lower()
@@ -234,12 +224,12 @@ class TestTaskDependencies:
         client.patch(
             f"/api/tasks/{a['id']}",
             json={"status": "done", "version": 1},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         r2 = client.patch(
             f"/api/tasks/{b['id']}",
             json={"status": "in_progress", "version": 1},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r2.status_code == 200
         assert r2.json()["status"] == "in_progress"
@@ -249,35 +239,34 @@ class TestTaskDependencies:
         a = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "A"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
         b = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "B"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
         c = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "C"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         # A -> B -> C
         client.post(
             f"/api/tasks/{b['id']}/dependencies",
             json={"depends_on_task_id": a["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         client.post(
             f"/api/tasks/{c['id']}/dependencies",
             json={"depends_on_task_id": b["id"]},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
 
         # Direct deps of C
         r = client.get(
-            f"/api/tasks/{c['id']}/dependencies",
-            headers={"Authorization": f"Bearer {pm_token}"}
+            f"/api/tasks/{c['id']}/dependencies", headers={"Authorization": f"Bearer {pm_token}"}
         )
         assert r.status_code == 200
         deps = r.json()
@@ -296,13 +285,13 @@ class TestTaskComments:
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Commentable"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         r = client.post(
             f"/api/tasks/{task['id']}/comments",
             json={"content": "Please review"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 201
         c = r.json()
@@ -315,19 +304,19 @@ class TestTaskComments:
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Threaded"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         parent = client.post(
             f"/api/tasks/{task['id']}/comments",
             json={"content": "Parent"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         r = client.post(
             f"/api/tasks/{task['id']}/comments",
             json={"content": "Reply", "parent_comment_id": parent["id"]},
-            headers={"Authorization": f"Bearer {designer_id}"}
+            headers={"Authorization": f"Bearer {designer_id}"},
         )
         assert r.status_code == 201
         reply = r.json()
@@ -338,19 +327,18 @@ class TestTaskComments:
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "List Comments"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         for i in range(3):
             client.post(
                 f"/api/tasks/{task['id']}/comments",
                 json={"content": f"Comment {i}"},
-                headers={"Authorization": f"Bearer {pm_token}"}
+                headers={"Authorization": f"Bearer {pm_token}"},
             )
 
         r = client.get(
-            f"/api/tasks/{task['id']}/comments",
-            headers={"Authorization": f"Bearer {pm_token}"}
+            f"/api/tasks/{task['id']}/comments", headers={"Authorization": f"Bearer {pm_token}"}
         )
         assert r.status_code == 200
         comments = r.json()
@@ -367,12 +355,12 @@ class TestKanban:
             client.post(
                 f"/api/projects/{project_id}/tasks",
                 json={"title": f"Task {status}", "status": status},
-                headers={"Authorization": f"Bearer {pm_token}"}
+                headers={"Authorization": f"Bearer {pm_token}"},
             )
 
         r = client.get(
             f"/api/projects/{project_id}/tasks/kanban",
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 200
         board = r.json()
@@ -387,7 +375,7 @@ class TestKanban:
             t = client.post(
                 f"/api/projects/{project_id}/tasks",
                 json={"title": f"Task {i}", "status": "todo"},
-                headers={"Authorization": f"Bearer {pm_token}"}
+                headers={"Authorization": f"Bearer {pm_token}"},
             ).json()
             tasks.append(t)
 
@@ -395,7 +383,7 @@ class TestKanban:
         r = client.patch(
             f"/api/tasks/{tasks[2]['id']}/reorder",
             json={"status": "todo", "position": 0},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 200
         assert r.json()["position"] == 0
@@ -403,7 +391,7 @@ class TestKanban:
         # Verify order
         r2 = client.get(
             f"/api/projects/{project_id}/tasks/kanban",
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         todo = r2.json()["todo"]
         assert todo[0]["id"] == tasks[2]["id"]
@@ -413,13 +401,13 @@ class TestKanban:
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Move Me", "status": "todo"},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         r = client.patch(
             f"/api/tasks/{task['id']}/reorder",
             json={"status": "in_progress", "position": 0},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert r.status_code == 200
         assert r.json()["status"] == "in_progress"
@@ -434,12 +422,12 @@ class TestTaskNotifications:
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Notify Me", "assignee_id": designer_id},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         r = client.get(
             f"/api/notifications?user_id={designer_id}",
-            headers={"Authorization": f"Bearer {designer_id}"}
+            headers={"Authorization": f"Bearer {designer_id}"},
         )
         assert r.status_code == 200
         notifs = r.json()
@@ -450,41 +438,40 @@ class TestTaskNotifications:
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Status Change", "assignee_id": designer_id},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         client.patch(
             f"/api/tasks/{task['id']}",
             json={"status": "in_progress", "version": 1},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
 
         r = client.get(
             f"/api/notifications?user_id={designer_id}",
-            headers={"Authorization": f"Bearer {designer_id}"}
+            headers={"Authorization": f"Bearer {designer_id}"},
         )
         notifs = r.json()
         assert any(n["type"] == "task_status_changed" for n in notifs)
 
     def test_due_soon_notification(self, client, pm_token, project_id, designer_id):
         """Notification sent for due-soon tasks (via Celery beat)."""
-        due = (datetime.utcnow() + timedelta(hours=12)).isoformat()
+        due = (datetime.now(tz=UTC) + timedelta(hours=12)).isoformat()
         task = client.post(
             f"/api/projects/{project_id}/tasks",
             json={"title": "Due Soon", "assignee_id": designer_id, "due_date": due},
-            headers={"Authorization": f"Bearer {pm_token}"}
+            headers={"Authorization": f"Bearer {pm_token}"},
         ).json()
 
         # Trigger the due-soon check (normally Celery beat)
         # This tests the endpoint that Celery calls
         r = client.post(
-            "/api/internal/check-due-soon",
-            headers={"Authorization": f"Bearer {pm_token}"}
+            "/api/internal/check-due-soon", headers={"Authorization": f"Bearer {pm_token}"}
         )
         assert r.status_code == 200
 
         notifs = client.get(
             f"/api/notifications?user_id={designer_id}",
-            headers={"Authorization": f"Bearer {designer_id}"}
+            headers={"Authorization": f"Bearer {designer_id}"},
         ).json()
         assert any(n["type"] == "task_due_soon" for n in notifs)
