@@ -1,3 +1,16 @@
+import os
+
+# Disable the auth rate limiter for the test suite BEFORE the app is imported.
+# The limiter (src/backend/core/rate_limit.py, added in wave-18) allows
+# AUTH_RATE_LIMIT_PER_MIN (default 5) login/refresh calls per minute per client IP.
+# Every test shares one client IP, and most test modules log in far more than 5
+# times, so without this bypass the 6th+ login returns 429 with no body token and
+# every downstream fixture dies with `KeyError: 'access_token'`.
+# wave-18's own tests re-enable it per-test via monkeypatch.setenv(..., "0"),
+# which still works because rate_limit._rate_limit_disabled() reads os.environ at
+# request time, not import time.
+os.environ.setdefault("DISABLE_AUTH_RATE_LIMIT", "1")
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine, text

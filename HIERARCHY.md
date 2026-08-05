@@ -24,6 +24,9 @@
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
 | `attic/` | nobody (frozen) | superseded work, never deleted |
 | `scripts/` | workers + orchestrator | automation utilities (import tool, backup scripts) |
+| `HANDOFF_FINAL.md` | workers (OpenCode) | **PENDING CONSOLIDATION** — agent-produced handoff, to be merged into the canonical handoff set and removed |
+| `wave9handoff.md` | workers (OpenCode) | **PENDING CONSOLIDATION** — agent-produced wave-9 handoff, to be merged and removed |
+| `wave10handoff.md` | workers (OpenCode) | **PENDING CONSOLIDATION** — agent-produced wave-10 handoff, to be merged and removed |
 
 **Corrected 2026-07-21**: `data/`, `prompts/`, `config/`, and `schema/` were listed here from the
 generic project template but were never actually instantiated for this project — none of these
@@ -55,6 +58,9 @@ entries for directories that don't exist.
 - `node_modules/`
 - `orchestrator/`
 - `plan/`
+- `HANDOFF_FINAL.md` — PENDING CONSOLIDATION (agent-produced, to be merged + removed)
+- `wave9handoff.md` — PENDING CONSOLIDATION (agent-produced, to be merged + removed)
+- `wave10handoff.md` — PENDING CONSOLIDATION (agent-produced, to be merged + removed)
 - `playwright-report/`
 - `playwright.config.ts`
 - `pyproject.toml`
