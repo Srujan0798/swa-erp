@@ -11,7 +11,6 @@
 | `HOW_TO_RUN.md` | orchestrator | dual-tier workflow guide |
 | `CHANGELOG.md` | orchestrator | version history |
 | `CONTRIBUTING.md` | orchestrator | contribution rules |
-| `OS_SETUP.md` | orchestrator | methodology reference (copy from ~/Desktop/OS_SETUP.md) |
 | `plan/` | orchestrator | strategy (3 living docs: PRD, ARCHITECTURE, EXECUTION) |
 | `.specify/` | orchestrator | spec-driven contracts (constitution + wave specs) |
 | `orchestrator/` | orchestrator | commands, skills, agents, hooks, recipes, rules |
@@ -24,9 +23,6 @@
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
 | `attic/` | nobody (frozen) | superseded work, never deleted |
 | `scripts/` | workers + orchestrator | automation utilities (import tool, backup scripts) |
-| `HANDOFF_FINAL.md` | workers (OpenCode) | **PENDING CONSOLIDATION** — agent-produced handoff, to be merged into the canonical handoff set and removed |
-| `wave9handoff.md` | workers (OpenCode) | **PENDING CONSOLIDATION** — agent-produced wave-9 handoff, to be merged and removed |
-| `wave10handoff.md` | workers (OpenCode) | **PENDING CONSOLIDATION** — agent-produced wave-10 handoff, to be merged and removed |
 
 **Corrected 2026-07-21**: `data/`, `prompts/`, `config/`, and `schema/` were listed here from the
 generic project template but were never actually instantiated for this project — none of these
@@ -47,8 +43,8 @@ entries for directories that don't exist.
 - `HOW_TO_RUN.md`
 - `KIMI.md`
 - `Makefile`
-- `OS_SETUP.md`
 - `README.md`
+- `attic/`
 - `backups/`
 - `deliverables/`
 - `docker-compose.prod.yml`
@@ -58,9 +54,6 @@ entries for directories that don't exist.
 - `node_modules/`
 - `orchestrator/`
 - `plan/`
-- `HANDOFF_FINAL.md` — PENDING CONSOLIDATION (agent-produced, to be merged + removed)
-- `wave9handoff.md` — PENDING CONSOLIDATION (agent-produced, to be merged + removed)
-- `wave10handoff.md` — PENDING CONSOLIDATION (agent-produced, to be merged + removed)
 - `playwright-report/`
 - `playwright.config.ts`
 - `pyproject.toml`

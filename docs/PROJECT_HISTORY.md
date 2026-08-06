@@ -73,6 +73,36 @@ so nobody "fixes" them again from scratch if this pattern resurfaces):
 - The ID generator originally displayed a literal `year=0` in generated IDs before being fixed to
   use `current_year()`.
 
+## Auth rate-limiter test-suite trap
+
+The auth rate limiter (`src/backend/core/rate_limit.py`, added wave-18) allows
+`AUTH_RATE_LIMIT_PER_MIN` (default 5) logins per minute per client IP. The whole backend test
+suite shares one client IP and most modules log in far more than 5 times, so the 6th+ login
+returns `429` with no body token and every downstream fixture dies with
+`KeyError: 'access_token'`. This surfaces as mass failures across unrelated modules — the same
+"looks-like-everything-is-broken" signature as the Postgres ENUM/fixture bug above. The fix
+is never in the failing module: `tests/conftest.py` must set `DISABLE_AUTH_RATE_LIMIT=1`
+**before** the app is imported (top of file, before `src.backend.main`), and wave-18's tests
+re-enable it per-test via `monkeypatch.setenv`. Reference commit `3e0f137`.
+
+## Code gotchas from the session exports
+
+Verified against current code 2026-08-07. Real, recurring traps worth keeping:
+- **`date` vs `Date` import collision** — models import both `from datetime import date` and
+  `from sqlalchemy import Date`; a `mapped_column(date)` (Python class) instead of
+  `mapped_column(Date)` (SQLAlchemy type) breaks model registration/imports. Use
+  `Mapped[date]` for the annotation and `mapped_column(Date)` for the column. Pattern is live
+  in ~10 model files.
+- **`datetime` not JSON-serializable in export paths** — `json.dumps` of ORM/datetime objects
+  raises `TypeError`; export endpoints must pass `default=str`
+  (see `src/backend/api/exports.py:85`). Recurring any time a new export endpoint is added.
+
+Checked and found already fixed / one-off — do not "fix" again:
+- **BOQ upload RBAC** — `src/backend/api/boqs.py:34` now `require_role([Role.ADMIN, Role.PM])`;
+  the old ADMIN-only gate that blocked PMs is gone.
+- **`.join("boq")` path-construction** — no such string-join remains in the BOQ query path.
+- **`conftest.py` overwrite hazard** — was an external parallel-agent artifact, not a code bug.
+
 ## Everything else worth knowing is already documented elsewhere
 
 Checked against the source material and confirmed there is nothing else to extract — these are
