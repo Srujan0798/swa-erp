@@ -1,10 +1,12 @@
 import uuid
 from typing import Any
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.project_repo import (
+    ProjectVersionConflictError,
     create_project,
     get_project_with_names,
     list_projects_with_names,
@@ -66,7 +68,12 @@ def update_project_service(
     before_json = _project_to_dict(project)
 
     update_data = data.model_dump(exclude_unset=True)
-    update_project(db, project_id, update_data)
+    expected_version = update_data.pop("expected_version", None)
+    try:
+        update_project(db, project_id, update_data, expected_version)
+    except ProjectVersionConflictError as e:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(e)) from e
 
     project = get_project_by_id(db, project_id)
     after_json = _project_to_dict(project)
@@ -148,4 +155,5 @@ def _project_to_dict(project: Project) -> dict[str, Any]:
         "target_end_date": str(project.target_end_date) if project.target_end_date else None,
         "actual_end_date": str(project.actual_end_date) if project.actual_end_date else None,
         "is_active": project.is_active,
+        "version": project.version,
     }

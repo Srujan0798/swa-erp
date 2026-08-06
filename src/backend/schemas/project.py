@@ -47,6 +47,7 @@ class ProjectUpdate(BaseModel):
     target_end_date: date | None = None
     actual_end_date: date | None = None
     is_active: bool | None = None
+    expected_version: int | None = None
 
 
 class ProjectRead(BaseModel):
@@ -70,6 +71,7 @@ class ProjectRead(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    version: int = 1
     client_name: str | None = None
     pm_name: str | None = None
     designer_name: str | None = None

@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -24,7 +25,7 @@ class TransitionRequest(BaseModel):
 class ProjectStatsResponse(BaseModel):
     total_active: int
     by_status: dict[str, int]
-    total_estimated_value: float
+    total_estimated_value: Decimal
 
 
 @router.post("/{project_id}/transition", response_model=ProjectRead)
@@ -64,10 +65,10 @@ def project_stats(
 
     total_estimated = db.query(func.sum(Project.estimated_value)).filter(
         Project.deleted_at.is_(None), Project.is_active.is_(True)
-    ).scalar() or 0
+    ).scalar()
 
     return ProjectStatsResponse(
         total_active=total_active,
         by_status=status_counts,
-        total_estimated_value=float(total_estimated),
+        total_estimated_value=Decimal(total_estimated) if total_estimated is not None else Decimal("0"),
     )
