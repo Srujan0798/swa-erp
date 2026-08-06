@@ -24,12 +24,13 @@ the first pass got wrong or left unnecessarily open:
 
 1. **ID scheme is confirmed, not guessed.** Every entity uses `SWA-{year}-{3-letter-code}-{seq:03d}`:
    `SWA-2025-INQ-001` (Inquiry), `SWA-2025-CLT-001` (Client), `SWA-2025-SA-011` (Service
-   Agreement), `SWA-2025-TKN-001` (Token), `SWA-2025-EMP-001` (Employee). This supersedes the
+   Agreement),    `SWA-2025-TKN-001` (Token), `SWA-2025-EMP-001` (Employee). This supersedes the
    verbal "IESK=12, APEX=0.12, Inner=0.9" numeric codes from Meeting 1 — those are legacy/spoken
    shorthand, not what's actually in the live sheets. **Correction from first pass:** I had
    designed Agreement around the old numeric codes; that was wrong. Build one shared
-   `generate_reference_id(entity_type: str) -> str` service used by Inquiry, Client, Agreement,
-   Token, and (extended) Project — sequential counter per type, reset per calendar year (the
+   `generate_reference_id(db: Session, entity_type: str) -> str` service used by Inquiry,
+   Client, Agreement, Token, and (extended) Project — sequential counter per type, reset per
+   calendar year (the
    year is literally embedded in the ID, so continuing a `2025` sequence into `2026` would be
    self-contradictory; reset-per-year is a design inference, not itself confirmed by evidence
    spanning two years — flag to Viraj to confirm before locking in the reset behavior).

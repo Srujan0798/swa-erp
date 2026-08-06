@@ -18,7 +18,8 @@ Visit `http://localhost:3000` (frontend) and `http://localhost:8000/docs` (API).
 
 ## How this project is built
 
-Two-tier agentic workflow (per `OS_SETUP.md`):
+Two-tier agentic workflow (per the project's methodology docs in `orchestrator/core/` and
+`HOW_TO_RUN.md`):
 
 - **Orchestrator** = Claude Code or Kimi (interchangeable). Plans, dispatches, reviews, merges.
 - **Workers** = OpenCode CLI in parallel windows. Execute self-contained task briefs.

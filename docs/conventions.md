@@ -6,6 +6,22 @@
 - **DB:** SQLAlchemy 2 declarative; Alembic migrations for every schema change
 - **Tests:** pytest for backend, Playwright for E2E, Vitest for frontend units
 
+## Backend module conventions
+- **Service convention** (`src/backend/services/<entity>_service.py`): one function per
+  operation; each takes `db: Session` + `actor_id: uuid.UUID`; returns an ORM model or raises
+  a typed exception. Services hold the business logic — API routers must not.
+- **Repository convention** (`src/backend/db/repositories/<entity>_repo.py`): expose
+  `list_*`, `get_by_id`, `create`, `update`, `soft_delete`. Soft-delete is via a `deleted_at`
+  column — never a hard delete of business data.
+- **Reference-ID service** (`src/backend/services/reference_id_service.py`):
+  `generate_reference_id(db: Session, entity_type: str) -> str` returns
+  `SWA-{year}-{TYPE}-{seq:03d}`, atomically and race-safe via `INSERT … ON CONFLICT` on
+  `reference_counters`. Entity codes in use: `SA`, `INQ`, `CLT`, `TKN`, plus per-document-type
+  counter keys from `document_reference_service.py`. The code is authoritative over any doc
+  (see ADR-0002's corrected signature).
+- **Alembic**: revisions are 4-digit zero-padded (`0001`…`0025`), one migration per concern;
+  always create with `alembic revision --rev-id=NNNN_descriptive_name`.
+
 ## Data (runtime storage — as actually implemented)
 
 **Corrected 2026-07-21** — this section previously described a `data/` directory structure and
