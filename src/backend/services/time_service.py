@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, timedelta
+from datetime import UTC, date, timedelta
 from decimal import Decimal
 
 from fastapi import HTTPException
@@ -237,9 +237,8 @@ def approve_timesheet_service(
     ts.status = "approved"
     ts.approved_by = manager_id
     from datetime import datetime as _dt
-    from datetime import timezone as _tz
 
-    ts.approved_at = _dt.now(_tz.utc)
+    ts.approved_at = _dt.now(UTC)
     _create_audit_log(db, timesheet_id, "approved", manager_id)
     db.commit()
     db.refresh(ts)
@@ -260,9 +259,8 @@ def reject_timesheet_service(
     ts.status = "rejected"
     ts.approved_by = manager_id
     from datetime import datetime as _dt
-    from datetime import timezone as _tz
 
-    ts.approved_at = _dt.now(_tz.utc)
+    ts.approved_at = _dt.now(UTC)
     _create_audit_log(db, timesheet_id, "rejected", manager_id)
     db.commit()
     db.refresh(ts)

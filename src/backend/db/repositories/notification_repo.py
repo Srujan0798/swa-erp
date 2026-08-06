@@ -1,6 +1,6 @@
-from typing import List, Optional
-from uuid import UUID
-from sqlalchemy import update, select, delete as sqlalchemy_delete
+from sqlalchemy import delete as sqlalchemy_delete
+from sqlalchemy import select, update
+
 from src.backend.models.notification import Notification
 
 

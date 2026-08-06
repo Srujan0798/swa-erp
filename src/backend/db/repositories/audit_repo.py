@@ -1,6 +1,6 @@
 import json
 import uuid as _uuid
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session

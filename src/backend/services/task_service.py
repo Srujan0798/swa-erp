@@ -1,6 +1,5 @@
 import uuid
 
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.backend.core.task_workflow import validate_transition

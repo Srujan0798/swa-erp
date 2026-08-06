@@ -1,8 +1,8 @@
 from uuid import UUID
-from typing import List, Optional
-from sqlalchemy import select, delete, text
+
+from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.backend.models.task import Task
+
 from src.backend.models.task_dependency import TaskDependency
 
 
@@ -24,17 +24,17 @@ class TaskDependencyRepository:
         result = await self.session.execute(stmt)
         return result.rowcount > 0
 
-    async def get_direct_dependencies(self, task_id: UUID) -> List[UUID]:
+    async def get_direct_dependencies(self, task_id: UUID) -> list[UUID]:
         stmt = select(TaskDependency.depends_on_task_id).where(TaskDependency.task_id == task_id)
         result = await self.session.execute(stmt)
         return [row[0] for row in result.fetchall()]
 
-    async def get_dependents(self, task_id: UUID) -> List[UUID]:
+    async def get_dependents(self, task_id: UUID) -> list[UUID]:
         stmt = select(TaskDependency.task_id).where(TaskDependency.depends_on_task_id == task_id)
         result = await self.session.execute(stmt)
         return [row[0] for row in result.fetchall()]
 
-    async def get_all_dependencies(self, task_id: UUID) -> List[UUID]:
+    async def get_all_dependencies(self, task_id: UUID) -> list[UUID]:
         """Transitive closure: all tasks that task_id depends on (direct + indirect)."""
         stmt = text("""
         WITH RECURSIVE deps AS (
@@ -49,7 +49,7 @@ class TaskDependencyRepository:
         result = await self.session.execute(stmt, {"tid": task_id})
         return [row[0] for row in result.fetchall()]
 
-    async def get_all_dependents(self, task_id: UUID) -> List[UUID]:
+    async def get_all_dependents(self, task_id: UUID) -> list[UUID]:
         """Transitive closure: all tasks that depend on task_id (direct + indirect)."""
         stmt = text("""
         WITH RECURSIVE deps AS (

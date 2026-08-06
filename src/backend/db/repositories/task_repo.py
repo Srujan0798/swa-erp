@@ -1,9 +1,11 @@
+import builtins
 from uuid import UUID
-from typing import List, Optional
-from sqlalchemy import select, func, text
+
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
-from src.backend.models.task import Task, TaskDependency, TaskComment
-from src.backend.schemas.task import TaskCreate, TaskUpdate, TaskFilter
+
+from src.backend.models.task import Task, TaskComment, TaskDependency
+from src.backend.schemas.task import TaskCreate, TaskFilter, TaskUpdate
 
 
 class TaskRepository:
@@ -21,7 +23,7 @@ class TaskRepository:
         self.session.flush()
         return task
 
-    def get(self, task_id: UUID) -> Optional[Task]:
+    def get(self, task_id: UUID) -> Task | None:
         stmt = select(Task).where(Task.id == task_id).options(
             selectinload(Task.assignee),
             selectinload(Task.reporter),
@@ -31,7 +33,7 @@ class TaskRepository:
         result = self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    def list(self, project_id: UUID, filters: TaskFilter, skip: int = 0, limit: int = 50) -> List[Task]:
+    def list(self, project_id: UUID, filters: TaskFilter, skip: int = 0, limit: int = 50) -> list[Task]:
         stmt = select(Task).options(
             selectinload(Task.assignee),
             selectinload(Task.reporter),
@@ -87,7 +89,7 @@ class TaskRepository:
             "total": self.session.execute(total).scalar_one(),
         }
 
-    def get_blocked_tasks(self, task_id: UUID) -> List[UUID]:
+    def get_blocked_tasks(self, task_id: UUID) -> builtins.list[UUID]:
         """Return all task IDs that depend (directly or transitively) on task_id."""
         stmt = text("""
         WITH RECURSIVE deps AS (
@@ -108,7 +110,7 @@ _repo = TaskRepository.__dict__
 
 _priority_map = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
-def create_task(db: Session, *, project_id: UUID, title: str, reporter_id: UUID, description: Optional[str] = None, priority: str = "medium", assignee_id: Optional[UUID] = None, due_date=None) -> Task:
+def create_task(db: Session, *, project_id: UUID, title: str, reporter_id: UUID, description: str | None = None, priority: str = "medium", assignee_id: UUID | None = None, due_date=None) -> Task:
     priority_int = _priority_map.get(priority, 2)
     task = Task(
         project_id=project_id,
@@ -125,7 +127,7 @@ def create_task(db: Session, *, project_id: UUID, title: str, reporter_id: UUID,
     return task
 
 
-def get_task_with_names(db: Session, task_id: UUID) -> Optional[dict]:
+def get_task_with_names(db: Session, task_id: UUID) -> dict | None:
     repo = TaskRepository(db)
     task = repo.get(task_id)
     if not task:
@@ -141,7 +143,7 @@ def get_task_with_names(db: Session, task_id: UUID) -> Optional[dict]:
     }
 
 
-def list_by_project(db: Session, project_id: UUID, page: int, page_size: int, status: Optional[str], assignee_id: Optional[UUID], priority: Optional[str]) -> tuple:
+def list_by_project(db: Session, project_id: UUID, page: int, page_size: int, status: str | None, assignee_id: UUID | None, priority: str | None) -> tuple:
     repo = TaskRepository(db)
     filters = TaskFilter(status=status, assignee_id=assignee_id, priority=priority)
     skip = (page - 1) * page_size
@@ -150,7 +152,7 @@ def list_by_project(db: Session, project_id: UUID, page: int, page_size: int, st
     return items, total
 
 
-def list_tasks_by_assignee(db: Session, user_id: UUID, page: int, page_size: int, status: Optional[str], priority: Optional[str]) -> tuple:
+def list_tasks_by_assignee(db: Session, user_id: UUID, page: int, page_size: int, status: str | None, priority: str | None) -> tuple:
     repo = TaskRepository(db)
     filters = TaskFilter(status=status, assignee_id=user_id, priority=priority)
     skip = (page - 1) * page_size
@@ -159,12 +161,12 @@ def list_tasks_by_assignee(db: Session, user_id: UUID, page: int, page_size: int
     return items, total
 
 
-def get_by_id(db: Session, task_id: UUID) -> Optional[Task]:
+def get_by_id(db: Session, task_id: UUID) -> Task | None:
     repo = TaskRepository(db)
     return repo.get(task_id)
 
 
-def get_user_by_id(db: Session, user_id: UUID) -> Optional[Task]:
+def get_user_by_id(db: Session, user_id: UUID) -> Task | None:
     # Placeholder typed under task helpers: callers actually need User; preserve boundary.
     from src.backend.models.user import User
     return db.query(User).get(user_id)
@@ -179,7 +181,7 @@ def update_task(db: Session, task: Task, **kwargs) -> Task:
     return repo.update(task, update_data)
 
 
-def assign_task(db: Session, task_id: UUID, assignee_id: UUID) -> Optional[Task]:
+def assign_task(db: Session, task_id: UUID, assignee_id: UUID) -> Task | None:
     repo = TaskRepository(db)
     task = repo.get(task_id)
     if not task:
@@ -190,7 +192,7 @@ def assign_task(db: Session, task_id: UUID, assignee_id: UUID) -> Optional[Task]
     return task
 
 
-def unassign_task(db: Session, task_id: UUID) -> Optional[Task]:
+def unassign_task(db: Session, task_id: UUID) -> Task | None:
     repo = TaskRepository(db)
     task = repo.get(task_id)
     if not task:
@@ -201,7 +203,7 @@ def unassign_task(db: Session, task_id: UUID) -> Optional[Task]:
     return task
 
 
-def bulk_update_status(db: Session, task_ids: List[UUID], new_status: str) -> int:
+def bulk_update_status(db: Session, task_ids: list[UUID], new_status: str) -> int:
     stmt = select(Task).where(Task.id.in_(task_ids))
     result = db.execute(stmt)
     tasks = result.scalars().all()
@@ -215,7 +217,7 @@ def bulk_update_status(db: Session, task_ids: List[UUID], new_status: str) -> in
     return count
 
 
-def reorder_task(db: Session, task_id: UUID, new_status: str, new_sort_order: int) -> Optional[Task]:
+def reorder_task(db: Session, task_id: UUID, new_status: str, new_sort_order: int) -> Task | None:
     repo = TaskRepository(db)
     task = repo.get(task_id)
     if not task:
@@ -243,7 +245,7 @@ def create_comment(db: Session, task_id: UUID, author_id: UUID, content: str) ->
     return comment
 
 
-def list_comments(db: Session, task_id: UUID) -> List[TaskComment]:
+def list_comments(db: Session, task_id: UUID) -> list[TaskComment]:
     stmt = select(TaskComment).where(TaskComment.task_id == task_id).order_by(TaskComment.created_at.asc())
     result = db.execute(stmt)
     return result.scalars().all()

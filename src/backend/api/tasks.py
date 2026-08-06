@@ -20,23 +20,19 @@ from src.backend.schemas.task import (
     TaskReorder,
     TaskStatsResponse,
     TaskTransition,
-    TaskUpdate,
 )
 from src.backend.services.task_service import (
     add_comment_service,
     assign_task_service,
     bulk_update_status_service,
     create_task_service,
-    delete_task_service,
     get_task_counts_service,
     get_task_service,
-    get_project_task_stats_service,
     list_my_tasks_service,
     list_tasks_service,
     reorder_task_service,
     transition_task_service,
     unassign_task_service,
-    update_task_service,
 )
 
 router = APIRouter(tags=["tasks"])
