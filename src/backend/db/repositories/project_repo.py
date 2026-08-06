@@ -48,6 +48,22 @@ def get_by_id(db: Session, project_id: uuid.UUID) -> Project | None:
     )
 
 
+class ProjectVersionConflictError(Exception):
+    """Raised when an update carries a stale expected_version (optimistic lock miss)."""
+
+
+def _get_by_id_locked(db: Session, project_id: uuid.UUID) -> Project | None:
+    return (
+        db.query(Project)
+        .filter(
+            Project.id == project_id,
+            Project.deleted_at.is_(None),
+        )
+        .with_for_update()
+        .first()
+    )
+
+
 def create_project(db: Session, data: dict[str, Any]) -> Project:
     project = Project(**data)
     db.add(project)
@@ -56,15 +72,27 @@ def create_project(db: Session, data: dict[str, Any]) -> Project:
     return project
 
 
-def update_project(db: Session, project_id: uuid.UUID, data: dict[str, Any]) -> Project | None:
-    project = get_by_id(db, project_id)
+def update_project(
+    db: Session,
+    project_id: uuid.UUID,
+    data: dict[str, Any],
+    expected_version: int | None = None,
+) -> Project | None:
+    project = _get_by_id_locked(db, project_id)
     if not project:
         return None
+
+    if expected_version is not None and expected_version != project.version:
+        raise ProjectVersionConflictError(
+            f"Project {project_id} was modified by another user; expected version "
+            f"{expected_version}, current version {project.version}"
+        )
 
     for key, value in data.items():
         if value is not None:
             setattr(project, key, value)
 
+    project.version += 1
     db.commit()
     db.refresh(project)
     return project
@@ -111,6 +139,7 @@ def get_project_with_names(db: Session, project_id: uuid.UUID) -> dict | None:
         "is_active": project.is_active,
         "created_at": project.created_at,
         "updated_at": project.updated_at,
+        "version": project.version,
         "client_name": client.name if client else None,
         "pm_name": pm.name if pm else None,
         "designer_name": designer.name if designer else None,
@@ -156,6 +185,7 @@ def list_projects_with_names(
             "is_active": p.is_active,
             "created_at": p.created_at,
             "updated_at": p.updated_at,
+            "version": p.version,
             "client_name": client.name if client else None,
             "pm_name": pm.name if pm else None,
             "designer_name": designer.name if designer else None,

@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from fpdf import FPDF
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
@@ -12,7 +13,9 @@ from src.backend.db.repositories.task_repo import get_task_counts_by_project, li
 from src.backend.db.repositories.time_repo import list_time_entries
 from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
 from src.backend.models.boq import BOQItem
+from src.backend.models.project_cost import ProjectCost
 from src.backend.models.quote import Quote
+from src.backend.services.project_pnl_service import DEFAULT_HOURLY_RATE
 
 
 class _SWAPdf(FPDF):
@@ -206,11 +209,23 @@ def export_financial_report(db: Session, start_date: date, end_date: date) -> by
     pdf._kv_row("Pending Revenue:", _fmt_decimal(total_pending))
     pdf.ln(4)
 
-    net = total_revenue
+    manual_costs = (
+        db.query(func.coalesce(func.sum(ProjectCost.amount), 0))
+        .filter(
+            ProjectCost.deleted_at.is_(None),
+            ProjectCost.date >= start_date,
+            ProjectCost.date <= end_date,
+        )
+        .scalar()
+    )
+    time_cost = sum(billable_hours.values()) * DEFAULT_HOURLY_RATE
+    total_costs = Decimal(manual_costs) + time_cost
+    net_pnl = total_revenue - total_costs
+
     pdf._section_title("Net Profit & Loss (Estimated)")
     pdf._kv_row("Revenue:", _fmt_decimal(total_revenue))
-    pdf._kv_row("Estimated Costs:", _fmt_decimal(total_revenue * Decimal("0.7")))
-    pdf._kv_row("Net P&L:", _fmt_decimal(net * Decimal("0.3")))
+    pdf._kv_row("Estimated Costs:", _fmt_decimal(total_costs))
+    pdf._kv_row("Net P&L:", _fmt_decimal(net_pnl))
 
     return bytes(pdf.output())
 

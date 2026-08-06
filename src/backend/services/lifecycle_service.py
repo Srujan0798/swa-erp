@@ -27,6 +27,7 @@ def transition_project(
 
     before_json = {"status": project.status}
     project.status = to_status.value
+    project.version += 1
 
     if to_status == ProjectStatus.CLOSED:
         project.actual_end_date = date.today()
