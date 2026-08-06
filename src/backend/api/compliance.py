@@ -86,7 +86,7 @@ def update_item(
 def review_item(
     item_id: uuid.UUID,
     body: ProjectComplianceItemReview,
-    current_user: User = Depends(require_role(Role.AUDITOR)),  # noqa: B008
+    current_user: User = Depends(require_role([Role.AUDITOR, Role.DESIGNER])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> ProjectComplianceItemRead:
     try:

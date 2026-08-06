@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
-from src.backend.core.roles import Role
+from src.backend.core.roles import Role, role_includes
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.document_reference import (
@@ -61,9 +61,26 @@ def list_document_references(
 )
 def create_document_reference(
     body: DocumentReferenceCreate,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentReferenceRead:
+    # Type-conditional access control per the client's access matrix
+    # (resources/MEETINGS_MASTER.md Meeting 1 section 4):
+    #   DBR/KDR generation -> PM, Designer
+    #   Reforge/DPR -> Auditor, Designer
+    #   anything else -> PM only (safe default)
+    doc_type = (body.document_type or "").strip().upper()
+    if doc_type in ("DBR", "KDR"):
+        allowed = {Role.PM, Role.DESIGNER}
+    elif doc_type == "REFORGE":
+        allowed = {Role.AUDITOR, Role.DESIGNER}
+    else:
+        allowed = {Role.PM}
+    if not any(role_includes(Role(current_user.role), r) for r in allowed):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Role '{current_user.role}' cannot create a '{doc_type or body.document_type}' document reference",
+        )
     try:
         doc_ref = create_document_reference_service(db, body, current_user.id)
     except ProjectNotFoundError as e:

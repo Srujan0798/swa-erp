@@ -51,7 +51,7 @@ def list_inquiries(
 @router.post("", response_model=InquiryRead, status_code=status.HTTP_201_CREATED)
 def create_inquiry(
     body: InquiryCreate,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(require_role([Role.PM, Role.DESIGNER])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InquiryRead:
     inquiry = create_inquiry_service(db, body, current_user.id)

@@ -103,7 +103,7 @@ def get_rfq_endpoint(
 )
 def send_rfq_endpoint(
     rfq_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
     try:
@@ -119,7 +119,7 @@ def send_rfq_endpoint(
 def respond_rfq_endpoint(
     rfq_id: uuid.UUID,
     body: list[RFQResponseItem],
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
     try:
@@ -135,7 +135,7 @@ def respond_rfq_endpoint(
 )
 def compare_rfq_endpoint(
     rfq_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
     try:
@@ -165,7 +165,7 @@ def award_rfq_endpoint(
 )
 def close_rfq_endpoint(
     rfq_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
     try:
@@ -180,7 +180,7 @@ def close_rfq_endpoint(
 )
 def cancel_rfq_endpoint(
     rfq_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
     try:
