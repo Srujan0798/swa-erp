@@ -778,3 +778,16 @@ export interface DocumentReferenceUpdate {
   status?: string;
   remarks?: string;
 }
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  notification_type: string;
+  title: string;
+  message: string;
+  reference_type: string | null;
+  reference_id: string | null;
+  is_read: boolean;
+  created_at: string;
+  read_at: string | null;
+}
