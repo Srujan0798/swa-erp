@@ -1,3 +1,4 @@
+from src.backend.db import repositories
 from src.backend.schemas import (
     auth,
     boq,
@@ -8,6 +9,7 @@ from src.backend.schemas import (
     document,
     invoice,
     material,
+    notification,
     pnl,
     project,
     quote,
@@ -17,9 +19,7 @@ from src.backend.schemas import (
     time_tracking,
     user,
     vendor,
-    notification,
 )
-from src.backend.db import repositories
 from src.backend.services import (
     audit_service,
     auth_service,
@@ -32,6 +32,7 @@ from src.backend.services import (
     invoice_service,
     lifecycle_service,
     material_service,
+    notification_service,
     pdf_service,
     project_pnl_service,
     project_service,
@@ -42,5 +43,4 @@ from src.backend.services import (
     time_service,
     user_service,
     vendor_service,
-    notification_service,
 )

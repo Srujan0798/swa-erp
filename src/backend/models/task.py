@@ -1,18 +1,19 @@
 import uuid
-from datetime import datetime
+
 from sqlalchemy import (
+    DECIMAL,
     Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
     String,
     Text,
-    Integer,
-    ForeignKey,
-    DateTime,
-    DECIMAL,
-    Index,
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+
 from src.backend.db.base import Base
 
 
@@ -93,5 +94,5 @@ class TaskComment(Base):
 
     task = relationship("Task", back_populates="comments")
     author = relationship("User", back_populates="authored_task_comments")
-    parent = relationship("TaskComment", remote_side=[id], back_populates="replies")
+    parent = relationship("TaskComment", remote_side=["TaskComment.id"], back_populates="replies")
     replies = relationship("TaskComment", back_populates="parent")

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.backend.db.base import Base
 
 
-class RFQStatus(str, enum.Enum):
+class RFQStatus(enum.Enum):
     DRAFT = "draft"
     SENT = "sent"
     RESPONDED = "responded"

@@ -67,7 +67,7 @@ if ! gzip -t "$BACKUP_FILE" 2>/dev/null; then
     exit 1
 fi
 
-echo "==> Restoring $BACKUP_FILE -> $DATABASE_URL"
+echo "==> Restoring $BACKUP_FILE"
 
 # gunzip | psql. Capture both exit codes.
 if ! gunzip -c "$BACKUP_FILE" | psql "$DATABASE_URL" --set ON_ERROR_STOP=on --single-transaction; then

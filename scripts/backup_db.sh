@@ -17,7 +17,6 @@ TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 OUT_FILE="$OUTPUT_DIR/swa_erp_backup_${TIMESTAMP}.sql.gz"
 
 echo "==> Backing up database"
-echo "    DATABASE_URL = $DATABASE_URL"
 echo "    output       = $OUT_FILE"
 echo "    retention    = ${RETENTION_DAYS} days"
 

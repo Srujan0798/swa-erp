@@ -33,7 +33,6 @@ def _to_read(rfq) -> RFQRead:
 
     items = []
     for item in rfq.items:
-        material = item._sa_instance_state.manager.class_
         items.append({
             "id": item.id,
             "rfq_id": item.rfq_id,

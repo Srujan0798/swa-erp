@@ -1,11 +1,10 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
 
-class NotificationType(str, Enum):
+class NotificationType(Enum):
     task_assigned = "task_assigned"
     task_status_changed = "task_status_changed"
     task_due_soon = "task_due_soon"
