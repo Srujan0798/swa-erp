@@ -197,14 +197,3 @@ def add_comment_endpoint(
     return comment
 
 
-@router.get("/api/projects/{project_id}/tasks/{task_id}/debug", response_model=dict)
-def debug_task_endpoint(
-    project_id: uuid.UUID,
-    task_id: uuid.UUID,
-    _: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-) -> dict:
-    data = get_task_service(db, task_id)
-    if not data:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return data.model_dump()

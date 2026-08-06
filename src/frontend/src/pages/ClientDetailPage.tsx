@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,9 @@ import { Plus, Trash2, ArrowLeft } from "lucide-react";
 
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [showAddContact, setShowAddContact] = useState(false);
 
   const { data: client, isLoading } = useQuery({
@@ -34,6 +37,17 @@ export function ClientDetailPage() {
     },
   });
 
+  const deleteClientMutation = useMutation({
+    mutationFn: () => api.deleteClient(id!),
+    onSuccess: () => {
+      toast({ title: "Client deleted" });
+      navigate("/clients");
+    },
+    onError: (err) => {
+      toast({ title: (err as Error).message, variant: "destructive" });
+    },
+  });
+
   if (isLoading) return <div className="p-6">Loading...</div>;
   if (!client) return <div className="p-6">Client not found</div>;
 
@@ -47,6 +61,18 @@ export function ClientDetailPage() {
           </Link>
         </Button>
         <h1 className="text-2xl font-bold flex-1">{client.name}</h1>
+        <Button
+          variant="destructive"
+          disabled={deleteClientMutation.isPending}
+          onClick={() => {
+            if (confirm(`Delete client "${client.name}"? This cannot be undone.`)) {
+              deleteClientMutation.mutate();
+            }
+          }}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete Client
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-6">

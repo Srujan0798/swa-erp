@@ -10,6 +10,7 @@ import { BOQItemTable } from "@/components/boqs/BOQItemTable";
 import { QuoteList } from "@/components/quotes/QuoteList";
 import { QuoteBuilder } from "@/components/quotes/QuoteBuilder";
 import { QuoteDetail } from "@/components/quotes/QuoteDetail";
+import { DocumentReferenceList } from "@/components/documentRefs/DocumentReferenceList";
 import { SustainabilityManager } from "@/pages/SustainabilityPage";
 
 type View =
@@ -19,6 +20,7 @@ type View =
   | { tab: "quotes" }
   | { tab: "quotes-builder" }
   | { tab: "quotes-detail"; quoteId: string }
+  | { tab: "documents" }
   | { tab: "sustainability" };
 
 export function ProjectDetailPage() {
@@ -32,9 +34,11 @@ export function ProjectDetailPage() {
       ? "boqs"
       : view.tab.startsWith("quotes")
         ? "quotes"
-        : view.tab === "sustainability"
-          ? "sustainability"
-          : "overview";
+        : view.tab === "documents"
+          ? "documents"
+          : view.tab === "sustainability"
+            ? "sustainability"
+            : "overview";
 
   return (
     <div className="space-y-6">
@@ -53,6 +57,7 @@ export function ProjectDetailPage() {
           if (val === "overview") setView({ tab: "overview" });
           else if (val === "boqs") setView({ tab: "boqs" });
           else if (val === "quotes") setView({ tab: "quotes" });
+          else if (val === "documents") setView({ tab: "documents" });
         }}
       >
         <div className="flex items-center justify-between">
@@ -60,6 +65,7 @@ export function ProjectDetailPage() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="boqs">BOQs</TabsTrigger>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="sustainability">Sustainability</TabsTrigger>
           </TabsList>
         </div>
@@ -109,6 +115,10 @@ export function ProjectDetailPage() {
               />
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="documents">
+          <DocumentReferenceList projectId={id} />
         </TabsContent>
 
         <TabsContent value="sustainability">

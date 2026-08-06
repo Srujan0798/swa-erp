@@ -251,6 +251,9 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  deleteClient: (id: string) =>
+    request<void>(`/api/clients/${id}`, { method: "DELETE" }),
+
   deleteContact: (clientId: string, contactId: string) =>
     request<void>(`/api/clients/${clientId}/contacts/${contactId}`, { method: "DELETE" }),
 
@@ -899,6 +902,18 @@ export const api = {
 
   deleteDocumentReference: (id: string) =>
     request<void>(`/api/document-references/${id}`, { method: "DELETE" }),
+
+  listNotifications: (params?: { unread_only?: boolean; page?: number; page_size?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.unread_only) searchParams.set("unread_only", "true");
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    const query = searchParams.toString();
+    return request<Notification[]>(`/api/tasks/notifications${query ? `?${query}` : ""}`);
+  },
+
+  markNotificationRead: (id: string) =>
+    request<void>(`/api/tasks/notifications/${id}/read`, { method: "POST" }),
 };
 
 export { ApiError };
