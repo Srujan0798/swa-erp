@@ -4,8 +4,10 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 
-from src.backend.core.deps import get_current_user
+from src.backend.core.deps import require_role
+from src.backend.core.roles import Role
 from src.backend.db.session import get_db
+from src.backend.models.user import User
 from src.backend.services.export_service import (
     export_demo_package,
     export_financial_report,
@@ -19,7 +21,7 @@ router = APIRouter(prefix="/api/exports", tags=["exports"])
 @router.get("/projects/{project_id}/summary.pdf")
 def project_summary_pdf(
     project_id: uuid.UUID,
-    _: dict = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
     try:
@@ -38,7 +40,7 @@ def project_summary_pdf(
 def financial_report_pdf(
     start_date: date = Query(..., description="Report start date"),  # noqa: B008
     end_date: date = Query(..., description="Report end date"),  # noqa: B008
-    _: dict = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
     if start_date > end_date:
@@ -54,7 +56,7 @@ def financial_report_pdf(
 @router.get("/projects/{project_id}/slides.pdf")
 def project_slides_pdf(
     project_id: uuid.UUID,
-    _: dict = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
     try:
@@ -72,7 +74,7 @@ def project_slides_pdf(
 @router.get("/projects/{project_id}/demo.json")
 def demo_package_json(
     project_id: uuid.UUID,
-    _: dict = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
     try:

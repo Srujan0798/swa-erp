@@ -3,7 +3,8 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from src.backend.core.deps import get_current_user
+from src.backend.core.deps import get_current_user, require_role
+from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.pnl import (
@@ -26,7 +27,7 @@ router = APIRouter(prefix="/api/projects", tags=["project-pnl"])
 @router.get("/{project_id}/pnl", response_model=ProjectPnLSummary)
 def pnl_summary(
     project_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
     return get_project_pnl(db, project_id)
@@ -36,7 +37,7 @@ def pnl_summary(
 def add_cost(
     project_id: uuid.UUID,
     body: ProjectCostCreate,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.ADMIN)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
     return add_project_cost(db, project_id, current_user.id, body)

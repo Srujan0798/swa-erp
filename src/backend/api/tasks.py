@@ -20,23 +20,19 @@ from src.backend.schemas.task import (
     TaskReorder,
     TaskStatsResponse,
     TaskTransition,
-    TaskUpdate,
 )
 from src.backend.services.task_service import (
     add_comment_service,
     assign_task_service,
     bulk_update_status_service,
     create_task_service,
-    delete_task_service,
     get_task_counts_service,
     get_task_service,
-    get_project_task_stats_service,
     list_my_tasks_service,
     list_tasks_service,
     reorder_task_service,
     transition_task_service,
     unassign_task_service,
-    update_task_service,
 )
 
 router = APIRouter(tags=["tasks"])
@@ -99,7 +95,7 @@ def my_tasks_endpoint(
 @router.post("/api/tasks/bulk-status", response_model=int)
 def bulk_update_status_endpoint(
     body: TaskBulkStatusUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(Role.PM)),
     db: Session = Depends(get_db),
 ) -> int:
     count = bulk_update_status_service(db, body.task_ids, body.new_status, current_user.id)
@@ -122,7 +118,7 @@ def get_task_endpoint(
 def transition_task_endpoint(
     task_id: uuid.UUID,
     body: TaskTransition,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(Role.PM)),
     db: Session = Depends(get_db),
 ) -> TaskRead:
     task = transition_task_service(db, task_id, body.to_status, current_user.id)
@@ -135,7 +131,7 @@ def transition_task_endpoint(
 def reorder_task_endpoint(
     task_id: uuid.UUID,
     body: TaskReorder,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(Role.PM)),
     db: Session = Depends(get_db),
 ) -> TaskRead:
     task = reorder_task_service(db, task_id, body.status, body.sort_order, current_user.id)
@@ -188,7 +184,7 @@ def unassign_task_endpoint(
 def add_comment_endpoint(
     task_id: uuid.UUID,
     body: TaskCommentCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(Role.PM)),
     db: Session = Depends(get_db),
 ) -> TaskCommentRead:
     comment = add_comment_service(db, task_id, current_user.id, body.content)

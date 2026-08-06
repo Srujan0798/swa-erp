@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.backend.core.deps import require_role
+from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
@@ -52,6 +52,7 @@ def create_material_category(
 
 @router.get("/api/material-categories", response_model=list[MaterialCategoryTree])
 def list_material_categories(
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[MaterialCategoryTree]:
     tree = get_category_tree(db)
@@ -115,6 +116,7 @@ def create_material_endpoint(
 
 @router.get("/api/materials", response_model=MaterialListResponse)
 def list_materials(
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
@@ -133,6 +135,7 @@ def list_materials(
 @router.get("/api/materials/{material_id}", response_model=MaterialRead)
 def get_material_endpoint(
     material_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> MaterialRead:
     result = get_material(db, material_id)

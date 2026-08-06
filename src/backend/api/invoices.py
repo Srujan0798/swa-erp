@@ -116,7 +116,7 @@ def get_invoice_endpoint(
 def update_invoice_status_endpoint(
     invoice_id: uuid.UUID,
     body: InvoiceUpdateStatus,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     try:
