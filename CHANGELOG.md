@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] — 2026-07-20
+> **Corrected 2026-08-07** — release-versioning reconciliation against real git state
+> (`git tag -l`). Only one tag exists: `wave-3-complete` (points at the v0.2.0 bump commit
+> `3a66b7a`). There is **no `v0.1.0` and no `v0.3.0` tag**, and the version files
+> (`pyproject.toml`, `src/frontend/package.json`) still say `0.2.0`. The `[0.3.0]` entry below
+> describes work that was merged to git but **never cut as a release** — the compare links used
+> to point at tags that don't exist. The first real release will be `1.0.0`, cut by wave-30
+> (see `work/wave-30/01-final-release-and-submission.md`); this changelog will get its
+> `[1.0.0]` entry and the link refs fixed there.
+
+## [0.3.0] — 2026-07-20 (never released — no tag; version files still 0.2.0)
 ### Added
 - Wave-9: the actual client-requested core chain — Inquiry, Service Agreement, Token,
   Document Reference (`SWA-{year}-{TYPE}-{seq}` shared reference-ID generator), frontend for

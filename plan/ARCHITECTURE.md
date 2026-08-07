@@ -2,6 +2,13 @@
 
 ## High-level system
 
+> **Diagram truth note (corrected 2026-08-07):** boxes shown below are what the current code
+> actually runs EXCEPT the two marked **[TARGET]** — Celery (workers + broker) is an installed
+> dependency (`requirements.txt`) with **zero implementation** (no app, no `@task`, no worker
+> service — grep confirms); it is target-state, not running. Redis in the current code is used
+> only as a cache, not as a Celery broker. MinIO/S3 is likewise not wired (storage is a local
+> `uploads/` dir; see `docs/conventions.md`).
+
 ```
                     ┌──────────────────────────────────────────┐
                     │  Browser (React SPA, Vite, TS, Tailwind) │
@@ -17,15 +24,15 @@
                     └────┬──────────────┬──────────────┬────────┘
                          │              │              │
               ┌──────────▼──┐ ┌─────────▼────┐ ┌───────▼────────┐
-              │ PostgreSQL  │ │ Redis        │ │ Local FS / S3  │
-              │ (primary)   │ │ (Celery +    │ │ (uploads, docs,│
-              │             │ │  cache)      │ │  BOQs, expo)   │
+              │ PostgreSQL  │ │ Redis        │ │ Local FS       │
+              │ (primary)   │ │ (cache only  │ │ (uploads/ at   │
+              │             │ │  today)      │ │  repo root)    │
               └─────────────┘ └──────┬───────┘ └────────────────┘
                                      │
                               ┌──────▼──────┐
-                              │ Celery      │
-                              │ (workers)   │
-                              └─────────────┘
+                              │ Celery      │  [TARGET] — installed but
+                              │ (workers)   │  unimplemented (no app/
+                              └─────────────┘  no @task/ no worker)
 ```
 
 ## Modules (backend)
@@ -143,20 +150,24 @@ Transitions enforced in `services/project_service.transition()`. Each transition
 
 ## Integrations (MVP)
 
+> **Truth note (corrected 2026-08-07):** rows below describe the TARGET design. None of the
+> Celery-queued or MinIO/prod-S3 rows are implemented yet — email/PDF run synchronously in the
+> request handler, and file storage is a local `uploads/` directory (see `docs/conventions.md`).
+
 | Integration | When | How |
 |---|---|---|
-| Email (transactional) | Quote sent, invoice issued, password reset | Resend or SMTP, queued via Celery |
+| Email (transactional) | Quote sent, invoice issued, password reset | Resend or SMTP — **TARGET: queued via Celery; today runs synchronously, Celery unimplemented** |
 | PDF generation | Quotes, invoices, BOQ export | WeasyPrint (HTML→PDF) |
 | Excel import/export | BOQ upload, reports export | openpyxl |
-| File storage | Documents, BOQs, signed PDFs | Local FS in dev, MinIO in prod, S3 ready |
-| Background jobs | Email send, PDF gen, periodic reports | Celery + Redis broker |
+| File storage | Documents, BOQs, signed PDFs | **Local FS (`uploads/`) today**; MinIO in prod / S3 — target only, not wired |
+| Background jobs | Email send, PDF gen, periodic reports | **TARGET: Celery + Redis broker — not implemented** |
 
 ## Failure points + mitigations
 
 | Failure | Impact | Mitigation |
 |---|---|---|
 | DB connection lost | API 503 | Connection pool + retry; health check |
-| Celery worker crashes | Background tasks stuck | Supervisord; task retry with backoff |
+| Celery worker crashes | Background tasks stuck | **N/A today — Celery is not implemented** (see truth note above); if/when built: supervisord + task retry with backoff |
 | BOQ upload malformed | Bad data in DB | Schema validation; reject with clear error; never partial-insert |
 | User session expired | UX confusion | Auto-refresh token; 401 → redirect to login with toast |
 | File upload too large | Storage cost | 50MB cap per file; chunked upload for larger; clear error |

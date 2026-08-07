@@ -52,13 +52,13 @@ actually real:
 ## Money
 - ALL money fields: `Decimal(18, 2)` in DB; `Decimal` in Python; string in JSON ("99999999.99")
 - Currency: INR default; multi-currency-ready via `currency` column where applicable
-- GST: **not yet implemented as of 2026-07-21** — `Invoice`/`InvoiceItem` currently only have a
-  generic `tax_rate`/`tax_amount` pair (defaults to 18%, numerically GST-shaped but not
-  GST-specific), no `gst_amount` field, no HSN/SAC code per line, no GSTIN captured on the
-  invoice itself. Client and Vendor models do store a `gst_number` (their own registration
-  number) but Invoice never references it. This line previously described the target design as
-  already built — it wasn't; see `work/wave-18/01-security-hardening.md` item 4 for the actual
-  fix in progress.
+- GST: **implemented at invoice level as of wave-18** (`2073c36`, migration `0025_add_invoice_gst`).
+  `Invoice` carries `gst_percent` + `gst_amount` (`Numeric(18,2)`), computed in
+  `src/backend/services/invoice_service.py` (`gst_amount = subtotal × gst_percent / 100`) and
+  returned in `InvoiceRead`. The older generic `tax_rate`/`tax_amount` columns remain and mirror
+  the GST values. Scope of what is NOT GST-specific yet: no HSN/SAC code per line, and no GSTIN
+  captured on the invoice itself (Client/Vendor models do store their own `gst_number`).
+  **Corrected 2026-08-07** — this line previously claimed GST was not implemented; wave-18 shipped it.
 
 ## Dates and times
 - DB: `TIMESTAMPTZ`, always UTC
@@ -74,7 +74,11 @@ actually real:
 ## API
 - Routes: kebab-case in URLs (`/api/audit-log`, not `/api/auditLog`)
 - JSON keys: camelCase in TS frontend; snake_case in Python backend (Pydantic models bridge with `alias_generator`)
-- Errors: `{detail, code, request_id}` always
+- Errors: body is `{"detail": "..."}` (standard FastAPI `HTTPException`); every response carries a
+  `X-Request-ID` header (added by `src/backend/core/middleware.py` `RequestIdMiddleware`). There is
+  **no `code` field in the body and no `request_id` field in the body** — do not rely on them.
+  **Corrected 2026-08-07** — this line previously claimed `{detail, code, request_id}`; no custom
+  exception handler exists and `request_id` is header-only.
 - Pagination: `?page=1&page_size=20` query params; response includes `{items, total, page, page_size}`
 
 ## Git

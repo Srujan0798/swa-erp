@@ -9,13 +9,16 @@ going forward, don't let it drift again the way `HANDOFF.md`/`plan/EXECUTION.md`
 ## Project state
 - **Repo:** swa-erp
 - **Created:** May 2026
-- **Waves 1-16:** shipped and independently verified (324/324 tests, 7/7 E2E)
+- **Waves 1-16:** shipped and independently verified (7/7 E2E)
 - **Waves 17-21:** production-readiness/handover, check `work/reports/wave-N/` for landed status
 - **Waves 22-25:** security/correctness/dead-code/UI-wiring fixes from a 2026-07-21 four-agent
   full-project audit — check `plan/EXECUTION.md`'s status table for current state
 - **External blockers:** Viraj's 3 open decisions (`docs/decisions/0002-core-id-chain-gap.md`),
   IT's 8 infra answers (`docs/IT_BRIEF.md`, sent, awaiting reply)
 - **OS-Setup version:** v1.1
+- **Test suite:** **393/393 passing** (`python3 -m pytest tests/ -q`, verified 2026-08-07).
+  **Corrected 2026-08-07** — this section previously said "324/324"; that number was stale
+  (pre-waves 17-27).
 
 ## Session decisions (most recent first)
 - 2026-07-21: found and fixed a 3-way contradiction across `HANDOFF.md` and `plan/EXECUTION.md`
@@ -52,8 +55,11 @@ going forward, don't let it drift again the way `HANDOFF.md`/`plan/EXECUTION.md`
   tokens stored in frontend `localStorage` (not cookies), refresh does not rotate.
 - Money: `Decimal(18,2)` convention followed almost everywhere; one confirmed violation in
   `lifecycle.py`'s `ProjectStatsResponse.total_estimated_value` (float cast) — see wave-23.
-  GST is not implemented on invoices (generic tax_rate/tax_amount only) — see wave-18.
-  `Project` model has no `version` column despite being cited as having optimistic locking.
+  GST is implemented on invoices (wave-18, `2073c36`, migration `0025`): `gst_percent` +
+  `gst_amount` columns, computed in `invoice_service.py`. Not GST-specific yet: no HSN/SAC per
+  line, no GSTIN on the invoice. **Corrected 2026-08-07** — this line previously said GST was
+  not implemented. `Project` model has no `version` column despite being cited as having
+  optimistic locking.
 - Reference-ID scheme: `SWA-{year}-{TYPE}-{seq:03d}`, atomic via
   `src/backend/services/reference_id_service.py`, confirmed race-safe under concurrency testing.
 - Real runtime storage is a flat `uploads/<id>/` directory at repo root (gitignored) — not

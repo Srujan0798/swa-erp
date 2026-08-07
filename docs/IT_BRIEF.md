@@ -78,6 +78,11 @@ processing pipeline."
 
 ## Part 3 — How the application is built (technical architecture)
 
+> **Corrected 2026-08-07** — this section describes the TARGET deployment for IT planning.
+> Items 4 and 5 below (MinIO, Redis+Celery) are NOT running in the current build: storage is a
+> local `uploads/` directory and there is no Celery worker (installed dependency only). IT should
+> plan for them as end-state, not assume they're live today.
+
 In plain terms, the system has these separate pieces, each running as its own "container" (a
 self-contained, isolated unit — using a tool called Docker so each piece can be started, stopped,
 or replaced independently without affecting the others):

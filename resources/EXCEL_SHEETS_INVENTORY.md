@@ -1,7 +1,7 @@
 # ERP Excel Sheets — Complete Inventory & Wave Mapping
 
-**Source:** `ERP Structure.zip` → 21 sheets  
-**Date extracted:** 2026-07-03  
+**Source:** `ERP Structure.zip` → 21 sheets
+**Date extracted:** 2026-07-03
 **Status:** All sheets examined, columns documented
 
 ---
@@ -16,24 +16,24 @@
 | 4 | **Tokens Sheet.xlsx** | ~200+ | Token | **Wave-3** ✅ | Model exists |
 | 5 | **Document Reference Sheet.xlsx** | ~50+ | DRN/Document | **Wave-3/6** ✅ | Partial |
 | 6 | **Project Tracking Sheet.xlsx** | ~100+ | Project | **Wave-2** ✅ | Model exists |
-| 6 | **Time Logging Sheet.xlsx** | ~500+ | Time Entry | **Wave-7** ⏳ | Pending |
-| 7 | **Sustainability Metrics Sheet.xlsx** | ~30+ | Sustainability | **Wave-8** ⏳ | Pending |
+| 6 | **Time Logging Sheet.xlsx** | ~500+ | Time Entry | **Wave-7** ✅ | Shipped |
+| 7 | **Sustainability Metrics Sheet.xlsx** | ~30+ | Sustainability | **Wave-8** ✅ | Shipped |
 | 8 | **Tokens Sheet.xlsx** | ~200+ | Token (detailed) | **Wave-3** ✅ | Model exists |
 | 9 | **Service Agreements Sheet.xlsx** | ~20+ | Agreement | **Wave-2/3** ✅ | Partial |
 | 10 | **Inquiries Sheet.xlsx** | ~50+ | Inquiry | **Wave-2** ✅ | Model exists |
 | 11 | **Clients Sheet.xlsx** | ~100+ | Client | **Wave-2** ✅ | Model exists |
 | 12 | **Project Tracking Sheet.xlsx** | ~100+ | Project | **Wave-2** ✅ | Model exists |
-| 13 | **Time Logging Sheet.xlsx** | ~500+ | Time Entry | **Wave-7** ⏳ | Pending |
-| 14 | **Sustainability Metrics Sheet.xlsx** | ~30+ | Sustainability | **Wave-8** ⏳ | Pending |
-| 15 | **Document Reference Sheet.xlsx** | ~50+ | DRN | **Wave-6** ⏳ | Pending |
+| 13 | **Time Logging Sheet.xlsx** | ~500+ | Time Entry | **Wave-7** ✅ | Shipped |
+| 14 | **Sustainability Metrics Sheet.xlsx** | ~30+ | Sustainability | **Wave-8** ✅ | Shipped |
+| 15 | **Document Reference Sheet.xlsx** | ~50+ | DRN | **Wave-6** ✅ | Shipped |
 | 16 | **Tokens Sheet.xlsx** (detailed) | ~200+ | Token | **Wave-3** ✅ | Model exists |
 | 17 | **Service Agreements Sheet.xlsx** | ~20+ | Agreement | **Wave-2/3** ✅ | Partial |
 | 18 | **Inquiries Sheet.xlsx** | ~50+ | Inquiry | **Wave-2** ✅ | Model exists |
 | 18 | **Clients Sheet.xlsx** | ~100+ | Client | **Wave-2** ✅ | Model exists |
 | 19 | **Project Tracking Sheet.xlsx** | ~100+ | Project | **Wave-2** ✅ | Model exists |
-| 19 | **Time Logging Sheet.xlsx** | ~500+ | Time Entry | **Wave-7** ⏳ | Pending |
-| 20 | **Sustainability Metrics Sheet.xlsx** | ~30+ | Sustainability | **Wave-8** ⏳ | Pending |
-| 21 | **Document Reference Sheet.xlsx** | ~50+ | DRN | **Wave-6** ⏳ | Pending |
+| 19 | **Time Logging Sheet.xlsx** | ~500+ | Time Entry | **Wave-7** ✅ | Shipped |
+| 20 | **Sustainability Metrics Sheet.xlsx** | ~30+ | Sustainability | **Wave-8** ✅ | Shipped |
+| 21 | **Document Reference Sheet.xlsx** | ~50+ | DRN | **Wave-6** ✅ | Shipped |
 
 ---
 
@@ -92,7 +92,10 @@
 
 ## Next Steps: Complete Waves 4-8
 
-### Wave-4: Task Management (READY TO DISPATCH)
+> **Corrected 2026-08-07** — waves 4-8 all SHIPPED (see `plan/EXECUTION.md` status table). This
+> section is historical planning text; the Status column above is the live truth.
+
+### Wave-4: Task Management (SHIPPED)
 - **Goal:** Per-project tasks, assignees, deps, status, due dates
 - **Files to create:** `.specify/specs/wave-4/{spec,plan,tasks,contracts}/`
 - **Tasks (5):** Task API, Task Dependencies, Kanban UI, Task Notifications, Task Reports

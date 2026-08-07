@@ -169,6 +169,11 @@ this meeting), dev
 
 ### 1. Production infrastructure — confirmed, with one caveat
 
+> **Note (2026-08-07):** "Confirmed" below = the client confirmed these are the intended
+> **target** decisions, not that they're built today. In the current code, file storage is a
+> local `uploads/` dir and there is no Celery worker (see `HIERARCHY.md`); MinIO and Celery
+> remain target-state.
+
 | Item | Decision | Confidence |
 |------|----------|------------|
 | OS | Windows Server, on-prem | Viraj: **"99% confident it's Windows only"** — not 100%. Confirm on the IT call, don't assume. |
