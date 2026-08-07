@@ -48,19 +48,25 @@ wave-1 (Foundation) ✅ SHIPPED
 | 19 | Backup + restore + ops scripts | ready to dispatch | 0/1 | `work/wave-19/`; closes a Meeting-2-requested gap that was never built |
 | 20 | Production config templates | ready to dispatch | 0/1 | `work/wave-20/`; placeholders marked for each pending IT answer, ready for instant swap |
 | 21 | Handover documentation package | ready to dispatch | 0/1 | `work/wave-21/`; admin guide, user guide, the architecture summary Viraj asked for in Meeting 2 and never got |
-| 22 | Critical RBAC and auth gaps | ready to dispatch | 0/1 | `work/wave-22/`; found by 2026-07-21 four-agent audit: unauthenticated materials endpoints, zero RBAC on financial modules, core-chain access-matrix mismatches |
-| 23 | Correctness bugs | ready to dispatch | 0/1 | `work/wave-23/`; fabricated financial PDF numbers, money-as-float, fake soft-delete on Task, missing Project version column |
-| 24 | Dead code + missing UI wiring | ready to dispatch | 0/1 | `work/wave-24/`; dead debug endpoint, broken New User button, Tokens/DocumentReference UI built but unreachable, notification stubs |
+| 22 | Critical RBAC and auth gaps | **SHIPPED** ✅ | 1/1 | `work/reports/wave-22/01-critical-rbac-and-auth-gaps.report.md`; materials endpoints authenticated, financial modules (project_pnl/exports/invoice-status) role-gated, core-chain RBAC matrix matches client access matrix (PM+Designer for DBR/KDR, Auditor+Designer for Reforge), compliance-review and task/RFQ transitions gated |
+| 23 | Correctness bugs | **SHIPPED** ✅ | 1/1 | `work/reports/wave-23/01-correctness-bugs.report.md`; financial PDF now uses real ProjectCost data, money as Decimal, real soft-delete on Task, Project.version optimistic locking (0027) |
+| 24 | Dead code + missing UI wiring | **SHIPPED** ✅ | 1/1 | `work/reports/wave-24/01-dead-code-and-ui-wiring.report.md`; dead debug endpoint + dead page removed, New User button wired, delete-user/client UI, Tokens + DocumentReference reachable via navigation, notifications un-stubbed (0026) |
 | 25 | (docs truth pass) — DONE inline, no task file | ✅ SHIPPED | — | fixed directly by the orchestrator 2026-07-21: `docs/api.md`, `docs/conventions.md`, `docs/deployment.md`, `docs/runbook.md`, `HIERARCHY.md`, `orchestrator/rules/security.md`, `docs/SCOPE_GUARD.md`, `orchestrator/memory/MEMORY.md` |
+| 26 | Root handoff extraction + doc cleanup | **SHIPPED** ✅ | 4/4 | `work/reports/wave-26/*`; extracted 3 root handoffs, swept 142 archived handoffs, triaged 122 MB of session exports (no secrets), produced current-docs overlap map |
+| 27 | Security findings + lint | **SHIPPED** ✅ | 1/1 | `work/reports/wave-27/01-security-findings-and-lint.report.md`; backup scripts hardened against credential leakage, pre-commit hooks pinned to SHAs, ruff swept, backup-safety test suite added |
+| 28 | Doc consolidation | **SHIPPED** ✅ | 1/1 | `work/reports/wave-28/01-execute-doc-consolidation.report.md`; `HANDOFF_FINAL.md`/`wave9handoff`/`wave10handoff`/`OS_SETUP.md` archived via `git mv`, KIMI.md → CLAUDE.md symlink, ADR-0003 de-duplicated, conventions/history enriched |
+| 29 | Stale claim fixes | **SHIPPED** ✅ | 1/1 | `work/reports/wave-29/01-stale-claim-fixes.report.md`; 9 docs corrected to match real repo state (backups, GST, Celery/MinIO target-state, test counts, version/tag reconciliation) |
+| 30 | Final release + submission package | **SHIPPED** ✅ | 1/1 | this file; full verification sweep + live end-to-end business-flow validation, version cut at 1.0.0, `deliverables/SUBMISSION.md` produced. See `work/reports/wave-30/01-final-release-and-submission.report.md` |
 
-**Waves 22-24 all found by a 2026-07-21 four-agent full-project traceability audit** that read
-every backend module, every frontend page, and every current doc line-by-line against
-`resources/MEETINGS_MASTER.md`'s actual requirements — not a surface pass. Like 17-21, none of
-22-24 depend on Viraj's or IT's still-open answers.
+**Waves 22-30 are all SHIPPED** (see status table above; per-wave reports in `work/reports/wave-N/`).
+All of the audit-driven fixes (22-24), the security/lint pass (27), and the docs-consolidation
+passes (26, 28, 29) landed and were verified. **Wave-30 cut the first real release — `1.0.0`**
+(2026-08-07), replacing the stale `0.2.0` version files, and produced the client submission
+package at `deliverables/SUBMISSION.md`.
 
-**Waves 17-21 are all independent of the two remaining external blockers** (Viraj's 3 open
-decisions in `docs/decisions/0002-core-id-chain-gap.md`, IT's 8 answers in `docs/IT_BRIEF.md`) —
-they can all be dispatched and completed now, in parallel, while waiting on those replies.
+The only remaining external blockers are Viraj's 3 open decisions
+(`docs/decisions/0002-core-id-chain-gap.md`) and IT's 8 answers (`docs/IT_BRIEF.md`) — nothing
+in code can resolve those.
 
 **Note on waves 4-8:** these were committed in one mega-commit (`ed71fac`) rather than the
 per-task worker/report process this file describes — `work/reports/` is empty for waves 5, 6,
@@ -114,7 +120,7 @@ directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY
 current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
 instead of duplicating it here.
 
-**Active wave:** none — waves 1-17 shipped or ready-to-dispatch, waves 18-25 staged for
-production-readiness work (security, correctness, docs-truth, handover), see status table above.
-**Next action:** dispatch whichever of waves 17-25 aren't yet complete; see `work/wave-N/` for
-task briefs and `work/reports/wave-N/` for what's already landed.
+**Active wave:** none — waves 1-30 shipped (see status table above). Wave-30 cut the
+`1.0.0` client-submission release and produced `deliverables/SUBMISSION.md`.
+**Next action:** hand over per `deliverables/SUBMISSION.md` (deploy checklist, Excel import,
+support/next steps).
