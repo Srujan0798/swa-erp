@@ -15,7 +15,7 @@ def create_test_user(db: Session, role: Role) -> User:
     user = User(
         id=uuid.uuid4(),
         email=f"test-{role.value}@example.com",
-        username=f"test_{role.value}",
+        name=f"Test {role.value.title()}",
         password_hash=hash_password("test123!"),
         role=role,
         is_active=True,
@@ -76,7 +76,7 @@ class TestProjectPnlRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         project_id = uuid.uuid4()
         response = test_client.get(f"/api/projects/{project_id}/pnl")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_pnl_summary_admin_allowed(self, test_client, db_session):
         """Test that Admin can access P&L summary"""
@@ -84,7 +84,7 @@ class TestProjectPnlRoleEnforcement:
         login_user(test_client, "test-admin@example.com")
         project_id = uuid.uuid4()
         response = test_client.get(f"/api/projects/{project_id}/pnl")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_pnl_summary_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied access to P&L summary"""
@@ -101,7 +101,7 @@ class TestProjectPnlRoleEnforcement:
         project_id = uuid.uuid4()
         body = {"category": "test", "amount": 100.0}
         response = test_client.post(f"/api/projects/{project_id}/costs", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_add_cost_pm_denied(self, test_client, db_session):
         """Test that PM is denied for adding cost entry (admin required)"""
@@ -122,7 +122,7 @@ class TestExportsRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         project_id = uuid.uuid4()
         response = test_client.get(f"/api/exports/projects/{project_id}/summary.pdf")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_export_summary_admin_allowed(self, test_client, db_session):
         """Test that Admin can access export summary"""
@@ -130,7 +130,7 @@ class TestExportsRoleEnforcement:
         login_user(test_client, "test-admin@example.com")
         project_id = uuid.uuid4()
         response = test_client.get(f"/api/exports/projects/{project_id}/summary.pdf")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_export_summary_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied for export summary"""
@@ -150,8 +150,8 @@ class TestInvoicesRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         invoice_id = uuid.uuid4()
         body = {"status": "sent"}
-        response = test_client.patch(f"/invoices/{invoice_id}/status", json=body)
-        assert response.status_code == 401
+        response = test_client.patch(f"/api/invoices/{invoice_id}/status", json=body)
+        assert response.status_code not in (401, 403)
 
     def test_update_invoice_status_admin_allowed(self, test_client, db_session):
         """Test that Admin can update invoice status"""
@@ -159,8 +159,8 @@ class TestInvoicesRoleEnforcement:
         login_user(test_client, "test-admin@example.com")
         invoice_id = uuid.uuid4()
         body = {"status": "paid"}
-        response = test_client.patch(f"/invoices/{invoice_id}/status", json=body)
-        assert response.status_code == 401
+        response = test_client.patch(f"/api/invoices/{invoice_id}/status", json=body)
+        assert response.status_code not in (401, 403)
 
     def test_update_invoice_status_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied for invoice status update"""
@@ -168,7 +168,7 @@ class TestInvoicesRoleEnforcement:
         login_user(test_client, "test-viewer@example.com")
         invoice_id = uuid.uuid4()
         body = {"status": "sent"}
-        response = test_client.patch(f"/invoices/{invoice_id}/status", json=body)
+        response = test_client.patch(f"/api/invoices/{invoice_id}/status", json=body)
         assert response.status_code == 403
 
 
@@ -180,31 +180,31 @@ class TestInquiriesRoleEnforcement:
         create_test_user(db_session, Role.PM)
         login_user(test_client, "test-pm@example.com")
         body = {
-            "client_id": uuid.uuid4(),
+            "client_id": str(uuid.uuid4()),
             "subject": "Test Inquiry",
             "description": "Test inquiry for RBAC fix",
         }
         response = test_client.post("/api/inquiries", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_create_inquiry_designer_allowed(self, test_client, db_session):
         """Test that Designer can create inquiry (after RBAC fix)"""
         create_test_user(db_session, Role.DESIGNER)
         login_user(test_client, "test-designer@example.com")
         body = {
-            "client_id": uuid.uuid4(),
+            "client_id": str(uuid.uuid4()),
             "subject": "Test Inquiry",
             "description": "Test inquiry for RBAC fix",
         }
         response = test_client.post("/api/inquiries", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_create_inquiry_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied for creating inquiry"""
         create_test_user(db_session, Role.VIEWER)
         login_user(test_client, "test-viewer@example.com")
         body = {
-            "client_id": uuid.uuid4(),
+            "client_id": str(uuid.uuid4()),
             "subject": "Test Inquiry",
             "description": "Test inquiry for RBAC fix",
         }
@@ -220,35 +220,35 @@ class TestDocumentReferencesRoleEnforcement:
         create_test_user(db_session, Role.PM)
         login_user(test_client, "test-pm@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "DBR",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_create_dbr_kdr_designer_allowed(self, test_client, db_session):
         """Test that Designer can create DBR/KDR document reference (after RBAC fix)"""
         create_test_user(db_session, Role.DESIGNER)
         login_user(test_client, "test-designer@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "KDR",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_create_dbr_kdr_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied for creating DBR/KDR document reference"""
         create_test_user(db_session, Role.VIEWER)
         login_user(test_client, "test-viewer@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "DBR",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
@@ -259,35 +259,35 @@ class TestDocumentReferencesRoleEnforcement:
         create_test_user(db_session, Role.AUDITOR)
         login_user(test_client, "test-auditor@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "Reforge",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_create_reforge_designer_allowed(self, test_client, db_session):
         """Test that Designer can create Reforge document reference (after RBAC fix)"""
         create_test_user(db_session, Role.DESIGNER)
         login_user(test_client, "test-designer@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "Reforge",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_create_reforge_pm_denied(self, test_client, db_session):
         """Test that PM is denied for creating Reforge document reference"""
         create_test_user(db_session, Role.PM)
         login_user(test_client, "test-pm@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "Reforge",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
@@ -298,13 +298,13 @@ class TestDocumentReferencesRoleEnforcement:
         create_test_user(db_session, Role.PM)
         login_user(test_client, "test-pm@example.com")
         body = {
-            "project_id": uuid.uuid4(),
+            "project_id": str(uuid.uuid4()),
             "document_type": "Default",
-            "author_id": uuid.uuid4(),
+            "author_id": str(uuid.uuid4()),
             "doc_date": "2024-01-01",
         }
         response = test_client.post("/api/document-references", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
 
 class TestComplianceRoleEnforcement:
@@ -317,7 +317,7 @@ class TestComplianceRoleEnforcement:
         item_id = uuid.uuid4()
         body = {"notes": "Approved"}
         response = test_client.post(f"/api/compliance/items/{item_id}/review", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_review_item_designer_allowed(self, test_client, db_session):
         """Test that Designer can review compliance item (after RBAC fix)"""
@@ -326,7 +326,7 @@ class TestComplianceRoleEnforcement:
         item_id = uuid.uuid4()
         body = {"notes": "Design approved"}
         response = test_client.post(f"/api/compliance/items/{item_id}/review", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_review_item_pm_denied(self, test_client, db_session):
         """Test that PM is denied for reviewing compliance item"""
@@ -357,7 +357,7 @@ class TestTasksRoleEnforcement:
         task_id = uuid.uuid4()
         body = {"to_status": "in_progress"}
         response = test_client.post(f"/api/tasks/{task_id}/transition", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_reorder_task_pm_allowed(self, test_client, db_session):
         """Test that PM can reorder task"""
@@ -366,7 +366,7 @@ class TestTasksRoleEnforcement:
         task_id = uuid.uuid4()
         body = {"status": "completed", "sort_order": 1}
         response = test_client.post(f"/api/tasks/{task_id}/reorder", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_add_comment_pm_allowed(self, test_client, db_session):
         """Test that PM can add comment to task"""
@@ -375,7 +375,7 @@ class TestTasksRoleEnforcement:
         task_id = uuid.uuid4()
         body = {"content": "Comment"}
         response = test_client.post(f"/api/tasks/{task_id}/comments", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_transition_task_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied for task transition"""
@@ -396,7 +396,7 @@ class TestRFQsRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         rfq_id = uuid.uuid4()
         response = test_client.post(f"/api/rfqs/{rfq_id}/send")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_respond_rfq_pm_allowed(self, test_client, db_session):
         """Test that PM can respond to RFQ"""
@@ -405,7 +405,7 @@ class TestRFQsRoleEnforcement:
         rfq_id = uuid.uuid4()
         body = []
         response = test_client.post(f"/api/rfqs/{rfq_id}/respond", json=body)
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_compare_rfq_pm_allowed(self, test_client, db_session):
         """Test that PM can compare RFQ"""
@@ -413,7 +413,7 @@ class TestRFQsRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         rfq_id = uuid.uuid4()
         response = test_client.post(f"/api/rfqs/{rfq_id}/compare")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_close_rfq_pm_allowed(self, test_client, db_session):
         """Test that PM can close RFQ"""
@@ -421,7 +421,7 @@ class TestRFQsRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         rfq_id = uuid.uuid4()
         response = test_client.post(f"/api/rfqs/{rfq_id}/close")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_cancel_rfq_pm_allowed(self, test_client, db_session):
         """Test that PM can cancel RFQ"""
@@ -429,7 +429,7 @@ class TestRFQsRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         rfq_id = uuid.uuid4()
         response = test_client.post(f"/api/rfqs/{rfq_id}/cancel")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 
     def test_send_rfq_viewer_denied(self, test_client, db_session):
         """Test that Viewer is denied for sending RFQ"""
@@ -445,5 +445,5 @@ class TestRFQsRoleEnforcement:
         login_user(test_client, "test-pm@example.com")
         rfq_id = uuid.uuid4()
         response = test_client.post(f"/api/rfqs/{rfq_id}/award")
-        assert response.status_code == 401
+        assert response.status_code not in (401, 403)
 

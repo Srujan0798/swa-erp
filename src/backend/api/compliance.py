@@ -86,9 +86,19 @@ def update_item(
 def review_item(
     item_id: uuid.UUID,
     body: ProjectComplianceItemReview,
-    current_user: User = Depends(require_role([Role.AUDITOR, Role.DESIGNER])),  # noqa: B008
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> ProjectComplianceItemRead:
+    # Literal role membership, NOT hierarchy-based require_role(): compliance/certification
+    # review is a segregation-of-duties action restricted to exactly Auditor or Designer per
+    # the client's access matrix (resources/MEETINGS_MASTER.md Meeting 1 section 4) -
+    # deliberately excludes PM even though PM is "senior" in the general role hierarchy, since
+    # audit independence means the PM shouldn't be able to self-certify their own project.
+    if current_user.role not in (Role.AUDITOR.value, Role.DESIGNER.value, Role.ADMIN.value):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Auditor or Designer can review compliance items",
+        )
     try:
         result = review_compliance_item_service(db, item_id, current_user.id, body.notes)
     except ValueError as e:

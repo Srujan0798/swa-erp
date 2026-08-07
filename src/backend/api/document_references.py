@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
-from src.backend.core.roles import Role, role_includes
+from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.document_reference import (
@@ -71,12 +71,16 @@ def create_document_reference(
     #   anything else -> PM only (safe default)
     doc_type = (body.document_type or "").strip().upper()
     if doc_type in ("DBR", "KDR"):
-        allowed = {Role.PM, Role.DESIGNER}
+        allowed = {Role.PM.value, Role.DESIGNER.value}
     elif doc_type == "REFORGE":
-        allowed = {Role.AUDITOR, Role.DESIGNER}
+        # Literal membership, not hierarchy: excludes PM even though PM is "senior" in the
+        # general role hierarchy - Reforge/certification is a segregation-of-duties action
+        # restricted to exactly Auditor or Designer per the client's matrix (audit
+        # independence: PM shouldn't self-certify their own project).
+        allowed = {Role.AUDITOR.value, Role.DESIGNER.value}
     else:
-        allowed = {Role.PM}
-    if not any(role_includes(Role(current_user.role), r) for r in allowed):
+        allowed = {Role.PM.value}
+    if current_user.role not in allowed and current_user.role != Role.ADMIN.value:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Role '{current_user.role}' cannot create a '{doc_type or body.document_type}' document reference",

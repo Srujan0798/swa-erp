@@ -94,5 +94,5 @@ class TaskComment(Base):
 
     task = relationship("Task", back_populates="comments")
     author = relationship("User", back_populates="authored_task_comments")
-    parent = relationship("TaskComment", remote_side=["TaskComment.id"], back_populates="replies")
+    parent = relationship("TaskComment", remote_side=[id], back_populates="replies")
     replies = relationship("TaskComment", back_populates="parent")
