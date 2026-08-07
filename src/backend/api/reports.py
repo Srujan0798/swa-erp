@@ -34,8 +34,8 @@ def project_health(
 
 @router.get("/utilization", response_model=UtilizationReport)
 def utilization(
-    start_date: date | None = Query(default=None),
-    end_date: date | None = Query(default=None),
+    start_date: date | None = Query(default=None),  # noqa: B008
+    end_date: date | None = Query(default=None),  # noqa: B008
     _: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> UtilizationReport:
