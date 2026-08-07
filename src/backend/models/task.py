@@ -22,7 +22,10 @@ class Task(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     project_id = Column(
-        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
@@ -47,12 +50,32 @@ class Task(Base):
     )
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
-    project = relationship("Project", foreign_keys=[project_id], back_populates="tasks", lazy="selectin")
-    assignee = relationship("User", foreign_keys=[assignee_id], back_populates="assigned_tasks", lazy="selectin")
-    reporter = relationship("User", foreign_keys=[reporter_id], back_populates="reported_tasks", lazy="selectin")
-    dependencies = relationship("TaskDependency", foreign_keys="TaskDependency.task_id", back_populates="task", cascade="all, delete-orphan", lazy="selectin")
-    dependents = relationship("TaskDependency", foreign_keys="TaskDependency.depends_on_task_id", back_populates="depends_on_task", cascade="all, delete-orphan", lazy="selectin")
-    comments = relationship("TaskComment", back_populates="task", cascade="all, delete-orphan", lazy="selectin")
+    project = relationship(
+        "Project", foreign_keys=[project_id], back_populates="tasks", lazy="selectin"
+    )
+    assignee = relationship(
+        "User", foreign_keys=[assignee_id], back_populates="assigned_tasks", lazy="selectin"
+    )
+    reporter = relationship(
+        "User", foreign_keys=[reporter_id], back_populates="reported_tasks", lazy="selectin"
+    )
+    dependencies = relationship(
+        "TaskDependency",
+        foreign_keys="TaskDependency.task_id",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    dependents = relationship(
+        "TaskDependency",
+        foreign_keys="TaskDependency.depends_on_task_id",
+        back_populates="depends_on_task",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    comments = relationship(
+        "TaskComment", back_populates="task", cascade="all, delete-orphan", lazy="selectin"
+    )
 
     __table_args__ = (
         Index("ix_tasks_project_status", "project_id", "status"),
@@ -72,7 +95,9 @@ class TaskDependency(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     task = relationship("Task", foreign_keys=[task_id], back_populates="dependencies")
-    depends_on_task = relationship("Task", foreign_keys=[depends_on_task_id], back_populates="dependents")
+    depends_on_task = relationship(
+        "Task", foreign_keys=[depends_on_task_id], back_populates="dependents"
+    )
 
 
 class TaskComment(Base):
@@ -94,5 +119,5 @@ class TaskComment(Base):
 
     task = relationship("Task", back_populates="comments")
     author = relationship("User", back_populates="authored_task_comments")
-    parent = relationship("TaskComment", remote_side=[id], back_populates="replies")
+    parent = relationship("TaskComment", remote_side=[id], back_populates="replies")  # noqa: A003
     replies = relationship("TaskComment", back_populates="parent")

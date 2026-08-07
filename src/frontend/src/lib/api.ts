@@ -60,6 +60,7 @@ import type {
   DocumentReferenceListResponse,
   DocumentReferenceCreate,
   DocumentReferenceUpdate,
+  Notification,
 } from "@/types/api";
 import type {
   DocumentItem,

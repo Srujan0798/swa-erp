@@ -51,7 +51,7 @@ def _check_project_exists(db: Session, project_id: uuid.UUID) -> None:
 async def upload_document_endpoint(
     project_id: uuid.UUID,
     file: UploadFile,
-    folder_id: uuid.UUID | None = Form(default=None),
+    folder_id: uuid.UUID | None = Form(default=None),  # noqa: B008
     tags: str | None = Form(default=None),
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
@@ -84,7 +84,7 @@ def list_documents_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    folder_id: uuid.UUID | None = Query(default=None),
+    folder_id: uuid.UUID | None = Query(default=None),  # noqa: B008
 ) -> DocumentListResponse:
     _check_project_exists(db, project_id)
     result = list_project_documents(db, project_id, page, page_size, folder_id)
@@ -148,7 +148,7 @@ def update_document_endpoint(
 async def reupload_document_endpoint(
     project_id: uuid.UUID,
     original_name: str = Form(...),
-    file: UploadFile = Form(...),
+    file: UploadFile = Form(...),  # noqa: B008
     tags: str | None = Form(default=None),
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
@@ -214,7 +214,9 @@ def move_documents_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> dict:
     try:
-        count = move_documents_service(db, body.document_ids, body.target_folder_id, current_user.id)
+        count = move_documents_service(
+            db, body.document_ids, body.target_folder_id, current_user.id
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return {"moved": count}
@@ -245,7 +247,7 @@ def list_folders_endpoint(
     project_id: uuid.UUID,
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
-    parent_id: uuid.UUID | None = Query(default=None),
+    parent_id: uuid.UUID | None = Query(default=None),  # noqa: B008
 ) -> list[DocumentFolderRead]:
     _check_project_exists(db, project_id)
     return list_project_folders(db, project_id, parent_id)
@@ -291,7 +293,7 @@ def search_documents_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
     q: str | None = Query(default=None),
     tags: str | None = Query(default=None),
-    folder_id: uuid.UUID | None = Query(default=None),
+    folder_id: uuid.UUID | None = Query(default=None),  # noqa: B008
 ) -> list[DocumentRead]:
     _check_project_exists(db, project_id)
     return search_project_documents(db, project_id, q, tags, folder_id)

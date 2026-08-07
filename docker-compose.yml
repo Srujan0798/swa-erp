@@ -56,6 +56,7 @@ services:
       CORS_ORIGINS: '["http://localhost:3000"]'
       APP_ENV: dev
       DEBUG: "true"
+      DISABLE_AUTH_RATE_LIMIT: ${DISABLE_AUTH_RATE_LIMIT:-true}
     ports: ["8000:8000"]
     depends_on:
       postgres:

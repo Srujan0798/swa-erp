@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swa-erp"
-version = "0.2.0"
+version = "1.0.0"
 description = "Internal ERP for SWA Consultancy Pvt. Ltd."
 authors = [{name = "Srujan"}]
 requires-python = ">=3.11"
@@ -18,6 +18,10 @@ extend-exclude = ["src/backend/alembic/versions", ".venv", "node_modules"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "RUF"]
 ignore = ["E501", "N999"]
+
+[tool.ruff.lint.per-file-ignores]
+# `src/backend/__init__.py` re-exports submodules as the public package API (intentional, wave-1 pattern)
+"src/backend/__init__.py" = ["F401"]
 
 [tool.black]
 line-length = 100

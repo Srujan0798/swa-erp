@@ -150,7 +150,7 @@ def bulk_create_items(
 @projects_compliance_router.get("/items", response_model=list[ProjectComplianceItemRead])
 def list_project_items(
     project_id: uuid.UUID,
-    standard_id: uuid.UUID | None = Query(default=None),
+    standard_id: uuid.UUID | None = Query(default=None),  # noqa: B008
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[ProjectComplianceItemRead]:
