@@ -36,11 +36,16 @@ See [`plan/EXECUTION.md`](plan/EXECUTION.md) for wave progress.
 
 ## Tech stack
 
-- **Backend:** Python 3.11 · FastAPI · SQLAlchemy 2 · Pydantic v2 · PostgreSQL · Celery · Redis
+- **Backend:** Python 3.11 · FastAPI · SQLAlchemy 2 · Pydantic v2 · PostgreSQL · Redis
 - **Frontend:** React 18 · Vite · TypeScript · TailwindCSS · shadcn/ui · TanStack Query · React Router
 - **Auth:** JWT + bcrypt (role-based access control)
-- **Storage:** Local filesystem (dev) → MinIO/S3 (prod)
+- **Storage:** Local filesystem only — all uploads live in `uploads/` at the repo root
 - **Deploy:** Docker Compose
+
+**Corrected 2026-08-07.** Celery and MinIO are NOT live. Celery is an installed
+dependency (`requirements.txt`) with zero implementation — no app, no `@task`, no worker service;
+Redis is used only as a cache. MinIO/S3 is not wired at all; storage is a local `uploads/`
+directory. Both remain target-state (see `docs/conventions.md`).
 
 ## Deliverables
 

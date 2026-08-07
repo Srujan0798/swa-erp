@@ -82,14 +82,18 @@ alembic upgrade head   # apply
 Documented in `docs/deployment.md` (rewritten 2026-07-21 — no longer a wave-8 placeholder).
 
 ## Backups
-**Corrected 2026-07-21**: check `work/reports/wave-19/` before trusting this section — wave-19
-(`scripts/backup_db.sh`, `backup_files.sh`, `restore_db.sh`, `docs/runbook_backup_restore.md`)
-was scoped to build real backup automation but had not landed as of this correction (no
-`work/reports/wave-19/` report exists yet, none of those scripts exist in `scripts/`). Until
-that lands, backups are manual only:
-- Postgres: `pg_dump swa_erp > backup-YYYY-MM-DD.sql` (manual; wave-19 automates this)
-- File uploads: the real directory is `uploads/` at repo root, not `documents/` (see
-  `docs/conventions.md`'s 2026-07-21 correction) — manually copy/rsync this until wave-19 lands
+**Corrected 2026-08-07** — wave-19 landed and wave-27 hardened it: real, tested backup
+automation exists and is documented in `docs/runbook_backup_restore.md`. Use that document;
+do not treat backups as manual.
+
+- Postgres: `make backup-db` → `scripts/backup_db.sh` (pg_dump → timestamped `.sql.gz`,
+  retention-pruned)
+- File uploads: `make backup-files` → `scripts/backup_files.sh` (tar of `uploads/` at repo
+  root, retention-pruned)
+- Restore: `make restore-db file=<path>` → `scripts/restore_db.sh` (prints target before
+  prompting; `--yes` for CI)
+- Verified by `tests/wave-19/test_backup_scripts.py` (full round-trip) and
+  `tests/wave-27/test_backup_script_safety.py`
 - Audit log: never deleted; archived to cold storage after N years (TBD by legal)
 
 ## Health checks

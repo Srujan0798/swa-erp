@@ -84,7 +84,8 @@ Need to pick tech stack for swa-erp at project kickoff. Project 1 (rfq2boq) uses
 ### Background jobs: Celery + Redis
 **Why:**
 - Standard Python choice; team familiar
-- Used in wave-3+ for PDF gen, email send
+- Chosen for wave-3+ PDF gen / email send **— but never implemented** (no Celery app/worker
+  exists; installed dependency only, see `HIERARCHY.md`). Decision stands as target-state.
 
 **Rejected:**
 - RQ: less featured

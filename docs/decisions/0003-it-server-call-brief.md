@@ -12,9 +12,11 @@ IT person can answer, not to re-derive the architecture from scratch.
 - RAM: 128 GB, extendable
 - Load target: 100+ concurrent users via VPN/RDP
 - Database: PostgreSQL
-- File storage: MinIO (S3-compatible), same server
+- File storage: MinIO (S3-compatible), same server — **target decision; MinIO not wired in the
+  current code (local `uploads/` only, see `HIERARCHY.md`)**
 - Containerization: Docker Desktop on Windows Server
-- Background jobs: Celery + Redis
+- Background jobs: Celery + Redis — **target decision; Celery installed but unimplemented (no
+  worker exists), Redis used only as a cache today**
 - PDF generation: WeasyPrint (HTML→PDF)
 - Excel import/export: openpyxl
 - Backend: FastAPI (Python 3.11), internal REST only, no paid external APIs

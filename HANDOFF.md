@@ -7,10 +7,12 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
 reading this in a future session, check `plan/EXECUTION.md`'s status table and `git log` before
 trusting anything below, don't repeat that mistake)
 
-- **Status:** Waves 1-16 ✅ SHIPPED and independently verified (324/324 backend tests, 7/7 E2E,
+- **Status:** Waves 1-16 ✅ SHIPPED and independently verified (7/7 E2E,
   Docker boots clean from cold). The real client-requested core chain (Inquiry→Agreement→Token→
   DocumentReference, waves 9-10) is built and traced correctly against
   `resources/MEETINGS_MASTER.md` — see the 2026-07-21 four-agent audit findings referenced below.
+  **Backend test suite: 393/393 passing** (`python3 -m pytest tests/ -q`, verified 2026-08-07).
+  **Corrected 2026-08-07** — this line previously said "324/324"; that count predates waves 17-27.
 - **Waves 17-21** (notifications mount, security hardening, backup scripts, prod config
   templates, handover docs): task briefs exist in `work/wave-N/`, check `work/reports/wave-N/`
   for which have actually landed — don't assume, verify.
@@ -87,7 +89,7 @@ That's it. No project memory needed.
 13. Excel → ERP data migration importer — ready to dispatch, depends on wave-9+10 (`work/wave-13/`)
 
 ## Key project context
-- **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Celery, Redis / React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query
+- **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Redis, React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query. (Celery is an installed dependency only — no worker exists; storage is a local `uploads/` dir, MinIO/S3 not wired — see `HIERARCHY.md`)
 - **Auth:** JWT + RBAC (roles: admin, pm, designer, auditor, viewer)
 - **Money:** Decimal(18,2), INR default, multi-currency ready
 - **Compliance standards:** NBC, ECBC, IGBC, IS fire codes (explicit references required)

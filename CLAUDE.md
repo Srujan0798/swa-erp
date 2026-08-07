@@ -6,10 +6,10 @@ You are the project orchestrator. Full role in `orchestrator/ROLE.md`.
 Internal ERP for SWA Consultancy: manage clients, projects, quotations/BOQ workflow, tasks, vendors, inventory, documents, compliance tracking (NBC/ECBC/IGBC/IS), time tracking, and financials at startup scale.
 
 ## Tech stack
-- **Backend:** Python 3.11 · FastAPI · SQLAlchemy 2 · Pydantic v2 · PostgreSQL · Celery · Redis
+- **Backend:** Python 3.11 · FastAPI · SQLAlchemy 2 · Pydantic v2 · PostgreSQL · Redis · Celery (installed dependency only — **no Celery app/worker exists**; see `HIERARCHY.md`)
 - **Frontend:** React 18 · Vite · TypeScript · TailwindCSS · shadcn/ui · TanStack Query
 - **Auth:** JWT + RBAC
-- **Storage:** Local fs (dev) → MinIO/S3 (prod)
+- **Storage:** Local filesystem only — `uploads/` at repo root. MinIO/S3 is **not wired** (target-state; see `docs/conventions.md`)
 - **Deploy:** Docker Compose
 
 ## Code style

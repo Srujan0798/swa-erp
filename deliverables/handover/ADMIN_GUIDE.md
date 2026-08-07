@@ -58,20 +58,20 @@ make import-data file=<path.xlsx> type=<...> commit=1
 
 ## 3. Backup and restore
 
-> **PENDING WAVE-19.** The dedicated backup/restore + ops runbook
-> (`docs/runbook_backup_restore.md`) has **not been built yet** (wave-19 is
-> still "ready to dispatch"). Until it lands, there is **no automated backup
-> procedure shipped in this repo** — do not assume nightly backups exist.
+> **Corrected 2026-08-07.** The dedicated backup/restore scripts shipped and are
+> tested — this is no longer pending. See `docs/runbook_backup_restore.md` for the
+> full how-to. In short:
 >
-> What is known/planned: the confirmed infra intent is a **daily database
-> backup + weekly file backup** on the on-prem Windows server
-> (`resources/MEETINGS_MASTER.md`, IT_BRIEF Part 3). IT_BRIEF Q5 asks whether
-> backup tooling already exists on the server — prefer hooking into that over
-> building something new. Replace this section with the wave-19 runbook contents
-> once it ships.
-
-Until then, a manual safety net: take a snapshot/export of the Postgres volume
-(`swa_erp_prod_pgdata`) and the uploaded-files volume before any risky operation.
+> - **Database backup:** `make backup-db` (runs `scripts/backup_db.sh` → a
+>   timestamped `.sql.gz`, pruned after 30 days). Restore: `make restore-db file=<path>`.
+> - **File backup:** `make backup-files` (runs `scripts/backup_files.sh` → a tar of
+>   the `uploads/` directory, pruned after 90 days).
+> - **Scheduling:** add the two cron lines in `docs/runbook_backup_restore.md` §"How to
+>   schedule backups" to get the intended daily DB + weekly file backup on the on-prem
+>   server. Retention (30/90 days) is a default, not a confirmed client requirement —
+>   adjust if the client specifies otherwise.
+> - These are verified by `tests/wave-19/test_backup_scripts.py` (full
+>   backup → restore round-trip) and `tests/wave-27/test_backup_script_safety.py`.
 
 ---
 

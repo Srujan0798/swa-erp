@@ -67,12 +67,12 @@ Sustainability metrics — see `resources/MEETINGS_MASTER.md` for the full requi
 | R3 | RBAC complexity | Start with 3 roles (admin, PM, viewer); grow only when needed | new permission checks scattered in code |
 | R4 | DB schema churn | Alembic from day 1; never edit migrations after merge | accidental data loss in dev |
 | R5 | Compliance tracking becomes unmaintainable | Versioned checklists (NBC 2016 vs 2024); checklists in DB not code | new code edit needed for every standards update |
-| R6 | Document storage cost | Local fs in dev → MinIO local in prod → S3 only when scale demands | storage > 50GB in year 1 |
+| R6 | Document storage cost | Local fs in dev → **MinIO local in prod → S3 only when scale demands** (target plan — MinIO is NOT wired today; storage is local `uploads/`, see `docs/conventions.md`) | storage > 50GB in year 1 |
 | R7 | Performance with many projects | Pagination + indexes from day 1; load test in wave-2 | slow list views |
 | R8 | Vendor coordination email-vs-portal | Vendors get a lightweight portal in wave-5; email fallback always works | vendors asking for status manually |
 
 ## Constraints
-- **Tech stack frozen:** Python 3.11 + FastAPI + Postgres + Celery + Redis + React + Vite + TS + Tailwind + shadcn/ui
+- **Tech stack frozen:** Python 3.11 + FastAPI + Postgres + Celery + Redis + React + Vite + TS + Tailwind + shadcn/ui — Celery is a **chosen dependency, not yet implemented** (no worker exists; see `HIERARCHY.md`), and Redis is used only as a cache today
 - **Self-hosted:** Single deployment for SWA; Docker Compose first, k8s later
 - **Indian context:** INR primary currency, GST-aware invoicing, Gujarati/Hindi/English support in UI (English first)
 - **GDPR-lite:** Personal data deletable on request; audit log for who accessed what
