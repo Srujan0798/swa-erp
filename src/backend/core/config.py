@@ -21,6 +21,13 @@ class Settings(BaseSettings):
 
     AUTH_RATE_LIMIT_PER_MIN: int = 5
 
+    STORAGE_BACKEND: str = "local"  # "local" | "minio"
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_BUCKET: str = "swa-erp"
+    MINIO_SECURE: bool = False
+
     @model_validator(mode="after")
     def _validate_production_secrets(self) -> "Settings":
         if self.APP_ENV.lower() != "dev" and self.SECRET_KEY in INSECURE_SECRET_KEYS:

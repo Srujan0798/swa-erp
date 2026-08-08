@@ -1,12 +1,13 @@
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.boq_parser import BOQParseError
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
+from src.backend.core.storage import get_storage
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.session import get_db
 from src.backend.models.user import User
@@ -110,6 +111,26 @@ def get_boq_items_endpoint(
 ):
     result = get_boq_items_paginated(db, boq_id, page=page, page_size=page_size)
     return result
+
+
+@router.get(
+    "/api/boqs/{boq_id}/download",
+)
+def download_boq_endpoint(
+    boq_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Response:
+    result = get_boq_detail(db, boq_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="BOQ not found")
+    content = get_storage().read(result.file_path)
+    filename = result.file_name or "download"
+    return Response(
+        content=content,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.delete(
