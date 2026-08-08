@@ -1,8 +1,8 @@
-import os
 import uuid
 
 from sqlalchemy.orm import Session
 
+from src.backend.core.storage import get_storage
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.document_repo import (
     create_document,
@@ -75,12 +75,8 @@ def upload_document(
     tags: str | None = None,
 ) -> DocumentRead:
     stored_name = f"{uuid.uuid4().hex}_{file_name}"
-    upload_dir = f"uploads/{project_id}"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, stored_name)
-
-    with open(file_path, "wb") as f:
-        f.write(file_bytes)
+    key = f"{project_id}/{stored_name}"
+    file_path = get_storage().save(key, file_bytes)
 
     data = DocumentCreate(
         project_id=project_id,
@@ -177,12 +173,8 @@ def create_new_version(
 
     new_version = latest.version_number + 1
     stored_name = f"{uuid.uuid4().hex}_{file_name}"
-    upload_dir = f"uploads/{project_id}"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, stored_name)
-
-    with open(file_path, "wb") as f:
-        f.write(file_bytes)
+    key = f"{project_id}/{stored_name}"
+    file_path = get_storage().save(key, file_bytes)
 
     data = DocumentCreate(
         project_id=project_id,

@@ -1,10 +1,11 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
+from src.backend.core.storage import get_storage
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.session import get_db
 from src.backend.models.user import User
@@ -172,6 +173,26 @@ async def reupload_document_endpoint(
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@router.get(
+    "/api/documents/{document_id}/download",
+)
+def download_document_endpoint(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Response:
+    doc = get_document(db, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    content = get_storage().read(doc.file_path)
+    filename = doc.name or "download"
+    return Response(
+        content=content,
+        media_type=doc.content_type or "application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get(

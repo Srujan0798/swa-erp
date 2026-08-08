@@ -4,6 +4,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from src.backend.core.boq_parser import parse_excel, parse_json
+from src.backend.core.storage import get_storage
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.boq_repo import (
     create_boq,
@@ -22,7 +23,6 @@ from src.backend.schemas.boq import (
     BOQRead,
 )
 
-UPLOAD_DIR = Path("uploads/boqs")
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 ALLOWED_EXTENSIONS = {".xlsx", ".json"}
 
@@ -52,12 +52,9 @@ def upload_boq(
 
     version_number = get_next_version_number(db, project_id)
 
-    project_dir = UPLOAD_DIR / str(project_id)
-    project_dir.mkdir(parents=True, exist_ok=True)
-
     unique_name = f"{uuid.uuid4()}_{file_name}"
-    file_path = project_dir / unique_name
-    file_path.write_bytes(file_bytes)
+    key = f"boqs/{project_id}/{unique_name}"
+    file_path = get_storage().save(key, file_bytes)
 
     boq = create_boq(
         db,
