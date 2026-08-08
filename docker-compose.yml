@@ -87,6 +87,29 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://swa:swa@postgres:5432/swa_erp
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
+      APP_ENV: dev
+      DEBUG: "true"
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+    command: ["celery", "-A", "src.backend.workers.celery_app", "worker", "--loglevel=info"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
   frontend:
     build:
       context: .

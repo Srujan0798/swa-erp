@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
+from src.backend.core.storage import get_storage
 from src.backend.models.user import User
 from src.backend.workers.celery_app import app
 
@@ -22,7 +23,7 @@ def get_job_status(
     elif result.state == "STARTED":
         pass
     elif result.state == "SUCCESS":
-        response["result_path"] = result.result
+        response["result_url"] = get_storage().url(result.result)
     elif result.state == "FAILURE":
         response["error"] = str(result.result)
     return response
@@ -33,8 +34,6 @@ def get_job_result(
     job_id: str,
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
 ) -> Response:
-    import os
-
     result = AsyncResult(job_id, app=app)
     if result.state != "SUCCESS":
         raise HTTPException(
@@ -42,16 +41,22 @@ def get_job_result(
             detail=f"Job {job_id} has no downloadable result (state: {result.state})",
         )
 
-    file_path = result.result
-    if not isinstance(file_path, str) or not os.path.exists(file_path):
+    result_key = result.result
+    if not isinstance(result_key, str):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Job {job_id} result is not a stored file",
+        )
+
+    try:
+        content = get_storage().read(result_key)
+    except FileNotFoundError:
         raise HTTPException(
             status_code=404,
             detail=f"Job {job_id} result file is no longer available",
-        )
+        ) from None
 
-    with open(file_path, "rb") as f:
-        content = f.read()
-    filename = os.path.basename(file_path)
+    filename = result_key.split("/")[-1]
     return Response(
         content=content,
         media_type="application/pdf",
