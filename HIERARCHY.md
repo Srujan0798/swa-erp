@@ -85,15 +85,14 @@ src/backend/
 ├── models/           # SQLAlchemy ORM models
 ├── schemas/          # Pydantic request/response models
 ├── services/         # business logic (no FastAPI deps)
+├── workers/          # Celery app + background tasks (PDF/report generation)
 └── main.py           # FastAPI app entry
 ```
-**Corrected 2026-07-21**: `workers/` (Celery tasks) was listed here but never built —
-`celery==5.4.0` is a listed dependency in `requirements.txt` and mentioned in the tech-stack
-line of several docs, but there is no Celery app, no `@task`, and no worker service in either
-compose file anywhere in this codebase (confirmed by a full-project audit). It's an unused
-dependency, not implemented infrastructure — remove references to a working Celery pipeline
-elsewhere in this repo's docs if you find them, or file a real task to build it if background
-jobs are actually needed.
+**Corrected 2026-08-09 (wave-31 task 02)**: `workers/` is now real — `workers/celery_app.py`
+defines the Celery app (Redis broker/backend), `workers/tasks.py` has `@task`s for project-summary
+and financial-report PDF generation, and `docker-compose.yml` has a `worker` service running
+`celery -A src.backend.workers.celery_app worker`. Async export endpoints (`?async=true`) enqueue
+jobs tracked via `api/jobs.py`; results are written through the storage abstraction.
 
 ## Frontend module layout
 ```

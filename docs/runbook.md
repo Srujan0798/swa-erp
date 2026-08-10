@@ -23,6 +23,10 @@ alembic upgrade head
 cd ../..
 uvicorn src.backend.main:app --reload --port 8000
 
+# Celery worker (separate terminal — REQUIRED for async PDF/report jobs)
+source .venv/bin/activate
+celery -A src.backend.workers.celery_app worker --loglevel=info
+
 # Frontend (separate terminal)
 cd src/frontend
 npm install
@@ -30,6 +34,13 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+> **Note on async jobs:** `GET /api/exports/projects/{id}/summary.pdf?async=true`
+> and `?async=true` on the financial report enqueue a Celery job and return a
+> `job_id` (202). Poll `GET /api/jobs/{job_id}` for status and fetch the PDF via
+> `GET /api/jobs/{job_id}/result`. If no worker is running, the job stays in
+> `pending` forever — it does not error. The default (no `?async=true`) stays
+> synchronous and needs no worker.
 
 ## Seeding dev data
 ```bash
@@ -48,7 +59,9 @@ make test-e2e              # Playwright E2E (requires backend + frontend running
 ```bash
 docker-compose up --build
 ```
-Then `http://localhost:3000` (frontend), `http://localhost:8000/docs` (API), `http://localhost:8080` (adminer).
+Then `http://localhost:3000` (frontend), `http://localhost:8000/docs` (API), `http://localhost:8080` (adminer). The
+`worker` service (`celery -A src.backend.workers.celery_app worker`) starts automatically and processes async PDF
+jobs.
 
 ## Common failures
 

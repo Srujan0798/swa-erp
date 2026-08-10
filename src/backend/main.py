@@ -13,6 +13,7 @@ from src.backend.api.exports import router as exports_router
 from src.backend.api.health import router as health_router
 from src.backend.api.inquiries import router as inquiries_router
 from src.backend.api.invoices import router as invoices_router
+from src.backend.api.jobs import router as jobs_router
 from src.backend.api.lifecycle import router as lifecycle_router
 from src.backend.api.materials import router as materials_router
 from src.backend.api.notifications import router as notifications_router
@@ -51,6 +52,7 @@ app.include_router(compliance_router)
 app.include_router(document_references_router)
 app.include_router(documents_router)
 app.include_router(exports_router)
+app.include_router(jobs_router)
 app.include_router(inquiries_router)
 app.include_router(invoices_router)
 app.include_router(lifecycle_router)

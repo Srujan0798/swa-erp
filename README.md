@@ -42,10 +42,11 @@ See [`plan/EXECUTION.md`](plan/EXECUTION.md) for wave progress.
 - **Storage:** Local filesystem only — all uploads live in `uploads/` at the repo root
 - **Deploy:** Docker Compose
 
-**Corrected 2026-08-07.** Celery and MinIO are NOT live. Celery is an installed
-dependency (`requirements.txt`) with zero implementation — no app, no `@task`, no worker service;
-Redis is used only as a cache. MinIO/S3 is not wired at all; storage is a local `uploads/`
-directory. Both remain target-state (see `docs/conventions.md`).
+**Corrected 2026-08-09.** Storage and background jobs are live. MinIO/S3 is wired via a storage
+abstraction (`src/backend/core/storage.py`, `STORAGE_BACKEND=local|minio`, compose `minio`
+service; default `local` keeps the historical `uploads/` layout). Celery is implemented
+(`src/backend/workers/` app + `@task`s, compose `worker` service, Redis broker/backend) and powers
+the async export endpoints (`?async=true` + `GET /api/jobs/{id}`). See `docs/runbook.md`.
 
 ## Deliverables
 
