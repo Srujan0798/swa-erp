@@ -1,10 +1,13 @@
-.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db
+.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db seed-demo seed-dev smoke
 
 help:
 	@echo "swa-erp commands:"
 	@echo "  make install           — install backend + frontend deps"
 	@echo "  make dev               — docker-compose up (full stack)"
 	@echo "  make dev-services      — only postgres + redis (run backend/frontend separately)"
+	@echo "  make seed-demo         — demo users/clients/projects + core ID chain"
+	@echo "  make seed-dev          — minimal dev users only"
+	@echo "  make smoke             — live API smoke (Inquiry→SA→Token→DocRef); backend must be up"
 	@echo "  make test              — run all tests"
 	@echo "  make test-wave wave=N  — run wave-N tests"
 	@echo "  make test-unit         — unit tests only"
@@ -76,6 +79,15 @@ import-data:
 	else \
 		python3 scripts/import_excel.py $(type) $(file) --dry-run; \
 	fi
+
+seed-demo:
+	APP_ENV=dev python3 scripts/seed_demo.py
+
+seed-dev:
+	APP_ENV=dev python3 scripts/seed_dev.py
+
+smoke:
+	python3 scripts/smoke_chain.py
 
 ship:
 	@echo "Open Claude Code or Kimi in the project root and run:"

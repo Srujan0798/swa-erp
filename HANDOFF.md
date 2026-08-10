@@ -35,8 +35,10 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
    `deliverables/REPLY_VIRAJ.md` (includes LDI example he asked for).
 - **Deploy blocker:** server facts (Docker/WSL/ports/HTTPS/hostname/etc.) — owned by **Viraj**
   (no IT dept), slow path. Until then product stays complete but not company-server live.
-- **Where to start:** `MASTER-FLOW.md` → paste reply from `REPLY_VIRAJ.md` → wait / help when
-  Viraj has bandwidth for server.
+- **Where to start:** `MASTER-FLOW.md` → wait / help when Viraj has bandwidth for server.
+- **Local demo ready (2026-08-11):** `make seed-demo` (core chain + APEX/INNER/INSUDESIGN),
+  `make smoke`, walkthrough `deliverables/DEMO_WALKTHROUGH.md`. Install when free:
+  `docs/INSTALL_NO_IT.md`.
 
 ## Where to start a new session
 1. Read this file

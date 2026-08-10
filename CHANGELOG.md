@@ -12,6 +12,22 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > (describing waves 9-21, merged but never cut) has no git compare range of its own. The
 > `[1.0.0]` entry compares against `wave-3-complete`, which is the last real tag.
 
+## [Unreleased] — go-live prep (2026-08-11)
+
+### Added
+- `scripts/seed_demo.py` now seeds the **core ID chain** (Inquiry → SA with service_name
+  `INSUDESIGN` → Token → DBR/KDR) plus APEX/INNER demo clients (Viraj-confirmed naming),
+  time entry, and sustainability metric. Idempotent re-run safe for contacts + chain.
+- `scripts/smoke_chain.py` + `make smoke` — live API smoke (login → Inquiry → convert → SA →
+  Token → DocRef).
+- `make seed-demo` / `make seed-dev` shortcuts.
+- `deliverables/DEMO_WALKTHROUGH.md` — 15‑minute Viraj/training script.
+- Async PDF export for project slides (`?async=true` + Celery task
+  `generate_project_slides_pdf`); tests in wave-31.
+
+### Docs
+- Viraj data answers locked (ADR-0002); `docs/INSTALL_NO_IT.md` for no-IT-dept install.
+
 ## [1.0.1] — 2026-08-10 — deferred-feature release (wave-31)
 
 Wave-31 closed the two last deferred features from `SUBMISSION.md` §3/§9: object storage and

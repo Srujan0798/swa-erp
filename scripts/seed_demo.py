@@ -11,7 +11,7 @@ import sys
 import os
 import uuid
 import random
-from datetime import datetime, timedelta, date
+from datetime import date, timedelta
 from decimal import Decimal
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -162,6 +162,25 @@ def main():
             "email": "facilities@welspun.com",
             "phone": "+91 2836 270 001",
         },
+        # Viraj-confirmed: APEX / INNER are client names (not SA types)
+        {
+            "name": "APEX",
+            "code": "APEX-011",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
+            "gst": "24AABCA9999A1Z1",
+            "email": "contact@apex.example",
+            "phone": "+91 79 1111 0001",
+        },
+        {
+            "name": "INNER",
+            "code": "INNER-012",
+            "city": "Ahmedabad",
+            "state": "Gujarat",
+            "gst": "24AABCI9999B1Z2",
+            "email": "contact@inner.example",
+            "phone": "+91 79 1111 0002",
+        },
     ]
 
     clients = []
@@ -203,7 +222,11 @@ def main():
 
     contact_idx = 0
     for client in clients:
-        for _ in range(random.randint(2, 3)):
+        existing_n = db.query(Contact).filter_by(client_id=client.id).count()
+        if existing_n > 0:
+            contact_idx += existing_n
+            continue
+        for j in range(random.randint(2, 3)):
             contact = Contact(
                 id=uuid.uuid4(),
                 client_id=client.id,
@@ -211,12 +234,12 @@ def main():
                 email=f"{contact_names[contact_idx % len(contact_names)].lower().replace(' ', '.')}@{client.name.lower().replace(' ', '').replace('.','')[:10]}.com",
                 phone=f"+91 {random.randint(70000, 99999)} {random.randint(10000, 99999)}",
                 designation=random.choice(designations),
-                is_primary=(contact_idx == 0),
+                is_primary=(j == 0),
             )
             db.add(contact)
             contact_idx += 1
     db.flush()
-    print(f"  + {contact_idx} contacts created")
+    print(f"  + contacts ready ({contact_idx} total across clients)")
 
     # ------------------------------------------------------------------
     # 4. PROJECTS
@@ -283,14 +306,193 @@ def main():
         db.add(project)
         print(f"  + Project: {code} ({status}) — ₹{est_value/Decimal('100000'):.0f}L")
 
-    db.commit()
+    db.flush()
+
+    # ------------------------------------------------------------------
+    # 5. CORE ID CHAIN (Inquiry → SA → Token → DocRef + time + sustainability)
+    #    Mirrors what Viraj's team actually uses. Idempotent: skip if chain exists.
+    # ------------------------------------------------------------------
+    from src.backend.models.inquiry import Inquiry
+    from src.backend.models.agreement import ServiceAgreement
+    from src.backend.models.token import Token
+    from src.backend.models.document_reference import DocumentReference
+    from src.backend.models.time_tracking import TimeEntry
+    from src.backend.models.sustainability_metric import SustainabilityMetric
+    from src.backend.services.reference_id_service import generate_reference_id
+
+    chain_marker = (
+        db.query(ServiceAgreement)
+        .filter(ServiceAgreement.service_name == "INSUDESIGN", ServiceAgreement.notes == "demo-seed-chain")
+        .first()
+    )
+    if chain_marker:
+        print("  ✓ Core ID chain demo already seeded — skipping")
+    else:
+        print("  + Seeding core ID chain (Inquiry → SA → Token → DBR/KDR)…")
+        db.commit()  # commit projects/clients before generate_reference_id (it commits)
+
+        # Pick APEX client if present, else first client
+        apex = db.query(Client).filter_by(code="APEX-011").first() or clients[0]
+        demo_project = (
+            db.query(Project).filter_by(client_id=apex.id).first()
+            or db.query(Project).first()
+        )
+        pm = users_by_role.get("pm")
+        designer = users_by_role.get("designer")
+        admin = users_by_role.get("admin")
+
+        # Open inquiry (not yet converted)
+        inq_open_ref = generate_reference_id(db, "INQ")
+        inq_open = Inquiry(
+            id=uuid.uuid4(),
+            reference_id=inq_open_ref,
+            inquiry_date=date.today() - timedelta(days=3),
+            inquiry_type="Design",
+            inquiry_source="Referral",
+            client_name="Potential New Hospitality Client",
+            requirement_summary="Thermal insulation concept note for new kitchen plant.",
+            estimated_value=Decimal("850000.00"),
+            priority="Medium",
+            status="New",
+            owner_id=pm.id if pm else None,
+            notes="demo-seed open inquiry",
+        )
+        db.add(inq_open)
+
+        # Converted inquiry for APEX
+        inq_ref = generate_reference_id(db, "INQ")
+        inq = Inquiry(
+            id=uuid.uuid4(),
+            reference_id=inq_ref,
+            inquiry_date=date.today() - timedelta(days=40),
+            inquiry_type="Design",
+            inquiry_source="Repeat client",
+            client_name=apex.name,
+            requirement_summary="INSUDESIGN scope: cold insulation package for process lines.",
+            estimated_value=Decimal("2500000.00"),
+            priority="High",
+            status="Converted",
+            owner_id=pm.id if pm else None,
+            converted_client_id=apex.id,
+            converted_project_id=demo_project.id if demo_project else None,
+            notes="demo-seed converted inquiry",
+        )
+        db.add(inq)
+        db.flush()
+
+        if apex.first_inquiry_id is None:
+            apex.first_inquiry_id = inq.id
+            # Historical First Lead ID field (Leads sheet removed — text only)
+            if not apex.first_lead_id:
+                apex.first_lead_id = "LDI-001"
+
+        sa_ref = generate_reference_id(db, "SA")
+        sa = ServiceAgreement(
+            id=uuid.uuid4(),
+            reference_id=sa_ref,
+            client_id=apex.id,
+            inquiry_id=inq.id,
+            service_name="INSUDESIGN",  # product/service name — not a client
+            start_date=date.today().replace(month=1, day=1),
+            end_date=date.today().replace(month=12, day=31),
+            total_tokens=12,
+            status="Active",
+            notes="demo-seed-chain",
+        )
+        db.add(sa)
+        db.flush()
+
+        tkn_ref = generate_reference_id(db, "TKN")
+        tkn = Token(
+            id=uuid.uuid4(),
+            reference_id=tkn_ref,
+            agreement_id=sa.id,
+            token_date=date.today() - timedelta(days=14),
+            token_type="Design",
+            description="Concept note + vendor BOQ package under INSUDESIGN",
+            token_status="In Progress",
+            tokens_used=1,
+            swa_employee_id=designer.id if designer else None,
+            project_owner_id=pm.id if pm else None,
+            client_employee_name="Client Coordinator",
+            project_id=demo_project.id if demo_project else None,
+        )
+        db.add(tkn)
+        db.flush()
+
+        chain_ids = []
+        if demo_project:
+            for doc_type, desc in (
+                ("DBR", "Insulation design basis — demo"),
+                ("KDR", "Kitchen duct detail — demo"),
+            ):
+                # DBR/KDR share counter key "DBR" in production service;
+                # seed uses generate with DBR for both to mirror shared sequence.
+                dref = generate_reference_id(db, "DBR")
+                doc = DocumentReference(
+                    id=uuid.uuid4(),
+                    reference_id=dref,
+                    project_id=demo_project.id,
+                    token_id=tkn.id,
+                    doc_date=date.today() - timedelta(days=7),
+                    document_type=doc_type,
+                    type_="Submittal",
+                    author_id=designer.id if designer else None,
+                    description=desc,
+                    revision="R0",
+                    status="Draft",
+                    remarks="demo-seed",
+                )
+                db.add(doc)
+                chain_ids.append(dref)
+
+            te = TimeEntry(
+                id=uuid.uuid4(),
+                project_id=demo_project.id,
+                user_id=(designer or admin or pm).id,
+                date=date.today() - timedelta(days=2),
+                hours=Decimal("4.00"),
+                description="INSUDESIGN design hours — demo seed",
+                is_billable=True,
+            )
+            db.add(te)
+
+            sm = SustainabilityMetric(
+                id=uuid.uuid4(),
+                project_id=demo_project.id,
+                reference_id=sa_ref,
+                recorded_date=date.today(),
+                compliant_with_green_standards=True,
+                energy_saved_kwh=Decimal("12500.00"),
+                co2_avoided_tco2e=Decimal("8.50"),
+                lifecycle_cost_savings_inr=Decimal("450000.00"),
+                insulation_efficiency_ratio=Decimal("0.89"),
+                payback_period_months=Decimal("18.00"),
+                notes="demo-seed",
+            )
+            db.add(sm)
+
+        db.commit()
+        print(f"     Inquiry open:  {inq_open_ref}")
+        print(f"     Inquiry conv:  {inq_ref} → client {apex.name}")
+        print(f"     Agreement:     {sa_ref} (service_name=INSUDESIGN)")
+        print(f"     Token:         {tkn_ref}")
+        if chain_ids:
+            print(f"     Doc refs:      {', '.join(chain_ids)}")
+        print("     + time entry + sustainability metric on demo project")
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
     db.close()
 
     print("\n✅ Demo data seeded successfully!")
-    print(f"   {len(user_seeds)} users | {len(client_data)} clients | {contact_idx} contacts | {len(project_names)} projects")
+    print(f"   {len(user_seeds)} users | {len(client_data)} clients | contacts | {len(project_names)} projects + core chain")
     print("\nDemo credentials:")
     for s in user_seeds:
         print(f"   {s['email']} / {s['password']}  ({s['role']})")
+    print("\nWalkthrough: deliverables/DEMO_WALKTHROUGH.md")
     print()
 
 

@@ -158,6 +158,36 @@ async def test_async_financial_report_endpoint_returns_job_id(
     assert "job_id" in r.json()
 
 
+def test_project_slides_task_produces_stored_pdf(
+    db_session, test_project_id, admin_user
+):
+    from src.backend.core.storage import get_storage
+
+    _add_task(db_session, test_project_id, "Slides Task", "done", admin_user.id)
+
+    result = worker_tasks.generate_project_slides_pdf.apply(
+        args=[str(test_project_id)]
+    )
+    assert result.successful()
+    stored_key = result.result
+    content = get_storage().read(stored_key)
+    assert content[:4] == b"%PDF"
+
+
+@pytest.mark.asyncio
+async def test_async_slides_endpoint_returns_job_id(
+    authed_pm_client, db_session, test_project_id, admin_user
+):
+    _add_task(db_session, test_project_id, "Async Slides", "done", admin_user.id)
+
+    r = await authed_pm_client.get(
+        f"/api/exports/projects/{test_project_id}/slides.pdf",
+        params={"async": "true"},
+    )
+    assert r.status_code == 202
+    assert "job_id" in r.json()
+
+
 @pytest.mark.asyncio
 async def test_sync_path_unchanged(authed_pm_client, db_session, test_project_id, admin_user):
     _add_task(db_session, test_project_id, "Sync Task", "todo", admin_user.id)

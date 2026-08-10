@@ -52,3 +52,18 @@ def generate_financial_report_pdf(self, start_date_iso: str, end_date_iso: str) 
         db.close()
 
     return _store_result(self.request.id, pdf_bytes)
+
+
+@app.task(bind=True, name="workers.generate_project_slides_pdf", max_retries=2)
+def generate_project_slides_pdf(self, project_id: str) -> str:
+    db = _worker_db()
+    try:
+        from src.backend.services.export_service import export_project_slides
+
+        pdf_bytes = export_project_slides(db, uuid.UUID(project_id))
+    except Exception as exc:
+        raise self.retry(exc=exc, countdown=10) from exc
+    finally:
+        db.close()
+
+    return _store_result(self.request.id, pdf_bytes)
