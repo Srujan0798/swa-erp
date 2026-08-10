@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus } from "lucide-react";
 import { ProjectDetail } from "@/components/projects/ProjectDetail";
+import {
+  ProjectQuickLinks,
+  type ProjectTabKey,
+} from "@/components/projects/ProjectQuickLinks";
 import { BOQUpload } from "@/components/boqs/BOQUpload";
 import { BOQVersionList } from "@/components/boqs/BOQVersionList";
 import { BOQItemTable } from "@/components/boqs/BOQItemTable";
@@ -23,13 +29,19 @@ type View =
   | { tab: "documents" }
   | { tab: "sustainability" };
 
-export function ProjectDetailPage() {
+export function ProjectDetailPage(): ReactElement | null {
   const { id } = useParams<{ id: string }>();
   const [view, setView] = useState<View>({ tab: "overview" });
 
+  const { data: project } = useQuery({
+    queryKey: ["project", id],
+    queryFn: () => api.getProject(id!),
+    enabled: !!id,
+  });
+
   if (!id) return null;
 
-  const activeTab =
+  const activeTab: ProjectTabKey =
     view.tab.startsWith("boqs")
       ? "boqs"
       : view.tab.startsWith("quotes")
@@ -39,6 +51,14 @@ export function ProjectDetailPage() {
           : view.tab === "sustainability"
             ? "sustainability"
             : "overview";
+
+  const handleTabChange = (val: string): void => {
+    if (val === "overview") setView({ tab: "overview" });
+    else if (val === "boqs") setView({ tab: "boqs" });
+    else if (val === "quotes") setView({ tab: "quotes" });
+    else if (val === "documents") setView({ tab: "documents" });
+    else if (val === "sustainability") setView({ tab: "sustainability" });
+  };
 
   return (
     <div className="space-y-6">
@@ -51,16 +71,14 @@ export function ProjectDetailPage() {
         </Button>
       </div>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(val) => {
-          if (val === "overview") setView({ tab: "overview" });
-          else if (val === "boqs") setView({ tab: "boqs" });
-          else if (val === "quotes") setView({ tab: "quotes" });
-          else if (val === "documents") setView({ tab: "documents" });
-          else if (val === "sustainability") setView({ tab: "sustainability" });
-        }}
-      >
+      <ProjectQuickLinks
+        projectId={id}
+        clientId={project?.client_id}
+        activeTab={activeTab}
+        onTabChange={(tab) => handleTabChange(tab)}
+      />
+
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>

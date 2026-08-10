@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { useAgreements } from "@/hooks/useAgreements";
 import { Input } from "@/components/ui/input";
@@ -13,13 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 
 /**
  * Global Service Agreements inventory (consultancy core).
  * Create new SAs from Client detail; this page is for browse/search.
  */
-export function AgreementsPage() {
+export function AgreementsPage(): ReactElement {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -65,12 +66,11 @@ export function AgreementsPage() {
           </div>
 
           {isError && (
-            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-              {(error as Error)?.message ?? "Failed to load agreements"}.{" "}
-              <button type="button" className="underline" onClick={() => refetch()}>
-                Retry
-              </button>
-            </div>
+            <QueryErrorBanner
+              message="Failed to load agreements"
+              error={error}
+              onRetry={() => void refetch()}
+            />
           )}
 
           <div className="rounded-md border">
@@ -95,11 +95,17 @@ export function AgreementsPage() {
                 ) : items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      No agreements. Create from{" "}
-                      <Link className="underline" to="/clients">
-                        Clients
-                      </Link>{" "}
-                      → open client → Service agreements.
+                      {debounced ? (
+                        <>No agreements match “{debounced}”. Try another reference or service name.</>
+                      ) : (
+                        <>
+                          No service agreements yet. Open a{" "}
+                          <Link className="underline font-medium text-foreground" to="/clients">
+                            client
+                          </Link>{" "}
+                          → Service agreements to add a retainer (e.g. INSUDESIGN).
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ) : (

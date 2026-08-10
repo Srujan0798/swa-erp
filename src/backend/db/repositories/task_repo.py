@@ -177,10 +177,15 @@ def get_by_id(db: Session, task_id: UUID) -> Task | None:
     return repo.get(task_id)
 
 
-def get_user_by_id(db: Session, user_id: UUID) -> Task | None:
-    # Placeholder typed under task helpers: callers actually need User; preserve boundary.
+def get_user_by_id(db: Session, user_id: UUID):
+    # Callers need User for assignment; exclude soft-deleted accounts.
     from src.backend.models.user import User
-    return db.query(User).get(user_id)
+
+    return (
+        db.query(User)
+        .filter(User.id == user_id, User.deleted_at.is_(None))
+        .first()
+    )
 
 
 def update_task(db: Session, task: Task, **kwargs) -> Task:

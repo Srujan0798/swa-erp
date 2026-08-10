@@ -32,7 +32,8 @@ export interface InvoiceItem {
 }
 
 export interface InvoiceCreate {
-  project_id: string;
+  /** Path param on create; optional in body for FE convenience. */
+  project_id?: string;
   invoice_number?: string;
   tax_rate?: number;
   due_date?: string;

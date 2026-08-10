@@ -111,6 +111,10 @@ Only after the app is up and Viraj names who owns the data:
 python3 scripts/import_excel.py clients path/to/Clients.xlsx
 # ... review report ...
 python3 scripts/import_excel.py clients path/to/Clients.xlsx --commit
+
+# Incomplete multi-sheet sets may need stub FKs (SWA-SYS-UNLINKED hold client,
+# orphan projects). Opt in with --allow-stubs or IMPORT_ALLOW_STUBS=1:
+python3 scripts/import_excel.py document_references path/to/DRN.xlsx --commit --allow-stubs
 ```
 
 Supported types: see `deliverables/SUBMISSION.md` §7.

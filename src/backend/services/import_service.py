@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -20,6 +22,23 @@ from src.backend.models import (
     Token,
     User,
 )
+
+# When False, import will not create stub clients/projects (e.g. SWA-SYS-UNLINKED).
+# Override per call via import_sheet(allow_stubs=...) or env IMPORT_ALLOW_STUBS=1|true|yes.
+_allow_stubs: ContextVar[bool] = ContextVar("import_allow_stubs", default=False)
+
+
+def _stubs_allowed() -> bool:
+    return _allow_stubs.get()
+
+
+def _env_allow_stubs() -> bool:
+    return os.environ.get("IMPORT_ALLOW_STUBS", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -122,41 +141,70 @@ def _parse_bool(value: Any) -> bool | None:
 # FK resolvers
 # --------------------------------------------------------------------------- #
 def _client_by_code(s: Session, code: str) -> Client | None:
-    return s.scalar(select(Client).where(Client.code == code))
+    return s.scalar(
+        select(Client).where(Client.code == code, Client.deleted_at.is_(None))
+    )
 
 
 def _client_by_name(s: Session, name: str) -> Client | None:
-    return s.scalar(select(Client).where(Client.name == name))
+    return s.scalar(
+        select(Client).where(Client.name == name, Client.deleted_at.is_(None))
+    )
 
 
 def _inquiry_by_ref(s: Session, ref: str) -> Inquiry | None:
-    return s.scalar(select(Inquiry).where(Inquiry.reference_id == ref))
+    return s.scalar(
+        select(Inquiry).where(Inquiry.reference_id == ref, Inquiry.deleted_at.is_(None))
+    )
 
 
 def _agreement_by_ref(s: Session, ref: str) -> ServiceAgreement | None:
-    return s.scalar(select(ServiceAgreement).where(ServiceAgreement.reference_id == ref))
+    return s.scalar(
+        select(ServiceAgreement).where(
+            ServiceAgreement.reference_id == ref,
+            ServiceAgreement.deleted_at.is_(None),
+        )
+    )
 
 
 def _project_by_code(s: Session, code: str) -> Project | None:
-    return s.scalar(select(Project).where(Project.code == code))
+    return s.scalar(
+        select(Project).where(Project.code == code, Project.deleted_at.is_(None))
+    )
 
 
 def _token_by_ref(s: Session, ref: str) -> Token | None:
-    return s.scalar(select(Token).where(Token.reference_id == ref))
+    return s.scalar(
+        select(Token).where(Token.reference_id == ref, Token.deleted_at.is_(None))
+    )
 
 
 def _resolve_user_by_name(s: Session, name: str) -> User | None:
-    return s.scalar(select(User).where(User.name == name))
+    return s.scalar(
+        select(User).where(
+            User.name == name,
+            User.deleted_at.is_(None),
+            User.is_active.is_(True),
+        )
+    )
 
 
 def _doc_by_ref(s: Session, reference_id: str) -> DocumentReference | None:
     return s.scalar(
-        select(DocumentReference).where(DocumentReference.reference_id == reference_id)
+        select(DocumentReference).where(
+            DocumentReference.reference_id == reference_id,
+            DocumentReference.deleted_at.is_(None),
+        )
     )
 
 
 def _ensure_import_user(s: Session) -> User:
-    user = s.scalar(select(User).where(User.email == "import@swa.local"))
+    user = s.scalar(
+        select(User).where(
+            User.email == "import@swa.local",
+            User.deleted_at.is_(None),
+        )
+    )
     if user is None:
         # Attribution-only identity: it must never be able to authenticate.
         # "!" is not a valid bcrypt hash, so verify_password fails closed for any
@@ -177,7 +225,7 @@ def _ensure_import_user(s: Session) -> User:
 def _ensure_client(
     s: Session, *, code: str | None, name: str | None
 ) -> Client | None:
-    """Resolve client by code/name; create a minimal stub from sheet data if missing."""
+    """Resolve client by code/name; create a minimal stub if missing and stubs allowed."""
     client = None
     if code:
         client = _client_by_code(s, code)
@@ -186,6 +234,8 @@ def _ensure_client(
     if client is not None:
         return client
     if not name and not code:
+        return None
+    if not _stubs_allowed():
         return None
     code = code or f"IMP-{(name or 'UNKNOWN')[:20].upper().replace(' ', '-')}"
     name = name or code
@@ -215,8 +265,11 @@ def _ensure_project(s: Session, code: str, name: str | None = None) -> Project |
     project = _project_by_code(s, code)
     if project is not None:
         return project
+    if not _stubs_allowed():
+        return None
     # Hold client for orphan project IDs (e.g. sustainability refs when Project Tracking is empty).
     # Not fake demo data — system staging until full sheets are imported.
+    # Requires allow_stubs (CLI --allow-stubs or IMPORT_ALLOW_STUBS=1).
     hold = _ensure_client(
         s,
         code="SWA-SYS-UNLINKED",
@@ -726,7 +779,11 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
                 # match by project name column when ref is non-id text
                 pname = _txt(d.get("Project Name"))
                 if project is None and pname:
-                    project = s.scalar(select(Project).where(Project.name == pname))
+                    project = s.scalar(
+                        select(Project).where(
+                            Project.name == pname, Project.deleted_at.is_(None)
+                        )
+                    )
                 if project is None and _looks_like_swa_id(ref):
                     project = _ensure_project(s, ref, name=pname)
                 if project is None:
@@ -889,12 +946,24 @@ SHEET_CONFIG: dict[str, dict[str, Any]] = {
 
 
 def import_sheet(
-    session: Session, sheet_type: str, file_path: str, commit: bool = False
+    session: Session,
+    sheet_type: str,
+    file_path: str,
+    commit: bool = False,
+    allow_stubs: bool | None = None,
 ) -> ImportResult:
+    """Import one Excel sheet type.
+
+    Stub entities (missing clients, SWA-SYS-UNLINKED hold client, orphan projects)
+    are only created when ``allow_stubs`` is True. When ``allow_stubs`` is None,
+    the env flag ``IMPORT_ALLOW_STUBS`` (1/true/yes/on) is used; default is off.
+    """
     if sheet_type not in SHEET_CONFIG:
         raise ValueError(f"unknown sheet_type: {sheet_type}")
     cfg = SHEET_CONFIG[sheet_type]
     result = ImportResult(sheet_type=sheet_type)
+    stubs = _env_allow_stubs() if allow_stubs is None else bool(allow_stubs)
+    token = _allow_stubs.set(stubs)
     try:
         try:
             rows = read_rows(
@@ -924,4 +993,6 @@ def import_sheet(
     except Exception as e:
         session.rollback()
         result.add_error(0, f"Fatal: {e}")
+    finally:
+        _allow_stubs.reset(token)
     return result

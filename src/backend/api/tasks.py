@@ -150,7 +150,15 @@ def assign_task_endpoint(
     task = get_task_service(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    assignee = db.query(User).filter(User.id == body.assignee_id, User.is_active.is_(True)).first()
+    assignee = (
+        db.query(User)
+        .filter(
+            User.id == body.assignee_id,
+            User.is_active.is_(True),
+            User.deleted_at.is_(None),
+        )
+        .first()
+    )
     if not assignee:
         raise HTTPException(status_code=400, detail="Assignee not found or inactive")
     result = assign_task_service(db, task_id, body.assignee_id, current_user.id)

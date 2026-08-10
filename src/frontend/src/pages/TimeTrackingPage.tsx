@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { api } from "@/lib/api";
 import type { TimeEntry, TimeEntryListResponse } from "@/types/time";
 import { useToast } from "@/hooks/useToast";
@@ -20,11 +22,12 @@ import { useToast } from "@/hooks/useToast";
 const timeKey = (...segments: (string | number | boolean | undefined)[]) =>
   ["time", ...segments] as const;
 
-export default function TimeTrackingPage() {
+export default function TimeTrackingPage(): ReactElement {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const today = new Date().toISOString().split("T")[0];
-  const [projectId, setProjectId] = useState("");
+  const [projectId, setProjectId] = useState(searchParams.get("project") ?? "");
   const [form, setForm] = useState({
     date: today,
     hours: "",
@@ -32,13 +35,25 @@ export default function TimeTrackingPage() {
     is_billable: true,
   });
 
+  useEffect(() => {
+    const fromUrl = searchParams.get("project") ?? "";
+    if (fromUrl && fromUrl !== projectId) setProjectId(fromUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const selectProject = (id: string): void => {
+    setProjectId(id);
+    if (id) setSearchParams({ project: id }, { replace: true });
+    else setSearchParams({}, { replace: true });
+  };
+
   const { data: projectsData } = useQuery({
     queryKey: ["projects-for-time"],
     queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
   });
   const projects = projectsData?.items ?? [];
 
-  const { data: list, isLoading, isError } = useQuery<TimeEntryListResponse>({
+  const { data: list, isLoading, isError, error, refetch } = useQuery<TimeEntryListResponse>({
     queryKey: timeKey("entries"),
     queryFn: async () => api.listTimeEntries(),
   });
@@ -126,7 +141,7 @@ export default function TimeTrackingPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Project *</Label>
-            <Select value={projectId || undefined} onValueChange={setProjectId}>
+            <Select value={projectId || undefined} onValueChange={selectProject}>
               <SelectTrigger>
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
@@ -190,10 +205,16 @@ export default function TimeTrackingPage() {
             <p className="text-sm text-muted-foreground">Loading…</p>
           )}
           {isError && (
-            <p className="text-sm text-destructive">Failed to load time entries.</p>
+            <QueryErrorBanner
+              message="Failed to load time entries"
+              error={error}
+              onRetry={() => void refetch()}
+            />
           )}
-          {!isLoading && entries.length === 0 && (
-            <p className="text-sm text-muted-foreground">No entries yet.</p>
+          {!isLoading && !isError && entries.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No entries yet. Pick a project above, enter hours (0.25 steps), and click Add entry.
+            </p>
           )}
           {entries.length > 0 && (
             <div className="overflow-x-auto rounded-md border">

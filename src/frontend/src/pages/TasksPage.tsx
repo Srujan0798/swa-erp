@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { TaskDetail } from "@/components/tasks/TaskDetail";
@@ -13,11 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import {
   Plus,
-  Filter,
   UserRoundPlus,
   LayoutDashboard,
   MessageSquare,
@@ -25,10 +26,13 @@ import {
 } from "lucide-react";
 import type { TaskStatus, TaskPriority } from "@/types/api";
 
-export function TasksPage() {
+export function TasksPage(): JSX.Element {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [projectId, setProjectId] = useState<string | null>(
+    searchParams.get("project"),
+  );
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createProjectId, setCreateProjectId] = useState<string>("");
@@ -37,12 +41,29 @@ export function TasksPage() {
   const [newPriority, setNewPriority] = useState<TaskPriority>("medium");
   const [newDueDate, setNewDueDate] = useState<string>("");
   const [newAssigneeId, setNewAssigneeId] = useState<string>("");
+  const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("project");
+    if (fromUrl && fromUrl !== projectId) setProjectId(fromUrl);
+  }, [searchParams, projectId]);
+
+  const selectProject = (id: string): void => {
+    setProjectId(id);
+    setSearchParams(id ? { project: id } : {});
+  };
 
   const { data: projectsData } = useQuery({
     queryKey: ["projects-for-tasks"],
     queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
   });
   const projects = projectsData?.items ?? [];
+
+  const { data: assigneesData } = useQuery({
+    queryKey: ["assignees"],
+    queryFn: () => api.listAssignees({ page_size: 100 }),
+  });
+  const assignees = assigneesData?.items ?? [];
 
   const tasksQuery = useQuery({
     queryKey: ["tasks", "list", projectId],
@@ -96,6 +117,30 @@ export function TasksPage() {
     },
   });
 
+  const transitionMutation = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
+      api.transitionTask(taskId, status),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      void queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    },
+    onError: () => {
+      toast({
+        title: "Could not update task status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const boardTasks = (tasksQuery.data?.items ?? []).filter((t) => {
+    if (!searchText.trim()) return true;
+    const q = searchText.toLowerCase();
+    return (
+      t.title.toLowerCase().includes(q) ||
+      (t.description ?? "").toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -126,7 +171,7 @@ export function TasksPage() {
           <div className="ml-auto flex items-center gap-2">
             <Select
               value={projectId ?? undefined}
-              onValueChange={(v) => setProjectId(v)}
+              onValueChange={(v) => selectProject(v)}
             >
               <SelectTrigger className="w-72">
                 <SelectValue placeholder="Select project" />
@@ -146,26 +191,57 @@ export function TasksPage() {
               </SelectContent>
             </Select>
             <Input
-              value={newTitle}
-              placeholder="Search..."
-              onChange={(e) => setNewTitle(e.target.value)}
+              value={searchText}
+              placeholder="Search tasks..."
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-48"
             />
-            <Button variant="outline" onClick={() => {}}>
-              <Filter className="mr-2 h-4 w-4" /> Filter
-            </Button>
           </div>
         </div>
 
         <TabsContent value="board" className="space-y-4">
           {!projectId && (
-            <p className="text-sm text-muted-foreground">Select a project to load the board.</p>
+            <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+              Select a project to load the board, or open a project and use the Tasks quick link.
+            </div>
           )}
-          {projectId && (
-            <KanbanBoard
-              tasks={tasksQuery.data?.items ?? []}
-              isLoading={tasksQuery.isLoading}
-              onTaskClick={(t) => setSelectedTaskId(t.id)}
+          {projectId && tasksQuery.isError && (
+            <QueryErrorBanner
+              message="Failed to load tasks"
+              error={tasksQuery.error}
+              onRetry={() => void tasksQuery.refetch()}
             />
+          )}
+          {projectId && !tasksQuery.isError && (
+            <>
+              <KanbanBoard
+                tasks={boardTasks}
+                isLoading={tasksQuery.isLoading}
+                onTaskClick={(t) => setSelectedTaskId(t.id)}
+                onStatusChange={(taskId, newStatus) =>
+                  transitionMutation.mutate({ taskId, status: newStatus })
+                }
+              />
+              {!tasksQuery.isLoading && boardTasks.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center">
+                  {searchText.trim()
+                    ? "No tasks match your search."
+                    : "No tasks on this project yet. "}
+                  {!searchText.trim() && (
+                    <button
+                      type="button"
+                      className="underline font-medium text-foreground"
+                      onClick={() => {
+                        setCreateProjectId(projectId);
+                        setIsCreateOpen(true);
+                      }}
+                    >
+                      Create the first task
+                    </button>
+                  )}
+                </p>
+              )}
+            </>
           )}
         </TabsContent>
 
@@ -275,6 +351,25 @@ export function TasksPage() {
                 <Label>Due Date</Label>
                 <Input type="date" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Assignee</Label>
+              <Select
+                value={newAssigneeId || "none"}
+                onValueChange={(v) => setNewAssigneeId(v === "none" ? "" : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Unassigned" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {assignees.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name} ({u.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

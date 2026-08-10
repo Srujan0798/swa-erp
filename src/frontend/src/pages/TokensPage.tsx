@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, type ReactElement } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Input } from "@/components/ui/input";
@@ -14,12 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 
 /**
  * Global Tokens inventory. New tokens are created under a Client → Agreement.
  */
-export function TokensPage() {
+export function TokensPage(): ReactElement {
+  const [searchParams] = useSearchParams();
+  const projectFilter = searchParams.get("project") ?? undefined;
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -31,12 +34,13 @@ export function TokensPage() {
   }, [search]);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ["tokens-global", page, debounced],
+    queryKey: ["tokens-global", page, debounced, projectFilter],
     queryFn: () =>
       api.listTokens({
         page,
         page_size: pageSize,
         q: debounced || undefined,
+        project_id: projectFilter,
       }),
   });
 
@@ -69,13 +73,20 @@ export function TokensPage() {
           </div>
 
           {isError && (
-            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-              {(error as Error)?.message ?? "Failed to load tokens"}.{" "}
-              <button type="button" className="underline" onClick={() => refetch()}>
-                Retry
-              </button>
-            </div>
+            <QueryErrorBanner
+              message="Failed to load tokens"
+              error={error}
+              onRetry={() => void refetch()}
+            />
           )}
+          {projectFilter ? (
+            <p className="mb-3 text-xs text-muted-foreground">
+              Filtered to project from quick link.{" "}
+              <Link className="underline" to="/tokens">
+                Show all tokens
+              </Link>
+            </p>
+          ) : null}
 
           <div className="rounded-md border">
             <Table>
@@ -100,11 +111,23 @@ export function TokensPage() {
                 ) : items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                      No tokens yet. Open a{" "}
-                      <Link className="underline" to="/agreements">
-                        service agreement
-                      </Link>{" "}
-                      via its client to issue tokens.
+                      {debounced || projectFilter ? (
+                        <>
+                          No tokens match this filter.{" "}
+                          <Link className="underline font-medium text-foreground" to="/tokens">
+                            Clear filters
+                          </Link>
+                          .
+                        </>
+                      ) : (
+                        <>
+                          No tokens yet. Open a{" "}
+                          <Link className="underline font-medium text-foreground" to="/clients">
+                            client
+                          </Link>{" "}
+                          → agreement to issue the first token.
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ) : (

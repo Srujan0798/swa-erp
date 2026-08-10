@@ -37,7 +37,7 @@ def pnl_summary(
 def add_cost(
     project_id: uuid.UUID,
     body: ProjectCostCreate,
-    current_user: User = Depends(require_role(Role.ADMIN)),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008  # ADMIN+PM
     db: Session = Depends(get_db),  # noqa: B008
 ):
     return add_project_cost(db, project_id, current_user.id, body)
@@ -59,7 +59,7 @@ def list_costs(
 def remove_cost(
     project_id: uuid.UUID,
     cost_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008  # ADMIN+PM; not VIEWER
     db: Session = Depends(get_db),  # noqa: B008
 ):
     deleted = delete_project_cost(db, cost_id, current_user.id)

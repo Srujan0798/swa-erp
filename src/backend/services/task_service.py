@@ -1,5 +1,6 @@
 import uuid
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from src.backend.core.task_workflow import validate_transition
@@ -61,6 +62,12 @@ def create_task_service(
     body: TaskCreate,
     created_by: uuid.UUID,
 ) -> TaskRead:
+    if body.assignee_id is not None:
+        assignee = get_user_by_id(db, body.assignee_id)
+        if not assignee or not getattr(assignee, "is_active", True):
+            raise HTTPException(
+                status_code=400, detail="Assignee not found or inactive"
+            )
     task = create_task(
         db,
         project_id=project_id,

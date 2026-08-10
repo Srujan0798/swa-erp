@@ -103,14 +103,32 @@ class TestProjectPnlRoleEnforcement:
         response = test_client.post(f"/api/projects/{project_id}/costs", json=body)
         assert response.status_code not in (401, 403)
 
-    def test_add_cost_pm_denied(self, test_client, db_session):
-        """Test that PM is denied for adding cost entry (admin required)"""
+    def test_add_cost_pm_allowed(self, test_client, db_session):
+        """Test that PM can add cost entry (aligned with DELETE — ADMIN+PM)"""
         create_test_user(db_session, Role.PM)
         login_user(test_client, "test-pm@example.com")
         project_id = uuid.uuid4()
         body = {"category": "test", "amount": 100.0}
         response = test_client.post(f"/api/projects/{project_id}/costs", json=body)
+        assert response.status_code not in (401, 403)
+
+    def test_delete_cost_viewer_denied(self, test_client, db_session):
+        """VIEWER must not delete project costs"""
+        create_test_user(db_session, Role.VIEWER)
+        login_user(test_client, "test-viewer@example.com")
+        project_id = uuid.uuid4()
+        cost_id = uuid.uuid4()
+        response = test_client.delete(f"/api/projects/{project_id}/costs/{cost_id}")
         assert response.status_code == 403
+
+    def test_delete_cost_pm_allowed_auth(self, test_client, db_session):
+        """PM is authorized to delete costs (404 if missing is fine)"""
+        create_test_user(db_session, Role.PM)
+        login_user(test_client, "test-pm@example.com")
+        project_id = uuid.uuid4()
+        cost_id = uuid.uuid4()
+        response = test_client.delete(f"/api/projects/{project_id}/costs/{cost_id}")
+        assert response.status_code not in (401, 403)
 
 
 class TestExportsRoleEnforcement:

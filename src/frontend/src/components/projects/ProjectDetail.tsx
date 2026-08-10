@@ -6,6 +6,7 @@ import { ProjectStatus } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import {
   Select,
   SelectContent,
@@ -42,11 +43,17 @@ interface ProjectDetailProps {
   projectId: string;
 }
 
-export function ProjectDetail({ projectId }: ProjectDetailProps) {
+export function ProjectDetail({ projectId }: ProjectDetailProps): JSX.Element {
   const queryClient = useQueryClient();
   const [nextStatus, setNextStatus] = useState<string>("");
 
-  const { data: project, isLoading } = useQuery({
+  const {
+    data: project,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => api.getProject(projectId),
   });
@@ -60,6 +67,15 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
   });
 
   if (isLoading) return <div className="p-6">Loading...</div>;
+  if (isError) {
+    return (
+      <QueryErrorBanner
+        message="Failed to load project"
+        error={error}
+        onRetry={() => void refetch()}
+      />
+    );
+  }
   if (!project) return <div className="p-6">Project not found</div>;
 
   const allowedTransitions = STATUS_TRANSITIONS[project.status] ?? [];

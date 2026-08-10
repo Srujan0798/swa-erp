@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { api } from "@/lib/api";
 import type { ProjectPnL, ProjectCost } from "@/types/financial";
 
@@ -16,17 +18,37 @@ type CostItem = { category: string; amount: number; count: number; percentage: n
 
 const reportKey = (...segments: (string | number | boolean | undefined)[]) => ["reports", ...segments] as const;
 
-export function ReportsPage() {
-  const [projectId, setProjectId] = useState("");
+export function ReportsPage(): ReactElement {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [projectId, setProjectId] = useState(searchParams.get("project") ?? "");
   const [categoryFilter, setCategoryFilter] = useState("");
 
-  const { data: projectsData } = useQuery({
-    queryKey: ["projects-for-reports"],
-    queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
-  });
+  useEffect(() => {
+    const fromUrl = searchParams.get("project") ?? "";
+    if (fromUrl && fromUrl !== projectId) setProjectId(fromUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const selectProject = (id: string): void => {
+    setProjectId(id);
+    if (id) setSearchParams({ project: id }, { replace: true });
+    else setSearchParams({}, { replace: true });
+  };
+
+  const { data: projectsData, isError: projectsError, error: projectsErr, refetch: refetchProjects } =
+    useQuery({
+      queryKey: ["projects-for-reports"],
+      queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
+    });
   const projects = projectsData?.items ?? [];
 
-  const { data: pnl, isLoading: pnlLoading } = useQuery<ProjectPnL>({
+  const {
+    data: pnl,
+    isLoading: pnlLoading,
+    isError: pnlError,
+    error: pnlErr,
+    refetch: refetchPnl,
+  } = useQuery<ProjectPnL>({
     queryKey: reportKey("pnl", projectId),
     enabled: !!projectId,
     queryFn: async () => api.getProjectPnL(projectId),
@@ -48,8 +70,16 @@ export function ReportsPage() {
         <p className="text-sm text-muted-foreground">Project profitability, cost breakdown, and financial summaries.</p>
       </div>
 
+      {projectsError && (
+        <QueryErrorBanner
+          message="Failed to load projects"
+          error={projectsErr}
+          onRetry={() => void refetchProjects()}
+        />
+      )}
+
       <div className="flex items-center gap-2">
-        <Select value={projectId || undefined} onValueChange={setProjectId}>
+        <Select value={projectId || undefined} onValueChange={selectProject}>
           <SelectTrigger className="w-80"><SelectValue placeholder="Select project" /></SelectTrigger>
           <SelectContent>
             {projects.map((p) => (
@@ -62,7 +92,15 @@ export function ReportsPage() {
       </div>
 
       {!projectId ? (
-        <p className="text-sm text-muted-foreground">Select a project to view reports.</p>
+        <p className="text-sm text-muted-foreground">
+          Select a project to view P&amp;L and costs, or use Costs / P&amp;L from a project page.
+        </p>
+      ) : pnlError ? (
+        <QueryErrorBanner
+          message="Failed to load project report"
+          error={pnlErr}
+          onRetry={() => void refetchPnl()}
+        />
       ) : pnlLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
       ) : pnl ? (

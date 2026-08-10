@@ -232,7 +232,11 @@ def main() -> int:
             if not path.exists():
                 print(f"  SKIP missing {filename}")
                 continue
-            result = import_sheet(s, sheet_type, str(path), commit=True)
+            # allow_stubs: real multi-sheet sets create SWA-SYS-UNLINKED /
+            # orphan projects when Project Tracking lags cross-sheet refs.
+            result = import_sheet(
+                s, sheet_type, str(path), commit=True, allow_stubs=True
+            )
             d = result.to_dict()
             status = "OK" if d["ok"] else "ERR"
             print(

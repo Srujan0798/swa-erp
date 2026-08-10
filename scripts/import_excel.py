@@ -2,11 +2,16 @@
 
 Usage:
     python3 scripts/import_excel.py <sheet_type> <file.xlsx> [--commit]
+    python3 scripts/import_excel.py <sheet_type> <file.xlsx> --commit --allow-stubs
 
 sheet_type is one of: clients, inquiries, agreements, tokens,
 document_references, projects, time_logs, sustainability.
 
 Defaults to --dry-run (no writes). Use --commit to persist.
+
+Stub entities (missing clients, SWA-SYS-UNLINKED hold client, orphan projects
+from cross-sheet refs) are off by default. Pass --allow-stubs or set env
+IMPORT_ALLOW_STUBS=1 when incomplete sheet sets need them.
 """
 from __future__ import annotations
 
@@ -32,6 +37,14 @@ def main() -> int:
     parser.add_argument("file", type=Path)
     parser.add_argument("--commit", action="store_true", help="Persist changes (default: dry-run).")
     parser.add_argument("--dry-run", action="store_true", help="Do not persist (default).")
+    parser.add_argument(
+        "--allow-stubs",
+        action="store_true",
+        help=(
+            "Allow creating stub clients/projects (incl. SWA-SYS-UNLINKED) for "
+            "missing FKs. Also enabled by IMPORT_ALLOW_STUBS=1."
+        ),
+    )
     args = parser.parse_args()
 
     if not args.file.exists():
@@ -44,7 +57,11 @@ def main() -> int:
     session = SessionLocal()
     try:
         result = import_sheet(
-            session, args.sheet_type, str(args.file), commit=args.commit
+            session,
+            args.sheet_type,
+            str(args.file),
+            commit=args.commit,
+            allow_stubs=True if args.allow_stubs else None,
         )
     finally:
         session.close()

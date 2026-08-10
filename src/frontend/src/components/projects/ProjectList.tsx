@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -21,6 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
+import { useCurrentUser } from "@/hooks/useAuth";
 import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 const STATUSES: ProjectStatus[] = ["Lead", "Quote", "Awarded", "Design", "Vendor", "Execution", "Validation", "Closed"];
@@ -36,7 +38,9 @@ const STATUS_COLORS: Record<ProjectStatus, string> = {
   Closed: "bg-green-100 text-green-800",
 };
 
-export function ProjectList() {
+export function ProjectList(): ReactElement {
+  const { data: user } = useCurrentUser();
+  const canCreate = user?.role !== "viewer";
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -72,12 +76,14 @@ export function ProjectList() {
             Open a project for BOQ, quotes, document references, sustainability.
           </p>
         </div>
-        <Button asChild>
-          <Link to="/projects/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Project
-          </Link>
-        </Button>
+        {canCreate ? (
+          <Button asChild>
+            <Link to="/projects/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Project
+            </Link>
+          </Button>
+        ) : null}
       </div>
 
       <Card>
@@ -111,11 +117,12 @@ export function ProjectList() {
           </div>
 
           {isError && (
-            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-              Failed to load projects: {(error as Error)?.message ?? "API error"}.{" "}
-              <button type="button" className="underline" onClick={() => refetch()}>
-                Retry
-              </button>
+            <div className="mb-4">
+              <QueryErrorBanner
+                message="Failed to load projects"
+                error={error}
+                onRetry={() => void refetch()}
+              />
             </div>
           )}
 
@@ -142,8 +149,19 @@ export function ProjectList() {
                 ) : projects.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                      No projects. Run{" "}
-                      <code className="rounded bg-muted px-1">make bootstrap-real</code>
+                      {debouncedSearch || statusFilter ? (
+                        <>No projects match these filters. Clear search/status and try again.</>
+                      ) : canCreate ? (
+                        <>
+                          No projects yet.{" "}
+                          <Link className="underline font-medium text-foreground" to="/projects/new">
+                            Create a project
+                          </Link>{" "}
+                          after you have a client on file.
+                        </>
+                      ) : (
+                        <>No projects yet. Ask a PM to create one from a client engagement.</>
+                      )}
                     </TableCell>
                   </TableRow>
                 ) : (

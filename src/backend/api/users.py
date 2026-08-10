@@ -7,7 +7,14 @@ from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
-from src.backend.schemas.user import UserCreate, UserListResponse, UserRead, UserUpdate
+from src.backend.schemas.user import (
+    UserAssigneeListResponse,
+    UserAssigneeRead,
+    UserCreate,
+    UserListResponse,
+    UserRead,
+    UserUpdate,
+)
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -32,6 +39,28 @@ def list_users(
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.get("/assignees", response_model=UserAssigneeListResponse)
+def list_assignees(
+    _: User = Depends(get_current_user),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+    q: str | None = None,
+    role: str | None = None,
+    page_size: int = Query(default=100, ge=1, le=200),
+) -> UserAssigneeListResponse:
+    """Active, non-deleted users for task/project assignee pickers (all auth roles)."""
+    from src.backend.services.user_service import list_users_service
+
+    items, _, _, _ = list_users_service(
+        db, page=1, page_size=page_size, q=q, role=role, is_active=True
+    )
+    # Attribution-only import identity must never appear in pickers
+    items = [u for u in items if u.email != "import@swa.local"]
+    return UserAssigneeListResponse(
+        items=[UserAssigneeRead.model_validate(u) for u in items],
+        total=len(items),
     )
 
 

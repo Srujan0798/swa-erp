@@ -180,6 +180,18 @@ export const api = {
     return request<UserListResponse>(`/api/users${query ? `?${query}` : ""}`);
   },
 
+  /** Active users for assignee pickers — any authenticated role (not ADMIN-only). */
+  listAssignees: (params?: { page_size?: number; q?: string; role?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page_size) searchParams.set("page_size", String(params.page_size));
+    if (params?.q) searchParams.set("q", params.q);
+    if (params?.role) searchParams.set("role", params.role);
+    const query = searchParams.toString();
+    return request<{ items: User[]; total: number }>(
+      `/api/users/assignees${query ? `?${query}` : ""}`,
+    );
+  },
+
   createUser: (data: UserCreate) =>
     request<User>("/api/users", {
       method: "POST",

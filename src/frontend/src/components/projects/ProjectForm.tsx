@@ -52,17 +52,17 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
 
   const { data: pmUsers } = useQuery({
     queryKey: ["users-pm"],
-    queryFn: () => api.listUsers({ role: "pm" }),
+    queryFn: () => api.listAssignees({ role: "pm" }),
   });
 
   const { data: designerUsers } = useQuery({
     queryKey: ["users-designer"],
-    queryFn: () => api.listUsers({ role: "designer" }),
+    queryFn: () => api.listAssignees({ role: "designer" }),
   });
 
   const { data: auditorUsers } = useQuery({
     queryKey: ["users-auditor"],
-    queryFn: () => api.listUsers({ role: "auditor" }),
+    queryFn: () => api.listAssignees({ role: "auditor" }),
   });
 
   const handleSubmit = async (data: ProjectFormData) => {

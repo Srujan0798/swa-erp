@@ -94,6 +94,21 @@ def main() -> int:
         default=BASE,
         help="Directory containing the xlsx files",
     )
+    parser.add_argument(
+        "--allow-stubs",
+        action="store_true",
+        default=True,
+        help=(
+            "Create stub clients/projects for missing FKs (default on for real "
+            "multi-sheet import). Disable with --no-allow-stubs."
+        ),
+    )
+    parser.add_argument(
+        "--no-allow-stubs",
+        action="store_false",
+        dest="allow_stubs",
+        help="Refuse stub clients/projects (strict FK mode).",
+    )
     args = parser.parse_args()
 
     if args.wipe and not args.commit:
@@ -123,7 +138,13 @@ def main() -> int:
                 summary.append({"sheet_type": sheet_type, "ok": False, "errors": [{"message": f"missing {path}"}]})
                 failed = True
                 continue
-            result = import_sheet(session, sheet_type, str(path), commit=args.commit)
+            result = import_sheet(
+                session,
+                sheet_type,
+                str(path),
+                commit=args.commit,
+                allow_stubs=args.allow_stubs,
+            )
             d = result.to_dict()
             summary.append(d)
             flag = "OK " if d["ok"] else "ERR"

@@ -36,3 +36,20 @@ class UserListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class UserAssigneeRead(BaseModel):
+    """Slim user row for assignee / team pickers (any authenticated role)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    # str not EmailStr: import/system identities may use reserved domains (.local)
+    email: str
+    name: str
+    role: Role
+
+
+class UserAssigneeListResponse(BaseModel):
+    items: list[UserAssigneeRead]
+    total: int

@@ -16,8 +16,23 @@ from src.backend.db.repositories.project_repo import (
 from src.backend.db.repositories.project_repo import (
     get_by_id as get_project_by_id,
 )
+from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
 from src.backend.models.project import Project
 from src.backend.schemas.project import ProjectCreate, ProjectUpdate
+
+
+def _require_assignable_user(
+    db: Session, user_id: uuid.UUID | None, field: str
+) -> None:
+    """Reject soft-deleted or inactive users for project role assignment."""
+    if user_id is None:
+        return
+    user = get_user_by_id(db, user_id)
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{field}: user not found, inactive, or deleted",
+        )
 
 
 def create_project_service(
@@ -25,6 +40,10 @@ def create_project_service(
     data: ProjectCreate,
     actor_id: uuid.UUID,
 ) -> dict[str, Any]:
+    _require_assignable_user(db, data.pm_id, "pm_id")
+    _require_assignable_user(db, data.designer_id, "designer_id")
+    _require_assignable_user(db, data.auditor_id, "auditor_id")
+
     project = create_project(db, data.model_dump())
 
     result = get_project_with_names(db, project.id)
@@ -77,6 +96,12 @@ def update_project_service(
 
     update_data = data.model_dump(exclude_unset=True)
     expected_version = update_data.pop("expected_version", None)
+    if "pm_id" in update_data:
+        _require_assignable_user(db, update_data.get("pm_id"), "pm_id")
+    if "designer_id" in update_data:
+        _require_assignable_user(db, update_data.get("designer_id"), "designer_id")
+    if "auditor_id" in update_data:
+        _require_assignable_user(db, update_data.get("auditor_id"), "auditor_id")
     try:
         update_project(db, project_id, update_data, expected_version)
     except ProjectVersionConflictError as e:

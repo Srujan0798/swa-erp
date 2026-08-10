@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -13,9 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
+import { useCurrentUser } from "@/hooks/useAuth";
 import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
-export function ClientList() {
+export function ClientList(): ReactElement {
+  const { data: user } = useCurrentUser();
+  const canCreate = user?.role !== "viewer";
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -49,12 +53,14 @@ export function ClientList() {
             From Clients Sheet / imports — open a row for Agreements & Tokens.
           </p>
         </div>
-        <Button asChild>
-          <Link to="/clients/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Client
-          </Link>
-        </Button>
+        {canCreate ? (
+          <Button asChild>
+            <Link to="/clients/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Client
+            </Link>
+          </Button>
+        ) : null}
       </div>
 
       <Card>
@@ -70,12 +76,11 @@ export function ClientList() {
           </div>
 
           {isError && (
-            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-              Failed to load clients: {(error as Error)?.message ?? "API error"}.{" "}
-              <button type="button" className="underline" onClick={() => refetch()}>
-                Retry
-              </button>
-            </div>
+            <QueryErrorBanner
+              message="Failed to load clients"
+              error={error}
+              onRetry={() => void refetch()}
+            />
           )}
 
           <div className="rounded-md border">
@@ -100,9 +105,19 @@ export function ClientList() {
                 ) : clients.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      No clients. Run{" "}
-                      <code className="rounded bg-muted px-1">make bootstrap-real</code> then
-                      refresh.
+                      {debouncedSearch ? (
+                        <>No clients match “{debouncedSearch}”. Clear search or try another name.</>
+                      ) : canCreate ? (
+                        <>
+                          No clients yet.{" "}
+                          <Link className="underline font-medium text-foreground" to="/clients/new">
+                            Add the first client
+                          </Link>{" "}
+                          to start agreements, projects, and tokens.
+                        </>
+                      ) : (
+                        <>No clients yet. Ask an admin or PM to add one.</>
+                      )}
                     </TableCell>
                   </TableRow>
                 ) : (
