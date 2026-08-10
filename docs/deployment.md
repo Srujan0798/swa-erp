@@ -20,7 +20,7 @@ The real production config work is done, not "to be designed later":
 - **`.env.production.example`** — production environment template, with every value that
   depends on the client's IT team's answers explicitly marked `# PENDING IT ANSWER`
 - **`docs/DEPLOYMENT_CHECKLIST.md`** — the actual step-by-step deployment runbook, built in wave-20
-- **`docs/IT_BRIEF.md`** — the 8 specific infra questions still blocking the final values in the
+- **`deliverables/SEND_IT.md`** — the 8 specific infra questions still blocking the final values in the
   files above (Docker Engine vs Desktop, Linux-container availability, free ports, TLS
   approach, internal hostname, where Postgres/Redis run, deploy access model) — already sent to
   the client's IT contact, awaiting reply as of this writing

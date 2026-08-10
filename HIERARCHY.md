@@ -13,7 +13,7 @@
 | `CHANGELOG.md` | orchestrator | version history |
 | `CONTRIBUTING.md` | orchestrator | contribution rules |
 | `plan/` | orchestrator | strategy (3 living docs: PRD, ARCHITECTURE, EXECUTION) |
-| `.specify/` | orchestrator | spec-driven contracts (constitution + wave specs) |
+| `.specify/` | orchestrator | constitution only — wave specs archived to `docs/historical/specify-specs/` |
 | `orchestrator/` | orchestrator | commands, skills, agents, hooks, recipes, rules |
 | `work/` | orchestrator (write) / workers (read) | task bridge |
 | `work/reports/` | workers (write) / orchestrator (read) | report bridge |

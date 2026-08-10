@@ -87,8 +87,9 @@ hold in the Windows Server target.
 ## Full brief text (send as-is)
 
 The full send-as-is brief for IT (business context, what's built vs. in progress, technical
-architecture, and the 8 questions) lives in [`docs/IT_BRIEF.md`](../IT_BRIEF.md) — that file is
-the canonical, sendable copy. This ADR records only *why* each of the 8 questions is being asked
-(see "The 8 things you actually need from this call" above); do not duplicate the brief text
-here. It was previously embedded in this file in full and drifted once on the RS256 claim —
-keep a single source of truth and edit `docs/IT_BRIEF.md`, not this ADR.
+architecture, and the 8 questions) lives in [`deliverables/SEND_IT.md`](../../deliverables/SEND_IT.md) — that file is
+the canonical, sendable copy (supersedes the earlier `docs/IT_BRIEF.md`, now archived to
+`docs/historical/IT_BRIEF-superseded.md`). This ADR records only *why* each of the 8 questions is
+being asked (see "The 8 things you actually need from this call" above); do not duplicate the
+brief text here. It was previously embedded in this file in full and drifted once on the RS256
+claim — keep a single source of truth and edit `deliverables/SEND_IT.md`, not this ADR.
