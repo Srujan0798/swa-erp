@@ -3,32 +3,39 @@
 ## Why this file exists
 Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't require re-explaining the project. This file lets the new session catch up in < 5 minutes.
 
-## Current state (2026-08-07 — FINAL RELEASE CUT: v1.0.0)
+## Current state (2026-08-11 — PROJECT COMPLETE: v1.0.1)
 
-- **Status:** Waves 1-30 ✅ SHIPPED and independently verified. **`v1.0.0`** is the first real
-  release (tagged locally `v1.0.0`, unpushed — orchestrator pushes it). Version files
-  (`pyproject.toml`, `src/frontend/package.json`, `package-lock.json`) all say **1.0.0**.
-- **Release verification (wave-30, all run live against the stack):** backend suite
-  **393 passed / 0 failed**; `ruff check src/backend/` clean; `tsc --noEmit` 0 errors;
-  eslint clean (`--max-warnings 0`); `vite build` succeeds; Docker cold boot (`down -v` +
-  `up --build`) brings all 5 services up healthy; `/healthz` → 200; Playwright **7/7**; the
-  full client business chain was walked live via the API (Inquiry → convert new + existing
-  client → Service Agreement → Token → DBR/KDR shared counter → time log → sustainability
-  metric → invoice with GST → report export), all with real reference IDs. Full evidence in
-  `work/reports/wave-30/01-final-release-and-submission.report.md` and
-  `deliverables/SUBMISSION.md`.
-- **Backend test suite: 393/393 passing** (`python3 -m pytest tests/ -q`, verified 2026-08-07).
-- **Client submission package:** `deliverables/SUBMISSION.md` — what was built, verification
-  evidence, explicit drop list, known limitations, the 2 open external blockers, deploy
-  pointer, Excel import pointer, docs map, and support/next steps.
+- **Status:** Waves 1-31 ✅ SHIPPED, verified, and **pushed to `origin/main`**
+  (GitHub `Srujan0798/swa-erp`). Final release **`v1.0.1`** (tagged + pushed), replacing
+  `v1.0.0`. Version files (`pyproject.toml`, `src/frontend/package.json`,
+  `package-lock.json`) all say **1.0.1**. Working tree clean, no worktrees/branches/stashes.
+- **v1.0.1 (wave-31, 2026-08-10) closed the last deferred features:**
+  - **Object storage:** `StorageBackend` (`src/backend/core/storage.py`) — `local` `uploads/`
+    default (byte-identical to 1.0.0), opt-in `minio` (`STORAGE_BACKEND=minio`, compose `minio`
+    service). Files from before wave-31 are not auto-migrated (deployment-time concern).
+  - **Celery worker:** `src/backend/workers/` (`celery_app` + `@task`s), compose `worker`
+    service, Redis broker/backend; async export via `?async=true` → `202 job_id` + poll
+    `GET /api/jobs/{id}`. Sync export path unchanged. Email is the one integration still on the
+    request path.
+  - Alembic migration graph collapsed from 7 heads → 1 (`c4dd496`).
+- **Cleanup sweep (2026-08-11, `0748c7f`):** `backups/` untracked + gitignored (runtime
+  output); FileBrowser "New Folder" dialog wired to `useCreateFolder` (was a dead `TODO`).
+- **Verification (all run this session against the live stack):** backend suite
+  **413 passed / 6 skipped / 0 failed**; `ruff check src/backend/` clean; frontend
+  `npm run build` (tsc) clean; wave-31 tests 20 passed / 6 skipped. Historical evidence in
+  `work/reports/wave-30/` and `work/reports/wave-31/`.
+- **Client submission package:** `deliverables/SUBMISSION.md` (v1.0.1) — what was built,
+  verification evidence, explicit drop list, known limitations, the 2 open external blockers,
+  deploy pointer, Excel import pointer, docs map, and support/next steps. All stale
+  "target-state" claims corrected to match reality.
 - **The 2 open external blockers remain** (nothing code can resolve): Viraj's 3 decisions
   (`docs/decisions/0002-core-id-chain-gap.md`) and IT's 8 answers (`docs/IT_BRIEF.md`).
-- **Known limitations (documented honestly in SUBMISSION.md):** Celery is an installed
-  dependency only — jobs run synchronously; storage is local disk (`uploads/`), MinIO/S3 not
-  wired; JWT is HS256 (not RS256); the Alembic graph has multiple heads resolved via
-  `upgrade heads` (no merge migrations).
+- **Remaining known limitations (documented honestly in SUBMISSION.md):** JWT is HS256 (not
+  RS256); email runs synchronously (Celery queue available if moved off request path);
+  Prometheus metrics + Sentry not implemented (documented as not built).
 - **Where to start:** `deliverables/SUBMISSION.md` → `docs/DEPLOYMENT_CHECKLIST.md` →
-  `docs/IT_BRIEF.md` (fill PENDING IT ANSWER placeholders before prod deploy).
+  `docs/IT_BRIEF.md` (fill `PENDING IT ANSWER (Q#)` placeholders before prod deploy).
+  `MASTER-FLOW.md` is the single-path "what to do next" file.
 
 ## Where to start a new session
 1. Read this file
@@ -77,12 +84,13 @@ That's it. No project memory needed.
 14. Docker Compose auto-migration + seed fix — ✅ SHIPPED (`ab0a786`)
 15. E2E test fixes — ✅ SHIPPED (`4be7536`)
 16. Model/migration drift sweep — ✅ SHIPPED (`d5b2790`)
-17-21. Notifications mount, security hardening, backup scripts, prod config templates,
+ 17-21. Notifications mount, security hardening, backup scripts, prod config templates,
    handover docs — ✅ SHIPPED (see `work/reports/wave-N/` and the status table in
    `plan/EXECUTION.md`)
-22-30. Audit fixes (RBAC, correctness, dead-code/UI), security/lint, doc consolidation, and the
+ 22-30. Audit fixes (RBAC, correctness, dead-code/UI), security/lint, doc consolidation, and the
    **v1.0.0 release** — ✅ SHIPPED; see `plan/EXECUTION.md` status table and
    `deliverables/SUBMISSION.md`
+ 31. Deferred features — MinIO/S3 storage + Celery worker — ✅ SHIPPED (**v1.0.1**, 2026-08-10)
 
 ## Key project context
 - **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Redis, React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query. Celery is implemented (`src/backend/workers/`, compose `worker` service, Redis broker/backend) and powers async export endpoints (`?async=true` → `GET /api/jobs/{id}`). Storage goes through `StorageBackend` (`src/backend/core/storage.py`) — `local` `uploads/` default, opt-in `minio` backend. See `HIERARCHY.md`.
