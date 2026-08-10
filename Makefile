@@ -5,9 +5,11 @@ help:
 	@echo "  make install           — install backend + frontend deps"
 	@echo "  make dev               — docker-compose up (full stack; UI :3100 API :8100)"
 	@echo "  make dev-services      — only postgres + redis (run backend/frontend separately)"
-	@echo "  make seed-demo         — demo users/clients/projects + core ID chain"
+	@echo "  make import-real       — DRY-RUN real Excel from resources/ (internship data)"
+	@echo "  make import-real-commit — WIPE domain tables + COMMIT real Excel import"
+	@echo "  make seed-demo         — synthetic demo only (prefer import-real)"
 	@echo "  make seed-dev          — minimal dev users only"
-	@echo "  make smoke             — live API smoke (Inquiry→SA→Token→DocRef); backend must be up"
+	@echo "  make smoke             — live API smoke; backend must be up on :8100"
 	@echo "  make test              — run all tests"
 	@echo "  make test-wave wave=N  — run wave-N tests"
 	@echo "  make test-unit         — unit tests only"
@@ -81,10 +83,18 @@ import-data:
 	fi
 
 seed-demo:
+	@echo "NOTE: seed-demo invents fake clients. Prefer: make import-real"
 	APP_ENV=dev python3 scripts/seed_demo.py
 
 seed-dev:
 	APP_ENV=dev python3 scripts/seed_dev.py
+
+# Real SWA Excel sheets from resources/ (dry-run by default)
+import-real:
+	APP_ENV=dev python3 scripts/import_real_sheets.py
+
+import-real-commit:
+	APP_ENV=dev python3 scripts/import_real_sheets.py --commit --wipe
 
 smoke:
 	python3 scripts/smoke_chain.py

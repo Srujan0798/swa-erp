@@ -58,6 +58,7 @@ export function ProjectDetailPage() {
           else if (val === "boqs") setView({ tab: "boqs" });
           else if (val === "quotes") setView({ tab: "quotes" });
           else if (val === "documents") setView({ tab: "documents" });
+          else if (val === "sustainability") setView({ tab: "sustainability" });
         }}
       >
         <div className="flex items-center justify-between">

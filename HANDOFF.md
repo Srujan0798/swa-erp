@@ -27,9 +27,9 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
 - **Client submission package:** `deliverables/SUBMISSION.md` (v1.0.1) — what was built,
   verification evidence, explicit drop list, known limitations, deploy pointer, Excel import
   pointer, docs map, and support/next steps.
-- **Group chat (2026-08-11):** Srujan already posted the 3 data Qs + 8 server Qs in WhatsApp.
-  Viraj answered data Qs; said **there is no IT department** and he's busy but will try server
-  answers later. Srujan already said "ok no worries." Do **not** re-send SEND_*.md as if unsent.
+- **Group chat (2026-08-11):** Viraj answered data Qs; said **there is no IT department**
+  (server questions deferred: "will discuss when time comes"). **Lead ID columns completely removed**
+  per his instruction: "remove Lead ID columns everywhere, don't keep even for historical values."
 - **Viraj data Qs — ANSWERED:** APEX/INNER = clients; INSUDESIGN = service name; yearly ID
    reset everywhere; no Leads sheet. Locked in ADR-0002. **No code change.** Reply sent:
    `deliverables/REPLY_VIRAJ.md` (includes LDI example he asked for).
@@ -39,9 +39,11 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
 - **Deploy blocker:** server facts (Docker/WSL/ports/HTTPS/hostname/etc.) — owned by **Viraj**
   (no IT dept), slow path. Until then product stays complete but not company-server live.
 - **Where to start:** `MASTER-FLOW.md` → wait / help when Viraj has bandwidth for server.
-- **Local demo ready (2026-08-11):** `make seed-demo` (core chain + APEX/INNER/INSUDESIGN),
-  `make smoke`, walkthrough `deliverables/DEMO_WALKTHROUGH.md`. Install when free:
-  `docs/INSTALL_NO_IT.md`.
+- **Real Excel path (2026-08-11):** source of truth is
+  `resources/ERP_Sheets_Extracted/ERP Sheets/`. Use `make import-real` (dry-run) or
+  `make import-real-commit` (wipe + load). Importer hardened for real multi-row headers.
+  Doc: `docs/REAL_DATA.md`. Demo seed is **not** client data. Ports: UI **3100**, API **8100**.
+  Install when free: `docs/INSTALL_NO_IT.md`.
 
 ## Where to start a new session
 1. Read this file

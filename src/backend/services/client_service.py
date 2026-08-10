@@ -50,6 +50,8 @@ def create_client_service(
         gst_number=data.gst_number,
         primary_phone=data.primary_phone,
         notes=data.notes,
+        industry=data.industry,
+        client_status=data.client_status,
     )
 
     create_entry(
@@ -113,6 +115,10 @@ def update_client_service(
         client.notes = data.notes
     if data.is_active is not None:
         client.is_active = data.is_active
+    if data.industry is not None:
+        client.industry = data.industry
+    if data.client_status is not None:
+        client.client_status = data.client_status
 
     update_client(db, client)
 

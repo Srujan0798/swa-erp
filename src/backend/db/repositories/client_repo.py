@@ -46,6 +46,8 @@ def create(
     gst_number: str | None = None,
     primary_phone: str | None = None,
     notes: str | None = None,
+    industry: str | None = None,
+    client_status: str = "Active",
 ) -> Client:
     client = Client(
         name=name,
@@ -59,6 +61,8 @@ def create(
         gst_number=gst_number,
         primary_phone=primary_phone,
         notes=notes,
+        industry=industry,
+        client_status=client_status,
     )
     db.add(client)
     db.commit()

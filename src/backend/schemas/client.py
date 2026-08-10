@@ -18,6 +18,8 @@ class ClientCreate(BaseModel):
     primary_email: EmailStr
     primary_phone: str | None = Field(default=None, max_length=50)
     notes: str | None = None
+    industry: str | None = Field(default=None, max_length=100)
+    client_status: str = Field(default="Active", max_length=50)
     contacts: list[ContactCreate] = Field(default_factory=list)
 
 
@@ -34,6 +36,8 @@ class ClientUpdate(BaseModel):
     primary_phone: str | None = Field(default=None, max_length=50)
     notes: str | None = None
     is_active: bool | None = None
+    industry: str | None = Field(default=None, max_length=100)
+    client_status: str | None = Field(default=None, max_length=50)
 
 
 class ClientRead(BaseModel):
@@ -52,6 +56,9 @@ class ClientRead(BaseModel):
     primary_phone: str | None
     notes: str | None
     is_active: bool
+    industry: str | None = None
+    client_status: str = "Active"
+    first_inquiry_id: uuid.UUID | None = None
     created_at: datetime
     updated_at: datetime
     contacts: list[ContactRead] = []

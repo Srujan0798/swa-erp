@@ -25,7 +25,14 @@ def login(
     user_agent: str | None = None,
 ) -> TokenResponse | None:
     user = get_by_email(db, email)
-    if not user or not verify_password(password, user.password_hash):
+    # is_active/deleted_at were enforced on refresh and in core.deps but not here,
+    # so a disabled account could still mint a token pair at login.
+    if (
+        not user
+        or not user.is_active
+        or user.deleted_at
+        or not verify_password(password, user.password_hash)
+    ):
         record_event(
             db, "auth.login_fail", user_id=None, ip_address=ip_address, user_agent=user_agent
         )

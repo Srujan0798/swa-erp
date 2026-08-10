@@ -13,7 +13,14 @@ def hash_password(plain: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    # A malformed/sentinel hash (e.g. "!" for accounts that must never log in)
+    # makes bcrypt raise. Fail closed instead of surfacing a 500.
+    if not hashed:
+        return False
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False
 
 
 def create_access_token(user_id: uuid.UUID | str, role: str | None = None) -> str:

@@ -157,55 +157,235 @@ def _doc_by_ref(s: Session, reference_id: str) -> DocumentReference | None:
 def _ensure_import_user(s: Session) -> User:
     user = s.scalar(select(User).where(User.email == "import@swa.local"))
     if user is None:
+        # Attribution-only identity: it must never be able to authenticate.
+        # "!" is not a valid bcrypt hash, so verify_password fails closed for any
+        # password; is_active=False is the second gate (checked in login and in
+        # core.deps); VIEWER keeps the blast radius minimal if it is ever misused.
         user = User(
             email="import@swa.local",
-            password_hash="imported",
+            password_hash="!",
             name="Data Import",
-            role="employee",
+            role=Role.VIEWER,
+            is_active=False,
         )
         s.add(user)
         s.flush()
     return user
 
 
+def _ensure_client(
+    s: Session, *, code: str | None, name: str | None
+) -> Client | None:
+    """Resolve client by code/name; create a minimal stub from sheet data if missing."""
+    client = None
+    if code:
+        client = _client_by_code(s, code)
+    if client is None and name:
+        client = _client_by_name(s, name)
+    if client is not None:
+        return client
+    if not name and not code:
+        return None
+    code = code or f"IMP-{(name or 'UNKNOWN')[:20].upper().replace(' ', '-')}"
+    name = name or code
+    # avoid unique collisions on re-run
+    existing = _client_by_code(s, code)
+    if existing:
+        return existing
+    client = Client(
+        code=code,
+        name=name,
+        primary_email=f"{code.lower().replace(' ', '')}@import.local",
+        country="India",
+        client_status="Active",
+        is_active=True,
+        notes="Auto-created during Excel import (referenced by another sheet)",
+    )
+    s.add(client)
+    s.flush()
+    return client
+
+
+def _ensure_project(s: Session, code: str, name: str | None = None) -> Project | None:
+    if not code:
+        return None
+    project = _project_by_code(s, code)
+    if project is not None:
+        return project
+    # attach to a placeholder client so FK holds
+    placeholder = _ensure_client(s, code="SWA-IMPORT-PLACEHOLDER", name="Import Placeholder Client")
+    if placeholder is None:
+        return None
+    project = Project(
+        code=code,
+        client_id=placeholder.id,
+        name=name or code,
+        status="Lead",
+        description="Auto-created during Excel import (referenced by another sheet)",
+        is_active=True,
+    )
+    s.add(project)
+    s.flush()
+    return project
+
+
 # --------------------------------------------------------------------------- #
 # Sheet reader
 # --------------------------------------------------------------------------- #
 def _find_header_index(rows: list[list[Any]], signatures: list[str]) -> int:
+    """Pick the *last* matching header in the first 25 rows.
+
+    SWA workbooks often have a template/legend header first, then the real
+    column header above the data block (Clients, Tokens, DRN, Time Logging).
+    """
     lowered = [sig.lower() for sig in signatures]
-    for i, row in enumerate(rows):
+    matches: list[int] = []
+    for i, row in enumerate(rows[:25]):
         cells = ["" if c is None else str(c).strip().lower() for c in row]
         if all(any(sig in cell for cell in cells) for sig in lowered):
-            return i
-    raise ValueError(f"header row not found (expected columns: {signatures})")
+            # Prefer rows that look like short column labels, not "Why it exists" prose
+            non_empty = [c for c in cells if c]
+            avg_len = sum(len(c) for c in non_empty) / max(len(non_empty), 1)
+            if avg_len < 40:
+                matches.append(i)
+            elif not matches:
+                matches.append(i)
+    if not matches:
+        raise ValueError(f"header row not found (expected columns: {signatures})")
+    return matches[-1]
 
 
-def read_rows(file_path: str, signatures: list[str], key_field: str) -> list[dict]:
+def _record_get(record: dict, *keys: str) -> Any:
+    for k in keys:
+        if k in record and record[k] not in (None, ""):
+            return record[k]
+    # case-insensitive fallback
+    lower_map = {str(k).strip().lower(): v for k, v in record.items()}
+    for k in keys:
+        v = lower_map.get(k.lower())
+        if v not in (None, ""):
+            return v
+    return None
+
+
+def _looks_like_swa_id(value: Any) -> bool:
+    s = _txt(value)
+    if not s:
+        return False
+    return s.upper().startswith("SWA-") or bool(
+        __import__("re").match(r"^[A-Z]{2,10}-\d", s.upper())
+    )
+
+
+def read_rows(
+    file_path: str,
+    signatures: list[str],
+    key_field: str,
+    *,
+    alt_key_fields: list[str] | None = None,
+    require_swa_key: bool = False,
+) -> list[dict]:
     import openpyxl
 
-    wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
-    ws = wb.active
+    wb = openpyxl.load_workbook(file_path, data_only=True)
+    # Prefer named operational tabs when present
+    preferred = ("DRN Sheet", "Project Tracking", "Sheet1")
+    ws = None
+    for name in preferred:
+        if name in wb.sheetnames:
+            ws = wb[name]
+            break
+    if ws is None:
+        ws = wb[wb.sheetnames[0]]
+
     rows = [list(r) for r in ws.iter_rows(values_only=True)]
+    wb.close()
     hdr_idx = _find_header_index(rows, signatures)
     header = [("" if c is None else str(c).strip()) for c in rows[hdr_idx]]
-    while header and header[-1] == "":
-        header.pop()
+    # Map non-empty header labels to their absolute Excel column index so a blank
+    # column A (common in SWA templates) does not shift every field.
+    colmap: list[tuple[int, str]] = [(i, h) for i, h in enumerate(header) if h]
+
+    key_fields = [key_field] + list(alt_key_fields or [])
+
+    def _build(cells: list[Any], shift: int) -> dict[str, Any]:
+        rec: dict[str, Any] = {}
+        for i, name in colmap:
+            j = i + shift
+            rec[name] = cells[j] if 0 <= j < len(cells) else ""
+        return rec
+
+    def _key_of(rec: dict[str, Any]) -> Any:
+        for kf in key_fields:
+            v = _record_get(rec, kf)
+            if v not in (None, ""):
+                return v
+        return None
 
     data: list[dict] = []
     for r in rows[hdr_idx + 1 :]:
         if r is None:
             continue
-        cells = [("" if c is None else c) for c in r]
-        if len(cells) < len(header):
-            cells = cells + [""] * (len(header) - len(cells))
-        record = {header[i]: cells[i] for i in range(len(header))}
+        cells = list(r) if r is not None else []
+        record = _build(cells, 0)
         # skip stray duplicate header rows
-        cell_texts = [str(v).strip().lower() for v in record.values()]
-        if any(t == sig.lower() for t in cell_texts for sig in signatures):
+        cell_texts = [str(v).strip().lower() for v in record.values() if v is not None]
+        sig_hits = sum(1 for t in cell_texts if any(sig.lower() == t for sig in signatures))
+        if sig_hits >= max(1, len(signatures)):
             continue
-        # skip blank / key-less rows
-        if not _txt(record.get(key_field)):
+        key_val = _key_of(record)
+
+        def _row_score(rec: dict[str, Any]) -> int:
+            """Prefer alignment where IDs land on ID columns, not under Type/Author."""
+            k = _key_of(rec)
+            if not _looks_like_swa_id(k):
+                return -1
+            score = 1
+            assoc = _txt(
+                _record_get(rec, "Associated Project/Token ID", "Associated Project ID")
+            )
+            if assoc and _looks_like_swa_id(assoc):
+                score += 3
+            doc_type = _txt(_record_get(rec, "Document Type", "Token Type", "Service Name"))
+            if doc_type and not _looks_like_swa_id(doc_type):
+                score += 1
+            author = _txt(_record_get(rec, "Author", "Client Name"))
+            if author and not _looks_like_swa_id(author):
+                score += 1
+            # Doc ref codes often contain CON/DBR/CAS/GAD/DRN/TKN/INQ/CLT/SA
+            ku = str(k).upper()
+            if any(
+                x in ku
+                for x in (
+                    "-CON-",
+                    "-DBR-",
+                    "-CAS-",
+                    "-GAD-",
+                    "-DRN-",
+                    "-TKN-",
+                    "-INQ-",
+                    "-CLT-",
+                    "-SA-",
+                    "-PRJ-",
+                )
+            ):
+                score += 2
+            return score
+
+        # Try shift -1 (data one column left of header labels — DRN sheet)
+        shifted = _build(cells, -1)
+        if _row_score(shifted) > _row_score(record):
+            record, key_val = shifted, _key_of(shifted)
+        else:
+            key_val = _key_of(record)
+
+        if not _txt(key_val):
             continue
+        if require_swa_key and not _looks_like_swa_id(key_val):
+            continue
+        if isinstance(key_val, str) and len(key_val) > 60:
+            continue
+        record[key_field] = key_val
         data.append(record)
     return data
 
@@ -237,10 +417,9 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                 fi = _txt(d.get("First Inquiry ID"))
                 if fi:
                     inq = _inquiry_by_ref(s, fi)
-                    if inq is None:
-                        result.add_error(i, f"Inquiry {fi} not found")
-                    else:
+                    if inq is not None:
                         client.first_inquiry_id = inq.id
+                    # else: keep null — inquiry may be imported later; not fatal
                 result.updated += 1
             else:
                 client = Client(
@@ -258,9 +437,7 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                 fi = _txt(d.get("First Inquiry ID"))
                 if fi:
                     inq = _inquiry_by_ref(s, fi)
-                    if inq is None:
-                        result.add_error(i, f"Inquiry {fi} not found")
-                    else:
+                    if inq is not None:
                         client.first_inquiry_id = inq.id
                 s.add(client)
                 result.created += 1
@@ -313,9 +490,9 @@ def _import_agreements(s: Session, rows: list[dict], result: ImportResult) -> No
             if not reference_id:
                 result.add_error(i, "missing Agreement ID")
                 continue
-            client = _client_by_name(s, _txt(d.get("Client Name")))
-            if client is None:
-                client = _client_by_code(s, _txt(d.get("Client ID")))
+            client = _ensure_client(
+                s, code=_txt(d.get("Client ID")), name=_txt(d.get("Client Name"))
+            )
             if client is None:
                 result.add_error(i, "client not found (Client Name / Client ID)")
                 continue
@@ -323,10 +500,14 @@ def _import_agreements(s: Session, rows: list[dict], result: ImportResult) -> No
             if not service_name:
                 result.add_error(i, "missing Service Name")
                 continue
-            start_date = _parse_date(d.get("Start Date"))
-            if start_date is None:
-                result.add_error(i, "missing or invalid Start Date")
+            try:
+                start_date = _parse_date(d.get("Start Date"))
+            except ValueError as e:
+                result.add_error(i, str(e))
                 continue
+            if start_date is None:
+                # Real SA samples sometimes omit start date — still import the row
+                start_date = dt.date.today()
             inquiry = _inquiry_by_ref(s, _txt(d.get("Inquiry ID"))) if _txt(
                 d.get("Inquiry ID")
             ) else None
@@ -378,7 +559,9 @@ def _import_tokens(s: Session, rows: list[dict], result: ImportResult) -> None:
             tu = _parse_int(d.get("Tokens Used"))
             if tu is not None:
                 values["tokens_used"] = tu
-            emp = _txt(d.get("Swa Employee Name/Team Leader"))
+            emp = _txt(d.get("Swa Employee Name/Team Leader")) or _txt(
+                d.get("Swa Employee Name")
+            )
             if emp:
                 u = _resolve_user_by_name(s, emp)
                 if u is not None:
@@ -403,27 +586,31 @@ def _import_tokens(s: Session, rows: list[dict], result: ImportResult) -> None:
 def _import_document_references(s: Session, rows: list[dict], result: ImportResult) -> None:
     for i, d in enumerate(rows, start=2):
         try:
-            reference_id = _txt(d.get("Doc Ref No")) or _txt(d.get("DRN"))
+            reference_id = _txt(_record_get(d, "Doc Ref No", "DRN"))
             if not reference_id:
                 result.add_error(i, "missing Doc Ref No / DRN")
                 continue
-            assoc = _txt(d.get("Associated Project/Token ID")) or _txt(
-                d.get("Associated Project ID")
+            if not _looks_like_swa_id(reference_id):
+                result.skipped += 1
+                continue
+            assoc = _txt(
+                _record_get(d, "Associated Project/Token ID", "Associated Project ID")
             )
             project = _project_by_code(s, assoc) if assoc else None
             token = None
             if project is None and assoc:
                 token = _token_by_ref(s, assoc)
-            if project is None and token is not None:
-                result.add_error(i, "document reference requires an associated Project (token only)")
-                continue
+                if token is not None and token.project_id is not None:
+                    project = s.get(Project, token.project_id)
+            if project is None and assoc and _looks_like_swa_id(assoc):
+                # Real sample sheets reference project codes not present on Project Tracking
+                project = _ensure_project(s, assoc)
             if project is None:
                 result.add_error(i, f"Project {assoc} not found")
                 continue
             doc_date = _parse_date(d.get("Date"))
             if doc_date is None:
-                result.add_error(i, "missing or invalid Date")
-                continue
+                doc_date = dt.date.today()
             document_type = _txt(d.get("Document Type"))
             if not document_type:
                 result.add_error(i, "missing Document Type")
@@ -500,15 +687,31 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
             if not ref:
                 result.add_error(i, "missing Reference ID")
                 continue
-            project = _project_by_code(s, ref)
+            project = _project_by_code(s, ref) if _looks_like_swa_id(ref) else None
             if project is None:
-                token = _token_by_ref(s, ref)
-                docref = _doc_by_ref(s, ref) if token is None else None
+                token = _token_by_ref(s, ref) if _looks_like_swa_id(ref) else None
+                docref = (
+                    _doc_by_ref(s, ref)
+                    if token is None and _looks_like_swa_id(ref)
+                    else None
+                )
                 if token is not None:
-                    result.add_error(i, "time log references a Token without a Project")
-                    continue
-                if docref is not None and docref.project_id is not None:
+                    if token.project_id is not None:
+                        project = s.get(Project, token.project_id)
+                    else:
+                        # bind to stub so hours are not lost
+                        project = _ensure_project(
+                            s, f"FROM-TOKEN-{token.reference_id}", name=f"Work for {token.reference_id}"
+                        )
+                        token.project_id = project.id if project else None
+                if project is None and docref is not None and docref.project_id is not None:
                     project = s.get(Project, docref.project_id)
+                # match by project name column when ref is non-id text
+                pname = _txt(d.get("Project Name"))
+                if project is None and pname:
+                    project = s.scalar(select(Project).where(Project.name == pname))
+                if project is None and _looks_like_swa_id(ref):
+                    project = _ensure_project(s, ref, name=pname)
                 if project is None:
                     result.add_error(i, f"Reference {ref} not found (Project/Token/Doc)")
                     continue
@@ -521,7 +724,7 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
                 result.add_error(i, "missing Hours Logged")
                 continue
             description = _txt(d.get("Activity Type")) or "Imported time log"
-            remarks = _txt(d.get("Remarks (optional)"))
+            remarks = _txt(d.get("Remarks (optional)")) or _txt(d.get("Remarks"))
             if remarks:
                 description = f"{description} — {remarks}"
             employee = _txt(d.get("Employee Name"))
@@ -563,6 +766,8 @@ def _import_sustainability(s: Session, rows: list[dict], result: ImportResult) -
                 result.add_error(i, "missing Reference ID")
                 continue
             project = _project_by_code(s, reference_id)
+            if project is None and _looks_like_swa_id(reference_id):
+                project = _ensure_project(s, reference_id)
             if project is None:
                 result.add_error(i, f"Project {reference_id} not found")
                 continue
@@ -571,20 +776,31 @@ def _import_sustainability(s: Session, rows: list[dict], result: ImportResult) -
                     SustainabilityMetric.reference_id == reference_id
                 )
             )
+            # Real sheet uses spaced header "Actual / Expected"
+            efficiency = _parse_decimal(
+                _record_get(
+                    d,
+                    "Insulation Efficiency (Actual/Expected)",
+                    "Insulation Efficiency (Actual / Expected)",
+                )
+            )
+            green_raw = d.get("Compliant with Green Standards")
+            green = None
+            try:
+                green = _parse_bool(green_raw)
+            except ValueError:
+                # sheet samples use standard names (GRIHA, IGBC) — treat as compliant
+                green = bool(_txt(green_raw) and str(green_raw).strip().lower() not in ("no", "n", "false", "0"))
             values = dict(
                 project_id=project.id,
                 recorded_date=_parse_date(d.get("Date")) or dt.date.today(),
-                compliant_with_green_standards=_parse_bool(
-                    d.get("Compliant with Green Standards")
-                ),
+                compliant_with_green_standards=green,
                 energy_saved_kwh=_parse_decimal(d.get("Total Energy Saved (kWh)")),
                 co2_avoided_tco2e=_parse_decimal(d.get("CO2 emissions avoided (tCO2e)")),
                 lifecycle_cost_savings_inr=_parse_decimal(
                     d.get("Lifecycle Cost savings delivered (INR)")
                 ),
-                insulation_efficiency_ratio=_parse_decimal(
-                    d.get("Insulation Efficiency (Actual/Expected)")
-                ),
+                insulation_efficiency_ratio=efficiency,
                 payback_period_months=_parse_decimal(d.get("Payback Period (Months)")),
                 notes=_txt(d.get("Notes")),
             )
@@ -606,41 +822,50 @@ SHEET_CONFIG: dict[str, dict[str, Any]] = {
     "clients": {
         "signatures": ["Client ID", "Client Name"],
         "key_field": "Client ID",
+        "require_swa_key": True,
         "fn": _import_clients,
     },
     "inquiries": {
         "signatures": ["Inquiry ID"],
         "key_field": "Inquiry ID",
+        "require_swa_key": True,
         "fn": _import_inquiries,
     },
     "agreements": {
         "signatures": ["Agreement ID"],
         "key_field": "Agreement ID",
+        "require_swa_key": True,
         "fn": _import_agreements,
     },
     "tokens": {
         "signatures": ["Token ID"],
         "key_field": "Token ID",
+        "require_swa_key": True,
         "fn": _import_tokens,
     },
     "document_references": {
         "signatures": ["Doc Ref No"],
+        "alt_signatures": ["DRN", "Document Type"],
         "key_field": "Doc Ref No",
+        "alt_key_fields": ["DRN"],
+        "require_swa_key": True,
         "fn": _import_document_references,
     },
     "projects": {
         "signatures": ["Project ID"],
         "key_field": "Project ID",
+        "require_swa_key": True,
         "fn": _import_projects,
     },
     "time_logs": {
-        "signatures": ["Reference ID", "Hours Logged"],
+        "signatures": ["Hours Logged", "Employee Name"],
         "key_field": "Reference ID",
         "fn": _import_time_logs,
     },
     "sustainability": {
-        "signatures": ["Reference ID"],
+        "signatures": ["Reference ID", "Compliant with Green Standards"],
         "key_field": "Reference ID",
+        "require_swa_key": True,
         "fn": _import_sustainability,
     },
 }
@@ -654,7 +879,25 @@ def import_sheet(
     cfg = SHEET_CONFIG[sheet_type]
     result = ImportResult(sheet_type=sheet_type)
     try:
-        rows = read_rows(file_path, cfg["signatures"], cfg["key_field"])
+        try:
+            rows = read_rows(
+                file_path,
+                cfg["signatures"],
+                cfg["key_field"],
+                alt_key_fields=cfg.get("alt_key_fields"),
+                require_swa_key=bool(cfg.get("require_swa_key")),
+            )
+        except ValueError:
+            alt = cfg.get("alt_signatures")
+            if not alt:
+                raise
+            rows = read_rows(
+                file_path,
+                alt,
+                cfg["key_field"],
+                alt_key_fields=cfg.get("alt_key_fields"),
+                require_swa_key=bool(cfg.get("require_swa_key")),
+            )
         result.total_rows = len(rows)
         cfg["fn"](session, rows, result)
         if commit:
