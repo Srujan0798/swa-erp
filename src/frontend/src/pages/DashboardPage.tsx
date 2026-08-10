@@ -42,9 +42,9 @@ const FLOW = [
   },
   {
     step: "4",
-    title: "SA → Token → Doc",
-    desc: "Agreement & refs",
-    to: "/clients",
+    title: "Agreements",
+    desc: "SA retainers",
+    to: "/agreements",
     icon: FileSignature,
     key: "sa" as const,
   },

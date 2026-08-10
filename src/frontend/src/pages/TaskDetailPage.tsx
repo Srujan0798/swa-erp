@@ -1,72 +1,51 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { TaskDetail } from "@/components/tasks/TaskDetail";
-import type { Task } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 export function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [open, setOpen] = useState(true);
-  const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    fetch(`/api/tasks/${id}`)
-      .then(async (r) => {
-        if (!r.ok) {
-          const body = await r.json().catch(() => null);
-          throw new Error(body?.detail ?? `Failed to load task: ${r.status}`);
-        }
-        return r.json();
-      })
-      .then((data) => {
-        if (!cancelled) setTask(data);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err.message ?? "Failed to load task");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+  const { data: task, isLoading, isError, error } = useQuery({
+    queryKey: ["task", id],
+    queryFn: () => api.getTask(id!),
+    enabled: !!id,
+  });
 
   if (!id) {
     return null;
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-3">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-40 w-full" />
       </div>
     );
   }
 
-  if (error || !task) {
+  if (isError || !task) {
     return (
       <div className="space-y-3">
-        <p className="text-sm text-destructive">{error ?? "Task not found"}</p>
-        <button
-          className="text-sm underline"
-          onClick={() => window.history.back()}
-        >
-          Back
-        </button>
+        <p className="text-sm text-destructive">
+          {(error as Error)?.message ?? "Task not found"}
+        </p>
+        <Button variant="outline" asChild>
+          <Link to="/tasks">Back to tasks</Link>
+        </Button>
       </div>
     );
   }
 
-  return <TaskDetail task={task} open={open} onClose={() => setOpen(false)} />;
+  return (
+    <div className="mx-auto max-w-3xl space-y-4">
+      <Button variant="ghost" size="sm" asChild>
+        <Link to="/tasks">← Back to tasks</Link>
+      </Button>
+      <TaskDetail task={task} open onClose={() => undefined} />
+    </div>
+  );
 }

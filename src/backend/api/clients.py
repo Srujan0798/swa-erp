@@ -51,7 +51,7 @@ def list_clients(
 @router.post("", response_model=ClientRead, status_code=status.HTTP_201_CREATED)
 def create_client(
     body: ClientCreate,
-    current_user: User = Depends(require_role(Role.ADMIN)),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008  # admin+pm
     db: Session = Depends(get_db),  # noqa: B008
 ) -> ClientRead:
     from sqlalchemy.exc import IntegrityError

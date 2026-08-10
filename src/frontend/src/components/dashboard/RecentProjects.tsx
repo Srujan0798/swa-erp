@@ -25,15 +25,6 @@ const statusColors: Record<ProjectStatus, string> = {
   Closed: "bg-slate-100 text-slate-800",
 };
 
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "-";
-  return new Date(dateStr).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export function RecentProjects() {
   const { data, isLoading, isError } = useProjects(1, 5);
 

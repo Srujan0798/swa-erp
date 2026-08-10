@@ -17,6 +17,7 @@ import {
   Clock,
   Inbox,
   FileSignature,
+  Coins,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -31,7 +32,9 @@ const CORE_FLOW: NavItem[] = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/inquiries", icon: Inbox, label: "1. Inquiries" },
   { to: "/clients", icon: Building2, label: "2. Clients" },
-  { to: "/projects", icon: FolderKanban, label: "3. Projects" },
+  { to: "/agreements", icon: FileSignature, label: "3. Agreements" },
+  { to: "/tokens", icon: Coins, label: "4. Tokens" },
+  { to: "/projects", icon: FolderKanban, label: "5. Projects" },
 ];
 
 const DELIVERY: NavItem[] = [

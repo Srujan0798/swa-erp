@@ -25,6 +25,8 @@ import { ReportsPage } from "@/pages/ReportsPage";
 import TimeTrackingPage from "@/pages/TimeTrackingPage";
 import { InquiriesPage } from "@/pages/InquiriesPage";
 import { InquiryDetailPage } from "@/pages/InquiryDetailPage";
+import { AgreementsPage } from "@/pages/AgreementsPage";
+import { TokensPage } from "@/pages/TokensPage";
 
 function App() {
   return (
@@ -49,6 +51,8 @@ function App() {
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/clients/new" element={<NewClientPage />} />
         <Route path="/clients/:id" element={<ClientDetailPage />} />
+        <Route path="/agreements" element={<AgreementsPage />} />
+        <Route path="/tokens" element={<TokensPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/new" element={<NewProjectPage />} />
         <Route path="/projects/:id" element={<ProjectDetailPage />} />

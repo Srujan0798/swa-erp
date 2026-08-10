@@ -21,22 +21,38 @@ export function InquiryDetailPage() {
   const updateMutation = useUpdateInquiry();
   const deleteMutation = useDeleteInquiry();
 
-  if (isLoading) return <div className="p-6">Loading...</div>;
-  if (!inquiry) return <div className="p-6">Inquiry not found</div>;
+  if (isLoading) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading inquiry…</div>;
+  }
+  if (!inquiry) {
+    return (
+      <div className="space-y-3 p-6">
+        <p className="text-sm text-muted-foreground">Inquiry not found.</p>
+        <Button variant="outline" asChild>
+          <Link to="/inquiries">Back to inquiries</Link>
+        </Button>
+      </div>
+    );
+  }
 
   const statusFlow = ["New", "Contacted", "Dropped"];
   const canConvert = inquiry.status !== "Converted" && inquiry.status !== "Dropped";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Button variant="ghost" asChild>
           <Link to="/inquiries">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Inquiries
+            Back
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold flex-1 font-mono">{inquiry.reference_id}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="font-mono text-xl font-bold tracking-tight sm:text-2xl">
+            {inquiry.reference_id}
+          </h1>
+          <p className="truncate text-sm text-muted-foreground">{inquiry.client_name}</p>
+        </div>
         <Badge
           variant="secondary"
           className={STATUS_COLORS[inquiry.status] ?? ""}
