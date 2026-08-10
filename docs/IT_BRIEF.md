@@ -78,10 +78,11 @@ processing pipeline."
 
 ## Part 3 — How the application is built (technical architecture)
 
-> **Corrected 2026-08-07** — this section describes the TARGET deployment for IT planning.
-> Items 4 and 5 below (MinIO, Redis+Celery) are NOT running in the current build: storage is a
-> local `uploads/` directory and there is no Celery worker (installed dependency only). IT should
-> plan for them as end-state, not assume they're live today.
+> **Corrected 2026-08-10** — this section now describes the ACTUAL build. As of wave-31:
+> Items 4 and 5 below (MinIO, Redis+Celery) are implemented. File storage uses MinIO with a
+> local `uploads/` fallback (configurable via `STORAGE_BACKEND`), and a Celery worker runs
+> background jobs (PDF/report generation) with `make worker`. Redis + Celery still require a
+> Redis server on the deployment host.
 
 In plain terms, the system has these separate pieces, each running as its own "container" (a
 self-contained, isolated unit — using a tool called Docker so each piece can be started, stopped,
