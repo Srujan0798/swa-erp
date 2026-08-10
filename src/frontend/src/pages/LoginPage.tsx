@@ -48,9 +48,10 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>SWA ERP — Sign In</CardTitle>
+          <CardTitle>SWA Consultancy ERP</CardTitle>
           <CardDescription>
-            Use port <strong>3100</strong> only (3000 is a different app). Demo login below.
+            Sign in with your SWA account. Local install: open this app on port{" "}
+            <strong>3100</strong>.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,7 +61,7 @@ export function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@swa.co.in"
+                autoComplete="username"
                 {...register("email")}
               />
               {errors.email && (
@@ -72,7 +73,7 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="admin123!"
+                autoComplete="current-password"
                 {...register("password")}
               />
               {errors.password && (
@@ -82,11 +83,8 @@ export function LoginPage() {
             {loginError && (
               <p className="text-sm text-destructive">{loginError}</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              Default: admin@swa.co.in / admin123! — data from real Excel import.
-            </p>
             <Button type="submit" className="w-full" disabled={isLoggingIn}>
-              {isLoggingIn ? "Signing in..." : "Sign In"}
+              {isLoggingIn ? "Signing in…" : "Sign in"}
             </Button>
           </form>
         </CardContent>

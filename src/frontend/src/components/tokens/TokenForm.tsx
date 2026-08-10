@@ -1,11 +1,20 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
 
 const tokenSchema = z.object({
   token_date: z.string().min(1, "Token date is required"),
@@ -38,30 +47,43 @@ export function TokenForm({ initialData, onSubmit, onCancel, isLoading }: TokenF
     },
   });
 
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-token-form"],
+    queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
+  });
+  const projects = projectsData?.items ?? [];
+  const projectId = form.watch("project_id");
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Token Details</CardTitle>
+          <CardTitle>Token details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="token_date">Token Date *</Label>
+              <Label htmlFor="token_date">Token date *</Label>
               <Input id="token_date" type="date" {...form.register("token_date")} />
               {form.formState.errors.token_date && (
-                <p className="text-sm text-red-500">{form.formState.errors.token_date.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.token_date.message as string}
+                </p>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="token_type">Type</Label>
-              <Input id="token_type" placeholder="e.g. Site Visit, Design Review" {...form.register("token_type")} />
+              <Input
+                id="token_type"
+                placeholder="Query, Design, Site visit…"
+                {...form.register("token_type")}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tokens_used">Tokens Used *</Label>
+              <Label htmlFor="tokens_used">Tokens used *</Label>
               <Input
                 id="tokens_used"
                 type="number"
@@ -77,12 +99,29 @@ export function TokenForm({ initialData, onSubmit, onCancel, isLoading }: TokenF
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="client_employee_name">Client Employee</Label>
+              <Label htmlFor="client_employee_name">Client employee</Label>
               <Input id="client_employee_name" {...form.register("client_employee_name")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="project_id">Project ID (optional)</Label>
-              <Input id="project_id" placeholder="UUID" {...form.register("project_id")} />
+              <Label>Linked project (optional)</Label>
+              <Select
+                value={projectId || "none"}
+                onValueChange={(v) =>
+                  form.setValue("project_id", v === "none" ? undefined : v)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No project link</SelectItem>
+                  {projects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} — {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -93,14 +132,14 @@ export function TokenForm({ initialData, onSubmit, onCancel, isLoading }: TokenF
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 justify-end">
+      <div className="flex justify-end gap-3">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Token"}
+          {isLoading ? "Saving…" : "Save token"}
         </Button>
       </div>
     </form>

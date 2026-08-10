@@ -1,11 +1,20 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
 
 const docRefSchema = z.object({
   doc_date: z.string().min(1, "Document date is required"),
@@ -22,6 +31,7 @@ const docRefSchema = z.object({
 type DocRefFormData = z.infer<typeof docRefSchema>;
 
 interface DocumentReferenceFormProps {
+  projectId: string;
   initialData?: Partial<DocRefFormData>;
   onSubmit: (data: DocRefFormData) => Promise<void>;
   onCancel?: () => void;
@@ -29,6 +39,7 @@ interface DocumentReferenceFormProps {
 }
 
 export function DocumentReferenceForm({
+  projectId,
   initialData,
   onSubmit,
   onCancel,
@@ -45,30 +56,42 @@ export function DocumentReferenceForm({
     },
   });
 
+  const { data: tokensData } = useQuery({
+    queryKey: ["tokens-for-project", projectId],
+    queryFn: () => api.listTokens({ project_id: projectId, page_size: 100 }),
+    enabled: !!projectId,
+  });
+  const tokens = tokensData?.items ?? [];
+  const tokenId = form.watch("token_id");
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Document Reference Details</CardTitle>
+          <CardTitle>Document reference</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="doc_date">Document Date *</Label>
+              <Label htmlFor="doc_date">Document date *</Label>
               <Input id="doc_date" type="date" {...form.register("doc_date")} />
               {form.formState.errors.doc_date && (
-                <p className="text-sm text-red-500">{form.formState.errors.doc_date.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.doc_date.message as string}
+                </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="document_type">Document Type *</Label>
+              <Label htmlFor="document_type">Document type *</Label>
               <Input
                 id="document_type"
-                placeholder="e.g. DBR, KDR, Concept Note"
+                placeholder="DBR, KDR, Concept Note…"
                 {...form.register("document_type")}
               />
               {form.formState.errors.document_type && (
-                <p className="text-sm text-red-500">{form.formState.errors.document_type.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.document_type.message as string}
+                </p>
               )}
             </div>
           </div>
@@ -76,10 +99,14 @@ export function DocumentReferenceForm({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Category (optional)</Label>
-              <Input id="type" placeholder="e.g. Architectural, Structural" {...form.register("type")} />
+              <Input
+                id="type"
+                placeholder="Submittal, Internal…"
+                {...form.register("type")}
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="user_ref">User Reference</Label>
+              <Label htmlFor="user_ref">User / reviewer ref</Label>
               <Input id="user_ref" {...form.register("user_ref")} />
             </div>
           </div>
@@ -96,8 +123,24 @@ export function DocumentReferenceForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="token_id">Linked Token ID (optional)</Label>
-            <Input id="token_id" placeholder="UUID" {...form.register("token_id")} />
+            <Label>Linked token (optional)</Label>
+            <Select
+              value={tokenId || "none"}
+              onValueChange={(v) => form.setValue("token_id", v === "none" ? undefined : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select token" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No token link</SelectItem>
+                {tokens.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.reference_id}
+                    {t.token_type ? ` — ${t.token_type}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -112,14 +155,14 @@ export function DocumentReferenceForm({
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 justify-end">
+      <div className="flex justify-end gap-3">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Document Reference"}
+          {isLoading ? "Saving…" : "Save document reference"}
         </Button>
       </div>
     </form>

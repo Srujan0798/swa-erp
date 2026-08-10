@@ -84,7 +84,8 @@ import-data:
 	fi
 
 seed-demo:
-	@echo "NOTE: seed-demo invents fake clients. Prefer: make import-real"
+	@echo "DEV ONLY synthetic seed. Live data: make bootstrap-real"
+	@test "$$CONFIRM_SYNTHETIC_SEED" = "1" || (echo "Set CONFIRM_SYNTHETIC_SEED=1 to force synthetic seed"; exit 1)
 	APP_ENV=dev python3 scripts/seed_demo.py
 
 seed-dev:

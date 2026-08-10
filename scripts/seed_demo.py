@@ -1,11 +1,11 @@
 """
-Seed realistic demo data for SWA ERP demos.
+SYNTHETIC DEV SEED — NOT for live SWA consultancy data.
 
-USAGE:
-    APP_ENV=dev python3 scripts/seed_demo.py
+For real Excel sheets use:
+    make bootstrap-real
+    # or: APP_ENV=dev python3 scripts/bootstrap_real.py
 
-Creates realistic clients, contacts, and projects for SWA Consultancy
-(insulation engineering, Ahmedabad-based).
+This script invents clients/projects for offline UI testing only.
 """
 import sys
 import os

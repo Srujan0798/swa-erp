@@ -40,7 +40,7 @@ export function Topbar() {
           {titleForPath(pathname)}
         </h1>
         <Badge variant="secondary" className="hidden font-normal sm:inline-flex">
-          Live data
+          SWA internal
         </Badge>
       </div>
       <div className="flex items-center gap-3">

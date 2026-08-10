@@ -131,7 +131,7 @@ def link_chain(s: Session) -> None:
             client = Client(
                 code=code,
                 name=inq.client_name.strip(),
-                primary_email=f"{code.lower()}@import.local",
+                primary_email=f"import+{code.lower().replace(' ', '-')}@swa.internal",
                 country="India",
                 client_status="Active",
                 is_active=True,

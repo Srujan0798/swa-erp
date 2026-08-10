@@ -39,6 +39,8 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
       <CardContent className="space-y-4">
         {showForm && (
           <DocumentReferenceForm
+            projectId={projectId}
+            initialData={tokenId ? { token_id: tokenId } : undefined}
             onSubmit={async (formData) => {
               try {
                 await createMutation.mutateAsync({

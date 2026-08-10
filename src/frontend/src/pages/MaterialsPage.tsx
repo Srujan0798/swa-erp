@@ -61,10 +61,13 @@ export function MaterialsPage() {
 
       <div className="flex items-center gap-3">
         <Input placeholder="Search materials..." className="max-w-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <Select value={categoryId} onValueChange={setCategoryId}>
+        <Select
+          value={categoryId || "all"}
+          onValueChange={(v) => setCategoryId(v === "all" ? "" : v)}
+        >
           <SelectTrigger className="w-48"><SelectValue placeholder="All categories" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All categories</SelectItem>
+            <SelectItem value="all">All categories</SelectItem>
             {categories.map((cat) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
           </SelectContent>
         </Select>

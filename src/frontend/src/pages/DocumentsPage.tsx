@@ -49,9 +49,9 @@ export function DocumentsPage() {
             Uploaded files per project. For DRN/DBR document references, open a Project → Documents.
           </p>
         </div>
-        <Button disabled title="Use project detail upload when available">
+        <Button disabled title="Open a project and use the project Documents area for file uploads">
           <Upload className="mr-2 h-4 w-4" />
-          Upload
+          Upload (via project)
         </Button>
       </div>
 

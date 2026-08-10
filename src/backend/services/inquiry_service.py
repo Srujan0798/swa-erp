@@ -222,7 +222,7 @@ def _create_client_from_inquiry(
 ) -> Client:
     primary_email = (
         req.client_primary_email
-        or f"inquiry-{inquiry.reference_id.lower()}@placeholder.swa.local"
+        or f"inquiry+{inquiry.reference_id.lower().replace(' ', '-')}@swa.internal"
     )
     code = _build_default_client_code(db)
     client = create_client(

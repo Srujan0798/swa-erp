@@ -192,14 +192,16 @@ def _ensure_client(
     existing = _client_by_code(s, code)
     if existing:
         return existing
+    # Synthetic email only when Excel has none — valid format, not a public domain spoof
+    slug = "".join(ch if ch.isalnum() else "-" for ch in code.lower()).strip("-")[:40]
     client = Client(
         code=code,
         name=name,
-        primary_email=f"{code.lower().replace(' ', '')}@import.local",
+        primary_email=f"import+{slug}@swa.internal",
         country="India",
         client_status="Active",
         is_active=True,
-        notes="Auto-created during Excel import (referenced by another sheet)",
+        notes="Created by Excel import because another sheet referenced this client.",
     )
     s.add(client)
     s.flush()
@@ -212,16 +214,29 @@ def _ensure_project(s: Session, code: str, name: str | None = None) -> Project |
     project = _project_by_code(s, code)
     if project is not None:
         return project
-    # attach to a placeholder client so FK holds
-    placeholder = _ensure_client(s, code="SWA-IMPORT-PLACEHOLDER", name="Import Placeholder Client")
-    if placeholder is None:
+    # Hold client for orphan project IDs (e.g. sustainability refs when Project Tracking is empty).
+    # Not fake demo data — system staging until full sheets are imported.
+    hold = _ensure_client(
+        s,
+        code="SWA-SYS-UNLINKED",
+        name="SWA — unlinked import rows",
+    )
+    if hold is None:
         return None
+    if hold.notes and "unlinked" not in (hold.notes or "").lower():
+        hold.notes = (
+            "System hold for project/doc IDs referenced in Excel before Project Tracking "
+            "rows exist. Re-assign to real clients after full import."
+        )
     project = Project(
         code=code,
-        client_id=placeholder.id,
+        client_id=hold.id,
         name=name or code,
         status="Lead",
-        description="Auto-created during Excel import (referenced by another sheet)",
+        description=(
+            "Created by Excel import from a cross-sheet reference "
+            f"(code {code}). Link to the correct client when Project Tracking is complete."
+        ),
         is_active=True,
     )
     s.add(project)
@@ -404,7 +419,8 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
             if not name:
                 result.add_error(i, "missing Client Name")
                 continue
-            email = _txt(d.get("Email")) or f"{code.lower()}@import.local"
+            slug = "".join(ch if ch.isalnum() else "-" for ch in code.lower()).strip("-")[:40]
+            email = _txt(d.get("Email")) or f"import+{slug}@swa.internal"
             client = _client_by_code(s, code)
             if client is not None:
                 client.name = name

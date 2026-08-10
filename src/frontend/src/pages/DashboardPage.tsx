@@ -83,7 +83,7 @@ export function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Operations dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            SWA Consultancy ERP — data from your Excel sheets (import), not random demo seed.
+            Live SWA Consultancy workflow counts — Inquiry → Client → Project → SA / Token / Docs.
           </p>
         </div>
         <Button asChild>
@@ -154,13 +154,12 @@ export function DashboardPage() {
             open a Project → Documents tab.
           </p>
           <p>
-            <span className="font-medium text-foreground">Reload Excel data</span> —{" "}
+            <span className="font-medium text-foreground">Reload from Excel</span> —{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-xs">make bootstrap-real</code>
           </p>
           <p>
-            <span className="font-medium text-foreground">Correct URL</span> —{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">http://127.0.0.1:3100</code>{" "}
-            (not 3000).
+            <span className="font-medium text-foreground">App URL</span> —{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">http://127.0.0.1:3100</code>
           </p>
         </CardContent>
       </Card>
