@@ -54,6 +54,10 @@ backups/
 # Worker reports — keep checked in (audit trail)
 # work/reports/ — kept
 
+# Raw AI-session JSON exports (122MB) — kept on disk, not in git.
+# Distilled knowledge lives in docs/historical/handoffs/*.md + PROJECT_HISTORY.md.
+docs/historical/session_exports/
+
 # Pre-commit
 .pre-commit-cache/
 
