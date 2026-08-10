@@ -26,19 +26,29 @@ export function ClientList() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["clients", page, debouncedSearch],
-    queryFn: () => api.listClients({ page, page_size: pageSize, q: debouncedSearch }),
+    queryFn: () =>
+      api.listClients({
+        page,
+        page_size: pageSize,
+        q: debouncedSearch || undefined,
+      }),
   });
 
   const clients = data?.items ?? [];
   const total = data?.total ?? 0;
-  const totalPages = Math.ceil(total / pageSize);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Clients</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
+          <p className="text-sm text-muted-foreground">
+            From Clients Sheet / imports — open a row for Agreements & Tokens.
+          </p>
+        </div>
         <Button asChild>
           <Link to="/clients/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -52,12 +62,21 @@ export function ClientList() {
           <div className="relative mb-4">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search clients..."
+              placeholder="Search by name or code..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
             />
           </div>
+
+          {isError && (
+            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              Failed to load clients: {(error as Error)?.message ?? "API error"}.{" "}
+              <button type="button" className="underline" onClick={() => refetch()}>
+                Retry
+              </button>
+            </div>
+          )}
 
           <div className="rounded-md border">
             <Table>
@@ -74,25 +93,31 @@ export function ClientList() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      Loading clients…
+                    </TableCell>
                   </TableRow>
                 ) : clients.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center">
-                      No clients found. Run: make bootstrap-real
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      No clients. Run{" "}
+                      <code className="rounded bg-muted px-1">make bootstrap-real</code> then
+                      refresh.
                     </TableCell>
                   </TableRow>
                 ) : (
                   clients.map((client) => (
-                    <TableRow key={client.id}>
-                      <TableCell className="font-mono text-sm">{client.code}</TableCell>
-                      <TableCell>{client.name}</TableCell>
+                    <TableRow key={client.id} className="hover:bg-muted/40">
+                      <TableCell className="font-mono text-xs">{client.code}</TableCell>
+                      <TableCell className="font-medium">{client.name}</TableCell>
                       <TableCell>{client.industry ?? "—"}</TableCell>
                       <TableCell>{client.client_status ?? "—"}</TableCell>
-                      <TableCell>{client.primary_email}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {client.primary_email}
+                      </TableCell>
                       <TableCell>
-                        <Button variant="ghost" asChild>
-                          <Link to={`/clients/${client.id}`}>View</Link>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/clients/${client.id}`}>Open</Link>
                         </Button>
                       </TableCell>
                     </TableRow>
