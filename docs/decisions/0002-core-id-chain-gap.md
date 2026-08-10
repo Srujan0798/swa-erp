@@ -85,14 +85,15 @@ Answers received from Viraj (verbatim summary locked here for future sessions):
 |---|----------|----------------|------------------------------|
 | 1 | 4th Service Agreement type / INSUDESIGN? | **APEX and INNER are client names**, not agreement types. **INSUDESIGN is the service name.** Earlier verbal "IESK / APEX / Inner as three SA types" was a misread. | `service_name` stays free-text (not an enum). No 4th-type enum. INSUDESIGN is a valid service product name. |
 | 2 | Yearly ID sequence reset? | **Yes — reset every year, everywhere.** Example: `SWA-2025-SA-011` in 2025 → `SWA-2026-SA-001` in 2026. Same rule on all sheets / entity types. | Already built: `reference_counters` is keyed by `(entity_type, year)`; new calendar year starts at `001`. No code change required. |
-| 3 | What is `LDI-*` / Leads? | Leads sheet existed in the **original** design, was **removed** as too hard to maintain. **There is no Leads sheet now.** He asked for an example of `LDI-*` (column was unclear without a sample). | No Leads module. **Lead ID columns completely removed from system** (per 2026-08-11 instruction). `LDI-*` values are not stored — only mapped to Inquiry during import for reference only. |
+| 3 | What is `LDI-*` / Leads? | No Leads sheet (removed). **Follow-up: remove Lead ID columns everywhere; do not keep even for historical values.** | **No Leads module. No `first_lead_id` column. Importer ignores Excel "First Lead ID". Migration `0030` drops residual DB column.** |
 
 ## Implementation status (2026-08-11)
 
-**Lead ID columns — COMPLETELY REMOVED:**
-- All Lead ID fields dropped from models, schemas, database, and importer
-- Migration `0018_drop_lead_id_columns.py` applied (no historical values kept)
-- `LDI-*` values only mapped during import for reference, not stored
+**Lead ID — REMOVED (final, Viraj instruction):**
+- Do **not** store `LDI-*` / First Lead ID anywhere (not even historical)
+- Excel column "First Lead ID" is **ignored** on import
+- New work is **Inquiry only** (`SWA-{year}-INQ-…`)
+- Migration `0030_drop_first_lead_id.py` applied (single head)
 
 **Still open:**
 | # | Question | Status |

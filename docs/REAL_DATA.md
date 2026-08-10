@@ -63,4 +63,4 @@ Full go-live import uses the same tool against **frozen live OneDrive files** wh
 - APEX / INNER = **client names** (not SA types)
 - INSUDESIGN = **service name**
 - Yearly ID reset everywhere
-- No Leads sheet; LDI historical only
+- No Leads sheet; **Lead ID / LDI columns removed entirely** (Viraj 2026-08 — not stored, not historical)

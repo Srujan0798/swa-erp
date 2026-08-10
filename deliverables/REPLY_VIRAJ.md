@@ -1,33 +1,41 @@
-# Reply to Viraj — SWA ERP Data Questions (2026-08-11)
+# Next message to Viraj (WhatsApp / group)
 
-Hi Viraj,
+**Context:** He answered the 3 data Qs earlier. Soft follow-up: server Qs “will discuss when time comes.”  
+**New instruction:** remove Lead ID columns everywhere — not even historical.
 
-Thanks for the quick answers! This clears up everything for the ID chain and service agreement setup.
+---
 
-## Summary of your answers (locked in the system):
+## COPY-PASTE
 
-✅ **Service Agreement type:** APEX and INNER are client names, INSUDESIGN is the service name.  
-✅ **ID sequence:** Yearly reset everywhere — SWA-2025-SA-011 → SWA-2026-SA-001.  
-✅ **Leads/`LDI-*`:** No Leads sheet exists (removed due to maintenance complexity).  
+```
+Got it Viraj 👍
 
-## Regarding `LDI-*` example you asked for:
+Lead ID — locked as you said:
+• We remove Lead ID / LDI columns everywhere in the system
+• Not kept even for historical values
+• Excel "First Lead ID" is ignored on import
+• New work = Inquiry only (SWA-YYYY-INQ-…)
+• No Leads sheet / no Leads module
 
-You mentioned you'd like an example of the `LDI-*` format. Here's what I found in the source data:
+Already locked from before:
+• APEX / INNER = client names
+• INSUDESIGN = service name
+• Yearly ID reset everywhere (…-2025-…-011 → …-2026-…-001)
 
-The `LDI` format appears to be a legacy ID scheme for the same concept we now call "Inquiry". For example:
-- An inquiry might have been recorded as `SWA-2025-LDI-001` in older systems
-- Today, new inquiries use `SWA-2025-INQ-001` 
-- The importer will map any `LDI-*` values from the Excel sheets into the `Inquiry` table
+Server / install questions — no rush, whenever you have bandwidth (“will discuss when time comes”).
 
-This means your team can continue using `LDI-*` in legacy Excel sheets, and the system will treat them as inquiries during import.
+Build stays ready; next step on our side is deploy when server details are free, then one-time Excel import of the live sheets.
+```
 
-## Next steps:
+---
 
-1. **System is ready** — Your answers confirm the design. No code changes needed.
-2. **Deployment** — When you have bandwidth, we'll fill in the server details (Docker, ports, HTTPS, etc.) for deployment.
-3. **Excel import** — Once deployed, we can run the importer against your real data. Just let me know who should run it when we're ready.
+## Do NOT re-ask
 
-No rush on the server questions — the system is complete and ready to go live whenever you're ready to deploy.
+- The long 8 server questions (he deferred)  
+- LDI examples again (decision is delete, not explain)  
 
-Best,
-Srujan
+## Next steps for Srujan (internal)
+
+1. Send the reply above  
+2. Migration `0030` applied — `first_lead_id` gone from DB  
+3. Continue: keep UI on :3100, real import path; wait on server for go-live  
