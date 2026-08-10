@@ -46,6 +46,7 @@ data/runtime/
 documents/
 *.sqlite
 *.db
+backups/
 
 # Auto-memory (orchestrator) — keep checked in
 # .claude/ — keep settings.local.json (intentional)
