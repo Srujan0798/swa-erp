@@ -31,8 +31,8 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
   Viraj answered data Qs; said **there is no IT department** and he's busy but will try server
   answers later. Srujan already said "ok no worries." Do **not** re-send SEND_*.md as if unsent.
 - **Viraj data Qs — ANSWERED:** APEX/INNER = clients; INSUDESIGN = service name; yearly ID
-  reset everywhere; no Leads sheet. Locked in ADR-0002. **No code change.** Next group
-  message only: `deliverables/REPLY_VIRAJ.md` (confirm + LDI example he asked for).
+   reset everywhere; no Leads sheet. Locked in ADR-0002. **No code change.** Reply sent:
+   `deliverables/REPLY_VIRAJ.md` (includes LDI example he asked for).
 - **Deploy blocker:** server facts (Docker/WSL/ports/HTTPS/hostname/etc.) — owned by **Viraj**
   (no IT dept), slow path. Until then product stays complete but not company-server live.
 - **Where to start:** `MASTER-FLOW.md` → paste reply from `REPLY_VIRAJ.md` → wait / help when
