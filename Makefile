@@ -5,8 +5,9 @@ help:
 	@echo "  make install           — install backend + frontend deps"
 	@echo "  make dev               — docker-compose up (full stack; UI :3100 API :8100)"
 	@echo "  make dev-services      — only postgres + redis (run backend/frontend separately)"
-	@echo "  make import-real       — DRY-RUN real Excel from resources/ (internship data)"
-	@echo "  make import-real-commit — WIPE domain tables + COMMIT real Excel import"
+	@echo "  make bootstrap-real    — FULL real Excel load + link chain (USE THIS)"
+	@echo "  make import-real       — DRY-RUN real Excel from resources/"
+	@echo "  make import-real-commit — WIPE + COMMIT real Excel only"
 	@echo "  make seed-demo         — synthetic demo only (prefer import-real)"
 	@echo "  make seed-dev          — minimal dev users only"
 	@echo "  make smoke             — live API smoke; backend must be up on :8100"
@@ -95,6 +96,10 @@ import-real:
 
 import-real-commit:
 	APP_ENV=dev python3 scripts/import_real_sheets.py --commit --wipe
+
+# Full internship bootstrap: wipe + real Excel + link chain + all role users
+bootstrap-real:
+	APP_ENV=dev python3 scripts/bootstrap_real.py
 
 smoke:
 	python3 scripts/smoke_chain.py

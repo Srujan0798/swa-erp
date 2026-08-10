@@ -24,6 +24,10 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "admin@swa.co.in",
+      password: "admin123!",
+    },
   });
 
   if (isAuthenticated) {
@@ -44,8 +48,10 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign In</CardTitle>
-          <CardDescription>Enter your credentials to access SWA ERP</CardDescription>
+          <CardTitle>SWA ERP — Sign In</CardTitle>
+          <CardDescription>
+            Use port <strong>3100</strong> only (3000 is a different app). Demo login below.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -54,7 +60,7 @@ export function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@swa.local"
+                placeholder="admin@swa.co.in"
                 {...register("email")}
               />
               {errors.email && (
@@ -66,7 +72,7 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="admin123!"
                 {...register("password")}
               />
               {errors.password && (
@@ -76,6 +82,9 @@ export function LoginPage() {
             {loginError && (
               <p className="text-sm text-destructive">{loginError}</p>
             )}
+            <p className="text-xs text-muted-foreground">
+              Default: admin@swa.co.in / admin123! — data from real Excel import.
+            </p>
             <Button type="submit" className="w-full" disabled={isLoggingIn}>
               {isLoggingIn ? "Signing in..." : "Sign In"}
             </Button>

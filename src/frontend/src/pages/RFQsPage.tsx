@@ -17,13 +17,6 @@ function statusLabel(status: string) {
   return status.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
 }
 
-type Vendor = { id: string; name: string };
-
-const VENDORS: Vendor[] = [
-  { id: "v1", name: "Vendor Alpha" },
-  { id: "v2", name: "Vendor Beta" },
-];
-
 const DEFAULT_PAYLOAD = (vendor_id: string, notes?: string): RFQCreatePayload => ({
   vendor_id,
   notes,
@@ -36,6 +29,18 @@ export function RFQsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [viewId, setViewId] = useState<string | null>(null);
+
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-for-rfqs"],
+    queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
+  });
+  const projects = projectsData?.items ?? [];
+
+  const { data: vendorsData } = useQuery({
+    queryKey: ["vendors-for-rfqs"],
+    queryFn: () => api.listVendors({ page: 1, page_size: 100 }),
+  });
+  const vendors = vendorsData?.items ?? [];
 
   const { data, isLoading } = useQuery<RFQListResponse>({
     queryKey: ["rfqs", projectId, statusFilter],
@@ -67,17 +72,20 @@ export function RFQsPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Select value={projectId} onValueChange={setProjectId}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="Select project" /></SelectTrigger>
+        <Select value={projectId || undefined} onValueChange={setProjectId}>
+          <SelectTrigger className="w-80"><SelectValue placeholder="Select project" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="p1">Project Alpha</SelectItem>
-            <SelectItem value="p2">Project Beta</SelectItem>
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.code} — {p.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || "all"} onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}>
           <SelectTrigger className="w-36"><SelectValue placeholder="All status" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             {STATUSES.map((s) => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -128,19 +136,40 @@ export function RFQsPage() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>New RFQ</DialogTitle></DialogHeader>
-          <CreateForm projectId={projectId} onCancel={() => setIsCreateOpen(false)} onDone={() => { setIsCreateOpen(false); queryClient.invalidateQueries({ queryKey: ["rfqs"] }); }} />
+          <CreateForm
+            projectId={projectId}
+            vendors={vendors}
+            onCancel={() => setIsCreateOpen(false)}
+            onDone={() => {
+              setIsCreateOpen(false);
+              queryClient.invalidateQueries({ queryKey: ["rfqs"] });
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
   );
 }
 
-function CreateForm({ projectId, onCancel, onDone }: { projectId: string; onCancel: () => void; onDone: () => void }) {
-  const [vendorId, setVendorId] = useState(VENDORS[0]?.id ?? "v1");
+function CreateForm({
+  projectId,
+  vendors,
+  onCancel,
+  onDone,
+}: {
+  projectId: string;
+  vendors: { id: string; name: string }[];
+  onCancel: () => void;
+  onDone: () => void;
+}) {
+  const [vendorId, setVendorId] = useState(vendors[0]?.id ?? "");
   const [notes, setNotes] = useState("");
 
   const create = useMutation({
-    mutationFn: () => api.createRfq(projectId, DEFAULT_PAYLOAD(vendorId, notes || undefined)),
+    mutationFn: () => {
+      if (!vendorId) throw new Error("Select a vendor");
+      return api.createRfq(projectId, DEFAULT_PAYLOAD(vendorId, notes || undefined));
+    },
     onSuccess: onDone,
   });
 
@@ -148,10 +177,20 @@ function CreateForm({ projectId, onCancel, onDone }: { projectId: string; onCanc
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Vendor</Label>
-        <Select value={vendorId} onValueChange={setVendorId}>
+        <Select value={vendorId || undefined} onValueChange={setVendorId}>
           <SelectTrigger><SelectValue placeholder="Select vendor" /></SelectTrigger>
           <SelectContent>
-            {VENDORS.map((v) => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
+            {vendors.length === 0 ? (
+              <SelectItem value="none" disabled>
+                No vendors in DB — create under Vendors
+              </SelectItem>
+            ) : (
+              vendors.map((v) => (
+                <SelectItem key={v.id} value={v.id}>
+                  {v.name}
+                </SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>

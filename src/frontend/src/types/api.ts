@@ -112,6 +112,9 @@ export interface Client {
   primary_phone: string | null;
   notes: string | null;
   is_active: boolean;
+  industry?: string | null;
+  client_status?: string | null;
+  first_inquiry_id?: string | null;
   created_at: string;
   updated_at: string;
   contacts: Contact[];

@@ -65,7 +65,8 @@ export function ClientList() {
                 <TableRow>
                   <TableHead>Code</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>City</TableHead>
+                  <TableHead>Industry</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Primary Email</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -73,18 +74,21 @@ export function ClientList() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center">Loading...</TableCell>
+                    <TableCell colSpan={6} className="text-center">Loading...</TableCell>
                   </TableRow>
                 ) : clients.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center">No clients found</TableCell>
+                    <TableCell colSpan={6} className="text-center">
+                      No clients found. Run: make bootstrap-real
+                    </TableCell>
                   </TableRow>
                 ) : (
                   clients.map((client) => (
                     <TableRow key={client.id}>
                       <TableCell className="font-mono text-sm">{client.code}</TableCell>
                       <TableCell>{client.name}</TableCell>
-                      <TableCell>{client.city ?? "—"}</TableCell>
+                      <TableCell>{client.industry ?? "—"}</TableCell>
+                      <TableCell>{client.client_status ?? "—"}</TableCell>
                       <TableCell>{client.primary_email}</TableCell>
                       <TableCell>
                         <Button variant="ghost" asChild>

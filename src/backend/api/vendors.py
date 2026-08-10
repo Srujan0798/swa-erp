@@ -34,7 +34,7 @@ router = APIRouter(prefix="/api/vendors", tags=["vendors"])
 
 @router.get("", response_model=VendorListResponse)
 def list_vendors(
-    _: User = Depends(require_role(Role.ADMIN)),  # noqa: B008
+    _: User = Depends(require_role(Role.VIEWER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),

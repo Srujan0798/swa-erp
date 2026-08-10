@@ -20,6 +20,12 @@ export function ReportsPage() {
   const [projectId, setProjectId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
 
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-for-reports"],
+    queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
+  });
+  const projects = projectsData?.items ?? [];
+
   const { data: pnl, isLoading: pnlLoading } = useQuery<ProjectPnL>({
     queryKey: reportKey("pnl", projectId),
     enabled: !!projectId,
@@ -43,11 +49,14 @@ export function ReportsPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Select value={projectId} onValueChange={setProjectId}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="Select project" /></SelectTrigger>
+        <Select value={projectId || undefined} onValueChange={setProjectId}>
+          <SelectTrigger className="w-80"><SelectValue placeholder="Select project" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="p1">Project Alpha</SelectItem>
-            <SelectItem value="p2">Project Beta</SelectItem>
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.code} — {p.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

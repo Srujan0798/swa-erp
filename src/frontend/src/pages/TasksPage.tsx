@@ -38,6 +38,12 @@ export function TasksPage() {
   const [newDueDate, setNewDueDate] = useState<string>("");
   const [newAssigneeId, setNewAssigneeId] = useState<string>("");
 
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-for-tasks"],
+    queryFn: () => api.listProjects({ page: 1, page_size: 100 }),
+  });
+  const projects = projectsData?.items ?? [];
+
   const tasksQuery = useQuery({
     queryKey: ["tasks", "list", projectId],
     enabled: !!projectId,
@@ -59,7 +65,8 @@ export function TasksPage() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const pid = createProjectId || "p1";
+      const pid = createProjectId || projectId;
+      if (!pid) throw new Error("Select a project first");
       return api.createTask(pid, {
         title: newTitle,
         description: newDescription || undefined,
@@ -117,13 +124,25 @@ export function TasksPage() {
           </TabsList>
 
           <div className="ml-auto flex items-center gap-2">
-            <Select value={projectId ?? ""} onValueChange={setProjectId}>
-              <SelectTrigger className="w-48">
+            <Select
+              value={projectId ?? undefined}
+              onValueChange={(v) => setProjectId(v)}
+            >
+              <SelectTrigger className="w-72">
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="p1">Project Alpha</SelectItem>
-                <SelectItem value="p2">Project Beta</SelectItem>
+                {projects.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    No projects — run make bootstrap-real
+                  </SelectItem>
+                ) : (
+                  projects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} — {p.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <Input
@@ -221,8 +240,11 @@ export function TasksPage() {
                   <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="p1">Project Alpha</SelectItem>
-                  <SelectItem value="p2">Project Beta</SelectItem>
+                  {projects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} — {p.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
