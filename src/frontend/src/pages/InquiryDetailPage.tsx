@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useInquiry } from "@/hooks/useInquiries";
 import { useUpdateInquiry, useDeleteInquiry } from "@/hooks/useInquiries";
 import { ConvertToClientButton } from "@/components/inquiries/ConvertToClientButton";
@@ -17,6 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function InquiryDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: inquiry, isLoading } = useInquiry(id);
   const updateMutation = useUpdateInquiry();
   const deleteMutation = useDeleteInquiry();
@@ -160,7 +161,9 @@ export function InquiryDetailPage() {
                 disabled={deleteMutation.isPending}
                 onClick={() => {
                   if (confirm("Delete this inquiry?")) {
-                    deleteMutation.mutate(inquiry.id);
+                    deleteMutation.mutate(inquiry.id, {
+                      onSuccess: () => navigate("/inquiries"),
+                    });
                   }
                 }}
               >

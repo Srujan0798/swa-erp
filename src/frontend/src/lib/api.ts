@@ -199,12 +199,19 @@ export const api = {
 
   getProjectStats: () => request<ProjectStats>("/api/projects/stats"),
 
-  listProjects: (params?: { page?: number; page_size?: number; q?: string; status?: string }) => {
+  listProjects: (params?: {
+    page?: number;
+    page_size?: number;
+    q?: string;
+    status?: string;
+    client_id?: string;
+  }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.page_size) searchParams.set("page_size", String(params.page_size));
     if (params?.q) searchParams.set("q", params.q);
     if (params?.status) searchParams.set("status", params.status);
+    if (params?.client_id) searchParams.set("client_id", params.client_id);
     const query = searchParams.toString();
     return request<ProjectListResponse>(`/api/projects${query ? `?${query}` : ""}`);
   },

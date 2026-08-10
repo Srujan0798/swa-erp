@@ -51,8 +51,16 @@ def list_projects_service(
     page_size: int = 20,
     q: str | None = None,
     status: str | None = None,
+    client_id: uuid.UUID | None = None,
 ) -> tuple[list[dict[str, Any]], int, int, int]:
-    return list_projects_with_names(db, page=page, page_size=page_size, q=q, status=status)
+    return list_projects_with_names(
+        db,
+        page=page,
+        page_size=page_size,
+        q=q,
+        status=status,
+        client_id=client_id,
+    )
 
 
 def update_project_service(

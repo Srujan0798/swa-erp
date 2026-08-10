@@ -32,8 +32,11 @@ def list_projects(
     page_size: int = Query(default=20, ge=1, le=100),
     q: str | None = None,
     status: str | None = None,
+    client_id: uuid.UUID | None = None,
 ) -> ProjectListResponse:
-    items, total, page, page_size = list_projects_service(db, page=page, page_size=page_size, q=q, status=status)
+    items, total, page, page_size = list_projects_service(
+        db, page=page, page_size=page_size, q=q, status=status, client_id=client_id
+    )
 
     result = []
     for p in items:

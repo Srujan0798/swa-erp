@@ -97,8 +97,16 @@ export function ConvertToClientButton({
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!projectName.trim()) return;
-    if (candidates && !selectedClientId) return;
-    await performConvert(candidates && selectedClientId ? selectedClientId : undefined);
+    // selectedClientId === "new" | null → create new client; uuid → reuse
+    if (candidates && selectedClientId === null) {
+      // require explicit choice when matches exist
+      return;
+    }
+    const clientId =
+      candidates && selectedClientId && selectedClientId !== "new"
+        ? selectedClientId
+        : undefined;
+    await performConvert(clientId);
   };
 
   return (
@@ -123,13 +131,15 @@ export function ConvertToClientButton({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {candidates && (
-              <div className="space-y-2 border rounded-md p-3 bg-amber-50">
-                <Label className="text-sm font-semibold">Existing client matches</Label>
-                <div className="space-y-2 mt-2">
+              <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3">
+                <Label className="text-sm font-semibold">
+                  Multiple clients match this name — choose one
+                </Label>
+                <div className="mt-2 space-y-2">
                   {candidates.map((c) => (
                     <label
                       key={c.id}
-                      className="flex items-center gap-2 text-sm cursor-pointer"
+                      className="flex cursor-pointer items-center gap-2 text-sm"
                     >
                       <input
                         type="radio"
@@ -139,13 +149,25 @@ export function ConvertToClientButton({
                         onChange={() => setSelectedClientId(c.id)}
                       />
                       <span className="font-medium">{c.name}</span>
-                      <span className="text-muted-foreground font-mono text-xs">({c.code})</span>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        ({c.code})
+                      </span>
                     </label>
                   ))}
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="client_match"
+                      value="new"
+                      checked={selectedClientId === "new"}
+                      onChange={() => setSelectedClientId("new")}
+                    />
+                    <span className="font-medium">Create a new client</span>
+                    <span className="text-xs text-muted-foreground">
+                      (do not reuse matches above)
+                    </span>
+                  </label>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Leave no selection and submit to create a brand new client.
-                </p>
               </div>
             )}
 
@@ -224,10 +246,10 @@ export function ConvertToClientButton({
                 disabled={
                   mutation.isPending ||
                   !projectName.trim() ||
-                  (!!candidates && !selectedClientId)
+                  (!!candidates && selectedClientId === null)
                 }
               >
-                {mutation.isPending ? "Converting..." : "Convert"}
+                {mutation.isPending ? "Converting…" : "Convert"}
               </Button>
             </DialogFooter>
           </form>

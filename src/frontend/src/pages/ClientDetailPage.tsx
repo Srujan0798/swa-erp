@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ContactForm } from "@/components/clients/ContactForm";
 import { AgreementsTab } from "@/components/agreements/AgreementsTab";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
+// ClientProjectsList defined below
 
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -193,7 +194,69 @@ export function ClientDetailPage() {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader className="flex-row items-center justify-between">
+          <div>
+            <CardTitle>Projects</CardTitle>
+            <p className="mt-1 text-xs font-normal text-muted-foreground">
+              Work under this client
+            </p>
+          </div>
+          <Button size="sm" asChild>
+            <Link to={`/projects/new?client_id=${client.id}`}>
+              <Plus className="mr-2 h-4 w-4" />
+              New project
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <ClientProjectsList clientId={client.id} />
+        </CardContent>
+      </Card>
+
       <AgreementsTab clientId={client.id} />
+    </div>
+  );
+}
+
+function ClientProjectsList({ clientId }: { clientId: string }) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["projects", "by-client", clientId],
+    queryFn: () => api.listProjects({ page: 1, page_size: 50, client_id: clientId }),
+  });
+  const projects = data?.items ?? [];
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Loading projects…</p>;
+  }
+  if (isError) {
+    return <p className="text-sm text-destructive">Failed to load projects.</p>;
+  }
+  if (projects.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No projects yet for this client.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      {projects.map((p) => (
+        <div
+          key={p.id}
+          className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+        >
+          <div className="min-w-0">
+            <span className="font-mono text-xs font-semibold">{p.code}</span>
+            <span className="mx-2 text-muted-foreground">·</span>
+            <span className="font-medium">{p.name}</span>
+            <span className="ml-2 text-xs text-muted-foreground">{p.status}</span>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/projects/${p.id}`}>Open</Link>
+          </Button>
+        </div>
+      ))}
     </div>
   );
 }

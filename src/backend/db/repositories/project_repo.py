@@ -14,8 +14,12 @@ def list_projects(
     page_size: int = 20,
     q: str | None = None,
     status: str | None = None,
+    client_id: uuid.UUID | None = None,
 ) -> tuple[list[Project], int, int, int]:
     query = db.query(Project).filter(Project.deleted_at.is_(None))
+
+    if client_id is not None:
+        query = query.filter(Project.client_id == client_id)
 
     if q:
         search_term = f"%{q}%"
@@ -153,8 +157,11 @@ def list_projects_with_names(
     page_size: int = 20,
     q: str | None = None,
     status: str | None = None,
+    client_id: uuid.UUID | None = None,
 ) -> tuple[list[dict[str, Any]], int, int, int]:
-    projects, total, page, page_size = list_projects(db, page, page_size, q, status)
+    projects, total, page, page_size = list_projects(
+        db, page, page_size, q, status, client_id=client_id
+    )
 
     from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
     from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
