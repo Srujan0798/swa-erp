@@ -552,7 +552,6 @@ export interface Inquiry {
   priority: string | null;
   status: string;
   owner_id: string | null;
-  technical_lead_id: string | null;
   notes: string | null;
   converted_client_id: string | null;
   converted_project_id: string | null;
@@ -577,7 +576,6 @@ export interface InquiryCreate {
   priority?: string;
   status?: string;
   owner_id?: string;
-  technical_lead_id?: string;
   notes?: string;
 }
 
@@ -591,7 +589,6 @@ export interface InquiryUpdate {
   priority?: string;
   status?: string;
   owner_id?: string;
-  technical_lead_id?: string;
   notes?: string;
 }
 

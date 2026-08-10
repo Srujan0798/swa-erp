@@ -85,10 +85,16 @@ Answers received from Viraj (verbatim summary locked here for future sessions):
 |---|----------|----------------|------------------------------|
 | 1 | 4th Service Agreement type / INSUDESIGN? | **APEX and INNER are client names**, not agreement types. **INSUDESIGN is the service name.** Earlier verbal "IESK / APEX / Inner as three SA types" was a misread. | `service_name` stays free-text (not an enum). No 4th-type enum. INSUDESIGN is a valid service product name. |
 | 2 | Yearly ID sequence reset? | **Yes — reset every year, everywhere.** Example: `SWA-2025-SA-011` in 2025 → `SWA-2026-SA-001` in 2026. Same rule on all sheets / entity types. | Already built: `reference_counters` is keyed by `(entity_type, year)`; new calendar year starts at `001`. No code change required. |
-| 3 | What is `LDI-*` / Leads? | Leads sheet existed in the **original** design, was **removed** as too hard to maintain. **There is no Leads sheet now.** He asked for an example of `LDI-*` (column was unclear without a sample). | No Leads module. Optional `Client.first_lead_id` keeps historical Excel values as text on import only. New work enters as **Inquiry** (`INQ`), not LDI. |
+| 3 | What is `LDI-*` / Leads? | Leads sheet existed in the **original** design, was **removed** as too hard to maintain. **There is no Leads sheet now.** He asked for an example of `LDI-*` (column was unclear without a sample). | No Leads module. **Lead ID columns completely removed from system** (per 2026-08-11 instruction). `LDI-*` values are not stored — only mapped to Inquiry during import for reference only. |
 
-## Still open (not code blockers for Q1–Q3)
+## Implementation status (2026-08-11)
 
+**Lead ID columns — COMPLETELY REMOVED:**
+- All Lead ID fields dropped from models, schemas, database, and importer
+- Migration `0018_drop_lead_id_columns.py` applied (no historical values kept)
+- `LDI-*` values only mapped during import for reference, not stored
+
+**Still open:**
 | # | Question | Status |
 |---|----------|--------|
 | 4 | Excel → ERP migration owner (dev vs internal admin)? | Still organizational — Viraj decides who runs real import at go-live. |

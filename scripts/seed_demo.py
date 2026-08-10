@@ -382,9 +382,6 @@ def main():
 
         if apex.first_inquiry_id is None:
             apex.first_inquiry_id = inq.id
-            # Historical First Lead ID field (Leads sheet removed — text only)
-            if not apex.first_lead_id:
-                apex.first_lead_id = "LDI-001"
 
         sa_ref = generate_reference_id(db, "SA")
         sa = ServiceAgreement(

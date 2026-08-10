@@ -15,7 +15,6 @@ class InquiryCreate(BaseModel):
     priority: str | None = Field(default=None, max_length=20)
     status: str = Field(default="New", max_length=50)
     owner_id: uuid.UUID | None = None
-    technical_lead_id: uuid.UUID | None = None
     notes: str | None = None
 
 
@@ -29,7 +28,6 @@ class InquiryUpdate(BaseModel):
     priority: str | None = Field(default=None, max_length=20)
     status: str | None = Field(default=None, max_length=50)
     owner_id: uuid.UUID | None = None
-    technical_lead_id: uuid.UUID | None = None
     notes: str | None = None
 
 
@@ -47,7 +45,6 @@ class InquiryRead(BaseModel):
     priority: str | None
     status: str
     owner_id: uuid.UUID | None
-    technical_lead_id: uuid.UUID | None
     notes: str | None
     converted_client_id: uuid.UUID | None
     converted_project_id: uuid.UUID | None

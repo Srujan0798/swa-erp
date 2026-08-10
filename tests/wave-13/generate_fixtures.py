@@ -28,10 +28,9 @@ def main() -> None:
         "clients_sample.xlsx",
         ["Columns", "Sr No", "Client ID", "Client Name", "Industry", "Date Onboarded",
          "Primary Contact", "Email", "Phone", "Billing Address", "Client Status",
-         "First Lead ID", "First Inquiry ID", "Notes"],
+         "First Inquiry ID", "Notes"],
         [["", 1, "SWA-2025-CLT-002", "Beta LLC", "Construction", "", "",
-          "beta@example.com", "9999999999", "123 St", "Active", "LDI-001",
-          "SWA-2025-INQ-001", "note"]],
+          "beta@example.com", "9999999999", "123 St", "Active", "SWA-2025-INQ-001", "note"]],
     )
     _save(
         "inquiries_sample.xlsx",

@@ -234,7 +234,6 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                 client.address = _txt(d.get("Billing Address"))
                 client.client_status = _txt(d.get("Client Status")) or "Active"
                 client.notes = _txt(d.get("Notes"))
-                client.first_lead_id = _txt(d.get("First Lead ID"))
                 fi = _txt(d.get("First Inquiry ID"))
                 if fi:
                     inq = _inquiry_by_ref(s, fi)
@@ -253,7 +252,6 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                     address=_txt(d.get("Billing Address")),
                     client_status=_txt(d.get("Client Status")) or "Active",
                     notes=_txt(d.get("Notes")),
-                    first_lead_id=_txt(d.get("First Lead ID")),
                     country="India",
                     is_active=True,
                 )

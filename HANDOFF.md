@@ -33,6 +33,9 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
 - **Viraj data Qs — ANSWERED:** APEX/INNER = clients; INSUDESIGN = service name; yearly ID
    reset everywhere; no Leads sheet. Locked in ADR-0002. **No code change.** Reply sent:
    `deliverables/REPLY_VIRAJ.md` (includes LDI example he asked for).
+- **Lead ID columns — REMOVED (2026-08-11):** Per Viraj's instruction "remove Lead ID columns
+   everywhere, don't keep even for historical values," all Lead ID fields dropped from models,
+   schemas, database, and importer. Migration `0018_drop_lead_id_columns.py` applied.
 - **Deploy blocker:** server facts (Docker/WSL/ports/HTTPS/hostname/etc.) — owned by **Viraj**
   (no IT dept), slow path. Until then product stays complete but not company-server live.
 - **Where to start:** `MASTER-FLOW.md` → wait / help when Viraj has bandwidth for server.

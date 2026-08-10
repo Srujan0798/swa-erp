@@ -25,7 +25,6 @@ class Client(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     industry: Mapped[str | None] = mapped_column(String(100), nullable=True)
     client_status: Mapped[str] = mapped_column(String(50), nullable=False, default="Active")
-    first_lead_id: Mapped[str | None] = mapped_column(String(30), nullable=True)
     first_inquiry_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("inquiries.id"), nullable=True
     )
