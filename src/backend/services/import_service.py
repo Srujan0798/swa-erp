@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from src.backend.core.roles import Role
 from src.backend.models import (
     Client,
     DocumentReference,
