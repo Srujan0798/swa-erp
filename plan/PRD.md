@@ -72,7 +72,7 @@ Sustainability metrics — see `resources/MEETINGS_MASTER.md` for the full requi
 | R8 | Vendor coordination email-vs-portal | Vendors get a lightweight portal in wave-5; email fallback always works | vendors asking for status manually |
 
 ## Constraints
-- **Tech stack frozen:** Python 3.11 + FastAPI + Postgres + Celery + Redis + React + Vite + TS + Tailwind + shadcn/ui — Celery is a **chosen dependency, not yet implemented** (no worker exists; see `HIERARCHY.md`), and Redis is used only as a cache today
+- **Tech stack frozen:** Python 3.11 + FastAPI + Postgres + Celery + Redis + React + Vite + TS + Tailwind + shadcn/ui — Celery implemented (wave-31, 2026-08-10: `src/backend/workers/` + compose `worker` service, Redis broker/backend); see `HIERARCHY.md`
 - **Self-hosted:** Single deployment for SWA; Docker Compose first, k8s later
 - **Indian context:** INR primary currency, GST-aware invoicing, Gujarati/Hindi/English support in UI (English first)
 - **GDPR-lite:** Personal data deletable on request; audit log for who accessed what

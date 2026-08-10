@@ -43,11 +43,11 @@ wave-1 (Foundation) ✅ SHIPPED
 | 14 | Docker Compose auto-migration + seed fix | **SHIPPED** ✅ | 1/1 | `ab0a786` |
 | 15 | E2E test fixes | **SHIPPED** ✅ | 1/1 | `4be7536`; 7/7 E2E, also fixed a real `quote.code` 500 in production code |
 | 16 | Model/migration drift sweep | **SHIPPED** ✅ | 1/1 | `d5b2790`; found 2 more missing tables (notifications, timesheet_audit_log) |
-| 17 | Mount notifications router | ready to dispatch | 0/1 | `work/wave-17/`; small wiring gap flagged by wave-16 |
-| 18 | Security hardening (secrets, rate limiting, GST on invoices) | ready to dispatch | 0/1 | `work/wave-18/`; does not depend on Viraj/IT answers |
-| 19 | Backup + restore + ops scripts | ready to dispatch | 0/1 | `work/wave-19/`; closes a Meeting-2-requested gap that was never built |
-| 20 | Production config templates | ready to dispatch | 0/1 | `work/wave-20/`; placeholders marked for each pending IT answer, ready for instant swap |
-| 21 | Handover documentation package | ready to dispatch | 0/1 | `work/wave-21/`; admin guide, user guide, the architecture summary Viraj asked for in Meeting 2 and never got |
+| 17 | Mount notifications router | **SHIPPED** ✅ | 1/1 | `work/reports/wave-17/01-mount-notifications-router.report.md`; notifications router mounted + verified (324 passed) |
+| 18 | Security hardening (secrets, rate limiting, GST on invoices) | **SHIPPED** ✅ | 1/1 | `work/reports/wave-18/01-security-hardening.report.md`; prod refuses insecure SECRET_KEY, 429 on rapid login, 339 passed |
+| 19 | Backup + restore + ops scripts | **SHIPPED** ✅ | 1/1 | `work/reports/wave-19/01-backup-and-ops-scripts.report.md`; closes the Meeting-2-requested gap — scripts + `docs/runbook_backup_restore.md` + 5 tests |
+| 20 | Production config templates | **SHIPPED** ✅ | 1/1 | `work/reports/wave-20/01-production-config-templates.report.md`; `docker-compose.prod.yml` + `.env.production.example` with `PENDING IT ANSWER (Q#)` markers + `docs/DEPLOYMENT_CHECKLIST.md` |
+| 21 | Handover documentation package | **SHIPPED** ✅ | 1/1 | `work/reports/wave-21/01-handover-documentation.report.md`; admin guide, user guide, training one-pager, architecture overview for Viraj |
 | 22 | Critical RBAC and auth gaps | **SHIPPED** ✅ | 1/1 | `work/reports/wave-22/01-critical-rbac-and-auth-gaps.report.md`; materials endpoints authenticated, financial modules (project_pnl/exports/invoice-status) role-gated, core-chain RBAC matrix matches client access matrix (PM+Designer for DBR/KDR, Auditor+Designer for Reforge), compliance-review and task/RFQ transitions gated |
 | 23 | Correctness bugs | **SHIPPED** ✅ | 1/1 | `work/reports/wave-23/01-correctness-bugs.report.md`; financial PDF now uses real ProjectCost data, money as Decimal, real soft-delete on Task, Project.version optimistic locking (0027) |
 | 24 | Dead code + missing UI wiring | **SHIPPED** ✅ | 1/1 | `work/reports/wave-24/01-dead-code-and-ui-wiring.report.md`; dead debug endpoint + dead page removed, New User button wired, delete-user/client UI, Tokens + DocumentReference reachable via navigation, notifications un-stubbed (0026) |
@@ -57,12 +57,15 @@ wave-1 (Foundation) ✅ SHIPPED
 | 28 | Doc consolidation | **SHIPPED** ✅ | 1/1 | `work/reports/wave-28/01-execute-doc-consolidation.report.md`; `HANDOFF_FINAL.md`/`wave9handoff`/`wave10handoff`/`OS_SETUP.md` archived via `git mv`, KIMI.md → CLAUDE.md symlink, ADR-0003 de-duplicated, conventions/history enriched |
 | 29 | Stale claim fixes | **SHIPPED** ✅ | 1/1 | `work/reports/wave-29/01-stale-claim-fixes.report.md`; 9 docs corrected to match real repo state (backups, GST, Celery/MinIO target-state, test counts, version/tag reconciliation) |
 | 30 | Final release + submission package | **SHIPPED** ✅ | 1/1 | this file; full verification sweep + live end-to-end business-flow validation, version cut at 1.0.0, `deliverables/SUBMISSION.md` produced. See `work/reports/wave-30/01-final-release-and-submission.report.md` |
+| 31 | Deferred features: MinIO storage + Celery worker | **SHIPPED** ✅ | 2/2 | `work/reports/wave-31/01-wire-minio-storage.report.md`, `work/reports/wave-31/02-wire-celery-worker.report.md`; object storage abstraction (`src/backend/core/storage.py`, `local` default | `minio` opt-in) + Celery app (`src/backend/workers/`) with async export endpoints. Version cut 1.0.1. See `CHANGELOG.md` |
 
-**Waves 22-30 are all SHIPPED** (see status table above; per-wave reports in `work/reports/wave-N/`).
-All of the audit-driven fixes (22-24), the security/lint pass (27), and the docs-consolidation
-passes (26, 28, 29) landed and were verified. **Wave-30 cut the first real release — `1.0.0`**
-(2026-08-07), replacing the stale `0.2.0` version files, and produced the client submission
-package at `deliverables/SUBMISSION.md`.
+**Waves 17-31 are all SHIPPED** (see status table above; per-wave reports in `work/reports/wave-N/`).
+All of the audit-driven fixes (22-24), the security/lint pass (27), the docs-consolidation
+passes (26, 28, 29), and the deferred-feature close (31) landed and were verified.
+**Wave-30 cut the first real release — `1.0.0`** (2026-08-07), replacing the stale `0.2.0`
+version files, and produced the client submission package at `deliverables/SUBMISSION.md`.
+**Wave-31 (2026-08-10) cut `1.0.1`**, shipping MinIO/S3 object storage and a real Celery
+worker for background PDF/report jobs (the two features previously marked target-state).
 
 The only remaining external blockers are Viraj's 3 open decisions
 (`docs/decisions/0002-core-id-chain-gap.md`) and IT's 8 answers (`docs/IT_BRIEF.md`) — nothing
@@ -120,7 +123,8 @@ directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY
 current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
 instead of duplicating it here.
 
-**Active wave:** none — waves 1-30 shipped (see status table above). Wave-30 cut the
-`1.0.0` client-submission release and produced `deliverables/SUBMISSION.md`.
+**Active wave:** none — waves 1-31 shipped (see status table above). Wave-30 cut the
+`1.0.0` client-submission release and produced `deliverables/SUBMISSION.md`; wave-31 cut
+`1.0.1`, shipping the last deferred features (MinIO object storage + Celery worker).
 **Next action:** hand over per `deliverables/SUBMISSION.md` (deploy checklist, Excel import,
 support/next steps).

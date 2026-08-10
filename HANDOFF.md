@@ -85,7 +85,7 @@ That's it. No project memory needed.
    `deliverables/SUBMISSION.md`
 
 ## Key project context
-- **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Redis, React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query. (Celery is an installed dependency only — no worker exists; storage is a local `uploads/` dir, MinIO/S3 not wired — see `HIERARCHY.md`)
+- **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Redis, React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query. Celery is implemented (`src/backend/workers/`, compose `worker` service, Redis broker/backend) and powers async export endpoints (`?async=true` → `GET /api/jobs/{id}`). Storage goes through `StorageBackend` (`src/backend/core/storage.py`) — `local` `uploads/` default, opt-in `minio` backend. See `HIERARCHY.md`.
 - **Auth:** JWT + RBAC (roles: admin, pm, designer, auditor, viewer)
 - **Money:** Decimal(18,2), INR default, multi-currency ready
 - **Compliance standards:** NBC, ECBC, IGBC, IS fire codes (explicit references required)

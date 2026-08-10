@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swa-erp"
-version = "1.0.0"
+version = "1.0.1"
 description = "Internal ERP for SWA Consultancy Pvt. Ltd."
 authors = [{name = "Srujan"}]
 requires-python = ">=3.11"

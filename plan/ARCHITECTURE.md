@@ -2,12 +2,13 @@
 
 ## High-level system
 
-> **Diagram truth note (corrected 2026-08-07):** boxes shown below are what the current code
-> actually runs EXCEPT the two marked **[TARGET]** — Celery (workers + broker) is an installed
-> dependency (`requirements.txt`) with **zero implementation** (no app, no `@task`, no worker
-> service — grep confirms); it is target-state, not running. Redis in the current code is used
-> only as a cache, not as a Celery broker. MinIO/S3 is likewise not wired (storage is a local
-> `uploads/` dir; see `docs/conventions.md`).
+> **Diagram truth note (corrected 2026-08-10):** boxes shown below are what the current code
+> actually runs. Redis is the Celery broker/backend; Celery is implemented (`src/backend/workers/`
+> — `celery_app` + `@task`s + a compose `worker` service) and powers the async export endpoints
+> (`?async=true` → job_id, poll `GET /api/jobs/{id}`). MinIO/S3 is wired via a `StorageBackend`
+> abstraction (`src/backend/core/storage.py`, `STORAGE_BACKEND=local|minio`, compose `minio`
+> service); the default `local` backend keeps the historical `uploads/` layout. See
+> `docs/conventions.md` and `CHANGELOG.md` [1.0.1].
 
 ```
                     ┌──────────────────────────────────────────┐
@@ -24,15 +25,17 @@
                     └────┬──────────────┬──────────────┬────────┘
                          │              │              │
               ┌──────────▼──┐ ┌─────────▼────┐ ┌───────▼────────┐
-              │ PostgreSQL  │ │ Redis        │ │ Local FS       │
-              │ (primary)   │ │ (cache only  │ │ (uploads/ at   │
-              │             │ │  today)      │ │  repo root)    │
+              │ PostgreSQL  │ │ Redis        │ │ File storage   │
+              │ (primary)   │ │ (cache +     │ │ (local uploads/│
+              │             │ │  Celery      │ │  default, or   │
+              │             │ │  broker/     │ │  MinIO/S3 via  │
+              │             │ │  backend)    │ │  StorageBackend│
               └─────────────┘ └──────┬───────┘ └────────────────┘
                                      │
                               ┌──────▼──────┐
-                              │ Celery      │  [TARGET] — installed but
-                              │ (workers)   │  unimplemented (no app/
-                              └─────────────┘  no @task/ no worker)
+                              │ Celery      │
+                              │ (workers)   │  PDF/report jobs; async export
+                              └─────────────┘  (?async=true → GET /api/jobs/{id})
 ```
 
 ## Modules (backend)
@@ -150,24 +153,26 @@ Transitions enforced in `services/project_service.transition()`. Each transition
 
 ## Integrations (MVP)
 
-> **Truth note (corrected 2026-08-07):** rows below describe the TARGET design. None of the
-> Celery-queued or MinIO/prod-S3 rows are implemented yet — email/PDF run synchronously in the
-> request handler, and file storage is a local `uploads/` directory (see `docs/conventions.md`).
+> **Truth note (corrected 2026-08-10):** rows below describe the implemented system. Celery
+> (wave-31) handles background PDF/report jobs and powers the async export endpoints
+> (`?async=true`); storage is a local `uploads/` directory by default (`StorageBackend=local`)
+> with an opt-in MinIO/S3 backend (`STORAGE_BACKEND=minio`). Email still runs synchronously in
+> the request handler — it is the one Celery-queued target not yet moved off the request path.
 
 | Integration | When | How |
 |---|---|---|
-| Email (transactional) | Quote sent, invoice issued, password reset | Resend or SMTP — **TARGET: queued via Celery; today runs synchronously, Celery unimplemented** |
-| PDF generation | Quotes, invoices, BOQ export | WeasyPrint (HTML→PDF) |
+| Email (transactional) | Quote sent, invoice issued, password reset | Resend or SMTP — runs synchronously today; Celery queue available (wave-31) if moved off the request path |
+| PDF generation | Quotes, invoices, BOQ export | WeasyPrint (HTML→PDF) — backgrounded via Celery when `?async=true` |
 | Excel import/export | BOQ upload, reports export | openpyxl |
-| File storage | Documents, BOQs, signed PDFs | **Local FS (`uploads/`) today**; MinIO in prod / S3 — target only, not wired |
-| Background jobs | Email send, PDF gen, periodic reports | **TARGET: Celery + Redis broker — not implemented** |
+| File storage | Documents, BOQs, signed PDFs | `StorageBackend` (wave-31): `local` (`uploads/`) default, or `minio` (`STORAGE_BACKEND=minio`) |
+| Background jobs | Email send, PDF gen, periodic reports | Celery + Redis broker/backend (`src/backend/workers/`, compose `worker` service) |
 
 ## Failure points + mitigations
 
 | Failure | Impact | Mitigation |
 |---|---|---|
 | DB connection lost | API 503 | Connection pool + retry; health check |
-| Celery worker crashes | Background tasks stuck | **N/A today — Celery is not implemented** (see truth note above); if/when built: supervisord + task retry with backoff |
+| Celery worker crashes | Background tasks stuck | Worker container restarts (compose `restart` policy); task retry with backoff; `GET /api/jobs/{id}` reports failed state |
 | BOQ upload malformed | Bad data in DB | Schema validation; reject with clear error; never partial-insert |
 | User session expired | UX confusion | Auto-refresh token; 401 → redirect to login with toast |
 | File upload too large | Storage cost | 50MB cap per file; chunked upload for larger; clear error |

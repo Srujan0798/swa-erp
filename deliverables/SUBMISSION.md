@@ -1,7 +1,7 @@
-# SWA Consultancy ERP — v1.0.0 Submission Package
+# SWA Consultancy ERP — v1.0.1 Submission Package
 
-**Version:** 1.0.0 (client-submission release; tagged `v1.0.0`)
-**Date:** 2026-08-07
+**Version:** 1.0.1 (client-submission release; tagged `v1.0.1`)
+**Date:** 2026-08-07 (wave-31 follow-up cut `1.0.1` on 2026-08-10)
 **Status:** READY TO SUBMIT
 
 This is the single document handed over with the project. It is honest about what exists, what
@@ -157,7 +157,6 @@ Per the client's confirmed decisions (Meeting 1 §7 and Meeting 2 §3 in
 - **Client portal** — deferred in Meeting 2 ("Wave-8 or later?"); not built.
 
 Also deliberately deferred, not forgotten:
-- MinIO/S3 object storage and a Celery background worker — target-state, not live (see §4).
 - Reforge/DPR document certification flow is role-gated in the code (Auditor+Designer) but has
   no dedicated UI screen.
 - The full 21-sheet Excel import has been validated on the importer for its supported sheet
@@ -193,9 +192,9 @@ These are real and deliberately not hidden. None were discovered by the client f
    `DISABLE_AUTH_RATE_LIMIT=true` so test suites (7 logins in under a minute) don't get
    throttled. Production should keep the limiter on (or raise the limit if staff find it
    annoying over VPN/NAT where everyone shares one IP).
-6. **Wave-24's full test run was blocked at the time** by a test-database deadlock from a prior
-   session (environment issue, not code). That deadlock is long resolved — the suite has been
-   run green (393/393) many times since, including twice today for this release.
+ 6. **Wave-24's full test run was blocked at the time** by a test-database deadlock from a prior
+    session (environment issue, not code). That deadlock is long resolved — the suite has been
+    run green (413 passed, 6 skipped) many times since, including for the wave-31 verification.
 7. **Migration 0026 cold-boot ordering bug** (found and fixed this session): on a fresh database
    the `documents` table could be missing when migration `0026` ran, because it lives on a
    sibling branch. Fixed by declaring `depends_on = "0022"`; verified with a full `down -v` cold
@@ -265,8 +264,8 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 | Doc | Purpose |
 |---|---|
 | `README.md` | Entry point, quick start |
-| `CHANGELOG.md` | Full release history (this release is `[1.0.0]`) |
-| `plan/EXECUTION.md` | Wave-by-wave status (all 30 waves shipped) |
+| `CHANGELOG.md` | Full release history (this release is `[1.0.1]`; `[1.0.0]` was the original submission cut) |
+| `plan/EXECUTION.md` | Wave-by-wave status (all 31 waves shipped) |
 | `docs/DEPLOYMENT_CHECKLIST.md` | Production deploy steps (see §6) |
 | `docs/IT_BRIEF.md` | The 8 IT questions + full deployment brief |
 | `docs/decisions/0001..0004` | ADRs (tech stack, core ID chain, IT brief, meeting-2 flow) |
@@ -276,7 +275,7 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 | `resources/MEETINGS_MASTER.md` | Consolidated record of both client meetings |
 | `resources/EXCEL_SHEETS_INVENTORY.md` | The 21 source sheets and their mapping |
 | `deliverables/handover/` | `ADMIN_GUIDE.md`, `USER_GUIDE.md`, `TRAINING_ONE_PAGER.md`, `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` |
-| `work/reports/wave-N/` | Per-wave verification reports (waves 1-30) |
+| `work/reports/wave-N/` | Per-wave verification reports (waves 1-31) |
 
 ## 9. Support / next steps
 
@@ -288,9 +287,12 @@ What a future developer picks up first:
 3. Deploy per §6 and `docs/DEPLOYMENT_CHECKLIST.md` once IT answers land.
 4. Run the Excel import (§7) against real data when Viraj confirms who owns the migration.
 5. Highest-value engineering follow-ups, in order:
-   - Add merge migrations to collapse the 7 Alembic heads (see §4.4).
    - Decide the year-reset ID policy once Viraj answers ADR-0002 Q2 (one config change).
-   - Wire MinIO/S3 + a Celery worker to move PDF/export work off the request path (target-state).
+   - Move transactional email off the request path onto the Celery queue (wave-31 worker is
+     in place; email is the last synchronous integration).
+   - (Resolved in wave-31: MinIO/S3 object storage and the Celery worker — previously §3
+     target-state items — shipped in `1.0.1`; the 7 Alembic heads were also collapsed to one.
+     No action needed.)
    - (Already resolved, noted for the record: `tests/wave-22/test_rbac_gaps.py` exists and
      all 39 tests pass — an earlier draft of the wave-22 report incorrectly claimed the file
      was missing; it was created, then had real bugs the orchestrator found and fixed
@@ -298,3 +300,5 @@ What a future developer picks up first:
 
 Everything else — the core chain, RBAC matrix, GST invoicing, compliance, time tracking, and
 the backup/ops scripts — is verified working as of 2026-08-07 and ready to hand over.
+Wave-31's storage + Celery work was verified green (413 passed, 6 skipped) on 2026-08-10 and
+shipped in `1.0.1`.

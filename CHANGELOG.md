@@ -12,6 +12,34 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > (describing waves 9-21, merged but never cut) has no git compare range of its own. The
 > `[1.0.0]` entry compares against `wave-3-complete`, which is the last real tag.
 
+## [1.0.1] — 2026-08-10 — deferred-feature release (wave-31)
+
+Wave-31 closed the two last deferred features from `SUBMISSION.md` §3/§9: object storage and
+background jobs. No breaking changes — the default `local` storage backend and the synchronous
+export path are byte-identical to 1.0.0.
+
+### Added
+- Wave-31 task 01 (object storage, `d5dd6f1`): `StorageBackend` abstraction
+  (`src/backend/core/storage.py`) with a `local` backend (default — `uploads/`, byte-identical
+  to 1.0.0) and an opt-in `minio` backend (`STORAGE_BACKEND=minio`); new `minio` compose service.
+  Document/BOQ/signed-PDF file writes now route through `get_storage()`.
+- Wave-31 task 02 (Celery worker, `9d9f80e`): a real Celery app (`src/backend/workers/`) with
+  `celery_app` and `@task`s for background PDF/report generation, a `worker` compose service
+  (Redis as broker/backend), async export endpoints (`?async=true` → `202` + `job_id`, poll
+  `GET /api/jobs/{id}`), and a job-status/result router. The synchronous export path is unchanged.
+- Wave-31 tests: `tests/wave-31/test_celery_tasks.py` (7 tests, eager mode).
+
+### Fixed
+- Wave-31: `docs/runbook.md`, `HIERARCHY.md`, `README.md`, and `docs/conventions.md` updated to
+  reflect the live storage and Celery implementation (previously documented as target-state).
+
+### Changed
+- Version cut `1.0.0` → `1.0.1` in `pyproject.toml`, `src/frontend/package.json`,
+  `package-lock.json` (wave-31 features landed after the `v1.0.0` tag, so they ship in this patch
+  release rather than retroactively in 1.0.0).
+- Alembic migration graph collapsed from 7 heads to 1 (commit `c4dd496`, follow-up to
+  `SUBMISSION.md` §4.4 / §9).
+
 ## [1.0.0] — 2026-08-07 — client submission release
 
 First release. Covers everything since `wave-3-complete` (waves 22-30), plus the cumulative
@@ -114,3 +142,4 @@ state of waves 1-21. Reference-ID convention across the system: `SWA-{year}-{TYP
 - Repository initialized.
 
 [1.0.0]: ../../compare/wave-3-complete...v1.0.0
+[1.0.1]: ../../compare/v1.0.0...v1.0.1

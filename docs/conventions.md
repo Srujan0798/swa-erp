@@ -24,15 +24,15 @@
 
 ## Data (runtime storage — as actually implemented)
 
-**Corrected 2026-07-21** — this section previously described a `data/` directory structure and
-MinIO integration that were never built; a full-project audit confirmed no `data/` directory
-exists at all and there is zero MinIO code anywhere in `src/backend` (grep confirms). What's
-actually real:
-- **All uploads (BOQs, documents, everything)**: flat `uploads/<id>/` directory at repo root —
-  see `src/backend/services/boq_service.py` (`UPLOAD_DIR = Path("uploads/boqs")`) and
-  `src/backend/services/document_service.py` (`f"uploads/{project_id}"`). This is local
-  filesystem only in the current implementation; MinIO/S3 was a planned future migration, never
-  built. `uploads/` is gitignored (see root `.gitignore`).
+**Corrected 2026-07-21, updated 2026-08-10 (wave-31)** — this section previously described a
+`data/` directory structure and MinIO integration that were never built; a full-project audit
+confirmed no `data/` directory exists at all. What's actually real:
+- **All uploads (BOQs, documents, everything)**: written through the `StorageBackend`
+  abstraction (`src/backend/core/storage.py`, `get_storage()`). Default backend is `local` —
+  flat `uploads/<id>/` directory at repo root, see `src/backend/services/boq_service.py`
+  (`UPLOAD_DIR = Path("uploads/boqs")`) and `src/backend/services/document_service.py`
+  (`f"uploads/{project_id}"`). Opt-in `minio` backend (`STORAGE_BACKEND=minio`) writes to the
+  compose `minio` service. `uploads/` is gitignored (see root `.gitignore`).
 - No `data/raw/`, `data/samples/`, `data/synthetic/`, `data/seed/`, or `documents/<project_id>/`
   structure exists — remove any references to these paths if found elsewhere, they describe an
   unbuilt plan, not the real system.
