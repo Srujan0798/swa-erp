@@ -23,7 +23,7 @@ Safe defaults used here (change only if Viraj prefers otherwise):
 1. Windows Server with VPN access for staff (already the plan).
 2. Install **Docker Engine** (free) + enable **WSL2** / Linux containers if needed.
 3. Git (or copy the repo zip) + enough disk for images + DB + uploads (~20 GB free is comfortable).
-4. Open/free ports (defaults): `3000` (UI), `8000` (API). DB/Redis stay internal to compose unless he wants them exposed.
+4. Open/free ports (defaults): `3100` (UI), `8100` (API). DB/Redis stay internal to compose unless he wants them exposed.
 
 ---
 
@@ -55,8 +55,8 @@ python3 -c "import secrets; print(secrets.token_hex(32))"   # → SECRET_KEY
 SECRET_KEY=...paste...
 POSTGRES_PASSWORD=...strong...
 # Staff browser origin — use real host/IP when known:
-CORS_ORIGINS=http://SERVER_IP:3000
-# or http://erp.swa.local:3000
+CORS_ORIGINS=http://SERVER_IP:3100
+# or http://erp.swa.local:3100
 ```
 
 If hostname is still unknown, use the server LAN IP for the first install and update
@@ -73,10 +73,10 @@ for secrets + CORS + ports you actually use.
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs migrate   # must Exit 0
-curl -f http://localhost:8000/healthz                    # {"status":"ok"}
+curl -f http://localhost:8100/healthz                    # {"status":"ok"}
 ```
 
-Open in a browser (on VPN): `http://SERVER_IP:3000` (or the host you set).
+Open in a browser (on VPN): `http://SERVER_IP:3100` (or the host you set).
 
 ---
 

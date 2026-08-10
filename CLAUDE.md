@@ -34,7 +34,7 @@ Internal ERP for SWA Consultancy: manage clients, projects, quotations/BOQ workf
 - You merge approved output
 
 ## Project-specific commands
-- `make dev` — start backend (8000) + frontend (3000) + postgres + redis
+- `make dev` — start backend (8100) + frontend (3100) + postgres + redis
 - `make test` — full test suite
 - `make test-wave wave=N` — test one wave's contracts
 - `make lint` — ruff + eslint

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Live API smoke of the core business chain.
 
-Usage (stack must be up — backend on :8000):
+Usage (stack must be up — backend on :8100 by default):
 
     python3 scripts/smoke_chain.py
-    BASE_URL=http://localhost:8000 ADMIN_EMAIL=admin@swa.co.in ADMIN_PASSWORD=admin123! \\
+    BASE_URL=http://localhost:8100 ADMIN_EMAIL=admin@swa.co.in ADMIN_PASSWORD=admin123! \\
         python3 scripts/smoke_chain.py
 
 Exits 0 if the chain succeeds; non-zero with a clear error otherwise.
@@ -17,7 +17,7 @@ from datetime import date
 
 import httpx
 
-BASE = os.environ.get("BASE_URL", "http://localhost:8000").rstrip("/")
+BASE = os.environ.get("BASE_URL", "http://localhost:8100").rstrip("/")
 EMAIL = os.environ.get("ADMIN_EMAIL", "admin@swa.co.in")
 PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123!")
 

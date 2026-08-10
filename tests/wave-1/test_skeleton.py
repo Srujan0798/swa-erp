@@ -26,7 +26,7 @@ async def test_cors_preflight(client: AsyncClient):
     r = await client.options(
         "/healthz",
         headers={
-            "Origin": "http://localhost:3000",
+            "Origin": "http://localhost:3100",
             "Access-Control-Request-Method": "GET",
         },
     )

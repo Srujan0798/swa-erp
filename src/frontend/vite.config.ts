@@ -10,10 +10,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    // SWA-specific host ports (avoid clashing with other apps on 3000/8000)
+    port: 3100,
+    strictPort: true,
     proxy: {
-      "/api": "http://localhost:8000",
-      "/healthz": "http://localhost:8000",
+      "/api": "http://localhost:8100",
+      "/healthz": "http://localhost:8100",
     },
   },
 });

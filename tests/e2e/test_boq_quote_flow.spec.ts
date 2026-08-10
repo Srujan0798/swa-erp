@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("BOQ & Quote flow", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("http://localhost:3000/login");
+    await page.goto("http://localhost:3100/login");
     await page.getByLabel("Email").fill("admin@swa.co.in");
     await page.getByLabel("Password").fill("admin123!");
     await page.getByRole("button", { name: /sign in/i }).click();
@@ -10,7 +10,7 @@ test.describe("BOQ & Quote flow", () => {
   });
 
   test("admin can upload BOQ and generate quote", async ({ page }) => {
-    await page.goto("http://localhost:3000/projects");
+    await page.goto("http://localhost:3100/projects");
     const projectRow = page.locator("table tbody tr").first();
     await projectRow.getByRole("link", { name: /view|open|details/i }).first().click();
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/);
@@ -37,7 +37,7 @@ test.describe("BOQ & Quote flow", () => {
   });
 
   test("quote approval workflow", async ({ page }) => {
-    await page.goto("http://localhost:3000/projects");
+    await page.goto("http://localhost:3100/projects");
     const projectRow = page.locator("table tbody tr").first();
     await projectRow.getByRole("link", { name: /view|open|details/i }).first().click();
     await expect(page).toHaveURL(/\/projects\/[a-f0-9-]+/);

@@ -10,7 +10,8 @@ APP_ENV=dev python3 scripts/seed_demo.py
 python3 scripts/smoke_chain.py
 ```
 
-Open UI: http://localhost:3000  
+Open UI: http://localhost:3100  
+API docs: http://localhost:8100/docs  
 
 | Role | Email | Password |
 |------|-------|----------|

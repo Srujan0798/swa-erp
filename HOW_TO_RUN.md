@@ -44,7 +44,7 @@ Runs integration tests, opens a PR, updates `plan/EXECUTION.md`, bumps `CHANGELO
 ## Local dev (running the app)
 ```bash
 make install      # python venv + node deps + db
-make dev          # start backend (8000) + frontend (3000) + postgres + redis
+make dev          # start backend (8100) + frontend (3100) + postgres + redis
 make migrate name="add_client_table"  # create new Alembic migration
 make migrate-up   # apply migrations
 make test         # full test suite (unit + integration)

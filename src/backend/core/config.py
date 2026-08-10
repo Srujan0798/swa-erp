@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "change-me"
     DATABASE_URL: str = "postgresql://swa:swa@localhost:5432/swa_erp"
     REDIS_URL: str = "redis://localhost:6379/0"
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3100"]
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TTL_MIN: int = 60
     JWT_REFRESH_TTL_DAYS: int = 30

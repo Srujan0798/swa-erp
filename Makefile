@@ -3,7 +3,7 @@
 help:
 	@echo "swa-erp commands:"
 	@echo "  make install           — install backend + frontend deps"
-	@echo "  make dev               — docker-compose up (full stack)"
+	@echo "  make dev               — docker-compose up (full stack; UI :3100 API :8100)"
 	@echo "  make dev-services      — only postgres + redis (run backend/frontend separately)"
 	@echo "  make seed-demo         — demo users/clients/projects + core ID chain"
 	@echo "  make seed-dev          — minimal dev users only"

@@ -14,7 +14,8 @@ make install
 make dev
 ```
 
-Visit `http://localhost:3000` (frontend) and `http://localhost:8000/docs` (API).
+Visit `http://localhost:3100` (frontend) and `http://localhost:8100/docs` (API).  
+(Ports **3100 / 8100** — not 3000/8000 — so SWA does not clash with other local apps.)
 
 ## How this project is built
 

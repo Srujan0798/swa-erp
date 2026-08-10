@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("dashboard shows stats for admin", async ({ page }) => {
-  await page.goto("http://localhost:3000/login");
+  await page.goto("http://localhost:3100/login");
   await page.getByLabel("Email").fill("admin@swa.co.in");
   await page.getByLabel("Password").fill("admin123!");
   await page.getByRole("button", { name: /sign in/i }).click();

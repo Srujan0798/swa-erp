@@ -74,13 +74,14 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-swa}:${POSTGRES_PASSWORD:-changeme_change_before_prod}@postgres:5432/${POSTGRES_DB:-swa_erp}
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY:-REPLACE_ME_IN_ENV_FILE}
-      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3100"]}
       # PENDING IT ANSWER (Q6): CORS_ORIGINS above must become the real internal
       #   hostname staff use (e.g. ["https://erp.swa.local"]).
       APP_ENV: production
       DEBUG: "false"
-    # PENDING IT ANSWER (Q3): replace with IT-confirmed free port (default 8000).
-    ports: ["8000:8000"]
+    # PENDING IT ANSWER (Q3): replace host port if needed. Dev-default is 8100
+    # (container still listens on 8000). Avoids clash with other apps on 8000.
+    ports: ["8100:8000"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -99,13 +100,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    # PENDING IT ANSWER (Q3): replace host port 3000 with IT-confirmed free port.
+    # PENDING IT ANSWER (Q3): replace host port if needed. Dev-default is 3100
+    # (container nginx still on 80). Avoids clash with other apps on 3000.
     # PENDING IT ANSWER (Q4): TLS termination. Below serves plain HTTP as a
     #   placeholder. Once Q4 is answered (internal CA vs self-signed):
     #     - drop a cert+key into the frontend image / mounted volume, and
     #     - update src/frontend/nginx.conf to `listen 443 ssl` + `ssl_certificate`.
     #   The app itself (React SPA) needs no code change for HTTPS — only nginx.
-    ports: ["3000:80"]
+    ports: ["3100:80"]
     depends_on:
       - backend
     restart: unless-stopped
