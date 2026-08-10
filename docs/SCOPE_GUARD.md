@@ -62,12 +62,14 @@ generic CRM above:
 - Bulk operations on projects/clients
 - Advanced search / full-text indexing (basic ILIKE for now)
 
-## Still genuinely open — not scope decisions, business/infra facts pending answers
-See `docs/decisions/0002-core-id-chain-gap.md` (4th Agreement type, ID-sequence year-reset
-behavior, migration ownership) and `docs/IT_BRIEF.md` (8 infra questions blocking prod deploy
-config). These aren't scope questions — don't treat "waiting on Viraj/IT" as license to build
-speculative alternatives for any of them; the code is already written to accept the answer
-either way without a rewrite (free-text fields, config-shaped counters).
+## Pending go-live (not new features — do not expand MVP)
+
+- **Data Qs from Viraj (2026-08): closed** — APEX/INNER = clients, INSUDESIGN = service name,
+  yearly ID reset, no Leads sheet. See ADR-0002. No code change.
+- **Migration owner** — still Viraj's call at go-live (who runs Excel import).
+- **Server install facts** — no IT department; Viraj gets answers when free. Blocks company
+  deploy config only. Do **not** invent hostname/ports or build alternate products while waiting.
+  When ready: `docs/INSTALL_NO_IT.md` + `docs/DEPLOYMENT_CHECKLIST.md`.
 
 ## When in doubt
 Ask the orchestrator's `interviewer` agent to interview you. If a feature isn't in this list, it

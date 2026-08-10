@@ -81,5 +81,7 @@ Do **not** invent company hostname/ports without him. Prefer wait over wrong pro
 Viraj is busy and there is no IT dept → **server answers may be slow**. That delays deploy,
 not the product. Code is done. Do not rebuild. Do not re-ask the same 8 unless he asks you to.
 
-**Next human action:** one short group reply (confirm + LDI example). Then wait / help only
-when he has bandwidth for server setup.
+**Next human action:** wait for Viraj. Confirm + LDI message already sent.
+
+**When he is free for install:** `docs/INSTALL_NO_IT.md` (no-IT one-sitting guide) → then
+Excel import + handover docs.
