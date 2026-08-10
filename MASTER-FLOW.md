@@ -26,52 +26,15 @@ re-read this file. If something isn't on this line, it is not your problem right
 
 ---
 
-## PART A — SEND TO VIRAJ (copy-paste this message)
+## PART A — SEND TO VIRAJ: the file is `deliverables/SEND_VIRAJ.md`
 
-> Viraj, the build is complete and verified. Three data questions only — a sentence each is
-> enough:
->
-> 1. **4th Service Agreement type** — your sample data has `INSUDESIGN` as a service name, but we
->    only know of three verbally (IESK/APEX/Inner). Is INSUDESIGN a real 4th type, or was it a
->    data-entry variant?
-> 2. **Yearly ID sequence** — IDs look like `SWA-2025-SA-011`. Does the counter restart at 1 on
->    Jan 1 each year, or keep counting across years? (System is built so either is a one-line
->    change.)
-> 3. **`LDI-*` IDs** — is that the legacy form of an Inquiry ID, or something different? There is
->    no "Leads Sheet" in the 21 source files, so I can't confirm from the data alone.
+Full brief + the 3 questions, ready to send as-is. Nothing else needed. If you want the question
+details behind it, see `docs/decisions/0002-core-id-chain-gap.md`.
 
-**Why this matters (short):** nothing breaks if unanswered — those fields stay free-text and the
-importer uses sensible defaults. But the wrong guess may need a one-line fix after go-live.
+## PART B — SEND TO IT/VIKRANT: the file is `deliverables/SEND_IT.md`
 
----
-
-## PART B — SEND TO IT/VIKRANT (copy-paste this message)
-
-> IT team, the app is ready to deploy on the company server. We need 8 factual answers to
-> configure it correctly the first time. A sentence or two each is fine; if you don't know one,
-> say so and who to ask.
->
-> 1. **Docker** — is Docker already installed on the server? If yes, free "Docker Engine" or paid
->    "Docker Desktop"? If nothing, it just needs installing (free version is fine).
-> 2. **WSL2** — the app uses standard Linux-style containers on the Windows Server. Can you
->    confirm WSL2 is available or can be enabled?
-> 3. **Free ports** — about 5 port numbers need to be free (database, Redis, file storage ×1–2,
->    the app itself). What's already running/reserved on that machine?
-> 4. **HTTPS** — staff log in with passwords over VPN, so the connection must be encrypted. Does
->    the company have an internal certificate authority, or should we set up a self-signed
->    certificate to start?
-> 5. **Backups** — is there an existing backup process on the server? (Database + uploaded files
->    need daily backup — better to join the existing process than build a separate one.)
-> 6. **Internal web address** — what will staff type/click to reach the app (e.g. `erp.swa.local`
->    or an IP)? This must be locked before final setup.
-> 7. **Database placement** — database + Redis in the same Docker setup, or installed directly on
->    Windows as services? Either works; which is easier for your team to maintain long-term?
-> 8. **Deploying updates** — when a new version is ready, what's the best way to push it: direct
->    remote access, a couple of commands we send, or an existing process you already use?
-
-**Why this matters (short):** deployment cannot be configured correctly without these — the
-production files have explicit `PENDING IT ANSWER (Q#)` markers for exactly these values, and
-the deploy must not proceed until they're filled.
+Full brief + the 8 questions, ready to send as-is. Nothing else needed. This is the single
+sendable version of the IT brief (older draft copy: `docs/IT_BRIEF.md` — do not send that one).
 
 ---
 
@@ -80,8 +43,8 @@ the deploy must not proceed until they're filled.
 | File | When you touch it |
 |---|---|
 | **`MASTER-FLOW.md`** (this file) | Every time you wonder what's next |
-| **`docs/decisions/0002-core-id-chain-gap.md`** | Only for Viraj's question details (Part A) |
-| **`docs/IT_BRIEF.md`** | Only for IT's question details (Part B) |
+| **`deliverables/SEND_VIRAJ.md`** | Send to Viraj (Part A) |
+| **`deliverables/SEND_IT.md`** | Send to IT/Vikrant (Part B) |
 
 Every other document in this repo is **already-written history**: the wave reports, the ADRs,
 the runbooks, the submission package. They exist as evidence and reference. You do NOT act on
