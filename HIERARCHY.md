@@ -5,6 +5,7 @@
 | Path | Owner | Purpose |
 |---|---|---|
 | `README.md` | orchestrator | entry point + quick start |
+| `MASTER-FLOW.md` | orchestrator | the single-path answer: what to do, ask, continue |
 | `CLAUDE.md`, `KIMI.md` | orchestrator | always-loaded kernel (identical content) |
 | `HANDOFF.md` | orchestrator | session/orchestrator switching protocol |
 | `HIERARCHY.md` | orchestrator | this file — repo map |
@@ -42,6 +43,7 @@ entries for directories that don't exist.
 - `HIERARCHY.md`
 - `HOW_TO_RUN.md`
 - `KIMI.md`
+- `MASTER-FLOW.md`
 - `Makefile`
 - `README.md`
 - `attic/`
