@@ -48,19 +48,30 @@ export function ProjectList() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["projects", page, debouncedSearch, statusFilter],
-    queryFn: () => api.listProjects({ page, page_size: pageSize, q: debouncedSearch, status: statusFilter }),
+    queryFn: () =>
+      api.listProjects({
+        page,
+        page_size: pageSize,
+        q: debouncedSearch || undefined,
+        status: statusFilter || undefined,
+      }),
   });
 
   const projects = data?.items ?? [];
   const total = data?.total ?? 0;
-  const totalPages = Math.ceil(total / pageSize);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Projects</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
+          <p className="text-sm text-muted-foreground">
+            Open a project for BOQ, quotes, document references, sustainability.
+          </p>
+        </div>
         <Button asChild>
           <Link to="/projects/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -71,7 +82,7 @@ export function ProjectList() {
 
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4 mb-4">
+          <div className="mb-4 flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -81,18 +92,32 @@ export function ProjectList() {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select
+              value={statusFilter || "all"}
+              onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}
+            >
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
+          {isError && (
+            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              Failed to load projects: {(error as Error)?.message ?? "API error"}.{" "}
+              <button type="button" className="underline" onClick={() => refetch()}>
+                Retry
+              </button>
+            </div>
+          )}
 
           <div className="rounded-md border">
             <Table>
@@ -110,11 +135,16 @@ export function ProjectList() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">Loading...</TableCell>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      Loading…
+                    </TableCell>
                   </TableRow>
                 ) : projects.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">No projects found</TableCell>
+                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                      No projects. Run{" "}
+                      <code className="rounded bg-muted px-1">make bootstrap-real</code>
+                    </TableCell>
                   </TableRow>
                 ) : (
                   projects.map((project) => (

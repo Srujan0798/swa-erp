@@ -36,8 +36,13 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between">
-        <CardTitle>Service Agreements</CardTitle>
+      <CardHeader className="flex-row items-start justify-between gap-2">
+        <div>
+          <CardTitle>Service agreements & tokens</CardTitle>
+          <p className="mt-1 text-xs font-normal text-muted-foreground">
+            Expand an agreement (e.g. INSUDESIGN) to see tokens under it.
+          </p>
+        </div>
         {!showForm && (
           <Button size="sm" onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />

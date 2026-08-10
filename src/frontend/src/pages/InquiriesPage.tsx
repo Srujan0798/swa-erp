@@ -72,7 +72,12 @@ export function InquiriesPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Inquiries</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Inquiries</h1>
+          <p className="text-sm text-muted-foreground">
+            Step 1 of the SWA chain — convert to client + project when won.
+          </p>
+        </div>
         <Button onClick={() => setShowCreate(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Inquiry

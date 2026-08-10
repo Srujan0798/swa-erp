@@ -84,11 +84,19 @@ export function ClientDetailPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-muted-foreground">Code</Label>
-                <p className="font-mono">{client.code}</p>
+                <p className="font-mono text-sm">{client.code}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Industry</Label>
+                <p>{client.industry ?? "—"}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Client status</Label>
+                <p>{client.client_status ?? "—"}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Primary Email</Label>
-                <p>{client.primary_email}</p>
+                <p className="break-all text-sm">{client.primary_email}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Primary Phone</Label>
