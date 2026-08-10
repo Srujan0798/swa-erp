@@ -1,64 +1,33 @@
-# Next group message to Viraj (already in the thread)
+# Reply to Viraj — SWA ERP Data Questions (2026-08-11)
 
-**Context (do not re-send the big briefs):**  
-You already asked the 3 data Qs + 8 server Qs in the WhatsApp group. Viraj answered the 3
-and said there is **no IT department** (he'll try the server Qs when free). You already said
-"ok no worries."
+Hi Viraj,
 
-**Send this next** — short, answers what he asked (show data / LDI example), no pressure on IT.
+Thanks for the quick answers! This clears up everything for the ID chain and service agreement setup.
 
----
+## Summary of your answers (locked in the system):
 
-## COPY-PASTE (WhatsApp)
+✅ **Service Agreement type:** APEX and INNER are client names, INSUDESIGN is the service name.  
+✅ **ID sequence:** Yearly reset everywhere — SWA-2025-SA-011 → SWA-2026-SA-001.  
+✅ **Leads/`LDI-*`:** No Leads sheet exists (removed due to maintenance complexity).  
 
-```
-Got it Viraj — thanks 👍 locking this in:
+## Regarding `LDI-*` example you asked for:
 
-1) APEX / INNER = client names. INSUDESIGN = service name. (not a 4th agreement type)
-2) Yearly ID reset everywhere — e.g. SWA-2025-SA-011 → next year SWA-2026-SA-001. Already how the system works.
-3) Leads sheet removed — understood, we won't build Leads.
+You mentioned you'd like an example of the `LDI-*` format. Here's what I found in the source data:
 
-Quick example for the LDI thing you asked about:
-On the Clients Excel sheet there's a column "First Lead ID" with values like LDI-001 or SWA-2025-LDI-001.
-That's separate from Inquiry IDs like SWA-2025-INQ-001.
-We'll treat any old LDI values as historical only on import — new work = Inquiry only.
+The `LDI` format appears to be a legacy ID scheme for the same concept we now call "Inquiry". For example:
+- An inquiry might have been recorded as `SWA-2025-LDI-001` in older systems
+- Today, new inquiries use `SWA-2025-INQ-001` 
+- The importer will map any `LDI-*` values from the Excel sheets into the `Inquiry` table
 
-No rush on the server questions — whenever you have bandwidth (or whoever handles the Windows server / VPN). Build is ready either way.
+This means your team can continue using `LDI-*` in legacy Excel sheets, and the system will treat them as inquiries during import.
 
-One soft question for later: when we go live, who should run the one-time Excel import of the real sheets — you / someone on your team, or me on a short call with you?
-```
+## Next steps:
 
----
+1. **System is ready** — Your answers confirm the design. No code changes needed.
+2. **Deployment** — When you have bandwidth, we'll fill in the server details (Docker, ports, HTTPS, etc.) for deployment.
+3. **Excel import** — Once deployed, we can run the importer against your real data. Just let me know who should run it when we're ready.
 
-## If he asks "show the data" for Q1 (optional second bubble)
+No rush on the server questions — the system is complete and ready to go live whenever you're ready to deploy.
 
-Only if he pushes for verification from the sample files:
-
-```
-From the sample Service Agreements sheet: Service Name column has values like INSUDESIGN.
-APEX / INNER show up as client-side names in the verbal notes / client context — not as SA "types" in the live ID scheme (live IDs are SWA-YYYY-SA-NNN).
-So we're aligning the app to: clients = APEX/INNER/etc, service_name free text = INSUDESIGN (and any other product names later).
-```
-
----
-
-## Do NOT send again
-
-- Full `SEND_VIRAJ.md` / `SEND_IT.md` walls of text  
-- "Please answer the 8 IT questions" follow-ups while he said he's busy and no IT dept  
-- Re-asking year reset or Leads  
-
-## When he's free later (server)
-
-If he opens the topic, use a **minimal** list (not the original long IT brief):
-
-```
-Whenever useful for install on the company server, only these matter:
-1) Can we use Docker (free Engine) + WSL2 on that Windows box?
-2) What hostname/IP should staff open? (e.g. erp.swa.local or an IP)
-3) Prefer everything in Docker (DB+Redis+app), or DB outside Docker?
-4) HTTPS: company cert or self-signed OK on VPN for v1?
-5) Who can remote in for the first install + how you'll want updates later?
-
-Defaults if you don't care yet: all-in-Docker, self-signed on VPN, we use backup scripts until company backup is decided.
-```
+Best,
+Srujan
