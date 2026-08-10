@@ -172,9 +172,18 @@ These are real and deliberately not hidden. None were discovered by the client f
    there is no Celery app, no worker, and no queue. Everything that *could* be async (PDF
    generation, report export, email) runs **synchronously** and returns when done. Verified this
    session: `grep -rn "celery" src/backend --include="*.py"` → zero code matches.
+   > **Update 2026-08-10 (wave-31): this is no longer true.** A real Celery app
+   > (`src/backend/workers/`), a `worker` compose service, an async export path
+   > (`?async=true` → 202 job_id + `GET /api/jobs/{id}` polling), and the runbook/HIERARCHY
+   > notes landed in wave-31 (commits `d5dd6f1`, `2340855`). The synchronous path is unchanged.
 2. **File storage is local disk.** Uploads live in `uploads/` at the repo root. MinIO/S3 is not
    wired (documented as target-state in `docs/IT_BRIEF.md` Part 3 and `docs/conventions.md`).
    Backups must therefore cover the `uploads/` directory too (`make backup-files`).
+   > **Update 2026-08-10 (wave-31): MinIO/S3 is now wired.** A `StorageBackend` abstraction
+   > (`src/backend/core/storage.py`, `local` default | `minio`), a `minio` compose service, and
+   > the file-writing services routed through `get_storage()` landed in wave-31 (commit
+   > `d5dd6f1`). Default behavior (`local`) is byte-identical; `STORAGE_BACKEND=minio` is opt-in.
+   > Files written before wave-31 are not auto-migrated (manual, deployment-time concern).
 3. **JWT is HS256, not RS256.** A single shared secret signs tokens; fine for an internal
    on-prem app, but if SWA ever needs token verification by a third party, RS256 is the target.
 4. **Alembic migration graph has multiple heads.** Seven branch heads exist (see §2) and are
