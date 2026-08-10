@@ -175,7 +175,7 @@ These are real and deliberately not hidden. None were discovered by the client f
    > **Update 2026-08-10 (wave-31): this is no longer true.** A real Celery app
    > (`src/backend/workers/`), a `worker` compose service, an async export path
    > (`?async=true` → 202 job_id + `GET /api/jobs/{id}` polling), and the runbook/HIERARCHY
-   > notes landed in wave-31 (commits `d5dd6f1`, `2340855`). The synchronous path is unchanged.
+   > notes landed in wave-31 (commits `d5dd6f1`, `9d9f80e`). The synchronous path is unchanged.
 2. **File storage is local disk.** Uploads live in `uploads/` at the repo root. MinIO/S3 is not
    wired (documented as target-state in `docs/IT_BRIEF.md` Part 3 and `docs/conventions.md`).
    Backups must therefore cover the `uploads/` directory too (`make backup-files`).
