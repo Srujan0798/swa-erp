@@ -1,7 +1,9 @@
 # SWA Consultancy ERP — Progress Brief for Viraj
 
-**From:** Srujan
-**Date:** August 2026
+**From:** Srujan  
+**Date:** August 2026  
+**Status:** Sent. Viraj answered the 3 data questions (2026-08). See `REPLY_VIRAJ.md` for
+the confirm reply + LDI example. Full lock-in: `docs/decisions/0002-core-id-chain-gap.md`.
 
 ---
 

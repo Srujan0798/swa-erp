@@ -25,17 +25,18 @@ Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't 
   `npm run build` (tsc) clean; wave-31 tests 20 passed / 6 skipped. Historical evidence in
   `work/reports/wave-30/` and `work/reports/wave-31/`.
 - **Client submission package:** `deliverables/SUBMISSION.md` (v1.0.1) — what was built,
-  verification evidence, explicit drop list, known limitations, the 2 open external blockers,
-  deploy pointer, Excel import pointer, docs map, and support/next steps. All stale
-  "target-state" claims corrected to match reality.
-- **The 2 open external blockers remain** (nothing code can resolve): Viraj's 3 decisions
-  (`docs/decisions/0002-core-id-chain-gap.md`) and IT's 8 answers (`docs/IT_BRIEF.md`).
-- **Remaining known limitations (documented honestly in SUBMISSION.md):** JWT is HS256 (not
-  RS256); email runs synchronously (Celery queue available if moved off request path);
-  Prometheus metrics + Sentry not implemented (documented as not built).
-- **Where to start:** `deliverables/SUBMISSION.md` → `docs/DEPLOYMENT_CHECKLIST.md` →
-  `docs/IT_BRIEF.md` (fill `PENDING IT ANSWER (Q#)` placeholders before prod deploy).
-  `MASTER-FLOW.md` is the single-path "what to do next" file.
+  verification evidence, explicit drop list, known limitations, deploy pointer, Excel import
+  pointer, docs map, and support/next steps.
+- **Group chat (2026-08-11):** Srujan already posted the 3 data Qs + 8 server Qs in WhatsApp.
+  Viraj answered data Qs; said **there is no IT department** and he's busy but will try server
+  answers later. Srujan already said "ok no worries." Do **not** re-send SEND_*.md as if unsent.
+- **Viraj data Qs — ANSWERED:** APEX/INNER = clients; INSUDESIGN = service name; yearly ID
+  reset everywhere; no Leads sheet. Locked in ADR-0002. **No code change.** Next group
+  message only: `deliverables/REPLY_VIRAJ.md` (confirm + LDI example he asked for).
+- **Deploy blocker:** server facts (Docker/WSL/ports/HTTPS/hostname/etc.) — owned by **Viraj**
+  (no IT dept), slow path. Until then product stays complete but not company-server live.
+- **Where to start:** `MASTER-FLOW.md` → paste reply from `REPLY_VIRAJ.md` → wait / help when
+  Viraj has bandwidth for server.
 
 ## Where to start a new session
 1. Read this file

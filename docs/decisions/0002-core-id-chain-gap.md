@@ -77,22 +77,27 @@ the first pass got wrong or left unnecessarily open:
    Existing `time_tracking.py` (wave-7, already shipped) should be checked against this and
    patched if these fields are missing — added as a wave-11 follow-up item, not blocking wave-9.
 
-## Still genuinely open — need Viraj's answer, no reliable default exists in the data
+## Resolved by Viraj (2026-08) — data questions Q1–Q3
 
-| # | Question | Why the data doesn't resolve it |
-|---|----------|----------------------------------|
-| 1 | What is the 4th Service Agreement type/service name? | Sample row's `Service Name` is `"INSUDESIGN"` — doesn't match any of the 3 verbally-named agreements (IESK/APEX/Inner) or confirm a 4th. `agreement_type`/`service_name` should stay free-text, not an enum, until Viraj confirms the full list. |
-| 2 | Does the yearly ID sequence actually reset on Jan 1, or run continuously across years? | Only 2025 data exists in the sample sheets; no year boundary to observe. Build the counter table so a reset policy is a config value, not hardcoded, so this is a one-line change either way. |
-| 3 | Is `LDI-*` really the legacy Inquiry ID (see item #6 above), or a distinct concept that just never got its own sheet exported? | No "Leads Sheet.xlsx" exists among the 21 files to check directly. |
-| 4 | Excel → ERP migration owner (dev team vs. internal admin)? | Explicitly unresolved in the Meeting 2 transcript itself — Viraj states *"we have everyone, like everyone has answers to the data as of now... it's hosted on OneDrive"* — this is not a data question, it's a still-pending organizational decision. Wave-13 builds the tool; **do not assume who runs it against real data** — that's a separate go-live decision for Viraj, not something to default silently. |
-| 5 | Compliance standard versions (which NBC/ECBC/IGBC/IS years)? | Not in any sheet; cosmetic data-entry question, no code blocked on it. |
-| 6 | GST invoicing required in wave-7 (already shipped)? | Meeting 2 flagged this as pending "before Wave-7" — need to confirm the shipped invoice module actually includes it; checked in wave-11. |
-| 7 | Client portal timing? | Explicitly deferred in Meeting 2 ("Wave-8 or later?") — out of scope for this dispatch. |
+Answers received from Viraj (verbatim summary locked here for future sessions):
+
+| # | Question | Viraj's answer | How the system implements it |
+|---|----------|----------------|------------------------------|
+| 1 | 4th Service Agreement type / INSUDESIGN? | **APEX and INNER are client names**, not agreement types. **INSUDESIGN is the service name.** Earlier verbal "IESK / APEX / Inner as three SA types" was a misread. | `service_name` stays free-text (not an enum). No 4th-type enum. INSUDESIGN is a valid service product name. |
+| 2 | Yearly ID sequence reset? | **Yes — reset every year, everywhere.** Example: `SWA-2025-SA-011` in 2025 → `SWA-2026-SA-001` in 2026. Same rule on all sheets / entity types. | Already built: `reference_counters` is keyed by `(entity_type, year)`; new calendar year starts at `001`. No code change required. |
+| 3 | What is `LDI-*` / Leads? | Leads sheet existed in the **original** design, was **removed** as too hard to maintain. **There is no Leads sheet now.** He asked for an example of `LDI-*` (column was unclear without a sample). | No Leads module. Optional `Client.first_lead_id` keeps historical Excel values as text on import only. New work enters as **Inquiry** (`INQ`), not LDI. |
+
+## Still open (not code blockers for Q1–Q3)
+
+| # | Question | Status |
+|---|----------|--------|
+| 4 | Excel → ERP migration owner (dev vs internal admin)? | Still organizational — Viraj decides who runs real import at go-live. |
+| 5 | Compliance standard versions (NBC/ECBC/IGBC/IS years)? | Cosmetic; no code blocked. |
+| 6 | GST on invoices? | Shipped and verified (wave-7 / wave-11). |
+| 7 | Client portal timing? | Explicitly deferred — out of MVP scope. |
 
 ## How to apply
 
-Wave-9 task briefs (`work/wave-9/`) now use the confirmed `SWA-{year}-{TYPE}-{seq}` ID scheme
-and the corrected field lists/FKs above. Where an item is still genuinely open (table above),
-the field is free-text/nullable so answering it later doesn't require a schema rewrite — but
-these should be sent to Viraj as an actual question list, not silently defaulted the way item
-#4 almost was in the first pass.
+Wave-9+ already use `SWA-{year}-{TYPE}-{seq}` with per-year counters and free-text
+`service_name`. Viraj's answers **confirm** those defaults — they do not reverse them.
+Remaining go-live work is IT deploy answers + real Excel migration ownership (item #4).

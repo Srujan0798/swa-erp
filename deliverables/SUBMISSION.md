@@ -202,31 +202,34 @@ These are real and deliberately not hidden. None were discovered by the client f
    (resolved to the DOM global, causing 7 `tsc` errors), and 37 `B008` FastAPI-DI lint items that
    had never received the repo's inline-`# noqa` convention.
 
-## 5. The 2 open external blockers
+## 5. External blockers
 
-Neither is resolvable in code. They are the only things standing between this build and a fully
-production-live system, and both are **client-side**.
+**A. Viraj's 3 data decisions — RESOLVED (2026-08)** — see `docs/decisions/0002-core-id-chain-gap.md`:
 
-**A. Viraj's 3 open decisions** — `docs/decisions/0002-core-id-chain-gap.md`:
-1. What is the 4th Service Agreement type/service name? (Sample row says `INSUDESIGN`; does not
-   match the 3 verbally-named agreements.)
-2. Does the yearly ID sequence reset on Jan 1, or run continuously across years? (Counter is
-   built so this is a one-line config change either way.)
-3. Is `LDI-*` really the legacy Inquiry ID, or a distinct concept? (No "Leads Sheet.xlsx" exists
-   among the 21 source files.)
+| # | Resolution |
+|---|------------|
+| 1 | **APEX / INNER are client names**; **INSUDESIGN is the service name** (not a 4th SA type). |
+| 2 | **Yearly ID reset confirmed everywhere:** e.g. `SWA-2025-SA-011` → next year `SWA-2026-SA-001`. |
+| 3 | **No Leads sheet** (removed from design). `LDI-*` / First Lead ID are historical only; new work is Inquiry. |
 
-*If unanswered:* fields involved are free-text/nullable so nothing breaks; the year-reset
-behavior defaults to "reset per year" (a design inference) and the importer maps `LDI-*` into
-Inquiries (an assumption). Each could need a one-line correction later.
+System already matched these answers (free-text `service_name`, per-year counters, no Leads module).
+No code change required. Confirm reply for Viraj: `deliverables/REPLY_VIRAJ.md`.
 
-**B. IT/Vikrant's 8 answers** — `docs/IT_BRIEF.md`:
-1. Docker license (Engine vs Desktop) · 2. WSL2/Linux containers · 3. Free ports · 4. HTTPS/cert
-   source · 5. Existing backup process · 6. Internal web address · 7. Postgres/Redis in-compose
-   vs native Windows · 8. How updates get deployed.
+Still organizational (not a schema question): **who runs the real Excel → ERP migration** at go-live
+(Viraj decides).
 
-*If unanswered:* the production deployment cannot be configured correctly. `docker-compose.prod.yml`
-and `.env.production.example` carry explicit `PENDING IT ANSWER (Q#)` markers for every value
-that depends on these — the deploy **must not proceed** until they're filled (see §6).
+**B. Server / deploy facts — STILL OPEN (no IT department)**  
+
+Asked in the client WhatsApp group (2026-08-11). Viraj stated **there is no IT department** and
+will try to get answers when free. Draft list (reference only, already messaged):
+`deliverables/SEND_IT.md`.
+
+1. Docker · 2. WSL2 · 3. Free ports · 4. HTTPS/cert · 5. Backups · 6. Internal hostname/IP ·
+7. DB/Redis in Docker vs Windows services · 8. How updates are applied.
+
+*If unanswered:* company-server production deploy waits. Do not invent hostname/ports.
+`docker-compose.prod.yml` / `.env.production.example` still have `PENDING IT ANSWER (Q#)`
+markers — fill when Viraj (or nominee) provides facts (see §6).
 
 ## 6. How to deploy
 
@@ -281,22 +284,16 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 
 What a future developer picks up first:
 
-1. Read `deliverables/SUBMISSION.md` (this file) → `HANDOFF.md` → `plan/EXECUTION.md`.
-2. Resolve the two external blockers (§5) — send `docs/IT_BRIEF.md` to IT if not yet answered,
-   and the ADR-0002 question list to Viraj.
-3. Deploy per §6 and `docs/DEPLOYMENT_CHECKLIST.md` once IT answers land.
-4. Run the Excel import (§7) against real data when Viraj confirms who owns the migration.
-5. Highest-value engineering follow-ups, in order:
-   - Decide the year-reset ID policy once Viraj answers ADR-0002 Q2 (one config change).
-   - Move transactional email off the request path onto the Celery queue (wave-31 worker is
-     in place; email is the last synchronous integration).
-   - (Resolved in wave-31: MinIO/S3 object storage and the Celery worker — previously §3
-     target-state items — shipped in `1.0.1`; the 7 Alembic heads were also collapsed to one.
-     No action needed.)
-   - (Already resolved, noted for the record: `tests/wave-22/test_rbac_gaps.py` exists and
-     all 39 tests pass — an earlier draft of the wave-22 report incorrectly claimed the file
-     was missing; it was created, then had real bugs the orchestrator found and fixed
-     post-merge — see the "fix: post-merge verification catches" commit. No action needed.)
+1. Read `deliverables/SUBMISSION.md` (this file) → `MASTER-FLOW.md` → `HANDOFF.md`.
+2. Viraj data Qs are closed (§5A). Optional: send `deliverables/REPLY_VIRAJ.md` to confirm +
+   LDI example + ask who owns migration.
+3. Send `deliverables/SEND_IT.md` to IT if not yet answered — only remaining deploy blocker.
+4. Deploy per §6 and `docs/DEPLOYMENT_CHECKLIST.md` once IT answers land.
+5. Run the Excel import (§7) against real data when Viraj confirms who owns the migration.
+6. Highest-value engineering follow-ups (optional, post-MVP):
+   - Move transactional email off the request path onto the Celery queue.
+   - (Resolved: year-reset policy confirmed by Viraj — already implemented.)
+   - (Resolved in wave-31: MinIO/S3 + Celery worker; Alembic heads collapsed.)
 
 Everything else — the core chain, RBAC matrix, GST invoicing, compliance, time tracking, and
 the backup/ops scripts — is verified working as of 2026-08-07 and ready to hand over.

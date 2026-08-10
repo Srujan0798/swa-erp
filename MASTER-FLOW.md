@@ -4,71 +4,82 @@
 > Everything else is reference. If a file isn't named here, you don't need it right now.
 > The whole project, as ONE line:
 >
-> **CODE DONE → VERIFIED → RELEASED → ASK 2 PEOPLE (3+8 questions) → THEIR ANSWERS → DEPLOY → GO-LIVE MIGRATION**
+> **CODE DONE → VERIFIED → RELEASED → VIRAJ DATA Qs ✅ → SERVER/DEPLOY ANSWERS (via Viraj, no IT dept) → DEPLOY → MIGRATE → LIVE**
 
 ---
 
-## THE ONE FLOW (read top to bottom, do it in this order only)
+## Reality check (group chat 2026-08-11)
+
+- Srujan **already sent** the 3 data Qs + 8 server Qs in the client WhatsApp group (not as
+  separate MD files to "resend").
+- Viraj **answered** the 3 data questions. Locked in ADR-0002. **No code change.**
+- Viraj: **"There is no IT department"** — he will try to get the 8 server answers when he can;
+  he is busy. Srujan already replied "ok no worries."
+- So: do **not** keep asking to "send SEND_IT.md / SEND_VIRAJ.md." Those files are **source
+  drafts** for messages already delivered. Next messages are **follow-ups in the same group**.
+
+---
+
+## THE ONE FLOW (now)
 
 ```
-[1] DONE   — all 31 waves shipped, v1.0.0 tagged, full test suite green (413 passed)
-[2] SEND   — 3 questions to Viraj  (copy-paste from Part A below)
-[3] SEND   — 8 questions to IT     (copy-paste from Part B below)
-[4] WAIT   — for the 11 answers. NOTHING in code depends on you meanwhile.
-[5] DEPLOY — when IT answers arrive: fill the PENDING IT ANSWER markers in
-             docker-compose.prod.yml + .env.production.example, run deployment
-[6] MIGRATE — when Viraj answers arrive: run the Excel importer against real data
-[7] LIVE   — hand over access, close the project
+[1] DONE  — product v1.0.1 shipped, verified
+[2] DONE  — 3 data Qs asked + Viraj answered (group)
+[3] DONE  — 8 server Qs asked in group; no IT dept; Viraj owns finding answers when free
+[4] NOW   — short group follow-up: confirm his 3 answers + LDI example (he asked for it)
+[5] WAIT  — Viraj (or whoever he points to) on server/deploy facts when he's free
+[6] DEPLOY — when enough server facts exist: fill PENDING markers, deploy
+[7] MIGRATE — Excel → ERP (who runs it = Viraj decides)
+[8] LIVE
 ```
 
-There is no step 8. There are no alternate paths. If you are unsure what to do,
-re-read this file. If something isn't on this line, it is not your problem right now.
+---
+
+## PART A — VIRAJ DATA ANSWERS (locked)
+
+| # | Answer | Code |
+|---|--------|------|
+| 1 | APEX / INNER = **clients**; INSUDESIGN = **service name** | Already free-text `service_name` |
+| 2 | Yearly reset **everywhere** (`2025-…-011` → `2026-…-001`) | Already per-(type, year) |
+| 3 | No Leads sheet (removed); he wanted LDI **example** | No Leads module; optional historical field |
+
+Group follow-up text: `deliverables/REPLY_VIRAJ.md` (short WhatsApp form at top).
+
+## PART B — SERVER / DEPLOY (no IT department)
+
+The 8 questions still matter for **first production install**, but the owner is **Viraj**
+(or someone he nominates), not a separate IT team. Draft list remains in
+`deliverables/SEND_IT.md` for reference only — **already posted in group.**
+
+Until answers exist, safe defaults for a small on-prem trial (if Viraj wants a temporary path):
+
+- Docker Engine free + WSL2 if Windows Server
+- Compose stack (Postgres + Redis + app + optional MinIO) all in Docker
+- Self-signed HTTPS or HTTP-only **only on VPN** (document risk)
+- Hostname/IP he chooses later
+- Daily DB + uploads backup via our `make backup-*` scripts until company backup joins
+
+Do **not** invent company hostname/ports without him. Prefer wait over wrong prod config.
 
 ---
 
-## PART A — SEND TO VIRAJ: the file is `deliverables/SEND_VIRAJ.md`
+## PART C — FILES THAT MATTER
 
-Full brief + the 3 questions, ready to send as-is. Nothing else needed. If you want the question
-details behind it, see `docs/decisions/0002-core-id-chain-gap.md`.
+| File | Role now |
+|------|----------|
+| `MASTER-FLOW.md` | Where you are |
+| `deliverables/REPLY_VIRAJ.md` | Next group message (confirm + LDI example) |
+| `docs/DEPLOYMENT_CHECKLIST.md` | After server facts exist |
+| `deliverables/SUBMISSION.md` | Full handoff package (reference) |
 
-## PART B — SEND TO IT/VIKRANT: the file is `deliverables/SEND_IT.md`
-
-Full brief + the 8 questions, ready to send as-is. Nothing else needed. This is the single
-sendable version of the IT brief (older draft copy: `docs/IT_BRIEF.md` — do not send that one).
-
----
-
-## PART C — THE 3 FILES THAT MATTER (and nothing else)
-
-| File | When you touch it |
-|---|---|
-| **`MASTER-FLOW.md`** (this file) | Every time you wonder what's next |
-| **`deliverables/SEND_VIRAJ.md`** | Send to Viraj (Part A) |
-| **`deliverables/SEND_IT.md`** | Send to IT/Vikrant (Part B) |
-
-Every other document in this repo is **already-written history**: the wave reports, the ADRs,
-the runbooks, the submission package. They exist as evidence and reference. You do NOT act on
-them. If you find yourself reading an old ADR or a wave report to decide "what's next", stop —
-the answer is in this file.
+`SEND_VIRAJ.md` / `SEND_IT.md` = **already-sent message drafts**, not to re-blast.
 
 ---
 
-## PART D — WHEN THE ANSWERS COME BACK
+## THE ONLY REMAINING RISK
 
-- **IT answers →** open `docker-compose.prod.yml` + `.env.production.example`, fill every
-  `PENDING IT ANSWER (Q#)` with the real values, then follow `docs/DEPLOYMENT_CHECKLIST.md`
-  (or `docs/runbook.md`) step by step. Deploy. Verify login over VPN.
-- **Viraj answers →** if Q2 (year reset) or Q3 (LDI) change a default, it's a one-line code fix
-  + one migration, then `make test`. Then run the Excel import (SUBMISSION.md §7) against the
-  real data with Viraj as the migration owner.
-- **Both → project is LIVE.** Close it. Keep this file as the handover.
+Viraj is busy and there is no IT dept → **server answers may be slow**. That delays deploy,
+not the product. Code is done. Do not rebuild. Do not re-ask the same 8 unless he asks you to.
 
----
-
-## THE ONLY REMAINING RISKS (both external, neither yours to fix in code)
-
-1. Viraj never answers → fields stay free-text/nullable, defaults hold, tiny fix possible later. Low risk.
-2. IT never answers → no production deploy. High risk, purely a client-side hold. Nothing you can
-   build around it.
-
-**You are done with code. You are waiting on two people. That is the whole truth.**
+**Next human action:** one short group reply (confirm + LDI example). Then wait / help only
+when he has bandwidth for server setup.
