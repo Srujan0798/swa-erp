@@ -1,13 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { ClientForm } from "@/components/clients/ClientForm";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Client } from "@/types/api";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
 
 export function NewClientPage() {
   const navigate = useNavigate();
+  const { data: user, isLoading } = useCurrentUser();
 
   const mutation = useMutation({
     mutationFn: (data: Partial<Client>) => api.createClient(data),
@@ -15,6 +18,11 @@ export function NewClientPage() {
       navigate(`/clients/${client.id}`);
     },
   });
+
+  if (isLoading) return <div className="p-6">Loading...</div>;
+  if (!canManageCommercial(user)) {
+    return <Navigate to="/clients" replace />;
+  }
 
   return (
     <div className="space-y-6">

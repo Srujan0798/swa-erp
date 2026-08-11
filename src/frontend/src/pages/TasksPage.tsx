@@ -17,6 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import {
   Plus,
   UserRoundPlus,
@@ -29,6 +31,8 @@ import type { TaskStatus, TaskPriority } from "@/types/api";
 export function TasksPage(): JSX.Element {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const [searchParams, setSearchParams] = useSearchParams();
   const [projectId, setProjectId] = useState<string | null>(
     searchParams.get("project"),
@@ -148,10 +152,12 @@ export function TasksPage(): JSX.Element {
           <h1 className="text-xl font-semibold">Tasks</h1>
           <p className="text-sm text-muted-foreground">Create, assign, and track tasks across projects.</p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Task
-        </Button>
+        {write ? (
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Task
+          </Button>
+        ) : null}
       </div>
 
       <Tabs defaultValue="board" className="space-y-4">
@@ -218,8 +224,11 @@ export function TasksPage(): JSX.Element {
                 tasks={boardTasks}
                 isLoading={tasksQuery.isLoading}
                 onTaskClick={(t) => setSelectedTaskId(t.id)}
-                onStatusChange={(taskId, newStatus) =>
-                  transitionMutation.mutate({ taskId, status: newStatus })
+                onStatusChange={
+                  write
+                    ? (taskId, newStatus) =>
+                        transitionMutation.mutate({ taskId, status: newStatus })
+                    : undefined
                 }
               />
               {!tasksQuery.isLoading && boardTasks.length === 0 && (
@@ -227,7 +236,7 @@ export function TasksPage(): JSX.Element {
                   {searchText.trim()
                     ? "No tasks match your search."
                     : "No tasks on this project yet. "}
-                  {!searchText.trim() && (
+                  {!searchText.trim() && write ? (
                     <button
                       type="button"
                       className="underline font-medium text-foreground"
@@ -238,7 +247,7 @@ export function TasksPage(): JSX.Element {
                     >
                       Create the first task
                     </button>
-                  )}
+                  ) : null}
                 </p>
               )}
             </>
@@ -288,14 +297,18 @@ export function TasksPage(): JSX.Element {
           )}
           <Separator />
           <DialogFooter className="justify-between">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => deleteMutation.mutate()}
-              disabled={deleteMutation.isPending || !selectedTaskId}
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </Button>
+            {write ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending || !selectedTaskId}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+            ) : (
+              <span />
+            )}
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setSelectedTaskId(null)}>Close</Button>
             </div>

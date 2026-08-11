@@ -5,6 +5,8 @@ import { TokenForm } from "@/components/tokens/TokenForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
 import { Plus, Trash2 } from "lucide-react";
 
 interface TokensListProps {
@@ -14,6 +16,8 @@ interface TokensListProps {
 export function TokensList({ agreementId }: TokensListProps) {
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const commercial = canManageCommercial(user);
   const { data, isLoading } = useTokens({ agreement_id: agreementId, page_size: 100 });
   const createMutation = useCreateToken();
   const deleteMutation = useDeleteToken();
@@ -24,15 +28,15 @@ export function TokensList({ agreementId }: TokensListProps) {
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>Tokens</CardTitle>
-        {!showForm && (
+        {!showForm && commercial ? (
           <Button size="sm" onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Token
           </Button>
-        )}
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
-        {showForm && (
+        {showForm && commercial ? (
           <TokenForm
             onSubmit={async (formData) => {
               try {
@@ -55,7 +59,7 @@ export function TokensList({ agreementId }: TokensListProps) {
             onCancel={() => setShowForm(false)}
             isLoading={createMutation.isPending}
           />
-        )}
+        ) : null}
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading tokens...</p>
@@ -82,18 +86,20 @@ export function TokensList({ agreementId }: TokensListProps) {
                     <div className="text-xs text-muted-foreground line-clamp-1">{t.description}</div>
                   )}
                 </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  disabled={deleteMutation.isPending}
-                  onClick={() => {
-                    if (confirm(`Delete token ${t.reference_id}?`)) {
-                      deleteMutation.mutate(t.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {commercial ? (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => {
+                      if (confirm(`Delete token ${t.reference_id}?`)) {
+                        deleteMutation.mutate(t.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                ) : null}
               </div>
             ))}
           </div>

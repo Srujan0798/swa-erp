@@ -1,10 +1,19 @@
 "use client";
 
+import { Navigate } from "react-router-dom";
 import { useCreateVendor } from "@/hooks/useVendors";
 import { VendorForm } from "@/components/vendors/VendorForm";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 
 export function NewVendorPage() {
   const createVendorMutation = useCreateVendor();
+  const { data: user, isLoading } = useCurrentUser();
+
+  if (isLoading) return <div className="p-6">Loading...</div>;
+  if (!canWrite(user)) {
+    return <Navigate to="/vendors" replace />;
+  }
 
   return (
     <div className="space-y-6">

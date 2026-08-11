@@ -755,7 +755,8 @@ export const api = {
   respondRfq: (rfqId: string, data: RFQRespondPayload) =>
     request<RFQ>(`/api/rfqs/${rfqId}/respond`, {
       method: "POST",
-      body: JSON.stringify(data),
+      // Backend expects a bare list of response items
+      body: JSON.stringify(data.items),
     }),
 
   awardRfq: (rfqId: string, data?: RFQAwardPayload) =>

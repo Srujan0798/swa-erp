@@ -9,6 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useDeleteTimeEntry } from "@/hooks/useTimeEntries";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import type { TimeEntry } from "@/types/time";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -19,6 +21,8 @@ interface TimeEntryListProps {
 }
 
 export function TimeEntryList({ entries, isLoading, onEdit }: TimeEntryListProps) {
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const deleteMutation = useDeleteTimeEntry();
 
   const handleDelete = async (id: string) => {
@@ -64,14 +68,18 @@ export function TimeEntryList({ entries, isLoading, onEdit }: TimeEntryListProps
                       </span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => onEdit(entry)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      {write ? (
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => onEdit(entry)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

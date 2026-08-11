@@ -13,9 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 export function VendorList() {
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -26,7 +31,7 @@ export function VendorList() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading } = useVendors({
+  const { data, isLoading, isError, error, refetch } = useVendors({
     page,
     page_size: pageSize,
     q: debouncedSearch,
@@ -40,12 +45,14 @@ export function VendorList() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Vendors</h1>
-        <Button asChild>
-          <Link to="/vendors/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Vendor
-          </Link>
-        </Button>
+        {write ? (
+          <Button asChild>
+            <Link to="/vendors/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Vendor
+            </Link>
+          </Button>
+        ) : null}
       </div>
 
       <Card>
@@ -59,6 +66,16 @@ export function VendorList() {
               className="pl-10"
             />
           </div>
+
+          {isError && (
+            <div className="mb-4">
+              <QueryErrorBanner
+                message="Failed to load vendors"
+                error={error}
+                onRetry={() => void refetch()}
+              />
+            </div>
+          )}
 
           <div className="rounded-md border overflow-x-auto">
             <Table>
@@ -78,9 +95,28 @@ export function VendorList() {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center">Loading...</TableCell>
                   </TableRow>
+                ) : isError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      Unable to load vendors.
+                    </TableCell>
+                  </TableRow>
                 ) : vendors.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">No vendors found</TableCell>
+                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                      {debouncedSearch ? (
+                        <>No vendors match “{debouncedSearch}”. Clear search or try another name.</>
+                      ) : write ? (
+                        <>
+                          No vendors yet.{" "}
+                          <Link className="underline font-medium text-foreground" to="/vendors/new">
+                            Add the first vendor
+                          </Link>
+                        </>
+                      ) : (
+                        <>No vendors yet.</>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ) : (
                   vendors.map((vendor) => (

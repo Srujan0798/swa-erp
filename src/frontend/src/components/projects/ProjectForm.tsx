@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageProjects } from "@/lib/permissions";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -40,6 +42,8 @@ interface ProjectFormProps {
 }
 
 export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: ProjectFormProps) {
+  const { data: user } = useCurrentUser();
+  const showTeamFields = canManageProjects(user);
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: initialData,
@@ -137,50 +141,52 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="pm_id">Project Manager</Label>
-              <Select onValueChange={(v) => form.setValue("pm_id", v)} defaultValue={initialData?.pm_id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select PM" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {pmUsers?.items.filter(u => u.role === "admin" || u.role === "pm").map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {showTeamFields ? (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pm_id">Project Manager</Label>
+                <Select onValueChange={(v) => form.setValue("pm_id", v)} defaultValue={initialData?.pm_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select PM" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {pmUsers?.items.filter(u => u.role === "admin" || u.role === "pm").map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="designer_id">Designer</Label>
+                <Select onValueChange={(v) => form.setValue("designer_id", v)} defaultValue={initialData?.designer_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Designer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {designerUsers?.items.filter(u => u.role === "admin" || u.role === "designer").map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="auditor_id">Auditor</Label>
+                <Select onValueChange={(v) => form.setValue("auditor_id", v)} defaultValue={initialData?.auditor_id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Auditor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {auditorUsers?.items.filter(u => u.role === "admin" || u.role === "auditor").map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="designer_id">Designer</Label>
-              <Select onValueChange={(v) => form.setValue("designer_id", v)} defaultValue={initialData?.designer_id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Designer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {designerUsers?.items.filter(u => u.role === "admin" || u.role === "designer").map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="auditor_id">Auditor</Label>
-              <Select onValueChange={(v) => form.setValue("auditor_id", v)} defaultValue={initialData?.auditor_id}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Auditor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {auditorUsers?.items.filter(u => u.role === "admin" || u.role === "auditor").map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          ) : null}
 
           <div className="p-3 bg-muted rounded-md">
             <span className="font-medium">Status:</span> <span className="text-muted-foreground">Lead (default)</span>

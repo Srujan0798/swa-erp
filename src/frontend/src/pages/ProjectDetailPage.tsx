@@ -18,6 +18,8 @@ import { QuoteBuilder } from "@/components/quotes/QuoteBuilder";
 import { QuoteDetail } from "@/components/quotes/QuoteDetail";
 import { DocumentReferenceList } from "@/components/documentRefs/DocumentReferenceList";
 import { SustainabilityManager } from "@/pages/SustainabilityPage";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial, canWrite } from "@/lib/permissions";
 
 type View =
   | { tab: "overview" }
@@ -32,6 +34,9 @@ type View =
 export function ProjectDetailPage(): ReactElement | null {
   const { id } = useParams<{ id: string }>();
   const [view, setView] = useState<View>({ tab: "overview" });
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
+  const commercial = canManageCommercial(user);
 
   const { data: project } = useQuery({
     queryKey: ["project", id],
@@ -101,7 +106,7 @@ export function ProjectDetailPage(): ReactElement | null {
             />
           ) : (
             <div className="space-y-6">
-              <BOQUpload projectId={id} />
+              {write ? <BOQUpload projectId={id} /> : null}
               <BOQVersionList
                 projectId={id}
                 onViewItems={(boqId) => setView({ tab: "boqs-items", boqId })}
@@ -124,10 +129,12 @@ export function ProjectDetailPage(): ReactElement | null {
             />
           ) : (
             <div className="space-y-6">
-              <Button onClick={() => setView({ tab: "quotes-builder" })}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Quote
-              </Button>
+              {commercial ? (
+                <Button onClick={() => setView({ tab: "quotes-builder" })}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Quote
+                </Button>
+              ) : null}
               <QuoteList
                 projectId={id}
                 onViewQuote={(quoteId) => setView({ tab: "quotes-detail", quoteId })}

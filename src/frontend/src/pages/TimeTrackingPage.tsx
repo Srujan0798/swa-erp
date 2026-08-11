@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { api } from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import type { TimeEntry, TimeEntryListResponse } from "@/types/time";
 import { useToast } from "@/hooks/useToast";
 
@@ -25,6 +27,8 @@ const timeKey = (...segments: (string | number | boolean | undefined)[]) =>
 export default function TimeTrackingPage(): ReactElement {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const [searchParams, setSearchParams] = useSearchParams();
   const today = new Date().toISOString().split("T")[0];
   const [projectId, setProjectId] = useState(searchParams.get("project") ?? "");
@@ -134,67 +138,73 @@ export default function TimeTrackingPage(): ReactElement {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Add time entry</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Project *</Label>
-            <Select value={projectId || undefined} onValueChange={selectProject}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.code} — {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {write ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Add time entry</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Date</Label>
-              <Input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
+              <Label>Project *</Label>
+              <Select value={projectId || undefined} onValueChange={selectProject}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} — {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Hours</Label>
+                <Input
+                  type="number"
+                  step="0.25"
+                  min="0.25"
+                  max="24"
+                  value={form.hours}
+                  onChange={(e) => setForm({ ...form, hours: e.target.value })}
+                  placeholder="e.g. 1.5"
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Hours</Label>
+              <Label>Description</Label>
               <Input
-                type="number"
-                step="0.25"
-                min="0.25"
-                max="24"
-                value={form.hours}
-                onChange={(e) => setForm({ ...form, hours: e.target.value })}
-                placeholder="e.g. 1.5"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="What did you work on?"
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <Input
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="What did you work on?"
-            />
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={form.is_billable}
-              onChange={(e) => setForm({ ...form, is_billable: e.target.checked })}
-            />
-            Billable
-          </label>
-          <Button onClick={submit}>Add entry</Button>
-        </CardContent>
-      </Card>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form.is_billable}
+                onChange={(e) => setForm({ ...form, is_billable: e.target.checked })}
+              />
+              Billable
+            </label>
+            <Button onClick={submit}>Add entry</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <p className="text-sm text-muted-foreground rounded-md border border-dashed p-4">
+          View-only: time entry logging is disabled for viewer accounts.
+        </p>
+      )}
 
       <Card>
         <CardHeader>

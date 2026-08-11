@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageProjects } from "@/lib/permissions";
 import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 const STATUSES: ProjectStatus[] = ["Lead", "Quote", "Awarded", "Design", "Vendor", "Execution", "Validation", "Closed"];
@@ -40,7 +41,7 @@ const STATUS_COLORS: Record<ProjectStatus, string> = {
 
 export function ProjectList(): ReactElement {
   const { data: user } = useCurrentUser();
-  const canCreate = user?.role !== "viewer";
+  const canCreate = canManageProjects(user);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

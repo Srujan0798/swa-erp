@@ -22,6 +22,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { InquiryForm } from "@/components/inquiries/InquiryForm";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import { ArrowLeft, ArrowRight, Plus, Search, Trash2 } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -38,6 +41,8 @@ export function InquiriesPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const pageSize = 20;
 
   useEffect(() => {
@@ -45,7 +50,7 @@ export function InquiriesPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading } = useInquiries({
+  const { data, isLoading, isError, error, refetch } = useInquiries({
     page,
     page_size: pageSize,
     q: debouncedSearch || undefined,
@@ -58,6 +63,7 @@ export function InquiriesPage() {
   const inquiries = data?.items ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const hasFilters = Boolean(debouncedSearch || statusFilter);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this inquiry?")) return;
@@ -78,10 +84,12 @@ export function InquiriesPage() {
             Step 1 of the SWA chain — convert to client + project when won.
           </p>
         </div>
-        <Button onClick={() => setShowCreate(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Inquiry
-        </Button>
+        {write ? (
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Inquiry
+          </Button>
+        ) : null}
       </div>
 
       <Card>
@@ -112,6 +120,16 @@ export function InquiriesPage() {
             </select>
           </div>
 
+          {isError && (
+            <div className="mb-4">
+              <QueryErrorBanner
+                message="Failed to load inquiries"
+                error={error}
+                onRetry={() => void refetch()}
+              />
+            </div>
+          )}
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -130,9 +148,32 @@ export function InquiriesPage() {
                   <TableRow>
                     <TableCell colSpan={7} className="text-center">Loading...</TableCell>
                   </TableRow>
+                ) : isError ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      Unable to load inquiries.
+                    </TableCell>
+                  </TableRow>
                 ) : inquiries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">No inquiries found</TableCell>
+                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                      {hasFilters ? (
+                        <>No inquiries match your filters. Clear search or status and try again.</>
+                      ) : write ? (
+                        <>
+                          No inquiries yet.{" "}
+                          <button
+                            type="button"
+                            className="underline font-medium text-foreground"
+                            onClick={() => setShowCreate(true)}
+                          >
+                            Create the first inquiry
+                          </button>
+                        </>
+                      ) : (
+                        <>No inquiries yet.</>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ) : (
                   inquiries.map((inquiry) => (
@@ -158,14 +199,16 @@ export function InquiriesPage() {
                         <Button variant="ghost" size="sm" asChild>
                           <Link to={`/inquiries/${inquiry.id}`}>View</Link>
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(inquiry.id)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {write ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(inquiry.id)}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))

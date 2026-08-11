@@ -6,6 +6,8 @@ import { TokensList } from "@/components/tokens/TokensList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
 import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 
 interface AgreementsTabProps {
@@ -16,6 +18,8 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [expandedAgreements, setExpandedAgreements] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const commercial = canManageCommercial(user);
   const { data, isLoading } = useAgreements({ client_id: clientId, page_size: 100 });
   const createMutation = useCreateAgreement();
   const deleteMutation = useDeleteAgreement();
@@ -43,15 +47,15 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
             Expand an agreement (e.g. INSUDESIGN) to see tokens under it.
           </p>
         </div>
-        {!showForm && (
+        {!showForm && commercial ? (
           <Button size="sm" onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Agreement
           </Button>
-        )}
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
-        {showForm && (
+        {showForm && commercial ? (
           <AgreementForm
             onSubmit={async (formData) => {
               try {
@@ -73,7 +77,7 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
             onCancel={() => setShowForm(false)}
             isLoading={createMutation.isPending}
           />
-        )}
+        ) : null}
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading agreements...</p>
@@ -111,18 +115,20 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
                           <ChevronRight className="h-4 w-4" />
                         )}
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        disabled={deleteMutation.isPending}
-                        onClick={() => {
-                          if (confirm(`Delete agreement ${a.reference_id}?`)) {
-                            deleteMutation.mutate(a.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {commercial ? (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          disabled={deleteMutation.isPending}
+                          onClick={() => {
+                            if (confirm(`Delete agreement ${a.reference_id}?`)) {
+                              deleteMutation.mutate(a.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                   {isExpanded && (

@@ -84,6 +84,8 @@ export interface ProjectCost {
 }
 
 export interface ProjectCostCreate {
+  /** Required by backend body even though path also has project_id */
+  project_id?: string;
   category: string;
   description: string;
   amount: number;

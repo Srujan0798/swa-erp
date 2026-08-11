@@ -5,6 +5,8 @@ import { DocumentReferenceForm } from "@/components/documentRefs/DocumentReferen
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import { Plus, Trash2 } from "lucide-react";
 
 interface DocumentReferenceListProps {
@@ -15,6 +17,8 @@ interface DocumentReferenceListProps {
 export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceListProps) {
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const { data, isLoading } = useDocumentReferences({
     project_id: projectId,
     token_id: tokenId,
@@ -29,15 +33,15 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>Document References {tokenId ? "(filtered by Token)" : ""}</CardTitle>
-        {!showForm && (
+        {!showForm && write ? (
           <Button size="sm" onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Document Reference
           </Button>
-        )}
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
-        {showForm && (
+        {showForm && write ? (
           <DocumentReferenceForm
             projectId={projectId}
             initialData={tokenId ? { token_id: tokenId } : undefined}
@@ -64,7 +68,7 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
             onCancel={() => setShowForm(false)}
             isLoading={createMutation.isPending}
           />
-        )}
+        ) : null}
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading document references...</p>
@@ -93,18 +97,20 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
                     <div className="text-sm line-clamp-1">{d.description}</div>
                   )}
                 </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  disabled={deleteMutation.isPending}
-                  onClick={() => {
-                    if (confirm(`Delete document reference ${d.reference_id}?`)) {
-                      deleteMutation.mutate(d.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {write ? (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => {
+                      if (confirm(`Delete document reference ${d.reference_id}?`)) {
+                        deleteMutation.mutate(d.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                ) : null}
               </div>
             ))}
           </div>

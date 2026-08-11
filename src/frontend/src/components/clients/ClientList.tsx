@@ -15,11 +15,12 @@ import {
 } from "@/components/ui/table";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
 import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 export function ClientList(): ReactElement {
   const { data: user } = useCurrentUser();
-  const canCreate = user?.role !== "viewer";
+  const canCreate = canManageCommercial(user);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

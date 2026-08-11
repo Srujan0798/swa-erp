@@ -3,6 +3,8 @@ import { useBoqs, useDeleteBoq } from "@/hooks/useBoqs";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import { Eye, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface BOQVersionListProps {
@@ -13,6 +15,8 @@ interface BOQVersionListProps {
 export function BOQVersionList({ projectId, onViewItems }: BOQVersionListProps) {
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const { data, isLoading } = useBoqs(projectId, page, pageSize);
   const deleteMutation = useDeleteBoq();
 
@@ -62,14 +66,16 @@ export function BOQVersionList({ projectId, onViewItems }: BOQVersionListProps) 
                         <Button variant="ghost" size="icon" onClick={() => onViewItems(boq.id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(boq.id)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        {write ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(boq.id)}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>

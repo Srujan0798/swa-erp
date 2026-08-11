@@ -39,7 +39,10 @@ export function CostEntryForm({ projectId, onSuccess, onCancel }: CostEntryFormP
     }
 
     try {
-      await addCostMutation.mutateAsync({ projectId, data: formData });
+      await addCostMutation.mutateAsync({
+        projectId,
+        data: { ...formData, project_id: projectId },
+      });
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

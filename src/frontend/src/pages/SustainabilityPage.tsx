@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import type {
   ProjectListResponse,
   SustainabilityMetric,
@@ -29,7 +30,13 @@ export function SustainabilityManager({ projectId }: { projectId: string }) {
   const [editing, setEditing] = useState<SustainabilityMetric | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const { data: metrics = [], isLoading } = useSustainabilityMetrics(projectId);
+  const {
+    data: metrics = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSustainabilityMetrics(projectId);
   const createMutation = useCreateSustainabilityMetric(projectId);
   const updateMutation = useUpdateSustainabilityMetric(projectId);
   const deleteMutation = useDeleteSustainabilityMetric(projectId);
@@ -65,6 +72,13 @@ export function SustainabilityManager({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
+      {isError && (
+        <QueryErrorBanner
+          message="Failed to load sustainability metrics"
+          error={error}
+          onRetry={() => void refetch()}
+        />
+      )}
       {!showForm && (
         <Button onClick={() => { setEditing(null); setShowForm(true); }}>
           <Plus className="mr-2 h-4 w-4" />
@@ -87,12 +101,18 @@ export function SustainabilityManager({ projectId }: { projectId: string }) {
           </CardContent>
         </Card>
       )}
-      <SustainabilityList
-        metrics={metrics}
-        isLoading={isLoading}
-        onEdit={startEdit}
-        onDelete={handleDelete}
-      />
+      {!isError && (
+        <SustainabilityList
+          metrics={metrics}
+          isLoading={isLoading}
+          onEdit={startEdit}
+          onDelete={handleDelete}
+          onAdd={() => {
+            setEditing(null);
+            setShowForm(true);
+          }}
+        />
+      )}
     </div>
   );
 }

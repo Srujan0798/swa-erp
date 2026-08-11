@@ -3,11 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import type { ProjectPnL, CostBreakdownItem } from "@/types/financial";
 
 interface PnlDashboardProps {
-  pnl: ProjectPnL;
-  isLoading: boolean;
+  pnl?: ProjectPnL | null;
+  isLoading?: boolean;
 }
 
-export function PnlDashboard({ pnl, isLoading }: PnlDashboardProps) {
+export function PnlDashboard({ pnl, isLoading = false }: PnlDashboardProps) {
   if (isLoading) {
     return <p className="text-muted-foreground text-sm">Loading...</p>;
   }

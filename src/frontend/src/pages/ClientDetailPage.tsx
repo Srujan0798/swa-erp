@@ -1,27 +1,55 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial, canWrite } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ContactForm } from "@/components/clients/ContactForm";
+import { ClientForm } from "@/components/clients/ClientForm";
 import { AgreementsTab } from "@/components/agreements/AgreementsTab";
-import { Plus, Trash2, ArrowLeft } from "lucide-react";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
+import { Plus, Trash2, ArrowLeft, Pencil } from "lucide-react";
 // ClientProjectsList defined below
 
-export function ClientDetailPage() {
+export function ClientDetailPage(): ReactElement {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const canEdit = canManageCommercial(user);
+  const canMutate = canWrite(user);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
-  const { data: client, isLoading } = useQuery({
+  const { data: client, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["client", id],
     queryFn: () => api.getClient(id!),
     enabled: !!id,
+  });
+
+  const updateClientMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: (payload: any) => api.updateClient(id!, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["client", id] });
+      void queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setShowEdit(false);
+      toast({ title: "Client updated" });
+    },
+    onError: (err) => {
+      toast({ title: (err as Error).message, variant: "destructive" });
+    },
   });
 
   const deleteContactMutation = useMutation({
@@ -50,11 +78,20 @@ export function ClientDetailPage() {
   });
 
   if (isLoading) return <div className="p-6">Loading...</div>;
+  if (isError) {
+    return (
+      <QueryErrorBanner
+        message="Failed to load client"
+        error={error}
+        onRetry={() => void refetch()}
+      />
+    );
+  }
   if (!client) return <div className="p-6">Client not found</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Button variant="ghost" asChild>
           <Link to="/clients">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -62,18 +99,26 @@ export function ClientDetailPage() {
           </Link>
         </Button>
         <h1 className="text-2xl font-bold flex-1">{client.name}</h1>
-        <Button
-          variant="destructive"
-          disabled={deleteClientMutation.isPending}
-          onClick={() => {
-            if (confirm(`Delete client "${client.name}"? This cannot be undone.`)) {
-              deleteClientMutation.mutate();
-            }
-          }}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete Client
-        </Button>
+        {canEdit && (
+          <Button variant="outline" onClick={() => setShowEdit(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+        )}
+        {canEdit && (
+          <Button
+            variant="destructive"
+            disabled={deleteClientMutation.isPending}
+            onClick={() => {
+              if (confirm(`Delete client "${client.name}"? This cannot be undone.`)) {
+                deleteClientMutation.mutate();
+              }
+            }}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Client
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -142,10 +187,12 @@ export function ClientDetailPage() {
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Contacts</CardTitle>
-            <Button size="sm" onClick={() => setShowAddContact(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Contact
-            </Button>
+            {canMutate && (
+              <Button size="sm" onClick={() => setShowAddContact(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Contact
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {showAddContact && (
@@ -179,13 +226,15 @@ export function ClientDetailPage() {
                         {contact.designation ? ` · ${contact.designation}` : ""}
                       </div>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => deleteContactMutation.mutate(contact.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {canMutate && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => deleteContactMutation.mutate(contact.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -202,12 +251,14 @@ export function ClientDetailPage() {
               Work under this client
             </p>
           </div>
-          <Button size="sm" asChild>
-            <Link to={`/projects/new?client_id=${client.id}`}>
-              <Plus className="mr-2 h-4 w-4" />
-              New project
-            </Link>
-          </Button>
+          {canMutate && (
+            <Button size="sm" asChild>
+              <Link to={`/projects/new?client_id=${client.id}`}>
+                <Plus className="mr-2 h-4 w-4" />
+                New project
+              </Link>
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <ClientProjectsList clientId={client.id} />
@@ -215,6 +266,37 @@ export function ClientDetailPage() {
       </Card>
 
       <AgreementsTab clientId={client.id} />
+
+      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit client</DialogTitle>
+          </DialogHeader>
+          <ClientForm
+            key={`edit-client-${client.id}`}
+            initialData={{
+              name: client.name,
+              code: client.code,
+              primary_email: client.primary_email,
+              primary_phone: client.primary_phone ?? undefined,
+              address: client.address ?? undefined,
+              city: client.city ?? undefined,
+              state: client.state ?? undefined,
+              pincode: client.pincode ?? undefined,
+              country: client.country ?? "India",
+              gst_number: client.gst_number ?? undefined,
+              notes: client.notes ?? undefined,
+            }}
+            onSubmit={async (data) => {
+              // Contacts are managed on the detail page, not via client update.
+              const { contacts: _contacts, ...payload } = data;
+              await updateClientMutation.mutateAsync(payload);
+            }}
+            onCancel={() => setShowEdit(false)}
+            isLoading={updateClientMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -48,6 +48,7 @@ export interface RFQListResponse {
 }
 
 export interface RFQCreatePayload {
+  project_id?: string;
   vendor_id: string;
   notes?: string;
   items: {

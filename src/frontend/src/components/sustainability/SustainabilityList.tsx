@@ -22,6 +22,7 @@ interface SustainabilityListProps {
   isLoading?: boolean;
   onEdit: (metric: SustainabilityMetric) => void;
   onDelete: (metric: SustainabilityMetric) => void;
+  onAdd?: () => void;
 }
 
 function fmt(value: number | null | undefined, suffix = ""): string {
@@ -34,6 +35,7 @@ export function SustainabilityList({
   isLoading,
   onEdit,
   onDelete,
+  onAdd,
 }: SustainabilityListProps) {
   if (isLoading) return <div className="p-4 text-muted-foreground">Loading metrics...</div>;
 
@@ -45,7 +47,18 @@ export function SustainabilityList({
       <CardContent>
         {metrics.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            No metrics recorded yet. Add one when the client provides green-building data.
+            No metrics recorded yet.{" "}
+            {onAdd ? (
+              <button
+                type="button"
+                className="underline font-medium text-foreground"
+                onClick={onAdd}
+              >
+                Add the first metric
+              </button>
+            ) : (
+              <>Add one when the client provides green-building data.</>
+            )}
           </p>
         ) : (
           <Table>

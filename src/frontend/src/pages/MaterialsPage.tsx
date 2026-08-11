@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canWrite } from "@/lib/permissions";
 import { api } from "@/lib/api";
 import type { Material, MaterialCategory, MaterialListResponse } from "@/types/api";
 
@@ -19,11 +22,13 @@ const materialKeys = {
 
 export function MaterialsPage() {
   const queryClient = useQueryClient();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", unit: "", category_id: "" });
-  const { data, isLoading } = useQuery<MaterialListResponse>({
+  const { data, isLoading, isError, error, refetch } = useQuery<MaterialListResponse>({
     queryKey: materialKeys.list(search || undefined, categoryId || undefined),
     queryFn: async () => api.listMaterials({ q: search || undefined, category_id: categoryId || undefined, page: 1, page_size: 50 }),
   });
@@ -34,6 +39,7 @@ export function MaterialsPage() {
   });
 
   const rows = data?.items ?? [];
+  const hasFilters = Boolean(search.trim() || categoryId);
 
   const createMutation = useMutation({
     mutationFn: () => api.createMaterial({ name: form.name, unit: form.unit, category_id: form.category_id || undefined, description: form.description || undefined }),
@@ -56,7 +62,16 @@ export function MaterialsPage() {
           <h1 className="text-xl font-semibold">Materials</h1>
           <p className="text-sm text-muted-foreground">Manage material catalog and categories.</p>
         </div>
-        <Button onClick={() => { setIsCreateOpen(true); setForm({ name: "", description: "", unit: "", category_id: "" }); }}>New Material</Button>
+        {write ? (
+          <Button
+            onClick={() => {
+              setIsCreateOpen(true);
+              setForm({ name: "", description: "", unit: "", category_id: "" });
+            }}
+          >
+            New Material
+          </Button>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-3">
@@ -73,9 +88,17 @@ export function MaterialsPage() {
         </Select>
       </div>
 
+      {isError && (
+        <QueryErrorBanner
+          message="Failed to load materials"
+          error={error}
+          onRetry={() => void refetch()}
+        />
+      )}
+
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading...</p>
-      ) : (
+      ) : isError ? null : (
         <div className="rounded-md border">
           <table className="min-w-full text-sm">
             <thead><tr className="border-b"><th className="text-left py-2 px-3">Name</th><th className="text-left py-2 px-3">Unit</th><th className="text-left py-2 px-3">Category</th><th className="text-right py-2 px-3">Actions</th></tr></thead>
@@ -85,10 +108,40 @@ export function MaterialsPage() {
                   <td className="py-2 px-3 font-medium">{row.name}</td>
                   <td className="py-2 px-3">{row.unit}</td>
                   <td className="py-2 px-3"><Badge variant="outline">{row.category_name ?? "Uncategorized"}</Badge></td>
-                  <td className="py-2 px-3 text-right"><Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(row.id)}>Delete</Button></td>
+                  <td className="py-2 px-3 text-right">
+                    {write ? (
+                      <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(row.id)}>
+                        Delete
+                      </Button>
+                    ) : null}
+                  </td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td colSpan={4} className="text-center text-sm text-muted-foreground py-6">No materials found.</td></tr>}
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center text-sm text-muted-foreground py-6">
+                    {hasFilters ? (
+                      <>No materials match your filters.</>
+                    ) : write ? (
+                      <>
+                        No materials yet.{" "}
+                        <button
+                          type="button"
+                          className="underline font-medium text-foreground"
+                          onClick={() => {
+                            setIsCreateOpen(true);
+                            setForm({ name: "", description: "", unit: "", category_id: "" });
+                          }}
+                        >
+                          Create the first material
+                        </button>
+                      </>
+                    ) : (
+                      <>No materials yet.</>
+                    )}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -108,6 +161,13 @@ export function MaterialsPage() {
               </Select>
             </div>
             <div className="space-y-2"><Label>Description</Label><Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+            {createMutation.isError && (
+              <p className="text-sm text-destructive" role="alert">
+                {createMutation.error instanceof Error
+                  ? createMutation.error.message
+                  : "Failed to create material"}
+              </p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>

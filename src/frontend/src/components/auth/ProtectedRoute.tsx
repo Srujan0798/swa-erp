@@ -4,10 +4,17 @@ import type { Role } from "@/types/api";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  /** Exact single role required (legacy). Prefer requiredRoles when multiple allowed. */
   requiredRole?: Role;
+  /** User must have one of these roles (exact match). */
+  requiredRoles?: Role[];
 }
 
-export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requiredRole,
+  requiredRoles,
+}: ProtectedRouteProps): React.ReactElement {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
@@ -18,7 +25,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
+  const role = user?.role;
+  if (requiredRole && role !== requiredRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  if (requiredRoles && requiredRoles.length > 0 && (!role || !requiredRoles.includes(role))) {
     return <Navigate to="/dashboard" replace />;
   }
 

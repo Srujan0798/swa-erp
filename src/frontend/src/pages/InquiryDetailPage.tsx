@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial, canWrite } from "@/lib/permissions";
 import { ArrowLeft } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -21,6 +23,9 @@ export function InquiryDetailPage() {
   const { data: inquiry, isLoading } = useInquiry(id);
   const updateMutation = useUpdateInquiry();
   const deleteMutation = useDeleteInquiry();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
+  const commercial = canManageCommercial(user);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading inquiry…</div>;
@@ -119,13 +124,13 @@ export function InquiryDetailPage() {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {canConvert && (
+              {canConvert && commercial ? (
                 <ConvertToClientButton
                   inquiryId={inquiry.id}
                   inquiryClientName={inquiry.client_name}
                   inquiryEstimatedValue={inquiry.estimated_value}
                 />
-              )}
+              ) : null}
               {inquiry.status === "Converted" && inquiry.converted_project_id && (
                 <Button asChild>
                   <Link to={`/projects/${inquiry.converted_project_id}`}>
@@ -133,7 +138,7 @@ export function InquiryDetailPage() {
                   </Link>
                 </Button>
               )}
-              {statusFlow.includes(inquiry.status) && (
+              {write && statusFlow.includes(inquiry.status) ? (
                 <div className="flex flex-col gap-2 pt-2">
                   <Label className="text-muted-foreground">Change Status</Label>
                   <div className="flex flex-wrap gap-2">
@@ -154,21 +159,25 @@ export function InquiryDetailPage() {
                       ))}
                   </div>
                 </div>
+              ) : null}
+              {write ? (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => {
+                    if (confirm("Delete this inquiry?")) {
+                      deleteMutation.mutate(inquiry.id, {
+                        onSuccess: () => navigate("/inquiries"),
+                      });
+                    }
+                  }}
+                >
+                  Delete Inquiry
+                </Button>
+              ) : (
+                <p className="text-sm text-muted-foreground">View-only access.</p>
               )}
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={deleteMutation.isPending}
-                onClick={() => {
-                  if (confirm("Delete this inquiry?")) {
-                    deleteMutation.mutate(inquiry.id, {
-                      onSuccess: () => navigate("/inquiries"),
-                    });
-                  }
-                }}
-              >
-                Delete Inquiry
-              </Button>
             </CardContent>
           </Card>
 

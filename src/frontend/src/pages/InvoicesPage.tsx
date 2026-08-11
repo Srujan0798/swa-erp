@@ -22,6 +22,7 @@ import {
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { InvoiceCreateForm } from "@/components/financials/InvoiceCreateForm";
 import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
 import { api } from "@/lib/api";
 import type { Invoice } from "@/types/financial";
 import { Plus } from "lucide-react";
@@ -44,7 +45,7 @@ export function InvoicesPage(): ReactElement {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const { data: user } = useCurrentUser();
-  const canCreate = user?.role !== "viewer";
+  const canCreate = canManageCommercial(user);
 
   useEffect(() => {
     const fromUrl = searchParams.get("project") ?? "";
