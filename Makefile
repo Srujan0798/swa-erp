@@ -57,6 +57,11 @@ lint:
 	ruff check src/backend/ 2>/dev/null || true
 	@if [ -d src/frontend ]; then cd src/frontend && npm run lint 2>/dev/null || true; fi
 
+verify: lint
+	. .venv/bin/activate && mypy src/backend/ --explicit-package-bases
+	. .venv/bin/activate && pytest tests/ -v --cov=src/backend --cov-report=term-missing --cov-report=xml --cov-fail-under=82
+	@if [ -d src/frontend ]; then cd src/frontend && npm run lint; fi
+
 format:
 	black src/backend/ 2>/dev/null || true
 	ruff check --fix src/backend/ 2>/dev/null || true

@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install -r requirements.txt
-      - run: pytest tests/unit -v || true
+      - run: pytest tests/unit -v
 
   integration:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
           if [ -d src/backend/alembic ]; then
             cd src/backend && alembic upgrade head
           fi
-      - run: pytest tests/integration -v || true
+      - run: pytest tests/integration -v
 
   acceptance:
     runs-on: ubuntu-latest
@@ -71,4 +71,4 @@ jobs:
           if [ -d src/backend/alembic ]; then
             cd src/backend && alembic upgrade head
           fi
-      - run: pytest .specify/specs/*/contracts/ -v || true
+      - run: pytest .specify/specs/*/contracts/ -v

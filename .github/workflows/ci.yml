@@ -15,11 +15,11 @@ jobs:
       - name: Install lint tools
         run: pip install ruff==0.6.3 black==24.8.0 mypy==1.11.2
       - name: Ruff check
-        run: ruff check src/backend/ || true
+        run: ruff check src/backend/
       - name: Black check
-        run: black --check src/backend/ || true
+        run: black --check src/backend/
       - name: Mypy
-        run: mypy src/backend/ || true
+        run: mypy src/backend/ --explicit-package-bases
 
   backend-test:
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
             cd src/backend && alembic upgrade head
           fi
       - name: Run tests
-        run: pytest tests/ -v || true
+        run: pytest tests/ -v
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -74,7 +74,7 @@ jobs:
           if [ -f src/frontend/package.json ]; then
             cd src/frontend
             npm ci
-            npm run lint || true
+            npm run lint
             npm run build
             npx tsc --noEmit
           else
