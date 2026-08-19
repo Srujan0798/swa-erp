@@ -67,6 +67,29 @@ entries for directories that don't exist.
 - `tests/`
 - `uploads/`
 - `work/`
+- `load-test-report-20260819-200408.html`
+- `load-test-report-20260819-201658.html`
+- `load-test-results-20260819-200408_stats.csv`
+- `load-test-results-20260819-200408_stats_history.csv`
+- `load-test-results-20260819-200408_failures.csv`
+- `load-test-results-20260819-200408_exceptions.csv`
+- `load-test-results-20260819-200957_stats.csv`
+- `load-test-results-20260819-200957_stats_history.csv`
+- `load-test-results-20260819-200957_failures.csv`
+- `load-test-results-20260819-200957_exceptions.csv`
+- `load-test-results-20260819-201658_stats.csv`
+- `load-test-results-20260819-201658_stats_history.csv`
+- `load-test-results-20260819-201658_failures.csv`
+- `load-test-results-20260819-201658_exceptions.csv`
+- `load-test-report-20260819-201906.html`
+- `load-test-results-20260819-201906_stats.csv`
+- `load-test-results-20260819-201906_stats_history.csv`
+- `load-test-results-20260819-201906_failures.csv`
+- `load-test-results-20260819-201906_exceptions.csv`
+- `load-test-results-20260819-202227_stats.csv`
+- `load-test-results-20260819-202227_stats_history.csv`
+- `load-test-results-20260819-202227_failures.csv`
+- `load-test-results-20260819-202227_exceptions.csv`
 
 ## Wave numbering
 Waves are sequential: wave-1, wave-2, ... Don't skip numbers. Cancelled waves → `attic/cancelled-wave-N/`.

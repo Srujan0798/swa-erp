@@ -10,7 +10,9 @@ IT person can answer, not to re-derive the architecture from scratch.
 ## What's already decided (Meeting 2) — state this, don't ask about it
 - OS: Windows Server, on-prem, 99% confirmed
 - RAM: 128 GB, extendable
-- Load target: 100+ concurrent users via VPN/RDP
+- Load target: 100+ concurrent users via VPN/RDP — **IT's claim (per Viraj), NOT verified by our
+  tests.** Wave-35 load tests verified **10 concurrent users, p95 ≈ 29–47 ms** on a dev machine
+  (`docs/PERFORMANCE.md`); 100+ on the real server is unproven until a load test runs there.
 - Database: PostgreSQL
 - File storage: MinIO (S3-compatible), same server — **target decision; shipped in wave-31
   (2026-08-10) via `StorageBackend` (`STORAGE_BACKEND=minio`); `local` `uploads/` remains the

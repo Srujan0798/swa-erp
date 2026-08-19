@@ -11,7 +11,10 @@ See `runbook.md` for local dev setup via `docker-compose.yml`.
 ## Production — real target, not the old placeholder
 
 The actual target is: **on-premises Windows Server, 128GB RAM, VPN-only access, 100+
-concurrent users** (per Meeting 2). This is not staging/prod-on-a-VPS the way the old version of
+concurrent users per Meeting 2** — this is **IT's claim, not yet verified by our load tests**.
+Wave-35 load tests verified the app at **10 concurrent users, p95 ≈ 29–47 ms** on a dev machine
+(`docs/PERFORMANCE.md`); a 100-user figure for the real server remains unproven. This is not
+staging/prod-on-a-VPS the way the old version of
 this file assumed — there is no cloud hosting decision to make, it's already been made.
 
 The real production config work is done, not "to be designed later":

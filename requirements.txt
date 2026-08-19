@@ -16,6 +16,7 @@ openpyxl==3.1.5
 fpdf2==2.8.1
 weasyprint==62.3
 minio==7.2.7
+locust==2.43.4
 
 # dev
 pytest==8.3.2

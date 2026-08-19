@@ -12,7 +12,7 @@
 |------|----------|
 | **OS** | Windows Server (on-prem) — 99% confirmed |
 | **RAM** | 128 GB (extendable) |
-| **Capacity** | 100+ concurrent users via VPN/RDP |
+| **Capacity** | 100+ concurrent users via VPN/RDP — *wave-35 note: IT's claim, unverified by our tests (verified 10 users on dev machine — `docs/PERFORMANCE.md`)* |
 | **Current load** | File storage only; some RDP sessions |
 | **Network** | VPN access; shortcut in user folders |
 | **Database** | PostgreSQL (user OK with SQL) |

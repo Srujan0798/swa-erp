@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db seed-demo seed-dev smoke
+.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db seed-demo seed-dev smoke load-test
 
 help:
 	@echo "swa-erp commands:"
@@ -26,6 +26,7 @@ help:
 	@echo "  make backup-files      — tar ./uploads/ → ./backups/files/ (90-day retention)"
 	@echo "  make restore-db file=<path> — DESTRUCTIVE restore, prompts for confirmation"
 	@echo "  make clean             — remove caches"
+	@echo "  make load-test         — run Locust load test (USERS=100 SPAWN_RATE=10 RUN_TIME=5m)"
 
 install:
 	python3 -m venv .venv
@@ -128,3 +129,32 @@ restore-db:
 		exit 1; \
 	fi
 	./scripts/restore_db.sh "$(file)"
+
+# Load testing with Locust
+# Usage: make load-test USERS=100 SPAWN_RATE=10 RUN_TIME=5m
+load-test:
+	@echo "Running Locust load test..."
+	@echo "Target: http://localhost:8100"
+	@echo "Users: $(USERS) | Spawn rate: $(SPAWN_RATE) | Duration: $(RUN_TIME)"
+	@which locust > /dev/null 2>&1 || (echo "Locust not found. Installing..." && pip install locust==2.43.4)
+	locust -f tests/performance/locustfile.py \
+		--host=http://localhost:8100 \
+		--users=$(USERS) \
+		--spawn-rate=$(SPAWN_RATE) \
+		--run-time=$(RUN_TIME) \
+		--headless \
+		--html=load-test-report-$(shell date +%Y%m%d-%H%M%S).html \
+		--csv=load-test-results-$(shell date +%Y%m%d-%H%M%S)
+
+# Quick load test stages for validation
+load-test-10:
+	$(MAKE) load-test USERS=10 SPAWN_RATE=2 RUN_TIME=2m
+
+load-test-50:
+	$(MAKE) load-test USERS=50 SPAWN_RATE=5 RUN_TIME=3m
+
+load-test-100:
+	$(MAKE) load-test USERS=100 SPAWN_RATE=10 RUN_TIME=5m
+
+load-test-150:
+	$(MAKE) load-test USERS=150 SPAWN_RATE=10 RUN_TIME=3m

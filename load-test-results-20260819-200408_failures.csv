@@ -1,0 +1,8 @@
+Method,Name,Error,Occurrences
+GET,/api/projects (list) [designer],HTTPError('500 Server Error: Internal Server Error for url: /api/projects (list) [designer]'),43
+GET,/api/projects (list) [viewer],HTTPError('500 Server Error: Internal Server Error for url: /api/projects (list) [viewer]'),11
+GET,/api/tasks (list),HTTPError('404 Client Error: Not Found for url: /api/tasks (list)'),15
+POST,/api/inquiries (create),HTTPError('422 Client Error: Unprocessable Entity for url: /api/inquiries (create)'),7
+POST,/api/timesheets/generate [designer],HTTPError('422 Client Error: Unprocessable Entity for url: /api/timesheets/generate [designer]'),4
+GET,/api/projects (list),CatchResponseError('Failed to fetch projects: 500'),10
+GET,/api/projects (list paginated),HTTPError('500 Server Error: Internal Server Error for url: /api/projects (list paginated)'),24

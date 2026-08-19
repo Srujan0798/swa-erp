@@ -1,0 +1,7 @@
+Count,Message,Traceback,Nodes
+62,No tasks defined on AuthenticatedUser. Use the @task decorator or set the 'tasks' attribute of the User (or mark it as abstract = True if you only intend to subclass it),"  File ""/Users/srujansai/Library/Python/3.11/lib/python/site-packages/locust/user/task.py"", line 358, in run
+    self.schedule_task(self.get_next_task())
+                       ^^^^^^^^^^^^^^^^^^^^
+  File ""/Users/srujansai/Library/Python/3.11/lib/python/site-packages/locust/user/task.py"", line 502, in get_next_task
+    raise Exception(
+",local
