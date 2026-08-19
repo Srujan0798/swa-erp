@@ -179,7 +179,7 @@ this meeting), dev
 | OS | Windows Server, on-prem | Viraj: **"99% confident it's Windows only"** — not 100%. Confirm on the IT call, don't assume. |
 | RAM | 128 GB, extendable | Confirmed, "not an issue" |
 | Current load | File storage only; some RDP sessions | Confirmed |
-| Capacity | IT said it can handle 100+ concurrent users | Confirmed (per IT, secondhand via Viraj — verify directly with IT). **Wave-35 note: IT's claim only — our load tests verified 10 concurrent users (p95 ≈ 29 ms, dev machine); 100+ unverified.** |
+| Capacity | IT said it can handle 100+ concurrent users | Confirmed (per IT, secondhand via Viraj — verify directly with IT). **Wave-35 note: IT's claim about the server. Our load tests verified 100 concurrent users on a dev machine (p95 ≈ 51 ms, no server errors, `docs/PERFORMANCE.md`); the client's server itself is unload-tested.** |
 | Network | VPN access; app reached via a shortcut in user folders | Confirmed |
 | Database | PostgreSQL | Viraj: **"I need, whatever you're willing to do, I'm okay with that... I can do anything"** — this was Viraj explicitly deferring the technical decision, not specifying Postgres himself. Postgres was the dev's proposal, accepted without pushback. |
 | File storage | MinIO (S3-compatible), same server | Confirmed |

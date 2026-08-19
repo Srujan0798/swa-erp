@@ -34,9 +34,9 @@ server). No external paid services, no public internet exposure.
 ## Confirmed infrastructure (per Viraj)
 - Windows Server, on-prem
 - 128 GB RAM (extendable)
-- Expected load: 100+ concurrent users over VPN/RDP — *IT's claim; wave-35 load tests verified
-  **10 concurrent users, p95 ≈ 29 ms** on a dev machine only (see `docs/PERFORMANCE.md`). Do not
-  repeat 100+ as a verified number.*
+- Expected load: 100+ concurrent users over VPN/RDP — *IT's claim about the server. Wave-35
+  load tests verified **10/50/100 concurrent users, p95 ≈ 29–51 ms, no server errors** on a dev
+  machine (see `docs/PERFORMANCE.md`); the client's server itself has not been load-tested.*
 - Docker for containerization
 - Daily DB backup + weekly file backup intended
 

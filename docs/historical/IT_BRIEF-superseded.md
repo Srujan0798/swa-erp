@@ -111,8 +111,9 @@ manage. There are no external paid APIs or third-party services involved.
 **Already confirmed with Viraj on infrastructure:**
 - Windows Server, on-prem (99% confirmed)
 - 128 GB RAM, extendable
-- Expected load: 100+ concurrent users over VPN/RDP — *superseded note (wave-35): IT's claim,
-  unverified by our load tests (verified 10 users, p95 ≈ 29 ms, dev machine — `docs/PERFORMANCE.md`)*
+- Expected load: 100+ concurrent users over VPN/RDP — *superseded note (wave-35): IT's claim
+  about the server; our load tests verified 10/50/100 users on a dev machine, p95 ≈ 29–51 ms,
+  no server errors (`docs/PERFORMANCE.md`); client server unload-tested*
 - Docker used for containerization
 - Daily database backup + weekly file backup intended
 
