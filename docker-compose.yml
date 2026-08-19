@@ -77,6 +77,8 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      ENABLE_METRICS: "true"
     ports: ["8100:8000"]
     depends_on:
       postgres:
@@ -102,6 +104,7 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      SENTRY_DSN: ${SENTRY_DSN:-}
     command: ["celery", "-A", "src.backend.workers.celery_app", "worker", "--loglevel=info"]
     depends_on:
       postgres:

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -30,10 +31,38 @@ from src.backend.api.tokens import router as tokens_router
 from src.backend.api.users import router as users_router
 from src.backend.api.vendors import router as vendors_router
 from src.backend.core.config import settings
+from src.backend.core.errors import init_sentry
 from src.backend.core.middleware import RequestIdMiddleware
+from src.backend.core.metrics import setup_metrics
 from src.backend.core.rate_limit import install_auth_rate_limiter
+from src.backend.db.session import engine
 
-app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
+
+# Setup metrics BEFORE creating the app (to avoid "Cannot add middleware after app started")
+# This creates the instrumentator and adds the middleware
+_instrumentator = setup_metrics(None)  # Will be completed in lifespan
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    # Initialize Sentry (no-op if SENTRY_DSN not set)
+    init_sentry()
+    
+    # Complete metrics setup (expose endpoint)
+    _instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
+    
+    yield
+    
+    # Shutdown
+    engine.dispose()
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    debug=settings.DEBUG,
+    lifespan=lifespan,
+)
 app.add_middleware(RequestIdMiddleware)
 install_auth_rate_limiter(app)
 app.add_middleware(
