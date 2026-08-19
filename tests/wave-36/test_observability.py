@@ -231,7 +231,7 @@ class TestErrorTracking:
         assert frame_vars["pan_number"] == "[REDACTED]"
         assert frame_vars["normal_field"] == "value"
 
-    def test_sentry_noop_mode_does_not_crash_on_error(self, client):
+    async def test_sentry_noop_mode_does_not_crash_on_error(self, client):
         """App should not crash when triggering an error without SENTRY_DSN."""
         # Ensure no DSN
         os.environ.pop("SENTRY_DSN", None)
