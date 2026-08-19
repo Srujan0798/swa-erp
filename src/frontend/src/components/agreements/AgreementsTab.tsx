@@ -108,6 +108,8 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
                         variant="ghost"
                         onClick={() => toggleExpanded(a.id)}
                         title={isExpanded ? "Hide tokens" : "Show tokens"}
+                        aria-label={isExpanded ? "Hide tokens" : "Show tokens"}
+                        aria-expanded={isExpanded}
                       >
                         {isExpanded ? (
                           <ChevronDown className="h-4 w-4" />
@@ -120,6 +122,7 @@ export function AgreementsTab({ clientId }: AgreementsTabProps) {
                           size="icon"
                           variant="ghost"
                           disabled={deleteMutation.isPending}
+                          aria-label={`Delete agreement ${a.reference_id}`}
                           onClick={() => {
                             if (confirm(`Delete agreement ${a.reference_id}?`)) {
                               deleteMutation.mutate(a.id);

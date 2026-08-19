@@ -13,7 +13,10 @@ const inquirySchema = z.object({
   inquiry_source: z.string().optional(),
   client_name: z.string().min(1, "Client name is required"),
   requirement_summary: z.string().optional(),
-  estimated_value: z.number().optional(),
+  estimated_value: z.preprocess(
+    (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+    z.number().optional()
+  ),
   priority: z.string().optional(),
   status: z.string().default("New"),
   notes: z.string().optional(),

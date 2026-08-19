@@ -101,8 +101,8 @@ export function InvoiceDetail({ invoice, onBack }: InvoiceDetailProps) {
                   <TableRow key={item.id}>
                     <TableCell>{item.description}</TableCell>
                     <TableCell className="text-right">{item.quantity}</TableCell>
-                    <TableCell className="text-right font-mono">₹{item.rate.toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-mono">₹{item.amount.toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-mono">₹{item.rate.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="text-right font-mono">₹{item.amount.toLocaleString("en-IN")}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -113,15 +113,15 @@ export function InvoiceDetail({ invoice, onBack }: InvoiceDetailProps) {
             <div className="w-64 space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
-                <span className="font-mono">₹{invoice.subtotal.toLocaleString()}</span>
+                <span className="font-mono">₹{invoice.subtotal.toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Tax ({(invoice.tax_rate * 100).toFixed(1)}%)</span>
-                <span className="font-mono">₹{invoice.tax_amount.toLocaleString()}</span>
+                <span className="font-mono">₹{invoice.tax_amount.toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between font-semibold border-t pt-2">
                 <span>Total</span>
-                <span className="font-mono">₹{invoice.total.toLocaleString()}</span>
+                <span className="font-mono">₹{invoice.total.toLocaleString("en-IN")}</span>
               </div>
             </div>
           </div>

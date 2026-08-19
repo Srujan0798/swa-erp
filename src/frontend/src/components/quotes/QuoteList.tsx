@@ -77,8 +77,8 @@ export function QuoteList({ projectId, onViewQuote }: QuoteListProps) {
                       <TableCell>
                         <Badge className={statusCfg.className}>{statusCfg.label}</Badge>
                       </TableCell>
-                      <TableCell className="text-right">₹{quote.subtotal.toLocaleString()}</TableCell>
-                      <TableCell className="text-right font-medium">₹{quote.total_amount.toLocaleString()}</TableCell>
+      <TableCell className="text-right">₹{quote.subtotal.toLocaleString("en-IN")}</TableCell>
+      <TableCell className="text-right font-medium">₹{quote.total_amount.toLocaleString("en-IN")}</TableCell>
                       <TableCell>{quote.valid_until ? new Date(quote.valid_until).toLocaleDateString() : "—"}</TableCell>
                       <TableCell>{quote.created_by_name ?? "—"}</TableCell>
                       <TableCell className="text-right">
@@ -87,7 +87,7 @@ export function QuoteList({ projectId, onViewQuote }: QuoteListProps) {
                             <Eye className="h-4 w-4" />
                           </Button>
                           {quote.status === "rejected" && (user?.role === "admin" || user?.role === "pm") && (
-                            <Button variant="ghost" size="icon" onClick={() => handleClone(quote.id)}>
+                            <Button variant="ghost" size="icon" aria-label="Clone quote" onClick={() => handleClone(quote.id)}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           )}
@@ -95,6 +95,7 @@ export function QuoteList({ projectId, onViewQuote }: QuoteListProps) {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="Delete quote"
                               onClick={() => handleDelete(quote.id)}
                               disabled={deleteMutation.isPending}
                             >

@@ -21,7 +21,13 @@ const tokenSchema = z.object({
   token_type: z.string().optional(),
   description: z.string().optional(),
   token_status: z.string().default("In Progress"),
-  tokens_used: z.number().int().positive().default(1),
+  tokens_used: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined || Number.isNaN(val)) return 1;
+      return Number(val);
+    },
+    z.number().int().positive()
+  ),
   client_employee_name: z.string().optional(),
   project_id: z.string().optional(),
 });
@@ -55,7 +61,7 @@ export function TokenForm({ initialData, onSubmit, onCancel, isLoading }: TokenF
   const projectId = form.watch("project_id");
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <Card>
         <CardHeader>
           <CardTitle>Token details</CardTitle>

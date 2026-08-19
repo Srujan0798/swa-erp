@@ -102,6 +102,7 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
                     size="icon"
                     variant="ghost"
                     disabled={deleteMutation.isPending}
+                    aria-label={`Delete document reference ${d.reference_id}`}
                     onClick={() => {
                       if (confirm(`Delete document reference ${d.reference_id}?`)) {
                         deleteMutation.mutate(d.id);

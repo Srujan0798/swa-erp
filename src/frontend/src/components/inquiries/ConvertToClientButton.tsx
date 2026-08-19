@@ -88,9 +88,7 @@ export function ConvertToClientButton({
         if (body?.candidates) {
           setCandidates(body.candidates);
         }
-        return;
       }
-      throw err;
     }
   };
 
