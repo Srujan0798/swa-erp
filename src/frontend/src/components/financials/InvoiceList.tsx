@@ -93,16 +93,16 @@ export function InvoiceList({ invoices, isLoading, onView, statusFilter, onStatu
                         {invoice.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono">₹{invoice.total.toLocaleString()}</TableCell>
+                    <TableCell className="font-mono">₹{invoice.total.toLocaleString("en-IN")}</TableCell>
                     <TableCell>
                       {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => onView(invoice.id)}>
+                        <Button variant="ghost" size="sm" aria-label="View invoice" onClick={() => onView(invoice.id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(invoice.id)}>
+                        <Button variant="ghost" size="sm" aria-label="Delete invoice" onClick={() => handleDelete(invoice.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

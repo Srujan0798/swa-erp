@@ -70,10 +70,10 @@ export function TimeEntryList({ entries, isLoading, onEdit }: TimeEntryListProps
                     <TableCell>
                       {write ? (
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => onEdit(entry)}>
+                          <Button variant="ghost" size="sm" onClick={() => onEdit(entry)} aria-label="Edit entry">
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)} aria-label="Delete entry">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

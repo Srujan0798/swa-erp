@@ -91,6 +91,7 @@ export function TokensList({ agreementId }: TokensListProps) {
                     size="icon"
                     variant="ghost"
                     disabled={deleteMutation.isPending}
+                    aria-label={`Delete token ${t.reference_id}`}
                     onClick={() => {
                       if (confirm(`Delete token ${t.reference_id}?`)) {
                         deleteMutation.mutate(t.id);

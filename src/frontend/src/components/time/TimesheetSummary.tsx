@@ -31,11 +31,11 @@ export function TimesheetSummary({ timesheets, isLoading, weekOffset, onWeekChan
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => onWeekChange(-1)}>
+            <Button variant="outline" size="sm" aria-label="Previous week" onClick={() => onWeekChange(-1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="font-medium">{weekLabel}</span>
-            <Button variant="outline" size="sm" onClick={() => onWeekChange(1)}>
+            <Button variant="outline" size="sm" aria-label="Next week" onClick={() => onWeekChange(1)}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

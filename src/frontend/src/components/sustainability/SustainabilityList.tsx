@@ -100,12 +100,13 @@ export function SustainabilityList({
                   <TableCell className="text-right">{fmt(m.payback_period_months)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
-                      <Button variant="ghost" size="icon" onClick={() => onEdit(m)}>
+                      <Button variant="ghost" size="icon" aria-label="Edit metric" onClick={() => onEdit(m)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label="Delete metric"
                         onClick={() => onDelete(m)}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />

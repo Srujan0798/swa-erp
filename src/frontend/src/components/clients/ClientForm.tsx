@@ -53,7 +53,7 @@ export function ClientForm({ initialData, onSubmit, onCancel, isLoading }: Clien
   };
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" noValidate>
       <Card>
         <CardHeader>
           <CardTitle>Client Details</CardTitle>

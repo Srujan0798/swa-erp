@@ -11,7 +11,10 @@ const agreementSchema = z.object({
   service_name: z.string().min(1, "Service name is required"),
   start_date: z.string().min(1, "Start date is required"),
   end_date: z.string().optional(),
-  total_tokens: z.number().int().nonnegative().optional(),
+  total_tokens: z.preprocess(
+    (val) => (val === null || val === undefined || Number.isNaN(val) ? undefined : val),
+    z.number().int().nonnegative().optional()
+  ),
   status: z.string().default("Active"),
   notes: z.string().optional(),
 });
@@ -35,7 +38,7 @@ export function AgreementForm({ initialData, onSubmit, onCancel, isLoading }: Ag
   });
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <Card>
         <CardHeader>
           <CardTitle>Service Agreement Details</CardTitle>
