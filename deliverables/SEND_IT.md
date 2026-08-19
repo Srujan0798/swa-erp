@@ -32,7 +32,7 @@ No external paid APIs, no third-party services, no internet exposure.
 - Windows Server, on-prem (99% confirmed)
 - 128 GB RAM, extendable
 - 100+ concurrent users over VPN — **IT's claim about the server; load-tested by us at
-  10/50/100 users with no server errors.** Wave-35 measured **p95 ≈ 29–51 ms at 10–100
+  10/50/100/150 users with no server errors.** Wave-35 measured **p95 ≈ 29–130 ms at 10–150
   concurrent users on a dev machine** (`docs/PERFORMANCE.md`). The client's Windows Server
   itself has **not** been load-tested; that is the remaining step before 100+ can be promised
   for production.

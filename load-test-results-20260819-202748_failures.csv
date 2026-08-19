@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences
+POST,/api/projects (create),HTTPError('409 Client Error: Conflict for url: /api/projects (create)'),7

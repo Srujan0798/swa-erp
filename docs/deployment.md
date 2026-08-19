@@ -12,8 +12,8 @@ See `runbook.md` for local dev setup via `docker-compose.yml`.
 
 The actual target is: **on-premises Windows Server, 128GB RAM, VPN-only access, 100+
 concurrent users per Meeting 2** — this was **IT's claim about the server; our wave-35 load
-tests verified the app at **10/50/100 concurrent users, p95 ≈ 29–51 ms, no server errors** on
-a dev machine (`docs/PERFORMANCE.md`). The client's Windows Server itself has not been
+tests verified the app at **10/50/100/150 concurrent users, p95 ≈ 29–130 ms, no server errors**
+on a dev machine (`docs/PERFORMANCE.md`). The client's Windows Server itself has not been
 load-tested yet. This is not
 staging/prod-on-a-VPS the way the old version of
 this file assumed — there is no cloud hosting decision to make, it's already been made.
