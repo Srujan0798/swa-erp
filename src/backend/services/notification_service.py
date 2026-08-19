@@ -8,7 +8,9 @@ class NotificationService:
     def __init__(self, db):
         self.db = db
 
-    def emit(self, user_id, notification_type, title, message, reference_type=None, reference_id=None):
+    def emit(
+        self, user_id, notification_type, title, message, reference_type=None, reference_id=None
+    ):
         repo = NotificationRepository(self.db)
         return repo.create(
             user_id=user_id,

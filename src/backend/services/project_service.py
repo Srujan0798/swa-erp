@@ -21,9 +21,7 @@ from src.backend.models.project import Project
 from src.backend.schemas.project import ProjectCreate, ProjectUpdate
 
 
-def _require_assignable_user(
-    db: Session, user_id: uuid.UUID | None, field: str
-) -> None:
+def _require_assignable_user(db: Session, user_id: uuid.UUID | None, field: str) -> None:
     """Reject soft-deleted or inactive users for project role assignment."""
     if user_id is None:
         return
@@ -56,6 +54,8 @@ def create_project_service(
             entity_id=project.id,
             after_json=_project_to_dict(project),
         )
+    else:
+        raise RuntimeError("Created project failed to load")
 
     return result
 
@@ -109,6 +109,8 @@ def update_project_service(
         raise HTTPException(status_code=409, detail=str(e)) from e
 
     project = get_project_by_id(db, project_id)
+    if project is None:
+        raise RuntimeError("Project disappeared during update")
     after_json = _project_to_dict(project)
 
     record_event(

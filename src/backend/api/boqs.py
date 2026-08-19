@@ -124,6 +124,8 @@ def download_boq_endpoint(
     result = get_boq_detail(db, boq_id)
     if not result:
         raise HTTPException(status_code=404, detail="BOQ not found")
+    if not result.file_path:
+        raise HTTPException(status_code=404, detail="BOQ has no stored file")
     content = get_storage().read(result.file_path)
     filename = result.file_name or "download"
     return Response(

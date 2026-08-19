@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import date
 from decimal import Decimal
 
-from fpdf import FPDF
+from fpdf import FPDF  # type: ignore[import-untyped]
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -51,7 +51,9 @@ class _SWAPdf(FPDF):
             self.cell(widths[i], 7, h, border=1, fill=True, align="C")
         self.ln()
 
-    def _table_row(self, values: list[str], widths: list[int], aligns: list[str] | None = None) -> None:
+    def _table_row(
+        self, values: list[str], widths: list[int], aligns: list[str] | None = None
+    ) -> None:
         self.set_font("Helvetica", "", 8)
         if aligns is None:
             aligns = ["L"] * len(values)
@@ -89,10 +91,7 @@ def export_project_summary(db: Session, project_id: uuid.UUID) -> bytes:
     auditor = get_user_by_id(db, project.auditor_id) if project.auditor_id else None
 
     boq_items = (
-        db.query(BOQItem)
-        .join(BOQItem.boq)
-        .filter(BOQItem.boq.has(project_id=project_id))
-        .all()
+        db.query(BOQItem).join(BOQItem.boq).filter(BOQItem.boq.has(project_id=project_id)).all()
     )
     boq_total = sum((item.amount for item in boq_items), Decimal("0"))
     boq_count = len(boq_items)
@@ -164,11 +163,15 @@ def export_financial_report(db: Session, start_date: date, end_date: date) -> by
         if entry.is_billable:
             billable_hours[month_key] += entry.hours
 
-    quotes = db.query(Quote).filter(
-        Quote.deleted_at.is_(None),
-        Quote.created_at >= start_date,
-        Quote.created_at <= end_date + timedelta(days=1),
-    ).all()
+    quotes = (
+        db.query(Quote)
+        .filter(
+            Quote.deleted_at.is_(None),
+            Quote.created_at >= start_date,
+            Quote.created_at <= end_date + timedelta(days=1),
+        )
+        .all()
+    )
 
     accepted = [q for q in quotes if q.client_response == "accepted"]
     pending = [q for q in quotes if q.status in ("sent", "pending_approval")]
@@ -255,10 +258,24 @@ def export_project_slides(db: Session, project_id: uuid.UUID) -> bytes:
     pdf.ln(60)
     pdf.cell(0, 20, _safe_str(project.name), align="C", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 18)
-    pdf.cell(0, 12, f"Project Status - {project.status.replace('_', ' ').title()}", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(
+        0,
+        12,
+        f"Project Status - {project.status.replace('_', ' ').title()}",
+        align="C",
+        new_x="LMARGIN",
+        new_y="NEXT",
+    )
     pdf.ln(10)
     pdf.set_font("Helvetica", "", 14)
-    pdf.cell(0, 10, f"Client: {_safe_str(client.name if client else None)}", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(
+        0,
+        10,
+        f"Client: {_safe_str(client.name if client else None)}",
+        align="C",
+        new_x="LMARGIN",
+        new_y="NEXT",
+    )
     pdf.cell(0, 10, f"Date: {_fmt_date(date.today())}", align="C", new_x="LMARGIN", new_y="NEXT")
 
     pdf.add_page(orientation="L")
@@ -300,10 +317,18 @@ def export_project_slides(db: Session, project_id: uuid.UUID) -> bytes:
     pdf._kv_row("Overall Progress:", progress_pct, 60, 200)
     if remaining > 0:
         pdf.ln(5)
-        pdf.cell(0, 10, "Continue task execution and monitor milestones.", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(
+            0, 10, "Continue task execution and monitor milestones.", new_x="LMARGIN", new_y="NEXT"
+        )
     else:
         pdf.ln(5)
-        pdf.cell(0, 10, "All tasks completed. Ready for validation and close-out.", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(
+            0,
+            10,
+            "All tasks completed. Ready for validation and close-out.",
+            new_x="LMARGIN",
+            new_y="NEXT",
+        )
 
     return bytes(pdf.output())
 
@@ -326,7 +351,9 @@ def export_demo_package(db: Session, project_id: uuid.UUID) -> dict:
         .all()
     )
 
-    tasks, _ = list_by_project(db, project_id, page=1, page_size=50, status=None, assignee_id=None, priority=None)
+    tasks, _ = list_by_project(
+        db, project_id, page=1, page_size=50, status=None, assignee_id=None, priority=None
+    )
 
     team = []
     if pm:

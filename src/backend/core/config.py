@@ -34,7 +34,7 @@ class Settings(BaseSettings):
             raise ValueError(
                 "SECRET_KEY is set to an insecure default value but APP_ENV is "
                 f"'{self.APP_ENV}'. Refusing to start. Generate a strong secret with: "
-                "python3 -c \"import secrets; print(secrets.token_hex(32))\" "
+                'python3 -c "import secrets; print(secrets.token_hex(32))" '
                 "and set it in the environment or .env file."
             )
         return self

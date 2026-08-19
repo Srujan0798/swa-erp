@@ -108,7 +108,9 @@ def delete_vendor(
         raise HTTPException(status_code=404, detail="Vendor not found")
 
 
-@router.post("/{vendor_id}/contacts", response_model=VendorContactRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{vendor_id}/contacts", response_model=VendorContactRead, status_code=status.HTTP_201_CREATED
+)
 def add_contact(
     vendor_id: uuid.UUID,
     body: VendorContactCreate,

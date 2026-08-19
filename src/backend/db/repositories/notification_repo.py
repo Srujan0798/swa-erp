@@ -8,10 +8,16 @@ class NotificationRepository:
     def __init__(self, session):
         self.session = session
 
-    def create(self, user_id, notification_type, title, message, reference_type=None, reference_id=None):
+    def create(
+        self, user_id, notification_type, title, message, reference_type=None, reference_id=None
+    ):
         notification = Notification(
             user_id=user_id,
-            type=notification_type.value if hasattr(notification_type, "value") else notification_type,
+            type=(
+                notification_type.value
+                if hasattr(notification_type, "value")
+                else notification_type
+            ),
             title=title,
             message=message,
             reference_type=reference_type,
@@ -22,7 +28,9 @@ class NotificationRepository:
         return notification
 
     def get_unread_count(self, user_id):
-        stmt = select(Notification.id).where(Notification.user_id == user_id, Notification.is_read.is_(False))
+        stmt = select(Notification.id).where(
+            Notification.user_id == user_id, Notification.is_read.is_(False)
+        )
         result = self.session.execute(stmt)
         return len(result.scalars().all())
 
@@ -35,16 +43,26 @@ class NotificationRepository:
         return list(result.scalars().all())
 
     def mark_read(self, notification_id, user_id):
-        stmt = update(Notification).where(Notification.id == notification_id, Notification.user_id == user_id).values(is_read=True)
+        stmt = (
+            update(Notification)
+            .where(Notification.id == notification_id, Notification.user_id == user_id)
+            .values(is_read=True)
+        )
         result = self.session.execute(stmt)
         return result.rowcount > 0
 
     def mark_all_read(self, user_id):
-        stmt = update(Notification).where(Notification.user_id == user_id, Notification.is_read.is_(False)).values(is_read=True)
+        stmt = (
+            update(Notification)
+            .where(Notification.user_id == user_id, Notification.is_read.is_(False))
+            .values(is_read=True)
+        )
         result = self.session.execute(stmt)
         return result.rowcount or 0
 
     def delete(self, notification_id, user_id):
-        stmt = sqlalchemy_delete(Notification).where(Notification.id == notification_id, Notification.user_id == user_id)
+        stmt = sqlalchemy_delete(Notification).where(
+            Notification.id == notification_id, Notification.user_id == user_id
+        )
         result = self.session.execute(stmt)
         return result.rowcount > 0

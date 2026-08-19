@@ -125,8 +125,12 @@ def list_materials(
     is_active: bool | None = None,
 ) -> MaterialListResponse:
     items, total, page, page_size = list_materials_service(
-        db, page=page, page_size=page_size, search=search,
-        category_id=category_id, is_active=is_active,
+        db,
+        page=page,
+        page_size=page_size,
+        search=search,
+        category_id=category_id,
+        is_active=is_active,
     )
     result = [MaterialRead.model_validate(item) for item in items]
     return MaterialListResponse(items=result, total=total, page=page, page_size=page_size)

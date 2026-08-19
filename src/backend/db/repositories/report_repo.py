@@ -44,17 +44,12 @@ def project_health_query(db: Session) -> dict:
         or 0
     )
 
-    budget_variance = (
-        db.query(
-            func.sum(
-                func.coalesce(Project.estimated_value, Decimal("0"))
-                - func.coalesce(Project.actual_value, Decimal("0"))
-            )
+    budget_variance = db.query(
+        func.sum(
+            func.coalesce(Project.estimated_value, Decimal("0"))
+            - func.coalesce(Project.actual_value, Decimal("0"))
         )
-        .filter(Project.deleted_at.is_(None), Project.is_active.is_(True))
-        .scalar()
-        or Decimal("0")
-    )
+    ).filter(Project.deleted_at.is_(None), Project.is_active.is_(True)).scalar() or Decimal("0")
 
     at_risk = []
     active_projects = (

@@ -22,10 +22,18 @@ class Quote(Base):
     version_number: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
     subtotal: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
-    markup_percent: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
-    markup_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
-    tax_percent: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("18"))
-    tax_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
+    markup_percent: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("0")
+    )
+    markup_amount: Mapped[Decimal] = mapped_column(
+        Numeric(18, 2), nullable=False, default=Decimal("0")
+    )
+    tax_percent: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("18")
+    )
+    tax_amount: Mapped[Decimal] = mapped_column(
+        Numeric(18, 2), nullable=False, default=Decimal("0")
+    )
     total_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
     terms: Mapped[str | None] = mapped_column(Text, nullable=True)
     validity_days: Mapped[int] = mapped_column(Integer, nullable=False, default=30)
@@ -39,7 +47,9 @@ class Quote(Base):
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     client_response: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    client_response_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    client_response_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     client_response_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -49,7 +59,9 @@ class Quote(Base):
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    items: Mapped[list["QuoteItem"]] = relationship("QuoteItem", back_populates="quote", lazy="selectin")
+    items: Mapped[list["QuoteItem"]] = relationship(
+        "QuoteItem", back_populates="quote", lazy="selectin"
+    )
 
 
 class QuoteItem(Base):

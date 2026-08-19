@@ -68,12 +68,14 @@ def get_cost_breakdown(
     items: list[CostBreakdownItem] = []
 
     if time_cost > 0:
-        items.append(CostBreakdownItem(
-            category="time",
-            amount=time_cost,
-            count=time_count,
-            percentage=Decimal("0"),
-        ))
+        items.append(
+            CostBreakdownItem(
+                category="time",
+                amount=time_cost,
+                count=time_count,
+                percentage=Decimal("0"),
+            )
+        )
 
     for cat in COST_CATEGORIES:
         if cat == "time":
@@ -81,17 +83,21 @@ def get_cost_breakdown(
         amount = costs_by_cat.get(cat, Decimal("0"))
         count = counts_by_cat.get(cat, 0)
         if amount > 0:
-            items.append(CostBreakdownItem(
-                category=cat,
-                amount=amount,
-                count=count,
-                percentage=Decimal("0"),
-            ))
+            items.append(
+                CostBreakdownItem(
+                    category=cat,
+                    amount=amount,
+                    count=count,
+                    percentage=Decimal("0"),
+                )
+            )
 
     total = sum(item.amount for item in items)
     if total > 0:
         for item in items:
-            item.percentage = (item.amount / total * 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            item.percentage = (item.amount / total * 100).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
 
     return items
 
@@ -107,7 +113,11 @@ def get_project_pnl(db: Session, project_id: uuid.UUID) -> ProjectPnLSummary:
     manual_costs = get_total_costs(db, project_id)
     total_costs = time_cost + manual_costs
     net_profit = revenue - total_costs
-    margin = (net_profit / revenue * 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if revenue > 0 else Decimal("0.00")
+    margin = (
+        (net_profit / revenue * 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if revenue > 0
+        else Decimal("0.00")
+    )
 
     breakdown = get_cost_breakdown(db, project_id)
 
@@ -154,8 +164,10 @@ def list_project_costs_service(
     reads = []
     for cost in items:
         user = get_user_by_id(db, cost.created_by)
-        reads.append(ProjectCostRead(
-            **ProjectCostRead.model_validate(cost).model_dump(exclude={"created_by_name"}),
-            created_by_name=user.name if user else None,
-        ))
+        reads.append(
+            ProjectCostRead(
+                **ProjectCostRead.model_validate(cost).model_dump(exclude={"created_by_name"}),
+                created_by_name=user.name if user else None,
+            )
+        )
     return ProjectCostListResponse(items=reads, total=total, page=pg, page_size=ps)

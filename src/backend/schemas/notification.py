@@ -5,11 +5,13 @@ from pydantic import BaseModel, ConfigDict
 
 
 class NotificationType(Enum):
-    task_assigned = "task_assigned"
-    task_status_changed = "task_status_changed"
-    task_due_soon = "task_due_soon"
-    task_overdue = "task_overdue"
-    task_comment = "task_comment"
+    # Uppercase member names (wave-32): notification_service referenced
+    # TASK_ASSIGNED etc.; values stay lowercase for storage.
+    TASK_ASSIGNED = "task_assigned"
+    TASK_STATUS_CHANGED = "task_status_changed"
+    TASK_DUE_SOON = "task_due_soon"
+    TASK_OVERDUE = "task_overdue"
+    TASK_COMMENT = "task_comment"
 
 
 class NotificationRead(BaseModel):

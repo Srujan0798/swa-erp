@@ -26,6 +26,8 @@ class Notification(Base):
     reference_type = Column(String(50), nullable=True)
     reference_id = Column(UUID(as_uuid=True), nullable=True, index=True)
     is_read = Column(Boolean, default=False, index=True)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), index=True)
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
 
     user = relationship("User", back_populates="notifications")

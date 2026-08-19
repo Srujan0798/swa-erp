@@ -35,9 +35,7 @@ class ReportService:
             at_risk_projects=raw["at_risk_projects"],
         )
 
-    def get_utilization(
-        self, db: Session, start_date: date, end_date: date
-    ) -> UtilizationReport:
+    def get_utilization(self, db: Session, start_date: date, end_date: date) -> UtilizationReport:
         raw = utilization_query(db, start_date, end_date)
         members = [
             MemberUtilization(
@@ -57,9 +55,7 @@ class ReportService:
 
     def get_revenue(self, db: Session) -> RevenueForecast:
         monthly_raw = revenue_query(db)
-        monthly = [
-            MonthlyRevenue(month=m["month"], total=m["total"]) for m in monthly_raw
-        ]
+        monthly = [MonthlyRevenue(month=m["month"], total=m["total"]) for m in monthly_raw]
 
         forecast_raw = forecast_query(db)
         forecast = [
@@ -103,9 +99,7 @@ class ReportService:
                 utilization.members
             )
 
-        pipeline_value = sum(
-            (f.expected_value for f in revenue.forecast), Decimal("0")
-        )
+        pipeline_value = sum((f.expected_value for f in revenue.forecast), Decimal("0"))
 
         return ExecutiveKPIs(
             active_projects=health.total_projects,

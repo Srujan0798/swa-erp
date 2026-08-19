@@ -140,25 +140,27 @@ def _parse_bool(value: Any) -> bool | None:
 # --------------------------------------------------------------------------- #
 # FK resolvers
 # --------------------------------------------------------------------------- #
-def _client_by_code(s: Session, code: str) -> Client | None:
-    return s.scalar(
-        select(Client).where(Client.code == code, Client.deleted_at.is_(None))
-    )
+def _client_by_code(s: Session, code: str | None) -> Client | None:
+    if not code:
+        return None
+    return s.scalar(select(Client).where(Client.code == code, Client.deleted_at.is_(None)))
 
 
 def _client_by_name(s: Session, name: str) -> Client | None:
-    return s.scalar(
-        select(Client).where(Client.name == name, Client.deleted_at.is_(None))
-    )
+    return s.scalar(select(Client).where(Client.name == name, Client.deleted_at.is_(None)))
 
 
-def _inquiry_by_ref(s: Session, ref: str) -> Inquiry | None:
+def _inquiry_by_ref(s: Session, ref: str | None) -> Inquiry | None:
+    if not ref:
+        return None
     return s.scalar(
         select(Inquiry).where(Inquiry.reference_id == ref, Inquiry.deleted_at.is_(None))
     )
 
 
-def _agreement_by_ref(s: Session, ref: str) -> ServiceAgreement | None:
+def _agreement_by_ref(s: Session, ref: str | None) -> ServiceAgreement | None:
+    if not ref:
+        return None
     return s.scalar(
         select(ServiceAgreement).where(
             ServiceAgreement.reference_id == ref,
@@ -168,15 +170,11 @@ def _agreement_by_ref(s: Session, ref: str) -> ServiceAgreement | None:
 
 
 def _project_by_code(s: Session, code: str) -> Project | None:
-    return s.scalar(
-        select(Project).where(Project.code == code, Project.deleted_at.is_(None))
-    )
+    return s.scalar(select(Project).where(Project.code == code, Project.deleted_at.is_(None)))
 
 
 def _token_by_ref(s: Session, ref: str) -> Token | None:
-    return s.scalar(
-        select(Token).where(Token.reference_id == ref, Token.deleted_at.is_(None))
-    )
+    return s.scalar(select(Token).where(Token.reference_id == ref, Token.deleted_at.is_(None)))
 
 
 def _resolve_user_by_name(s: Session, name: str) -> User | None:
@@ -222,9 +220,7 @@ def _ensure_import_user(s: Session) -> User:
     return user
 
 
-def _ensure_client(
-    s: Session, *, code: str | None, name: str | None
-) -> Client | None:
+def _ensure_client(s: Session, *, code: str | None, name: str | None) -> Client | None:
     """Resolve client by code/name; create a minimal stub if missing and stubs allowed."""
     client = None
     if code:
@@ -354,7 +350,7 @@ def read_rows(
     alt_key_fields: list[str] | None = None,
     require_swa_key: bool = False,
 ) -> list[dict]:
-    import openpyxl
+    import openpyxl  # type: ignore[import-untyped]
 
     wb = openpyxl.load_workbook(file_path, data_only=True)
     # Prefer named operational tabs when present
@@ -375,7 +371,7 @@ def read_rows(
     # column A (common in SWA templates) does not shift every field.
     colmap: list[tuple[int, str]] = [(i, h) for i, h in enumerate(header) if h]
 
-    key_fields = [key_field] + list(alt_key_fields or [])
+    key_fields = [key_field, *list(alt_key_fields or [])]
 
     def _build(cells: list[Any], shift: int) -> dict[str, Any]:
         rec: dict[str, Any] = {}
@@ -410,9 +406,7 @@ def read_rows(
             if not _looks_like_swa_id(k):
                 return -1
             score = 1
-            assoc = _txt(
-                _record_get(rec, "Associated Project/Token ID", "Associated Project ID")
-            )
+            assoc = _txt(_record_get(rec, "Associated Project/Token ID", "Associated Project ID"))
             if assoc and _looks_like_swa_id(assoc):
                 score += 3
             doc_type = _txt(_record_get(rec, "Document Type", "Token Type", "Service Name"))
@@ -578,9 +572,9 @@ def _import_agreements(s: Session, rows: list[dict], result: ImportResult) -> No
             if start_date is None:
                 # Real SA samples sometimes omit start date — still import the row
                 start_date = dt.date.today()
-            inquiry = _inquiry_by_ref(s, _txt(d.get("Inquiry ID"))) if _txt(
-                d.get("Inquiry ID")
-            ) else None
+            inquiry = (
+                _inquiry_by_ref(s, _txt(d.get("Inquiry ID"))) if _txt(d.get("Inquiry ID")) else None
+            )
             agreement = _agreement_by_ref(s, reference_id)
             values = dict(
                 client_id=client.id,
@@ -629,9 +623,7 @@ def _import_tokens(s: Session, rows: list[dict], result: ImportResult) -> None:
             tu = _parse_int(d.get("Tokens Used"))
             if tu is not None:
                 values["tokens_used"] = tu
-            emp = _txt(d.get("Swa Employee Name/Team Leader")) or _txt(
-                d.get("Swa Employee Name")
-            )
+            emp = _txt(d.get("Swa Employee Name/Team Leader")) or _txt(d.get("Swa Employee Name"))
             if emp:
                 u = _resolve_user_by_name(s, emp)
                 if u is not None:
@@ -663,9 +655,7 @@ def _import_document_references(s: Session, rows: list[dict], result: ImportResu
             if not _looks_like_swa_id(reference_id):
                 result.skipped += 1
                 continue
-            assoc = _txt(
-                _record_get(d, "Associated Project/Token ID", "Associated Project ID")
-            )
+            assoc = _txt(_record_get(d, "Associated Project/Token ID", "Associated Project ID"))
             project = _project_by_code(s, assoc) if assoc else None
             token = None
             if project is None and assoc:
@@ -760,18 +750,16 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
             project = _project_by_code(s, ref) if _looks_like_swa_id(ref) else None
             if project is None:
                 token = _token_by_ref(s, ref) if _looks_like_swa_id(ref) else None
-                docref = (
-                    _doc_by_ref(s, ref)
-                    if token is None and _looks_like_swa_id(ref)
-                    else None
-                )
+                docref = _doc_by_ref(s, ref) if token is None and _looks_like_swa_id(ref) else None
                 if token is not None:
                     if token.project_id is not None:
                         project = s.get(Project, token.project_id)
                     else:
                         # bind to stub so hours are not lost
                         project = _ensure_project(
-                            s, f"FROM-TOKEN-{token.reference_id}", name=f"Work for {token.reference_id}"
+                            s,
+                            f"FROM-TOKEN-{token.reference_id}",
+                            name=f"Work for {token.reference_id}",
                         )
                         token.project_id = project.id if project else None
                 if project is None and docref is not None and docref.project_id is not None:
@@ -780,9 +768,7 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
                 pname = _txt(d.get("Project Name"))
                 if project is None and pname:
                     project = s.scalar(
-                        select(Project).where(
-                            Project.name == pname, Project.deleted_at.is_(None)
-                        )
+                        select(Project).where(Project.name == pname, Project.deleted_at.is_(None))
                     )
                 if project is None and _looks_like_swa_id(ref):
                     project = _ensure_project(s, ref, name=pname)
@@ -864,7 +850,10 @@ def _import_sustainability(s: Session, rows: list[dict], result: ImportResult) -
                 green = _parse_bool(green_raw)
             except ValueError:
                 # sheet samples use standard names (GRIHA, IGBC) — treat as compliant
-                green = bool(_txt(green_raw) and str(green_raw).strip().lower() not in ("no", "n", "false", "0"))
+                green = bool(
+                    _txt(green_raw)
+                    and str(green_raw).strip().lower() not in ("no", "n", "false", "0")
+                )
             values = dict(
                 project_id=project.id,
                 recorded_date=_parse_date(d.get("Date")) or dt.date.today(),

@@ -20,7 +20,8 @@ def _compute_totals(
     items_data: list[dict[str, Any]], tax_rate: Decimal
 ) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal]:
     subtotal = sum(
-        Decimal(str(item["quantity"])) * Decimal(str(item["rate"])) for item in items_data
+        (Decimal(str(item["quantity"])) * Decimal(str(item["rate"])) for item in items_data),
+        Decimal("0"),
     )
     gst_percent = tax_rate
     gst_amount = (subtotal * gst_percent / Decimal("100")).quantize(Decimal("0.01"))

@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install pip-audit
-      - run: pip-audit -r requirements.txt --strict || true
+      - run: pip-audit -r requirements.txt --strict
 
   npm-audit:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
         run: |
           if [ -f src/frontend/package.json ]; then
             cd src/frontend
-            npm audit --audit-level=high || true
+            npm audit --audit-level=high
           fi
 
   secrets-scan:
@@ -36,4 +36,10 @@ jobs:
         with: { fetch-depth: 0 }
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@v2
-        continue-on-error: true
+
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install semgrep
+      - run: semgrep --config=auto src/backend/

@@ -53,7 +53,7 @@ def list_assignees(
     """Active, non-deleted users for task/project assignee pickers (all auth roles)."""
     from src.backend.services.user_service import list_users_service
 
-    items, _, _, _ = list_users_service(
+    items, _total, _page, _ps = list_users_service(
         db, page=1, page_size=page_size, q=q, role=role, is_active=True
     )
     # Attribution-only import identity must never appear in pickers

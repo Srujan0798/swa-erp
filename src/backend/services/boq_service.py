@@ -15,6 +15,7 @@ from src.backend.db.repositories.boq_repo import (
     list_versions_with_counts,
     soft_delete,
 )
+from src.backend.models.boq import BOQ
 from src.backend.schemas.boq import (
     BOQItemListResponse,
     BOQItemRead,
@@ -98,7 +99,7 @@ def list_boqs(
     page_size: int = 20,
 ) -> BOQListResponse:
     items, total = list_by_project(db, project_id, page=page, page_size=page_size)
-    reads = [_to_read(b) for b in items]
+    reads = [BOQListRead.model_validate(_to_read(b).model_dump()) for b in items]
     return BOQListResponse(items=reads, total=total, page=page, page_size=page_size)
 
 
@@ -115,7 +116,7 @@ def delete_boq(db: Session, boq_id: uuid.UUID, actor_id: uuid.UUID) -> bool:
     return success
 
 
-def _to_read(boq) -> BOQRead:
+def _to_read(boq: BOQ) -> BOQRead:
     return BOQRead(
         id=boq.id,
         project_id=boq.project_id,
@@ -127,7 +128,7 @@ def _to_read(boq) -> BOQRead:
         is_active=boq.is_active,
         created_at=boq.created_at,
         file_path=boq.file_path,
-        items=boq.items if boq.items else [],
+        items=[BOQItemRead.model_validate(i) for i in boq.items] if boq.items else [],
     )
 
 
@@ -157,7 +158,7 @@ def get_boq_detail(db: Session, boq_id: uuid.UUID) -> BOQRead | None:
         is_active=boq.is_active,
         created_at=boq.created_at,
         file_path=boq.file_path,
-        items=boq.items if boq.items else [],
+        items=[BOQItemRead.model_validate(i) for i in boq.items] if boq.items else [],
     )
 
 

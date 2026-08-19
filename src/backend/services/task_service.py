@@ -65,9 +65,7 @@ def create_task_service(
     if body.assignee_id is not None:
         assignee = get_user_by_id(db, body.assignee_id)
         if not assignee or not getattr(assignee, "is_active", True):
-            raise HTTPException(
-                status_code=400, detail="Assignee not found or inactive"
-            )
+            raise HTTPException(status_code=400, detail="Assignee not found or inactive")
     task = create_task(
         db,
         project_id=project_id,
@@ -213,7 +211,7 @@ def add_comment_service(
     return TaskCommentRead(
         id=comment.id,
         task_id=comment.task_id,
-        user_id=comment.user_id,
+        user_id=comment.author_id,
         user_name=user.name if user else None,
         content=comment.content,
         created_at=comment.created_at,

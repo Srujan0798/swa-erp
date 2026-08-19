@@ -55,13 +55,22 @@ test-e2e:
 	@if [ -f playwright.config.ts ]; then npx playwright test tests/e2e/; else echo "Playwright not yet configured (Task 04)"; fi
 
 lint:
-	ruff check src/backend/ 2>/dev/null || true
-	@if [ -d src/frontend ]; then cd src/frontend && npm run lint 2>/dev/null || true; fi
+	python3 -m ruff check src/backend/
+	@if [ -d src/frontend ]; then cd src/frontend && npm run lint; fi
+
+# Real quality gates, identical to CI (ci.yml backend-lint + backend-test).
+# Wave-32: every step fails the build — no `|| true` anywhere.
+verify:
+	python3 -m ruff check src/backend/
+	python3 -m black --check src/backend/
+	python3 -m mypy src/backend/ --explicit-package-bases
+	python3 -m pytest tests/ -q --cov=src/backend --cov-report=term-missing --cov-report=xml --cov-fail-under=82
+	@if [ -d src/frontend ]; then cd src/frontend && npm run lint; fi
 
 format:
-	black src/backend/ 2>/dev/null || true
-	ruff check --fix src/backend/ 2>/dev/null || true
-	@if [ -d src/frontend ]; then cd src/frontend && npx prettier --write src/ 2>/dev/null || true; fi
+	black src/backend/
+	ruff check --fix src/backend/
+	@if [ -d src/frontend ]; then cd src/frontend && npx prettier --write src/; fi
 
 migrate:
 	cd src/backend && alembic revision --autogenerate -m "$(name)"

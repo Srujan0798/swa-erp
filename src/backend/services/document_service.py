@@ -240,7 +240,10 @@ def move_documents_service(
         db,
         action="document.move",
         user_id=actor_id,
-        after_json={"document_ids": [str(d) for d in document_ids], "target_folder_id": str(target_folder_id) if target_folder_id else None},
+        after_json={
+            "document_ids": [str(d) for d in document_ids],
+            "target_folder_id": str(target_folder_id) if target_folder_id else None,
+        },
     )
 
     return count

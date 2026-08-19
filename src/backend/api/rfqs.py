@@ -77,9 +77,7 @@ def list_rfqs_endpoint(
     project = get_project_by_id(db, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    return list_project_rfqs(
-        db, project_id, page=page, page_size=page_size, status=rfq_status
-    )
+    return list_project_rfqs(db, project_id, page=page, page_size=page_size, status=rfq_status)
 
 
 @router.get(
@@ -123,12 +121,12 @@ def respond_rfq_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
     try:
-        items_data = [
-            {"item_id": i.item_id, "vendor_rate": i.vendor_rate} for i in body
-        ]
+        items_data = [{"item_id": i.item_id, "vendor_rate": i.vendor_rate} for i in body]
         return receive_response(db, rfq_id, items_data, responded_by=current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 @router.post(
     "/api/rfqs/{rfq_id}/compare",
     response_model=RFQRead,
@@ -207,7 +205,5 @@ def compare_rfqs_endpoint(
         try:
             mat_ids = [uuid.UUID(m.strip()) for m in material_ids.split(",")]
         except ValueError as e:
-            raise HTTPException(
-                status_code=400, detail="Invalid material_ids format"
-            ) from e
+            raise HTTPException(status_code=400, detail="Invalid material_ids format") from e
     return compare_rfq(db, project_id, mat_ids)

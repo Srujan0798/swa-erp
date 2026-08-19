@@ -289,7 +289,8 @@ export function ClientDetailPage(): ReactElement {
             }}
             onSubmit={async (data) => {
               // Contacts are managed on the detail page, not via client update.
-              const { contacts: _contacts, ...payload } = data;
+              const payload = { ...data };
+              delete (payload as { contacts?: unknown }).contacts;
               await updateClientMutation.mutateAsync(payload);
             }}
             onCancel={() => setShowEdit(false)}

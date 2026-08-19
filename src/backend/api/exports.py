@@ -61,9 +61,7 @@ def financial_report_pdf(
     if start_date > end_date:
         raise HTTPException(status_code=400, detail="start_date must be before end_date")
     if async_:
-        task = generate_financial_report_pdf.delay(
-            start_date.isoformat(), end_date.isoformat()
-        )
+        task = generate_financial_report_pdf.delay(start_date.isoformat(), end_date.isoformat())
         return Response(
             content=f'{{"job_id": "{task.id}"}}',
             media_type="application/json",

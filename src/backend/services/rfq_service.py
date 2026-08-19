@@ -14,35 +14,38 @@ from src.backend.db.repositories.rfq_repo import (
     update_item_rates,
     update_status,
 )
+from src.backend.models.rfq import RFQ
 from src.backend.schemas.rfq import (
     RFQCompareMaterial,
     RFQCompareVendor,
+    RFQItemRead,
     RFQListItem,
     RFQListResponse,
     RFQRead,
 )
 
 
-def _enforce_transition(rfq, to_status: str) -> None:
+def _enforce_transition(rfq: RFQ, to_status: str) -> None:
     if not can_transition(rfq.status, to_status):
         msg = f"Cannot transition from {rfq.status} to {to_status}"
         raise ValueError(msg)
 
 
-def _to_read(rfq) -> RFQRead:
-
-    items = []
+def _to_read(rfq: RFQ) -> RFQRead:
+    items: list[RFQItemRead] = []
     for item in rfq.items:
-        items.append({
-            "id": item.id,
-            "rfq_id": item.rfq_id,
-            "material_id": item.material_id,
-            "material_name": getattr(item, "_material_name", None),
-            "material_unit": getattr(item, "_material_unit", None),
-            "quantity": item.quantity,
-            "vendor_rate": item.vendor_rate,
-            "notes": item.notes,
-        })
+        items.append(
+            RFQItemRead(
+                id=item.id,
+                rfq_id=item.rfq_id,
+                material_id=item.material_id,
+                material_name=getattr(item, "_material_name", None),
+                material_unit=getattr(item, "_material_unit", None),
+                quantity=item.quantity,
+                vendor_rate=item.vendor_rate,
+                notes=item.notes,
+            )
+        )
 
     return RFQRead(
         id=rfq.id,
@@ -97,7 +100,10 @@ def create_rfq_with_items(
         },
     )
 
-    return get_rfq(db, rfq.id)
+    updated = get_rfq(db, rfq.id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared after create")
+    return updated
 
 
 def send_rfq(db: Session, rfq_id: uuid.UUID, sent_by: uuid.UUID) -> RFQRead:
@@ -120,7 +126,10 @@ def send_rfq(db: Session, rfq_id: uuid.UUID, sent_by: uuid.UUID) -> RFQRead:
         after_json={"status": "sent"},
     )
 
-    return get_rfq(db, rfq_id)
+    updated = get_rfq(db, rfq_id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared during transition")
+    return updated
 
 
 def receive_response(
@@ -136,9 +145,7 @@ def receive_response(
     _enforce_transition(rfq, "responded")
 
     before_json = {"status": rfq.status}
-    update_status(
-        db, rfq_id, "responded", responded_at=datetime.now(UTC)
-    )
+    update_status(db, rfq_id, "responded", responded_at=datetime.now(UTC))
     update_item_rates(db, rfq_id, items_data)
 
     create_entry(
@@ -151,7 +158,10 @@ def receive_response(
         after_json={"status": "responded", "item_count": len(items_data)},
     )
 
-    return get_rfq(db, rfq_id)
+    updated = get_rfq(db, rfq_id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared during transition")
+    return updated
 
 
 def mark_compared(db: Session, rfq_id: uuid.UUID, compared_by: uuid.UUID) -> RFQRead:
@@ -174,7 +184,10 @@ def mark_compared(db: Session, rfq_id: uuid.UUID, compared_by: uuid.UUID) -> RFQ
         after_json={"status": "compared"},
     )
 
-    return get_rfq(db, rfq_id)
+    updated = get_rfq(db, rfq_id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared during transition")
+    return updated
 
 
 def compare_rfq(
@@ -224,7 +237,10 @@ def award_rfq(db: Session, rfq_id: uuid.UUID, awarded_by: uuid.UUID) -> RFQRead:
         after_json={"status": "awarded"},
     )
 
-    return get_rfq(db, rfq_id)
+    updated = get_rfq(db, rfq_id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared during transition")
+    return updated
 
 
 def close_rfq(db: Session, rfq_id: uuid.UUID, closed_by: uuid.UUID) -> RFQRead:
@@ -247,7 +263,10 @@ def close_rfq(db: Session, rfq_id: uuid.UUID, closed_by: uuid.UUID) -> RFQRead:
         after_json={"status": "closed"},
     )
 
-    return get_rfq(db, rfq_id)
+    updated = get_rfq(db, rfq_id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared during transition")
+    return updated
 
 
 def cancel_rfq(db: Session, rfq_id: uuid.UUID, cancelled_by: uuid.UUID) -> RFQRead:
@@ -270,7 +289,10 @@ def cancel_rfq(db: Session, rfq_id: uuid.UUID, cancelled_by: uuid.UUID) -> RFQRe
         after_json={"status": "cancelled"},
     )
 
-    return get_rfq(db, rfq_id)
+    updated = get_rfq(db, rfq_id)
+    if updated is None:
+        raise RuntimeError("RFQ disappeared during transition")
+    return updated
 
 
 def get_rfq(db: Session, rfq_id: uuid.UUID) -> RFQRead | None:
@@ -284,13 +306,16 @@ def get_rfq(db: Session, rfq_id: uuid.UUID) -> RFQRead | None:
 
     vendor = db.query(Vendor).filter(Vendor.id == rfq.vendor_id).first()
     creator = db.query(User).filter(User.id == rfq.created_by).first()
-    rfq._vendor_name = vendor.name if vendor else None
-    rfq._creator_name = creator.name if creator else None
+    # Transient display attrs (underscore-prefixed; setattr keeps mypy clean under
+    # the declarative metaclass, which treats annotated attrs as class variables).
+    # B010: setattr is intentional here for the same metaclass reason.
+    setattr(rfq, "_vendor_name", vendor.name if vendor else None)  # noqa: B010
+    setattr(rfq, "_creator_name", creator.name if creator else None)  # noqa: B010
 
     for item in rfq.items:
         material = db.query(Material).filter(Material.id == item.material_id).first()
-        item._material_name = material.name if material else None
-        item._material_unit = material.unit if material else None
+        setattr(item, "_material_name", material.name if material else None)  # noqa: B010
+        setattr(item, "_material_unit", material.unit if material else None)  # noqa: B010
 
     return _to_read(rfq)
 

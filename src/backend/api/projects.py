@@ -89,8 +89,7 @@ def update_project(
 ) -> ProjectRead:
     if body.status is not None:
         raise HTTPException(
-            status_code=400,
-            detail="Use /api/projects/{id}/transition to change status."
+            status_code=400, detail="Use /api/projects/{id}/transition to change status."
         )
     project = update_project_service(db, project_id, body, current_user.id)
     if not project:

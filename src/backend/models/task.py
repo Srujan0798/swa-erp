@@ -1,8 +1,9 @@
 import uuid
+from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import (
     DECIMAL,
-    Column,
     DateTime,
     ForeignKey,
     Index,
@@ -12,7 +13,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.backend.db.base import Base
 
@@ -20,35 +21,40 @@ from src.backend.db.base import Base
 class Task(Base):
     __tablename__ = "tasks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    project_id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    title = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    status = Column(String(50), nullable=False, default="todo", index=True)
-    priority = Column(Integer, default=0, nullable=False)
-    assignee_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="todo", index=True)
+    priority: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    assignee_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
-    reporter_id = Column(
+    reporter_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
-    due_date = Column(DateTime(timezone=True), nullable=True)
-    started_at = Column(DateTime(timezone=True), nullable=True)
-    completed_at = Column(DateTime(timezone=True), nullable=True)
-    estimated_hours = Column(DECIMAL(6, 2), nullable=True)
-    actual_hours = Column(DECIMAL(6, 2), nullable=False, default=0)
-    position = Column(Integer, nullable=False, default=0)
-    version = Column(Integer, nullable=False, default=1)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
+    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    estimated_hours: Mapped[Decimal | None] = mapped_column(DECIMAL(6, 2), nullable=True)
+    actual_hours: Mapped[Decimal] = mapped_column(DECIMAL(6, 2), nullable=False, default=0)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
-    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     project = relationship(
         "Project", foreign_keys=[project_id], back_populates="tasks", lazy="selectin"
@@ -86,13 +92,15 @@ class Task(Base):
 class TaskDependency(Base):
     __tablename__ = "task_dependencies"
 
-    task_id = Column(
+    task_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True
     )
-    depends_on_task_id = Column(
+    depends_on_task_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True
     )
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     task = relationship("Task", foreign_keys=[task_id], back_populates="dependencies")
     depends_on_task = relationship(
@@ -103,21 +111,23 @@ class TaskDependency(Base):
 class TaskComment(Base):
     __tablename__ = "task_comments"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    task_id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    task_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    author_id = Column(
+    author_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
-    parent_comment_id = Column(
+    parent_comment_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("task_comments.id", ondelete="CASCADE"), nullable=True
     )
-    content = Column(Text, nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     task = relationship("Task", back_populates="comments")
     author = relationship("User", back_populates="authored_task_comments")
-    parent = relationship("TaskComment", remote_side=[id], back_populates="replies")  # noqa: A003
+    parent = relationship("TaskComment", remote_side=[id], back_populates="replies")
     replies = relationship("TaskComment", back_populates="parent")
