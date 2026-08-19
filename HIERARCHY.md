@@ -90,6 +90,16 @@ entries for directories that don't exist.
 - `load-test-results-20260819-202227_stats_history.csv`
 - `load-test-results-20260819-202227_failures.csv`
 - `load-test-results-20260819-202227_exceptions.csv`
+- `load-test-report-20260819-202748.html`
+- `load-test-results-20260819-202748_stats.csv`
+- `load-test-results-20260819-202748_stats_history.csv`
+- `load-test-results-20260819-202748_failures.csv`
+- `load-test-results-20260819-202748_exceptions.csv`
+- `load-test-report-20260819-202748.html`
+- `load-test-results-20260819-202748_stats.csv`
+- `load-test-results-20260819-202748_stats_history.csv`
+- `load-test-results-20260819-202748_failures.csv`
+- `load-test-results-20260819-202748_exceptions.csv`
 
 ## Wave numbering
 Waves are sequential: wave-1, wave-2, ... Don't skip numbers. Cancelled waves → `attic/cancelled-wave-N/`.

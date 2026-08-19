@@ -13,8 +13,8 @@ re-walked step by step so nothing is glossed over, with each point turned into a
    their folders, some people already use RDP on it. IT said it can handle 100+ users. Viraj is
    "99% confident" it's Windows, not 100% — this is a real, acknowledged uncertainty, not settled.
    (*Wave-35 note: the "100+ users" figure is IT's claim about the server. Our load tests
-   verified **10/50/100 concurrent users, p95 ≈ 29–51 ms, no server errors** on a dev machine
-   (`docs/PERFORMANCE.md`); the client's server itself remains unload-tested.*)
+   verified **10/50/100/150 concurrent users, p95 ≈ 29–130 ms, no server errors** on a dev
+   machine (`docs/PERFORMANCE.md`); the client's server itself remains unload-tested.*)
 2. **Tech choices handed to the dev.** Viraj explicitly said "whatever you're willing to do, I'm
    okay with that... I can do anything... I'm okay with any configuration" when asked about SQL.
    This is Viraj deferring the technical stack decision entirely — already exercised via ADR-0001.

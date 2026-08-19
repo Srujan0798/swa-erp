@@ -89,11 +89,11 @@ make load-test USERS=100 SPAWN_RATE=10 RUN_TIME=5m
 make load-test USERS=150 SPAWN_RATE=10 RUN_TIME=3m
 ```
 
-> **Status (wave-35, 2026-08-19):** **Stages 1–3 (10, 50, 100 users)** have been run — results
-> in `docs/PERFORMANCE.md` (at 100 users: p95 ≈ 51 ms, no server 5xx). Stage 4 (150 users) and a
-> load test on the client's Windows Server are **not yet done**; the "100+ concurrent users"
-> figure is IT's claim about the server and must not be presented as verified on the client's
-> hardware until a load test runs there.
+> **Status (wave-35, 2026-08-19):** **all four stages (10, 50, 100, 150 users)** have been run —
+> results in `docs/PERFORMANCE.md` (at 100 users: p95 ≈ 51 ms; at 150 users: p95 ≈ 130 ms, no
+> server 5xx at any level). A load test on the client's Windows Server is **not yet done**; the
+> "100+ concurrent users" figure is IT's claim about the server and must not be presented as
+> verified on the client's hardware until a load test runs there.
 
 ## Interpreting Results
 

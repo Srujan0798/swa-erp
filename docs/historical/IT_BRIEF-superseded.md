@@ -112,8 +112,8 @@ manage. There are no external paid APIs or third-party services involved.
 - Windows Server, on-prem (99% confirmed)
 - 128 GB RAM, extendable
 - Expected load: 100+ concurrent users over VPN/RDP — *superseded note (wave-35): IT's claim
-  about the server; our load tests verified 10/50/100 users on a dev machine, p95 ≈ 29–51 ms,
-  no server errors (`docs/PERFORMANCE.md`); client server unload-tested*
+  about the server; our load tests verified 10/50/100/150 users on a dev machine, p95 ≈
+  29–130 ms, no server errors (`docs/PERFORMANCE.md`); client server unload-tested*
 - Docker used for containerization
 - Daily database backup + weekly file backup intended
 

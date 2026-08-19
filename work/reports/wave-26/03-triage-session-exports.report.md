@@ -74,7 +74,7 @@
 | Agreement ID per client source (IESK=12, APEX=0.12) | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 1) | YES |
 | DBR/KDR share counter | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 1) | YES |
 | Access: Open / HR-Admin / Founder-Finance | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 1) | YES |
-| Windows Server 128GB + VPN + 100 users | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 2) | YES — IT's claim about the server; **wave-35: load-verified to 100 users on a dev machine (p95 ≈ 51 ms, no server errors); client server unload-tested** (`docs/PERFORMANCE.md`) |
+| Windows Server 128GB + VPN + 100 users | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 2) | YES — IT's claim about the server; **wave-35: load-verified to 150 users on a dev machine (p95 ≈ 130 ms, no server errors); client server unload-tested** (`docs/PERFORMANCE.md`) |
 | 5 modules MVP: Inquiries, Agreements, Tokens, Projects, DocRef+TimeLog | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 2) | YES |
 | Drop Client Complaints & Satisfaction from MVP | `ses_11105090cffe9j406Bw5CTWCTn.json` (from meeting 2) | YES |
 
