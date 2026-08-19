@@ -10,9 +10,9 @@ from src.backend.models.audit_log import AuditLog
 
 class _SafeEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, (_uuid.UUID,)):
+        if isinstance(o, _uuid.UUID):
             return str(o)
-        if isinstance(o, (datetime, date)):
+        if isinstance(o, datetime | date):
             return o.isoformat()
         return super().default(o)
 

@@ -10,11 +10,7 @@ from src.backend.models.rfq import RFQ, RFQItem
 def get_next_rfq_number(db: Session) -> str:
     year = datetime.now(UTC).year
     prefix = f"RFQ-{year}-"
-    result = (
-        db.query(func.max(RFQ.rfq_number))
-        .filter(RFQ.rfq_number.like(f"{prefix}%"))
-        .scalar()
-    )
+    result = db.query(func.max(RFQ.rfq_number)).filter(RFQ.rfq_number.like(f"{prefix}%")).scalar()
     if result:
         try:
             seq = int(result.split("-")[-1]) + 1
@@ -176,13 +172,15 @@ def compare_vendors(
         mat_id = item.material_id
         if mat_id not in material_map:
             material_map[mat_id] = {"material_id": mat_id, "vendors": []}
-        material_map[mat_id]["vendors"].append({
-            "vendor_id": rfq.vendor_id,
-            "vendor_name": vendor_name,
-            "rfq_id": rfq.id,
-            "rfq_number": rfq.rfq_number,
-            "rate": item.vendor_rate,
-        })
+        material_map[mat_id]["vendors"].append(
+            {
+                "vendor_id": rfq.vendor_id,
+                "vendor_name": vendor_name,
+                "rfq_id": rfq.id,
+                "rfq_number": rfq.rfq_number,
+                "rate": item.vendor_rate,
+            }
+        )
 
     return list(material_map.values())
 

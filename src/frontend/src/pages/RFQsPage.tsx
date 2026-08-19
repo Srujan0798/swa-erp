@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -401,7 +401,7 @@ function CreateForm({
     queryKey: ["materials-for-rfqs"],
     queryFn: () => api.listMaterials({ page: 1, page_size: 100 }),
   });
-  const materials: Material[] = materialsData?.items ?? [];
+  const materials: Material[] = useMemo(() => materialsData?.items ?? [], [materialsData]);
 
   useEffect(() => {
     if (!materialId && materials[0]?.id) setMaterialId(materials[0].id);

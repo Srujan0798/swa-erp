@@ -6,7 +6,12 @@ from src.backend.models.contact import Contact
 
 
 def list_by_client(db: Session, client_id: uuid.UUID) -> list[Contact]:
-    return db.query(Contact).filter(Contact.client_id == client_id).order_by(Contact.is_primary.desc()).all()
+    return (
+        db.query(Contact)
+        .filter(Contact.client_id == client_id)
+        .order_by(Contact.is_primary.desc())
+        .all()
+    )
 
 
 def create(

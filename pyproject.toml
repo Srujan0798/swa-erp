@@ -22,6 +22,10 @@ ignore = ["E501", "N999"]
 [tool.ruff.lint.per-file-ignores]
 # `src/backend/__init__.py` re-exports submodules as the public package API (intentional, wave-1 pattern)
 "src/backend/__init__.py" = ["F401"]
+# A003: `id`/`parent` are SQLAlchemy column/relationship names on TaskComment that
+# shadow builtins. Only flagged by ruff >= 0.14 on `remote_side=[id]`; a `# noqa: A003`
+# there would be reported as unused by CI-pinned ruff 0.6.3 (RUF100), so it lives here.
+"src/backend/models/task.py" = ["A003"]
 
 [tool.black]
 line-length = 100

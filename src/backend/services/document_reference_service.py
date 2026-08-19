@@ -54,9 +54,7 @@ def list_document_references_service(
     return items, total, page, page_size
 
 
-def get_document_reference_service(
-    db: Session, doc_ref_id: uuid.UUID
-) -> DocumentReference | None:
+def get_document_reference_service(db: Session, doc_ref_id: uuid.UUID) -> DocumentReference | None:
     return document_reference_repo.get_by_id(db, doc_ref_id)
 
 

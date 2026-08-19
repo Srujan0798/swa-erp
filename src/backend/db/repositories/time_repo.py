@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, date, datetime
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -118,8 +119,8 @@ def create_or_update_timesheet(
     from datetime import timedelta
 
     week_end = week_start + timedelta(days=6)
-    total_hours = sum(e.hours for e in entries)
-    billable_hours = sum(e.hours for e in entries if e.is_billable)
+    total_hours = sum((e.hours for e in entries), Decimal("0"))
+    billable_hours = sum((e.hours for e in entries if e.is_billable), Decimal("0"))
 
     timesheet = get_timesheet_by_user_week(db, user_id, week_start)
     if timesheet:

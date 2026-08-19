@@ -75,7 +75,7 @@ def task_stats_endpoint(
     _: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> TaskStatsResponse:
-    return get_task_counts_service(db, project_id)
+    return TaskStatsResponse(**get_task_counts_service(db, project_id))
 
 
 # IMPORTANT: /api/tasks/my-tasks MUST be defined BEFORE /api/tasks/{task_id}

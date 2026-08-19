@@ -1,4 +1,4 @@
-from celery.result import AsyncResult
+from celery.result import AsyncResult  # type: ignore[import-untyped]
 from fastapi import APIRouter, Depends, HTTPException, Response
 
 from src.backend.core.deps import require_role

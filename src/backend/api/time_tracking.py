@@ -76,6 +76,7 @@ def get_time_entry(
     entry = get_time_entry_by_id(db, entry_id)
     if not entry:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Time entry not found")
     return _entry_to_read(entry, db)
 
@@ -108,7 +109,9 @@ def list_timesheets(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
 ) -> TimesheetListResponse:
-    return list_timesheets_service(db, user_id=user_id, status=ts_status, page=page, page_size=page_size)
+    return list_timesheets_service(
+        db, user_id=user_id, status=ts_status, page=page, page_size=page_size
+    )
 
 
 @timesheets_router.get("/{timesheet_id}", response_model=TimesheetRead)

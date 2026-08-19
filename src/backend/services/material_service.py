@@ -191,8 +191,12 @@ def list_materials_service(
     is_active: bool | None = None,
 ) -> tuple[list[dict[str, Any]], int, int, int]:
     items, total, page, page_size = list_materials(
-        db, page=page, page_size=page_size, search=search,
-        category_id=category_id, is_active=is_active,
+        db,
+        page=page,
+        page_size=page_size,
+        search=search,
+        category_id=category_id,
+        is_active=is_active,
     )
 
     result = []
@@ -201,17 +205,19 @@ def list_materials_service(
         if m.category_id:
             cat = get_category_by_id(db, m.category_id)
             category_name = cat.name if cat else None
-        result.append({
-            "id": m.id,
-            "name": m.name,
-            "code": m.code,
-            "description": m.description,
-            "category_id": m.category_id,
-            "unit": m.unit,
-            "is_active": m.is_active,
-            "created_at": m.created_at,
-            "category_name": category_name,
-        })
+        result.append(
+            {
+                "id": m.id,
+                "name": m.name,
+                "code": m.code,
+                "description": m.description,
+                "category_id": m.category_id,
+                "unit": m.unit,
+                "is_active": m.is_active,
+                "created_at": m.created_at,
+                "category_name": category_name,
+            }
+        )
 
     return result, total, page, page_size
 

@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
@@ -163,10 +163,12 @@ def generate_quote(
     )
 
     items_data = []
+    item_amounts: list[Decimal] = []
     for boq_item in boq_items:
         amount = (boq_item.quantity * boq_item.rate).quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
+        item_amounts.append(amount)
         items_data.append(
             {
                 "boq_item_id": boq_item.id,
@@ -181,7 +183,7 @@ def generate_quote(
             }
         )
 
-    subtotal = sum((i["amount"] for i in items_data), Decimal("0"))
+    subtotal = sum(item_amounts, Decimal("0"))
     markup_amount = (subtotal * markup_percent / Decimal("100")).quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
@@ -260,6 +262,8 @@ def update_quote_service(
     if "items" in data and data["items"] is not None:
         replace_items(db, quote_id, data["items"])
         quote = get_with_items(db, quote_id)
+        if quote is None:
+            raise ValueError("Quote not found")
 
     _recalculate_totals(quote)
     db.commit()
@@ -298,29 +302,23 @@ def submit_quote(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dict[
 
 
 def approve_quote(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dict[str, Any]:
-    from datetime import datetime as dt
-
     return _transition(
         db,
         quote_id,
         "approved",
         actor_id,
         approved_by=actor_id,
-        approved_at=dt.now(dt.timezone.utc),
+        approved_at=datetime.now(UTC),
     )
 
 
 def send_quote(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dict[str, Any]:
-    from datetime import datetime as dt
-
-    return _transition(db, quote_id, "sent", actor_id, sent_at=dt.now(dt.timezone.utc))
+    return _transition(db, quote_id, "sent", actor_id, sent_at=datetime.now(UTC))
 
 
 def respond_quote(
     db: Session, quote_id: uuid.UUID, response: str, notes: str | None, actor_id: uuid.UUID
 ) -> dict[str, Any]:
-    from datetime import datetime as dt
-
     if response not in ("accepted", "rejected"):
         raise ValueError("Response must be 'accepted' or 'rejected'")
 
@@ -330,7 +328,7 @@ def respond_quote(
         response,
         actor_id,
         client_response=response,
-        client_response_at=dt.now(dt.timezone.utc),
+        client_response_at=datetime.now(UTC),
         client_response_notes=notes,
     )
 

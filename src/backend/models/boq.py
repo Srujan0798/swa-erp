@@ -44,7 +44,9 @@ class BOQ(Base):
 
     items: Mapped[list["BOQItem"]] = relationship("BOQItem", back_populates="boq", lazy="selectin")
 
-    __table_args__ = (UniqueConstraint("project_id", "version_number", name="uq_boq_project_version"),)
+    __table_args__ = (
+        UniqueConstraint("project_id", "version_number", name="uq_boq_project_version"),
+    )
 
 
 class BOQItem(Base):

@@ -124,11 +124,7 @@ def soft_delete_inquiry_service(
 
 
 def _find_clients_exact(db: Session, name: str) -> list[Client]:
-    return (
-        db.query(Client)
-        .filter(Client.name == name, Client.deleted_at.is_(None))
-        .all()
-    )
+    return db.query(Client).filter(Client.name == name, Client.deleted_at.is_(None)).all()
 
 
 def _build_default_client_code(db: Session) -> str:
@@ -277,9 +273,9 @@ def _create_project_from_inquiry(
         "designer_id": req.designer_id,
         "auditor_id": req.auditor_id,
         "location": req.location,
-        "estimated_value": req.estimated_value
-        if req.estimated_value is not None
-        else inquiry.estimated_value,
+        "estimated_value": (
+            req.estimated_value if req.estimated_value is not None else inquiry.estimated_value
+        ),
         "start_date": req.start_date,
         "target_end_date": req.target_end_date,
     }

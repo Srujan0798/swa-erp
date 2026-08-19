@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from fpdf import FPDF
+from fpdf import FPDF  # type: ignore[import-untyped]
 
 
 class QuotePDF(FPDF):
@@ -103,7 +103,14 @@ class QuotePDFBuilder:
         self.pdf.set_font("Helvetica", "B", 11)
         self.pdf.set_x(x_start)
         self.pdf.cell(50, 8, "Total:", align="R")
-        self.pdf.cell(30, 8, _fmt_decimal(self.quote.get("total_amount", Decimal("0"))), align="R", new_x="LMARGIN", new_y="NEXT")
+        self.pdf.cell(
+            30,
+            8,
+            _fmt_decimal(self.quote.get("total_amount", Decimal("0"))),
+            align="R",
+            new_x="LMARGIN",
+            new_y="NEXT",
+        )
 
     def _terms_section(self) -> None:
         self.pdf.ln(6)

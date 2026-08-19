@@ -71,9 +71,7 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-_auth_limiter = IPRateLimiter(
-    max_requests=settings.AUTH_RATE_LIMIT_PER_MIN, window_seconds=60.0
-)
+_auth_limiter = IPRateLimiter(max_requests=settings.AUTH_RATE_LIMIT_PER_MIN, window_seconds=60.0)
 
 
 def auth_rate_limiter() -> IPRateLimiter:

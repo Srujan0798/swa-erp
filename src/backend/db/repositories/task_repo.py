@@ -14,32 +14,42 @@ class TaskRepository:
         self.session = session
 
     def create(self, data: TaskCreate, reporter_id: UUID) -> Task:
-        task = Task(**data.model_dump(exclude={"dependencies"}), reporter_id=reporter_id)
+        # TaskCreate has no `dependencies` field; dependencies are managed via
+        # TaskDependencyRepository. Removing the previous (dead, attribute-error)
+        # references that mypy flagged in wave-32.
+        task = Task(**data.model_dump(), reporter_id=reporter_id)
         self.session.add(task)
-        self.session.flush()
-        if data.dependencies:
-            for dep_id in data.dependencies:
-                dep = TaskDependency(task_id=task.id, depends_on_task_id=dep_id)
-                self.session.add(dep)
         self.session.flush()
         return task
 
     def get(self, task_id: UUID) -> Task | None:
-        stmt = select(Task).where(Task.id == task_id, Task.deleted_at.is_(None)).options(
-            selectinload(Task.assignee),
-            selectinload(Task.reporter),
-            selectinload(Task.dependencies).selectinload(TaskDependency.depends_on_task),
-            selectinload(Task.comments).selectinload(TaskComment.author),
-        ).execution_options(populate_existing=True)
+        stmt = (
+            select(Task)
+            .where(Task.id == task_id, Task.deleted_at.is_(None))
+            .options(
+                selectinload(Task.assignee),
+                selectinload(Task.reporter),
+                selectinload(Task.dependencies).selectinload(TaskDependency.depends_on_task),
+                selectinload(Task.comments).selectinload(TaskComment.author),
+            )
+            .execution_options(populate_existing=True)
+        )
         result = self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    def list(self, project_id: UUID, filters: TaskFilter, skip: int = 0, limit: int = 50) -> list[Task]:
-        stmt = select(Task).where(Task.deleted_at.is_(None)).options(
-            selectinload(Task.assignee),
-            selectinload(Task.reporter),
-            selectinload(Task.comments),
-        ).execution_options(populate_existing=True)
+    def list(
+        self, project_id: UUID | None, filters: TaskFilter, skip: int = 0, limit: int = 50
+    ) -> list[Task]:
+        stmt = (
+            select(Task)
+            .where(Task.deleted_at.is_(None))
+            .options(
+                selectinload(Task.assignee),
+                selectinload(Task.reporter),
+                selectinload(Task.comments),
+            )
+            .execution_options(populate_existing=True)
+        )
         if project_id is not None:
             stmt = stmt.where(Task.project_id == project_id)
         if filters.status:
@@ -64,8 +74,8 @@ class TaskRepository:
         for field, value in data.model_dump(exclude_unset=True).items():
             if field != "version":
                 setattr(task, field, value)
-        task.version += 1
-        task.updated_at = func.now()
+        task.version = (task.version or 0) + 1
+        task.updated_at = datetime.now(tz=UTC)
         self.session.flush()
         return task
 
@@ -102,7 +112,8 @@ class TaskRepository:
 
     def get_blocked_tasks(self, task_id: UUID) -> builtins.list[UUID]:
         """Return all task IDs that depend (directly or transitively) on task_id."""
-        stmt = text("""
+        stmt = text(
+            """
         WITH RECURSIVE deps AS (
             SELECT task_id, depends_on_task_id FROM task_dependencies WHERE depends_on_task_id = :tid
             UNION ALL
@@ -111,7 +122,8 @@ class TaskRepository:
             JOIN deps d ON td.depends_on_task_id = d.task_id
         )
         SELECT task_id FROM deps
-        """)
+        """
+        )
         result = self.session.execute(stmt, {"tid": task_id})
         return [row[0] for row in result.fetchall()]
 
@@ -121,7 +133,18 @@ _repo = TaskRepository.__dict__
 
 _priority_map = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
-def create_task(db: Session, *, project_id: UUID, title: str, reporter_id: UUID, description: str | None = None, priority: str = "medium", assignee_id: UUID | None = None, due_date=None) -> Task:
+
+def create_task(
+    db: Session,
+    *,
+    project_id: UUID,
+    title: str,
+    reporter_id: UUID,
+    description: str | None = None,
+    priority: str = "medium",
+    assignee_id: UUID | None = None,
+    due_date=None,
+) -> Task:
     priority_int = _priority_map.get(priority, 2)
     task = Task(
         project_id=project_id,
@@ -154,7 +177,15 @@ def get_task_with_names(db: Session, task_id: UUID) -> dict | None:
     }
 
 
-def list_by_project(db: Session, project_id: UUID, page: int, page_size: int, status: str | None, assignee_id: UUID | None, priority: str | None) -> tuple:
+def list_by_project(
+    db: Session,
+    project_id: UUID,
+    page: int,
+    page_size: int,
+    status: str | None,
+    assignee_id: UUID | None,
+    priority: str | None,
+) -> tuple:
     repo = TaskRepository(db)
     filters = TaskFilter(status=status, assignee_id=assignee_id, priority=priority)
     skip = (page - 1) * page_size
@@ -163,7 +194,9 @@ def list_by_project(db: Session, project_id: UUID, page: int, page_size: int, st
     return items, total
 
 
-def list_tasks_by_assignee(db: Session, user_id: UUID, page: int, page_size: int, status: str | None, priority: str | None) -> tuple:
+def list_tasks_by_assignee(
+    db: Session, user_id: UUID, page: int, page_size: int, status: str | None, priority: str | None
+) -> tuple:
     repo = TaskRepository(db)
     filters = TaskFilter(status=status, assignee_id=user_id, priority=priority)
     skip = (page - 1) * page_size
@@ -181,20 +214,16 @@ def get_user_by_id(db: Session, user_id: UUID):
     # Callers need User for assignment; exclude soft-deleted accounts.
     from src.backend.models.user import User
 
-    return (
-        db.query(User)
-        .filter(User.id == user_id, User.deleted_at.is_(None))
-        .first()
-    )
+    return db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
 
 
 def update_task(db: Session, task: Task, **kwargs) -> Task:
     repo = TaskRepository(db)
-    task = repo.get(task.id)
-    if not task:
+    existing = repo.get(task.id)
+    if not existing:
         raise ValueError("Task not found")
     update_data = TaskUpdate(**{k: v for k, v in kwargs.items() if k in TaskUpdate.model_fields})
-    return repo.update(task, update_data)
+    return repo.update(existing, update_data)
 
 
 def assign_task(db: Session, task_id: UUID, assignee_id: UUID) -> Task | None:
@@ -262,9 +291,13 @@ def create_comment(db: Session, task_id: UUID, author_id: UUID, content: str) ->
 
 
 def list_comments(db: Session, task_id: UUID) -> list[TaskComment]:
-    stmt = select(TaskComment).where(TaskComment.task_id == task_id).order_by(TaskComment.created_at.asc())
+    stmt = (
+        select(TaskComment)
+        .where(TaskComment.task_id == task_id)
+        .order_by(TaskComment.created_at.asc())
+    )
     result = db.execute(stmt)
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 def get_task_counts_by_project(db: Session, project_id: UUID) -> dict:

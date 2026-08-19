@@ -100,7 +100,9 @@ def delete_client(
         raise HTTPException(status_code=404, detail="Client not found")
 
 
-@router.post("/{client_id}/contacts", response_model=ContactRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{client_id}/contacts", response_model=ContactRead, status_code=status.HTTP_201_CREATED
+)
 def add_contact(
     client_id: uuid.UUID,
     body: ContactCreate,

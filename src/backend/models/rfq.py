@@ -23,52 +23,34 @@ class RFQStatus(enum.Enum):
 class RFQ(Base):
     __tablename__ = "rfqs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     project_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False, index=True
     )
     vendor_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("vendors.id"), nullable=False, index=True
     )
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=RFQStatus.DRAFT.value
-    )
-    rfq_number: Mapped[str] = mapped_column(
-        String(50), nullable=False, unique=True, index=True
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default=RFQStatus.DRAFT.value)
+    rfq_number: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
-    sent_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    responded_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    awarded_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    awarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    deleted_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    items: Mapped[list["RFQItem"]] = relationship(
-        "RFQItem", back_populates="rfq", lazy="selectin"
-    )
+    items: Mapped[list["RFQItem"]] = relationship("RFQItem", back_populates="rfq", lazy="selectin")
 
 
 class RFQItem(Base):
     __tablename__ = "rfq_items"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     rfq_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("rfqs.id"), nullable=False, index=True
     )

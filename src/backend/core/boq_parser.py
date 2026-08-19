@@ -2,7 +2,7 @@ import io
 import json
 from decimal import Decimal, InvalidOperation
 
-import openpyxl
+import openpyxl  # type: ignore[import-untyped]
 
 REQUIRED_COLUMNS = {"description", "unit", "quantity", "rate"}
 OPTIONAL_COLUMNS = {"category", "specification"}
@@ -16,7 +16,7 @@ class BOQParseError(Exception):
 def _cell_to_decimal(value: object) -> Decimal:
     if isinstance(value, Decimal):
         return value
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return Decimal(str(value))
     if isinstance(value, str):
         cleaned = value.strip().replace(",", "")
@@ -145,15 +145,17 @@ def parse_json(file_bytes: bytes) -> list[dict]:
         category_raw = row.get("category")
         specification_raw = row.get("specification")
 
-        items.append({
-            "line_number": idx,
-            "category": str(category_raw).strip() if category_raw else None,
-            "description": description,
-            "specification": str(specification_raw).strip() if specification_raw else None,
-            "unit": unit,
-            "quantity": quantity,
-            "rate": rate,
-            "amount": amount,
-        })
+        items.append(
+            {
+                "line_number": idx,
+                "category": str(category_raw).strip() if category_raw else None,
+                "description": description,
+                "specification": str(specification_raw).strip() if specification_raw else None,
+                "unit": unit,
+                "quantity": quantity,
+                "rate": rate,
+                "amount": amount,
+            }
+        )
 
     return items

@@ -8,10 +8,14 @@ from src.backend.models.document import Document, DocumentFolder
 
 
 def get_by_id(db: Session, document_id: uuid.UUID) -> Document | None:
-    return db.query(Document).filter(
-        Document.id == document_id,
-        Document.is_active.is_(True),
-    ).first()
+    return (
+        db.query(Document)
+        .filter(
+            Document.id == document_id,
+            Document.is_active.is_(True),
+        )
+        .first()
+    )
 
 
 def create_document(db: Session, data: dict[str, Any]) -> Document:
@@ -83,34 +87,54 @@ def update_document(db: Session, document_id: uuid.UUID, **kwargs: Any) -> Docum
 
 
 def get_latest_version(db: Session, project_id: uuid.UUID, name: str) -> Document | None:
-    return db.query(Document).filter(
-        Document.project_id == project_id,
-        Document.name == name,
-        Document.is_active.is_(True),
-    ).order_by(Document.version_number.desc()).first()
+    return (
+        db.query(Document)
+        .filter(
+            Document.project_id == project_id,
+            Document.name == name,
+            Document.is_active.is_(True),
+        )
+        .order_by(Document.version_number.desc())
+        .first()
+    )
 
 
 def count_versions(db: Session, project_id: uuid.UUID, name: str) -> int:
-    return db.query(Document).filter(
-        Document.project_id == project_id,
-        Document.name == name,
-        Document.is_active.is_(True),
-    ).count()
+    return (
+        db.query(Document)
+        .filter(
+            Document.project_id == project_id,
+            Document.name == name,
+            Document.is_active.is_(True),
+        )
+        .count()
+    )
 
 
 def get_version_chain(db: Session, project_id: uuid.UUID, name: str) -> list[Document]:
-    return db.query(Document).filter(
-        Document.project_id == project_id,
-        Document.name == name,
-        Document.is_active.is_(True),
-    ).order_by(Document.version_number.asc()).all()
+    return (
+        db.query(Document)
+        .filter(
+            Document.project_id == project_id,
+            Document.name == name,
+            Document.is_active.is_(True),
+        )
+        .order_by(Document.version_number.asc())
+        .all()
+    )
 
 
-def move_documents(db: Session, document_ids: list[uuid.UUID], target_folder_id: uuid.UUID | None) -> int:
-    docs = db.query(Document).filter(
-        Document.id.in_(document_ids),
-        Document.is_active.is_(True),
-    ).all()
+def move_documents(
+    db: Session, document_ids: list[uuid.UUID], target_folder_id: uuid.UUID | None
+) -> int:
+    docs = (
+        db.query(Document)
+        .filter(
+            Document.id.in_(document_ids),
+            Document.is_active.is_(True),
+        )
+        .all()
+    )
     count = 0
     for doc in docs:
         doc.folder_id = target_folder_id
@@ -131,7 +155,9 @@ def create_folder(db: Session, data: dict[str, Any]) -> DocumentFolder:
     return folder
 
 
-def list_folders(db: Session, project_id: uuid.UUID, parent_id: uuid.UUID | None = None) -> list[DocumentFolder]:
+def list_folders(
+    db: Session, project_id: uuid.UUID, parent_id: uuid.UUID | None = None
+) -> list[DocumentFolder]:
     query = db.query(DocumentFolder).filter(DocumentFolder.project_id == project_id)
     if parent_id is not None:
         query = query.filter(DocumentFolder.parent_id == parent_id)

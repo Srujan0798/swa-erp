@@ -53,9 +53,12 @@ def create_project_compliance_item_service(
     if not checklist_item:
         raise ValueError("checklist_item_not_found")
 
-    existing = get_project_compliance_item(db, project_id=project_id, checklist_item_id=checklist_item_id)
+    existing = get_project_compliance_item(
+        db, project_id=project_id, checklist_item_id=checklist_item_id
+    )
     if existing:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=409, detail="Already exists")
 
     item = create_project_compliance_item(db, project_id, checklist_item_id)
@@ -75,7 +78,7 @@ def create_project_compliance_item_service(
 def update_compliance_item_status_service(
     db: Session,
     item_id: uuid.UUID,
-    status: str,
+    status: str | None,
     evidence_document_id: uuid.UUID | None,
     notes: str | None,
     actor_id: uuid.UUID,
@@ -174,7 +177,9 @@ def _pci_to_dict(item) -> dict[str, Any]:
         "project_id": str(item.project_id),
         "checklist_item_id": str(item.checklist_item_id),
         "status": item.status,
-        "evidence_document_id": str(item.evidence_document_id) if item.evidence_document_id else None,
+        "evidence_document_id": (
+            str(item.evidence_document_id) if item.evidence_document_id else None
+        ),
         "notes": item.notes,
         "reviewed_by": str(item.reviewed_by) if item.reviewed_by else None,
         "reviewed_at": item.reviewed_at.isoformat() if item.reviewed_at else None,

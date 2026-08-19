@@ -25,7 +25,9 @@ class Vendor(Base):
     gst_number: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True)
     pan_number: Mapped[str | None] = mapped_column(String(10), nullable=True, unique=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     contacts: Mapped[list["VendorContact"]] = relationship(

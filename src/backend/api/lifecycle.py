@@ -53,9 +53,11 @@ def project_stats(
 ):
     from src.backend.models.project import Project
 
-    query = db.query(Project.status, func.count(Project.id)).filter(
-        Project.deleted_at.is_(None), Project.is_active.is_(True)
-    ).group_by(Project.status)
+    query = (
+        db.query(Project.status, func.count(Project.id))
+        .filter(Project.deleted_at.is_(None), Project.is_active.is_(True))
+        .group_by(Project.status)
+    )
 
     status_counts = {status.value: 0 for status in ProjectStatus}
     for status_val, count in query.all():
@@ -63,12 +65,16 @@ def project_stats(
 
     total_active = sum(status_counts.values())
 
-    total_estimated = db.query(func.sum(Project.estimated_value)).filter(
-        Project.deleted_at.is_(None), Project.is_active.is_(True)
-    ).scalar()
+    total_estimated = (
+        db.query(func.sum(Project.estimated_value))
+        .filter(Project.deleted_at.is_(None), Project.is_active.is_(True))
+        .scalar()
+    )
 
     return ProjectStatsResponse(
         total_active=total_active,
         by_status=status_counts,
-        total_estimated_value=Decimal(total_estimated) if total_estimated is not None else Decimal("0"),
+        total_estimated_value=(
+            Decimal(total_estimated) if total_estimated is not None else Decimal("0")
+        ),
     )
