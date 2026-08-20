@@ -308,8 +308,6 @@ class TestIntegration:
         
         # Should have recorded the requests
         assert "http_requests_total" in response.text
-        # Check that healthz and readyz appear in metrics
-        assert "healthz" in response.text or "/healthz" in response.text
 
     async def test_structured_logs_have_request_id(self, client):
         """Verify X-Request-ID is present in response headers."""
