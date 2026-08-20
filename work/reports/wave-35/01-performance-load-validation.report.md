@@ -12,12 +12,13 @@ remains unload-tested.
   concurrency tested, and the honest conclusion on the "100+ concurrent users" claim.
 - Added `tests/performance/locustfile.py` + `tests/performance/README.md` (already present in the
   worktree) and `Makefile` `load-test*` targets + `locust==2.43.4` in `requirements.txt`.
-- Captured/committed six real Locust runs (raw CSVs + HTML reports in repo root):
+- Captured/committed six real Locust runs (raw CSVs + HTML reports — originally in repo root,
+  archived to `docs/performance-runs/` in wave-39):
   `200408` (10u), `200957` (10u), `201658` (10u), `201906` (50u), `202227` (100u),
   `202748` (150u).
 - Corrected every repo doc claiming "100+ concurrent users" to the measured figure.
 
-## Real numbers (raw locust CSVs in repo root)
+## Real numbers (raw locust CSVs, archived in `docs/performance-runs/`)
 
 | Run | Users | Requests | Failures | Failure % | Median | p95 | p99 | Max | Throughput |
 |-----|-------|----------|----------|-----------|--------|-----|-----|-----|------------|
