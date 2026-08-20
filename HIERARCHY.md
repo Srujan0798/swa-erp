@@ -1,5 +1,8 @@
 # Repository Hierarchy
 
+> **Role:** Repo map — every top-level entry and where things live (checked by FM-08). Part of
+> the front-door set — start at [README.md](README.md).
+
 ## Top-level map
 
 | Path | Owner | Purpose |

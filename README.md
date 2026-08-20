@@ -1,8 +1,31 @@
 # SWA ERP
 
+> **Role:** Front door / entry point. Every other top-level doc is one table away — see
+> "Where to look" below.
+
 Internal ERP for SWA Consultancy Pvt. Ltd. — an insulation engineering startup (Ahmedabad). The ERP manages clients, projects, quotations/BOQ workflow, tasks, vendors/inventory, documents, compliance, time/financials, and reporting at startup scale.
 
 **Not coupled to rfq2boq.** BOQ files are imported as uploads (JSON/Excel) — the ERP doesn't call the RFQ→BOQ extractor; it consumes outputs of any source.
+
+## Where to look
+
+Nine top-level docs compete for your attention. This table says which one to open — you should
+never have to guess:
+
+| File | Who it's for | When to read it |
+|---|---|---|
+| [`README.md`](README.md) | everyone | **first** — you're here |
+| [`MASTER-FLOW.md`](MASTER-FLOW.md) | orchestrator + anyone lost | when you need "what to do next" as one line |
+| [`CLAUDE.md`](CLAUDE.md) / [`KIMI.md`](KIMI.md) | orchestrator agents | auto-loaded every session (same file) |
+| [`HANDOFF.md`](HANDOFF.md) | orchestrators | when a new session or orchestrator takes over |
+| [`HIERARCHY.md`](HIERARCHY.md) | everyone | when you need the repo map / where things live |
+| [`HOW_TO_RUN.md`](HOW_TO_RUN.md) | anyone running the project | before `make dev` or dispatching work |
+| [`CHANGELOG.md`](CHANGELOG.md) | everyone | for version history and release notes |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | contributors / workers | before contributing or writing a brief |
+
+Beyond these, `docs/` holds the reference docs (deployment, runbook, conventions, decisions,
+performance, observability) and `plan/` the strategy. Each of the nine files above carries a
+one-line role header linking back here.
 
 ## Quick start
 

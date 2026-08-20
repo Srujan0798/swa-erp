@@ -1,5 +1,8 @@
 # Contributing
 
+> **Role:** Contribution rules (dual-tier agentic flow, code style, verification). Part of the
+> front-door set — start at [README.md](README.md).
+
 ## Workflow
 
 This project uses the dual-tier agentic flow:

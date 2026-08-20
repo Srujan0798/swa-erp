@@ -1,5 +1,8 @@
 # Handoff Protocol
 
+> **Role:** Session / orchestrator-switching protocol. Part of the front-door set — start at
+> [README.md](README.md).
+
 ## Why this file exists
 Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't require re-explaining the project. This file lets the new session catch up in < 5 minutes.
 

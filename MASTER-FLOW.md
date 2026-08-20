@@ -1,5 +1,8 @@
 # MASTER-FLOW — THE ONE PATH (no variants, no branches)
 
+> **Role:** The single-path "what to do, ask, continue" answer. Part of the front-door set —
+> start at [README.md](README.md).
+
 > This is the ONLY file you need to know where you are and what's next.
 > Everything else is reference. If a file isn't named here, you don't need it right now.
 > The whole project, as ONE line:

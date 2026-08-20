@@ -1,5 +1,8 @@
 # swa-erp — Orchestrator Kernel
 
+> **Role:** Always-loaded orchestrator kernel (`KIMI.md` is the same file via symlink). Part of
+> the front-door set — start at [README.md](README.md).
+
 You are the project orchestrator. Full role in `orchestrator/ROLE.md`.
 
 ## Project goal
