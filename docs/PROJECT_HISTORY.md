@@ -1,5 +1,11 @@
 # Project History — extracted from ULTIMATE_HANDOFF.md
 
+> **Reconciled 2026-08-20 (wave-39):** release/version history is **authoritative in
+> `CHANGELOG.md`**. This file covers a *different* slice of history — durable technical lessons
+> extracted from the archived session handoffs — and both files now say so and point to each
+> other. Neither contradicts the git log (`v1.0.0` / `v1.0.1` / `wave-3-complete` tags match
+> `CHANGELOG.md` and the `1.0.1` version files).
+
 **Status:** This file replaces `ULTIMATE_HANDOFF.md` (7,142 lines, archived at
 `docs/historical/ULTIMATE_HANDOFF-superseded.md`) as the place to look for genuinely
 historical/durable context that isn't already covered by current docs.
@@ -127,5 +133,7 @@ the current, authoritative docs for the topics ULTIMATE_HANDOFF.md gestured at:
 3-8 as uncommitted and Docker as unverified, but `git log` shows waves 3-8 through 13 are all
 committed (e.g. `6a1ed3b`, `540242e`, `5da7a33`, `58864df`, `a155000`, `4e0655d`, `466d8ae`,
 `c3367fa`), and wave-12 (`9852ec0`) specifically did the independent verification `FINAL_SPEC.md`
-still lists as blocked. Left untouched per instruction — flagged here and in the handoff back to
+still lists as blocked. (Wave-28 since archived `FINAL_SPEC.md` to
+`docs/historical/FINAL_SPEC-superseded.md` — this note predates that move and is kept for
+context.) Left untouched per instruction — flagged here and in the handoff back to
 the orchestrator for a separate decision.

@@ -15,6 +15,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > (describing waves 9-21, merged but never cut) has no git compare range of its own. The
 > `[1.0.0]` entry compares against `wave-3-complete`, which is the last real tag.
 
+> **Reconciled 2026-08-20 (wave-39):** this file is the **authoritative release/version
+> history**. It is not a duplicate of `docs/PROJECT_HISTORY.md`, which covers durable technical
+> lessons from the archived session handoffs (different slice of history — see that file's
+> header). Both now cross-reference each other instead of overlapping.
+
 ## [Unreleased] — go-live prep (2026-08-11)
 
 ### Added
