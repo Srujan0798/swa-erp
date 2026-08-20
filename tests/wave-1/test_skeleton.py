@@ -13,7 +13,7 @@ async def test_healthz(client: AsyncClient):
 async def test_readyz_db_ok(client_with_db: AsyncClient):
     r = await client_with_db.get("/readyz")
     assert r.status_code == 200
-    assert r.json()["db"] == "ok"
+    assert r.json()["checks"]["db"] == "ok"
 
 
 async def test_request_id_header(client: AsyncClient):
