@@ -49,9 +49,6 @@ async def lifespan(app: FastAPI):
     # Initialize Sentry (no-op if SENTRY_DSN not set)
     init_sentry()
     
-    # Complete metrics setup (expose endpoint)
-    _instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
-    
     yield
     
     # Shutdown
@@ -101,3 +98,6 @@ app.include_router(timesheets_router)
 app.include_router(tokens_router)
 app.include_router(users_router)
 app.include_router(vendors_router)
+
+# Expose Prometheus metrics endpoint (must be after app creation, before requests)
+_instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)

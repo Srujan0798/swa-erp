@@ -100,8 +100,7 @@ def setup_metrics(app) -> Instrumentator:
         registry=registry,
         should_group_status_codes=True,
         should_ignore_untemplated=True,
-        should_respect_env_var=True,
-        env_var_name="ENABLE_METRICS",
+        should_respect_env_var=False,
         excluded_handlers=["/metrics", "/healthz", "/readyz"],
     )
 
