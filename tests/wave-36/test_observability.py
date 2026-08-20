@@ -14,7 +14,7 @@ from unittest.mock import patch, MagicMock
 import os
 
 from src.backend.main import app
-from src.backend.core.errors import init_sentry, capture_exception, scrub_pii, _sentry_initialized
+from src.backend.core.errors import init_sentry, capture_exception, scrub_pii, get_sentry_initialized
 
 
 @pytest.fixture(scope="function")
@@ -127,7 +127,7 @@ class TestErrorTracking:
         
         result = init_sentry()
         assert result is False
-        assert _sentry_initialized is False
+        assert not get_sentry_initialized()
 
     def test_init_sentry_with_dsn_returns_true(self):
         """init_sentry() should return True when DSN is set."""
@@ -135,7 +135,7 @@ class TestErrorTracking:
         
         result = init_sentry()
         assert result is True
-        assert _sentry_initialized is True
+        assert get_sentry_initialized()
 
     def test_capture_exception_noop_without_dsn(self):
         """capture_exception should not crash when Sentry not initialized."""
