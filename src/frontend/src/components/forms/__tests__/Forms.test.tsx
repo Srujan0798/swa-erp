@@ -74,7 +74,7 @@ describe("ContactForm", () => {
     await user.type(screen.getByLabelText(/^email \*/i), "riya@acme.com");
     await user.click(screen.getByRole("button", { name: "Add Contact" }));
 
-    expect(onSubmit.mock.calls[0][0]).toMatchObject({ name: "Riya", email: "riya@acme.com", is_primary: false });
+    expect((onSubmit as any).mock.calls[0][0]).toMatchObject({ name: "Riya", email: "riya@acme.com", is_primary: false });
   });
 
   it("shows validation errors and calls onCancel", async () => {
@@ -103,7 +103,7 @@ describe("AgreementForm", () => {
     await user.type(screen.getByLabelText(/start date \*/i), "2026-01-15");
     await user.click(screen.getByRole("button", { name: "Save Agreement" }));
 
-    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+    expect((onSubmit as any).mock.calls[0][0]).toMatchObject({
       service_name: "Energy Audit",
       start_date: "2026-01-15",
       status: "Active",
@@ -135,7 +135,7 @@ describe("TokenForm", () => {
     await user.type(screen.getByLabelText(/type/i), "Site visit");
     await user.click(screen.getByRole("button", { name: "Save token" }));
 
-    expect(onSubmit.mock.calls[0][0]).toMatchObject({
+    expect((onSubmit as any).mock.calls[0][0]).toMatchObject({
       token_date: "2026-01-20",
       token_type: "Site visit",
       tokens_used: 1,
