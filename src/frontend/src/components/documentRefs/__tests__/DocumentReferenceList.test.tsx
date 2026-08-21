@@ -54,6 +54,7 @@ const docRef: DocumentReference = {
   doc_date: "2026-01-05",
   document_type: "Drawing",
   type: "As-Built",
+  author_id: null,
   user_ref: "Ravi",
   description: "Floor plan",
   revision: "R1",

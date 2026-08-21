@@ -26,8 +26,8 @@ function createWrapper() {
 }
 
 const notifications = [
-  { id: "n1", title: "Task assigned", message: "Design review", is_read: false, created_at: "2026-01-05T00:00:00Z" },
-  { id: "n2", title: "Quote approved", message: "Quote #1 approved", is_read: true, created_at: "2026-01-04T00:00:00Z" },
+  { id: "n1", user_id: "u1", notification_type: "task", title: "Task assigned", message: "Design review", reference_type: "task", reference_id: "t1", is_read: false, created_at: "2026-01-05T00:00:00Z", read_at: null },
+  { id: "n2", user_id: "u1", notification_type: "quote", title: "Quote approved", message: "Quote #1 approved", reference_type: "quote", reference_id: "q1", is_read: true, created_at: "2026-01-04T00:00:00Z", read_at: "2026-01-04T12:00:00Z" },
 ];
 
 describe("NotificationsBell", () => {

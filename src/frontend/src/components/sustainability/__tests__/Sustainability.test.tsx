@@ -6,6 +6,7 @@ import { SustainabilityList } from "../SustainabilityList";
 
 const metric = {
   id: "sm1",
+  project_id: "p1",
   reference_id: "SWA-2025-PRJ-065",
   recorded_date: "2026-01-10",
   compliant_with_green_standards: true,
@@ -15,6 +16,8 @@ const metric = {
   insulation_efficiency_ratio: 0.89,
   payback_period_months: 24,
   notes: "certified",
+  created_at: "2026-01-10T00:00:00Z",
+  updated_at: "2026-01-10T00:00:00Z",
 };
 
 describe("SustainabilityForm", () => {

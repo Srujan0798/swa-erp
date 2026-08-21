@@ -14,17 +14,23 @@ vi.mock("@/hooks/useInvoices", () => ({
 
 const invoice = {
   id: "inv1",
+  project_id: "p1",
   invoice_number: "INV-001",
   project_name: "Acme Office",
-  status: "draft",
+  status: "draft" as const,
   total: 118000,
   subtotal: 100000,
   tax_rate: 0.18,
   tax_amount: 18000,
+  gst_percent: 18,
+  gst_amount: 18000,
+  currency: "INR",
   due_date: "2026-02-01",
+  created_by: "u1",
+  paid_at: null,
   created_at: "2026-01-01T00:00:00Z",
   notes: "Net 30",
-  items: [{ id: "li1", description: "Design fees", quantity: 1, rate: 100000, amount: 100000 }],
+  items: [{ id: "li1", invoice_id: "inv1", description: "Design fees", quantity: 1, rate: 100000, amount: 100000, category: null, time_entry_id: null }],
 };
 
 describe("InvoiceList", () => {

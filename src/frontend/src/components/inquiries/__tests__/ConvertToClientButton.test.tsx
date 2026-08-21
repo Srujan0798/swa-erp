@@ -9,7 +9,7 @@ const convertMutationMock = vi.hoisted(() => ({
   mutateAsync: vi.fn(),
   isPending: false,
   isError: false,
-  error: null,
+  error: null as Error | null,
 }));
 
 vi.mock("react-router-dom", () => ({

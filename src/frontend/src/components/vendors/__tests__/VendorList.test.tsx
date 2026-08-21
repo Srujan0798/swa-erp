@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { VendorList } from "../VendorList";
@@ -24,7 +24,7 @@ const vendor: Vendor = {
   state: "MH",
   phone: "9820xxxxxx",
   email: "sales@insul.tech",
-  gst_number: null,
+  gst_number: undefined,
   is_active: true,
   created_at: "2025-01-01T00:00:00Z",
   updated_at: "2025-01-01T00:00:00Z",

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { api, ApiError } from "@/lib/api";
+import { api } from "@/lib/api";
 
 const fetchMock = vi.hoisted(() => vi.fn());
 vi.stubGlobal("fetch", fetchMock);
@@ -273,13 +273,13 @@ describe("api endpoint methods", () => {
     await api.deleteTask("t1");
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/t1", expect.objectContaining({ method: "DELETE" }));
 
-    await api.transitionTask("t1", "In Progress");
+    await api.transitionTask("t1", "in_progress");
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/t1/transition", expect.objectContaining({ method: "POST" }));
 
     await api.reorderTask("t1", "todo", 3);
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/t1/reorder", expect.objectContaining({ method: "POST" }));
 
-    await api.bulkUpdateStatus({ task_ids: ["t1"], status: "Done" } as never);
+    await api.bulkUpdateStatus({ task_ids: ["t1"], status: "done" } as never);
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/bulk-status", expect.objectContaining({ method: "POST" }));
 
     await api.assignTask("t1", "u2");

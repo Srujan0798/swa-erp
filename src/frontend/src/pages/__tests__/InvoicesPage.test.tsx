@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import React from "react";
 import { api } from "@/lib/api";
 
 const useCurrentUserMock = vi.hoisted(() => vi.fn());

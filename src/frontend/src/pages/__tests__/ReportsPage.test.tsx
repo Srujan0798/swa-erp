@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import React from "react";
 import { api } from "@/lib/api";
 
 const useCurrentUserMock = vi.hoisted(() => vi.fn());
@@ -26,7 +25,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 vi.mock("@/components/financials/PnlDashboard", () => ({
-  PnlDashboard: ({ pnl, isLoading }: any) => (
+  PnlDashboard: ({ isLoading }: any) => (
     <div data-testid="pnl-dashboard">
       <span>PnL loaded: {String(!isLoading)}</span>
     </div>
@@ -34,8 +33,8 @@ vi.mock("@/components/financials/PnlDashboard", () => ({
 }));
 
 vi.mock("@/components/financials/CostEntryForm", () => ({
-  CostEntryForm: ({ projectId, onSuccess, onCancel }: any) => (
-    <div data-testid="cost-entry-form">CostForm {projectId}</div>
+  CostEntryForm: (_props: any) => (
+    <div data-testid="cost-entry-form">CostForm</div>
   ),
 }));
 

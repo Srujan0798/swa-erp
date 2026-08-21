@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import React from "react";
 import { api } from "@/lib/api";
 
 const useCurrentUserMock = vi.hoisted(() => vi.fn());
@@ -37,11 +36,11 @@ vi.mock("@/components/boqs/BOQUpload", () => ({
 }));
 
 vi.mock("@/components/boqs/BOQVersionList", () => ({
-  BOQVersionList: ({ onViewItems }: any) => <div data-testid="boq-version-list">BOQVersionList</div>,
+  BOQVersionList: (_props: any) => <div data-testid="boq-version-list">BOQVersionList</div>,
 }));
 
 vi.mock("@/components/boqs/BOQItemTable", () => ({
-  BOQItemTable: ({ boqId, onBack }: any) => <div data-testid="boq-item-table">BOQItemTable {boqId}</div>,
+  BOQItemTable: (_props: any) => <div data-testid="boq-item-table">BOQItemTable</div>,
 }));
 
 vi.mock("@/components/quotes/QuoteList", () => ({

@@ -26,17 +26,21 @@ const projects = [{ id: "p1", name: "Acme Office" }];
 
 const timesheet = {
   id: "ts1",
+  user_id: "u1",
   week_start: "2026-01-05T00:00:00.000Z",
   week_end: "2026-01-11T00:00:00.000Z",
   total_hours: 8,
   billable_hours: 6,
-  status: "draft",
+  status: "draft" as const,
   user_name: "Alice",
+  approved_by: null,
+  approved_at: null,
+  created_at: "2026-01-05T00:00:00Z",
 };
 
 const entries = [
-  { id: "e1", date: "2026-01-05", hours: 4, is_billable: true, project_id: "p1", description: "x" },
-  { id: "e2", date: "2026-01-05", hours: 2, is_billable: false, project_id: "p1", description: "y" },
+  { id: "e1", task_id: null, user_id: "u1", date: "2026-01-05", hours: 4, is_billable: true, project_id: "p1", description: "x", created_at: "2026-01-05T00:00:00Z", deleted_at: null },
+  { id: "e2", task_id: null, user_id: "u1", date: "2026-01-05", hours: 2, is_billable: false, project_id: "p1", description: "y", created_at: "2026-01-05T00:00:00Z", deleted_at: null },
 ];
 
 describe("TimeEntryForm", () => {
@@ -90,7 +94,7 @@ describe("TimeEntryForm", () => {
     render(
       <TimeEntryForm
         projects={projects}
-        editEntry={{ id: "e1", project_id: "p1", date: "2026-01-05", hours: 4, is_billable: true, description: "x" }}
+        editEntry={{ id: "e1", project_id: "p1", task_id: null, user_id: "u1", date: "2026-01-05", hours: 4, is_billable: true, description: "x", created_at: "2026-01-05T00:00:00Z", deleted_at: null }}
         onSuccess={onSuccess}
         onCancel={vi.fn()}
       />

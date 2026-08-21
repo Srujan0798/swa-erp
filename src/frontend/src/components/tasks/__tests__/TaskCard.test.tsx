@@ -16,12 +16,20 @@ import { TaskCard } from "../TaskCard";
 
 const baseTask = {
   id: "t1",
+  project_id: "p1",
   title: "Design review",
-  priority: "high",
+  description: null,
+  priority: "high" as const,
   comment_count: 3,
+  assignee_id: "u1",
   assignee_name: "Alice Smith",
+  sort_order: 1,
+  created_by: "u2",
+  created_by_name: "Bob",
+  created_at: "2026-01-01T00:00:00Z",
+  updated_at: "2026-01-01T00:00:00Z",
   due_date: "2026-12-31",
-  status: "todo",
+  status: "todo" as const,
 };
 
 describe("TaskCard", () => {
