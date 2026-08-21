@@ -71,5 +71,6 @@ describe("useToast", () => {
 });
 
 function renderHook() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return { result: { current: useToast() } };
 }
