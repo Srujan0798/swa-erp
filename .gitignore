@@ -67,3 +67,7 @@ playwright-report/
 playwright/.cache/
 uploads/
 coverage/
+
+# Locust load-test output at repo root (archived runs live in docs/performance-runs/)
+load-test-report-*.html
+load-test-results-*

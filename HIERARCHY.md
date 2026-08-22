@@ -1,5 +1,8 @@
 # Repository Hierarchy
 
+> **Role:** Repo map — every top-level entry and where things live (checked by FM-08). Part of
+> the front-door set — start at [README.md](README.md).
+
 ## Top-level map
 
 | Path | Owner | Purpose |
@@ -24,14 +27,25 @@
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
 | `attic/` | nobody (frozen) | superseded work, never deleted |
 | `scripts/` | workers + orchestrator | automation utilities (import tool, backup scripts) |
+| `.github/workflows/` | CI | automated checks (ci, test, security) |
+| `.claude/` | Claude Code | settings.local.json (minimal) |
+| `resources/` | orchestrator + workers | reference material (client meeting master record, IT brief source) |
+| `uploads/` | runtime | uploaded files — gitignored, created when the app runs |
+| `backups/` | runtime | backup/restore script output — gitignored, created by `scripts/backup_db.sh` |
+| `node_modules/` | build | frontend npm dependencies — gitignored, created by `npm install` |
 
 **Corrected 2026-07-21**: `data/`, `prompts/`, `config/`, and `schema/` were listed here from the
 generic project template but were never actually instantiated for this project — none of these
 four directories exist in the repo. Runtime uploads actually live in a flat `uploads/` directory
 at repo root (see `docs/conventions.md`). Removed from the table above rather than leaving
 entries for directories that don't exist.
-| `.github/workflows/` | CI | automated checks (ci, test, security) |
-| `.claude/` | Claude Code | settings.local.json (minimal) |
+
+**Corrected 2026-08-20 (wave-39)**: the 28 load-test artifacts that previously lived at repo
+root were archived to `docs/performance-runs/` (see its README). `playwright-report/` and
+`test-results/` were removed from the inventory below — they are gitignored Playwright build
+output and do not exist as real directories. The `uploads/`, `backups/`, and `node_modules/`
+rows above are gitignored runtime/build directories: they appear only when the stack runs
+(`make dev` / `npm install`) and are absent on a clean checkout.
 
 ## Directory inventory (all top-level entries)
 - `CHANGELOG.md`
@@ -56,50 +70,21 @@ entries for directories that don't exist.
 - `node_modules/`
 - `orchestrator/`
 - `plan/`
-- `playwright-report/`
 - `playwright.config.ts`
 - `pyproject.toml`
 - `requirements.txt`
 - `resources/`
 - `scripts/`
 - `src/`
-- `test-results/`
 - `tests/`
 - `uploads/`
 - `work/`
-- `load-test-report-20260819-200408.html`
-- `load-test-report-20260819-201658.html`
-- `load-test-results-20260819-200408_stats.csv`
-- `load-test-results-20260819-200408_stats_history.csv`
-- `load-test-results-20260819-200408_failures.csv`
-- `load-test-results-20260819-200408_exceptions.csv`
-- `load-test-results-20260819-200957_stats.csv`
-- `load-test-results-20260819-200957_stats_history.csv`
-- `load-test-results-20260819-200957_failures.csv`
-- `load-test-results-20260819-200957_exceptions.csv`
-- `load-test-results-20260819-201658_stats.csv`
-- `load-test-results-20260819-201658_stats_history.csv`
-- `load-test-results-20260819-201658_failures.csv`
-- `load-test-results-20260819-201658_exceptions.csv`
-- `load-test-report-20260819-201906.html`
-- `load-test-results-20260819-201906_stats.csv`
-- `load-test-results-20260819-201906_stats_history.csv`
-- `load-test-results-20260819-201906_failures.csv`
-- `load-test-results-20260819-201906_exceptions.csv`
-- `load-test-results-20260819-202227_stats.csv`
-- `load-test-results-20260819-202227_stats_history.csv`
-- `load-test-results-20260819-202227_failures.csv`
-- `load-test-results-20260819-202227_exceptions.csv`
-- `load-test-report-20260819-202748.html`
-- `load-test-results-20260819-202748_stats.csv`
-- `load-test-results-20260819-202748_stats_history.csv`
-- `load-test-results-20260819-202748_failures.csv`
-- `load-test-results-20260819-202748_exceptions.csv`
-- `load-test-report-20260819-202748.html`
-- `load-test-results-20260819-202748_stats.csv`
-- `load-test-results-20260819-202748_stats_history.csv`
-- `load-test-results-20260819-202748_failures.csv`
-- `load-test-results-20260819-202748_exceptions.csv`
+
+*Gitignored runtime/build output (created by `scripts/backup_db.sh`, `npm install`, and the
+running app respectively): `backups/`, `node_modules/`, `uploads/`. They are declared above
+because they are legitimate operational top-level dirs, but may be absent on a clean checkout.
+`playwright-report/` and `test-results/` are gitignored Playwright build output and are **not**
+real top-level entries.*
 
 ## Wave numbering
 Waves are sequential: wave-1, wave-2, ... Don't skip numbers. Cancelled waves → `attic/cancelled-wave-N/`.

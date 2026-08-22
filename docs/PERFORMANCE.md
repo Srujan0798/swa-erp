@@ -40,13 +40,13 @@ client's hardware until a run happens there. The defensible claim we can make to
 - **Concurrency tested: 10 users (three runs), 50, 100, and 150 users (one run each).**
   10-user runs used spawn rate 2 (~2 min each); 50/100/150-user runs used spawn rate 5/10/10
   (3/5/3 min). Peak user counts confirmed from `*_stats_history.csv`.
-- Captured runs, raw CSVs in the repo root:
-  - `load-test-results-20260819-200408_*.csv` (10 users)
-  - `load-test-results-20260819-200957_*.csv` (10 users)
-  - `load-test-results-20260819-201658_*.csv` (10 users)
-  - `load-test-results-20260819-201906_*.csv` (50 users)
-  - `load-test-results-20260819-202227_*.csv` (100 users)
-  - `load-test-results-20260819-202748_*.csv` (150 users)
+- Captured runs, raw CSVs archived in [`docs/performance-runs/`](performance-runs/README.md):
+  - `docs/performance-runs/load-test-results-20260819-200408_*.csv` (10 users)
+  - `docs/performance-runs/load-test-results-20260819-200957_*.csv` (10 users)
+  - `docs/performance-runs/load-test-results-20260819-201658_*.csv` (10 users)
+  - `docs/performance-runs/load-test-results-20260819-201906_*.csv` (50 users)
+  - `docs/performance-runs/load-test-results-20260819-202227_*.csv` (100 users)
+  - `docs/performance-runs/load-test-results-20260819-202748_*.csv` (150 users)
 
 ## 3. Results
 
@@ -278,4 +278,6 @@ make load-test-100  # 100 users, 5 min (run 5 above — the claimed level, verif
 make load-test-150  # 150 users, 3 min (run 6 above — degradation knee)
 ```
 Outputs land in the repo root as `load-test-results-<timestamp>_*.csv` +
-`load-test-report-<timestamp>.html`.
+`load-test-report-<timestamp>.html`; move them into `docs/performance-runs/` (see its
+README) and commit. Root-level `load-test-*` output is gitignored (wave-39) so a run can't
+re-pollute the top level.

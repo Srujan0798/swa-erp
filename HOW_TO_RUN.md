@@ -1,5 +1,8 @@
 # How to Run This Project
 
+> **Role:** Dual-tier workflow guide (orchestrator + workers). Part of the front-door set —
+> start at [README.md](README.md).
+
 ## Open the orchestrator
 Either:
 - Open Claude Code in this directory (auto-loads `CLAUDE.md`), OR
