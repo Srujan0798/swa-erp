@@ -4,7 +4,7 @@
 
 **Focus:** MVP sheet parity close-out — Project Tracking + Clients Sheet columns; global Doc Ref create; DBR/KDR shared counter; Tokens Agreement ID; Time Token/Doc picker; convert→inquiry_id.
 
-**Commit:** _(pending — filled after push)_
+**Commit:** `b0c94b3` (pushed to `origin/main`)
 
 ### Changed
 
@@ -55,7 +55,7 @@ pytest tests/ -q → 572 passed, 1 skipped
 | Real-data boot default story | yes (`swa-live-local`) |
 | VIRAJ_TRIAL_SCRIPT accurate | yes |
 | No Acme/demo-first path | yes |
-| Pushed to origin | _(after this commit)_ |
+| Pushed to origin | yes (`b0c94b3`) |
 
 **North-star Weeks 1–3 recovery: MET.** Residual only: apply `alembic upgrade head` / `make swa-live-local` on Viraj trial machine (live Postgres).
 
