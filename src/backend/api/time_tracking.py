@@ -1,13 +1,26 @@
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
+
+
+def _is_admin(user: User) -> bool:
+    return user.role == Role.ADMIN.value
+
+
+def _scoped_user_id(current_user: User, requested: uuid.UUID | None) -> uuid.UUID | None:
+    """Meeting 1: time log is owner-only; Admin may see all / filter any user."""
+    if _is_admin(current_user):
+        return requested
+    if requested is not None and requested != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot view another user's time data")
+    return current_user.id
 from src.backend.schemas.time_tracking import (
     TimeEntryCreate,
     TimeEntryListResponse,
@@ -44,7 +57,7 @@ def create_time_entry(
 
 @time_entries_router.get("", response_model=TimeEntryListResponse)
 def list_time_entries(
-    _: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
     project_id: uuid.UUID | None = None,
     user_id: uuid.UUID | None = None,
@@ -56,7 +69,7 @@ def list_time_entries(
     return list_time_entries_service(
         db,
         project_id=project_id,
-        user_id=user_id,
+        user_id=_scoped_user_id(current_user, user_id),
         start_date=start_date,
         end_date=end_date,
         page=page,
@@ -67,7 +80,7 @@ def list_time_entries(
 @time_entries_router.get("/{entry_id}", response_model=TimeEntryRead)
 def get_time_entry(
     entry_id: uuid.UUID,
-    _: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> TimeEntryRead:
     from src.backend.db.repositories.time_repo import get_time_entry_by_id
@@ -75,9 +88,9 @@ def get_time_entry(
 
     entry = get_time_entry_by_id(db, entry_id)
     if not entry:
-        from fastapi import HTTPException
-
         raise HTTPException(status_code=404, detail="Time entry not found")
+    if not _is_admin(current_user) and entry.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot view another user's time data")
     return _entry_to_read(entry, db)
 
 
@@ -102,7 +115,7 @@ def delete_time_entry(
 
 @timesheets_router.get("", response_model=TimesheetListResponse)
 def list_timesheets(
-    _: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
     user_id: uuid.UUID | None = None,
     ts_status: str | None = Query(default=None, alias="status"),
@@ -110,21 +123,25 @@ def list_timesheets(
     page_size: int = Query(default=20, ge=1, le=100),
 ) -> TimesheetListResponse:
     return list_timesheets_service(
-        db, user_id=user_id, status=ts_status, page=page, page_size=page_size
+        db,
+        user_id=_scoped_user_id(current_user, user_id),
+        status=ts_status,
+        page=page,
+        page_size=page_size,
     )
 
 
 @timesheets_router.get("/{timesheet_id}", response_model=TimesheetRead)
 def get_timesheet(
     timesheet_id: uuid.UUID,
-    _: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> TimesheetRead:
-    from fastapi import HTTPException
-
     result = get_timesheet_service(db, timesheet_id)
     if not result:
         raise HTTPException(status_code=404, detail="Timesheet not found")
+    if not _is_admin(current_user) and result.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot view another user's timesheet")
     return result
 
 

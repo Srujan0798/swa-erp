@@ -83,7 +83,7 @@ def generate_from_time_endpoint(
 )
 def list_invoices_endpoint(
     project_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008  # Meeting: finance not VIEWER
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
@@ -103,7 +103,7 @@ def list_invoices_endpoint(
 @router.get("/invoices/{invoice_id}", response_model=InvoiceRead)
 def get_invoice_endpoint(
     invoice_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     result = get_invoice_service(db, invoice_id)

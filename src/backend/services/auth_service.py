@@ -33,6 +33,9 @@ def login(
         or user.deleted_at
         or not verify_password(password, user.password_hash)
     ):
+        from src.backend.core.metrics import record_failed_login
+
+        record_failed_login()
         record_event(
             db, "auth.login_fail", user_id=None, ip_address=ip_address, user_agent=user_agent
         )

@@ -3,7 +3,8 @@ from datetime import date
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from src.backend.core.deps import get_current_user
+from src.backend.core.deps import get_current_user, require_role
+from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.report import (
@@ -44,7 +45,7 @@ def utilization(
 
 @router.get("/revenue", response_model=RevenueForecast)
 def revenue(
-    _: User = Depends(get_current_user),  # noqa: B008
+    _: User = Depends(require_role(Role.PM)),  # noqa: B008  # Meeting: finance not VIEWER
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RevenueForecast:
     return get_revenue(db)
@@ -63,7 +64,7 @@ dashboard_router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 @dashboard_router.get("/executive", response_model=ExecutiveKPIs)
 def executive(
-    _: User = Depends(get_current_user),  # noqa: B008
+    _: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> ExecutiveKPIs:
     return get_executive_kpis(db)

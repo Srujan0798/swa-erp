@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+
+from fastapi import Depends, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from src.backend.api.agreements import router as agreements_router
 from src.backend.api.auth import router as auth_router
@@ -31,11 +33,13 @@ from src.backend.api.tokens import router as tokens_router
 from src.backend.api.users import router as users_router
 from src.backend.api.vendors import router as vendors_router
 from src.backend.core.config import settings
+from src.backend.core.deps import get_current_user
 from src.backend.core.errors import init_sentry
 from src.backend.core.middleware import RequestIdMiddleware
-from src.backend.core.metrics import setup_metrics
+from src.backend.core.metrics import registry, setup_metrics
 from src.backend.core.rate_limit import install_auth_rate_limiter
 from src.backend.db.session import engine
+from src.backend.models.user import User
 
 
 # Setup metrics BEFORE creating the app (to avoid "Cannot add middleware after app started")
@@ -99,5 +103,13 @@ app.include_router(tokens_router)
 app.include_router(users_router)
 app.include_router(vendors_router)
 
-# Expose Prometheus metrics endpoint (must be after app creation, before requests)
-_instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
+# Instrument HTTP metrics once. /metrics requires auth (no anonymous scrape on app port).
+if not getattr(app.state, "_swa_metrics_instrumented", False):
+    _instrumentator.instrument(app)
+    app.state._swa_metrics_instrumented = True
+
+
+
+@app.get("/metrics", include_in_schema=False)
+def metrics_endpoint(_: User = Depends(get_current_user)) -> Response:
+    return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)

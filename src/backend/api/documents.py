@@ -54,7 +54,7 @@ async def upload_document_endpoint(
     file: UploadFile,
     folder_id: uuid.UUID | None = Form(default=None),  # noqa: B008
     tags: str | None = Form(default=None),
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
     _check_project_exists(db, project_id)
@@ -132,7 +132,7 @@ def delete_document_endpoint(
 def update_document_endpoint(
     document_id: uuid.UUID,
     body: DocumentUpdate,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
     result = update_document_metadata(db, document_id, body, current_user.id)
@@ -151,7 +151,7 @@ async def reupload_document_endpoint(
     original_name: str = Form(...),
     file: UploadFile = Form(...),  # noqa: B008
     tags: str | None = Form(default=None),
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
     _check_project_exists(db, project_id)
@@ -216,7 +216,7 @@ def get_version_history_endpoint(
 def rename_document_endpoint(
     document_id: uuid.UUID,
     body: DocumentRenameRequest,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
     result = rename_document_service(db, document_id, body.new_name, current_user.id)
@@ -231,7 +231,7 @@ def rename_document_endpoint(
 )
 def move_documents_endpoint(
     body: DocumentMoveRequest,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> dict:
     try:
@@ -251,7 +251,7 @@ def move_documents_endpoint(
 def create_folder_endpoint(
     project_id: uuid.UUID,
     body: DocumentFolderCreate,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentFolderRead:
     _check_project_exists(db, project_id)
@@ -281,7 +281,7 @@ def list_folders_endpoint(
 def rename_folder_endpoint(
     folder_id: uuid.UUID,
     body: DocumentRenameRequest,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentFolderRead:
     result = rename_folder_service(db, folder_id, body.new_name, current_user.id)

@@ -981,6 +981,9 @@ def import_sheet(
             session.rollback()
     except Exception as e:
         session.rollback()
+        # Do not report inflated create/update counts after a full rollback
+        result.created = 0
+        result.updated = 0
         result.add_error(0, f"Fatal: {e}")
     finally:
         _allow_stubs.reset(token)

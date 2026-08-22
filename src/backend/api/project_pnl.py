@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from src.backend.core.deps import get_current_user, require_role
+from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
@@ -49,7 +49,7 @@ def list_costs(
     category: str | None = None,
     page: int = 1,
     page_size: int = 20,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008  # align with /pnl
     db: Session = Depends(get_db),  # noqa: B008
 ):
     return list_project_costs_service(db, project_id, category, page, page_size)
@@ -70,7 +70,7 @@ def remove_cost(
 @router.get("/{project_id}/costs/breakdown")
 def cost_breakdown(
     project_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
     return get_cost_breakdown(db, project_id)

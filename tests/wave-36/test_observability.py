@@ -34,52 +34,59 @@ def reset_sentry():
 
 
 class TestMetricsEndpoint:
-    """Tests for Prometheus /metrics endpoint."""
+    """Tests for Prometheus /metrics endpoint (auth required)."""
 
-    async def test_metrics_endpoint_exists(self, client):
-        """Verify /metrics returns 200."""
+    async def test_metrics_requires_auth(self, client):
+        """Anonymous scrape must not succeed on the app port."""
         response = await client.get("/metrics")
+        assert response.status_code in (401, 403)
+
+    async def test_metrics_endpoint_exists(self, authed_admin_client):
+        """Verify /metrics returns 200 when authenticated."""
+        response = await authed_admin_client.get("/metrics")
         assert response.status_code == 200, f"/metrics returned {response.status_code}: {response.text}"
 
-    async def test_metrics_content_type(self, client):
+    async def test_metrics_content_type(self, authed_admin_client):
         """Verify /metrics returns Prometheus text format."""
-        response = await client.get("/metrics")
+        response = await authed_admin_client.get("/metrics")
         assert "text/plain" in response.headers.get("content-type", "")
 
-    async def test_metrics_contains_http_requests_total(self, client):
+    async def test_metrics_contains_http_requests_total(self, authed_admin_client):
         """Verify http_requests_total metric is present."""
-        response = await client.get("/metrics")
+        response = await authed_admin_client.get("/metrics")
         assert "http_requests_total" in response.text
 
-    async def test_metrics_contains_request_duration(self, client):
+    async def test_metrics_contains_request_duration(self, authed_admin_client):
         """Verify http_request_duration_seconds metric is present."""
-        response = await client.get("/metrics")
+        response = await authed_admin_client.get("/metrics")
         assert "http_request_duration_seconds" in response.text
 
-    async def test_metrics_contains_in_flight(self, client):
+    async def test_metrics_contains_in_flight(self, authed_admin_client):
         """Verify http_requests_in_flight metric is present."""
-        response = await client.get("/metrics")
+        response = await authed_admin_client.get("/metrics")
         assert "http_requests_in_flight" in response.text
 
-    async def test_metrics_updates_on_request(self, client):
+    async def test_metrics_updates_on_request(self, authed_admin_client):
         """Verify counters increment when requests are made."""
-        # Get initial count
-        response = await client.get("/metrics")
         import re
-        match = re.search(r'http_requests_total\{[^}]*method="GET",endpoint="/metrics"[^}]*\}\s+(\d+)', response.text)
+
+        response = await authed_admin_client.get("/metrics")
+        match = re.search(
+            r'http_requests_total\{[^}]*method="GET",endpoint="/metrics"[^}]*\}\s+(\d+)',
+            response.text,
+        )
         initial_count = int(match.group(1)) if match else 0
 
-        # Make a request to a known endpoint
-        await client.get("/healthz")
+        await authed_admin_client.get("/healthz")
 
-        # Get updated count
-        response = await client.get("/metrics")
-        match = re.search(r'http_requests_total\{[^}]*method="GET",endpoint="/metrics"[^}]*\}\s+(\d+)', response.text)
+        response = await authed_admin_client.get("/metrics")
+        match = re.search(
+            r'http_requests_total\{[^}]*method="GET",endpoint="/metrics"[^}]*\}\s+(\d+)',
+            response.text,
+        )
         updated_count = int(match.group(1)) if match else 0
 
-        # Should have increased by at least 1 (the /metrics request itself)
         assert updated_count >= initial_count, "Counter did not increase"
-
 
 class TestHealthEndpoints:
     """Tests for /healthz and /readyz endpoints."""
@@ -295,18 +302,14 @@ class TestScrubberCoverage:
 class TestIntegration:
     """Integration tests requiring full stack."""
 
-    async def test_metrics_scraping_under_load(self, client):
+    async def test_metrics_scraping_under_load(self, authed_admin_client):
         """Verify metrics can be scraped while handling requests."""
-        # Make several requests
         for _ in range(5):
-            await client.get("/healthz")
-            await client.get("/readyz")
+            await authed_admin_client.get("/healthz")
+            await authed_admin_client.get("/readyz")
 
-        # Scrape metrics
-        response = await client.get("/metrics")
+        response = await authed_admin_client.get("/metrics")
         assert response.status_code == 200
-        
-        # Should have recorded the requests
         assert "http_requests_total" in response.text
 
     async def test_structured_logs_have_request_id(self, client):
