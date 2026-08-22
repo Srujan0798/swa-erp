@@ -32,20 +32,22 @@ const CORE_FLOW: NavItem[] = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/inquiries", icon: Inbox, label: "1. Inquiries" },
   { to: "/clients", icon: Building2, label: "2. Clients" },
-  { to: "/agreements", icon: FileSignature, label: "3. Agreements" },
+  { to: "/agreements", icon: FileSignature, label: "3. Service Agreements" },
   { to: "/tokens", icon: Coins, label: "4. Tokens" },
-  { to: "/projects", icon: FolderKanban, label: "5. Projects" },
+  { to: "/document-references", icon: FileText, label: "5. Document refs" },
+  { to: "/projects", icon: FolderKanban, label: "6. Projects" },
+  { to: "/time-tracking", icon: Clock, label: "7. Time logging" },
 ];
 
 const DELIVERY: NavItem[] = [
+  { to: "/documents", icon: FileText, label: "Files / drawings" },
   { to: "/tasks", icon: CheckSquare2, label: "Tasks" },
-  { to: "/documents", icon: FileText, label: "Documents" },
-  { to: "/time-tracking", icon: Clock, label: "Time logging" },
   { to: "/sustainability", icon: Leaf, label: "Sustainability" },
   { to: "/compliance", icon: ShieldCheck, label: "Compliance" },
 ];
 
-const COMMERCIAL: NavItem[] = [
+/** Demoted — not the Excel core chain; keep available but not equal weight */
+const MORE: NavItem[] = [
   { to: "/vendors", icon: Truck, label: "Vendors" },
   { to: "/materials", icon: Package, label: "Materials" },
   { to: "/rfqs", icon: Send, label: "RFQs" },
@@ -114,16 +116,18 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
-        <NavSection title="Core workflow" items={CORE_FLOW} role={user?.role} />
+        <NavSection title="Excel workflow" items={CORE_FLOW} role={user?.role} />
         <NavSection title="Delivery" items={DELIVERY} role={user?.role} />
-        <NavSection title="Commercial" items={COMMERCIAL} role={user?.role} />
+        <NavSection title="More" items={MORE} role={user?.role} />
         <NavSection title="Admin" items={ADMIN} role={user?.role} />
       </nav>
 
       <div className="border-t p-3 text-[10px] leading-snug text-muted-foreground">
-        <p className="font-medium text-foreground/80">Core chain</p>
+        <p className="font-medium text-foreground/80">SWA sheet chain</p>
         <p>Inquiry → Client → SA → Token → Doc Ref → Time</p>
-        <p className="mt-1">Open UI on port <span className="font-mono">3100</span></p>
+        <p className="mt-1">
+          Data: <span className="font-mono">make bootstrap-real</span>
+        </p>
       </div>
     </aside>
   );

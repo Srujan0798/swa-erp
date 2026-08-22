@@ -1,14 +1,15 @@
-.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db seed-demo seed-dev smoke load-test
+.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db seed-demo seed-dev smoke load-test bootstrap-real swa-live-local import-real import-real-commit
 
 help:
 	@echo "swa-erp commands:"
 	@echo "  make install           — install backend + frontend deps"
 	@echo "  make dev               — docker-compose up (full stack; UI :3100 API :8100)"
 	@echo "  make dev-services      — only postgres + redis (run backend/frontend separately)"
+	@echo "  make swa-live-local    — SAME AS bootstrap-real (USE THIS for Viraj/SWA)"
 	@echo "  make bootstrap-real    — FULL real Excel load + link chain (USE THIS)"
 	@echo "  make import-real       — DRY-RUN real Excel from resources/"
 	@echo "  make import-real-commit — WIPE + COMMIT real Excel only"
-	@echo "  make seed-demo         — synthetic demo only (prefer import-real)"
+	@echo "  make seed-demo         — SYNTHETIC only — never show this to SWA as the product"
 	@echo "  make seed-dev          — minimal dev users only"
 	@echo "  make smoke             — live API smoke; backend must be up on :8100"
 	@echo "  make test              — run all tests"
@@ -111,6 +112,15 @@ import-real-commit:
 # Full internship bootstrap: wipe + real Excel + link chain + all role users
 bootstrap-real:
 	APP_ENV=dev python3 scripts/bootstrap_real.py
+	@echo ""
+	@echo "=== SWA local trial ready ==="
+	@echo "1. make dev   (if stack not up) → UI http://127.0.0.1:3100  API :8100"
+	@echo "2. Login admin@swa.co.in / admin123!"
+	@echo "3. Open: Inquiries → Document refs (left nav). Expect SWA-2025-… IDs"
+	@echo "4. Note: sample Project Tracking sheet may be empty — create via Inquiry convert"
+
+# Alias — prefer this name when talking to SWA / evaluators
+swa-live-local: bootstrap-real
 
 smoke:
 	python3 scripts/smoke_chain.py

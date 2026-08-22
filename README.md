@@ -60,23 +60,26 @@ Decision record: [`docs/decisions/0001-tech-stack.md`](docs/decisions/0001-tech-
 
 ---
 
-## Run it (3 commands)
+## Run it — SWA real sheets (USE THIS)
 
 ```bash
 cp .env.example .env
 make install
-make dev
+make dev                 # UI :3100 · API :8100 (separate terminal OK)
+make swa-live-local      # wipe + load resources/ERP Sheets + link chain
 ```
+
+Login: `admin@swa.co.in` / `admin123!`  
+You should see **`SWA-2025-…`** IDs under **Inquiries**, **Tokens**, **Document refs**.
 
 | Surface | URL |
 |---------|-----|
-| UI | http://localhost:3100 |
-| API docs | http://localhost:8100/docs |
-| Health | http://localhost:8100/healthz |
+| UI | http://127.0.0.1:3100 |
+| API docs | http://127.0.0.1:8100/docs |
 
-Ports **3100 / 8100** (not 3000/8000) so local apps don’t clash. Full ops: [`HOW_TO_RUN.md`](HOW_TO_RUN.md).
-
-Demo seed: `APP_ENV=dev python3 scripts/seed_demo.py` — see [`deliverables/DEMO_SCRIPT.md`](deliverables/DEMO_SCRIPT.md).
+**Do not** show SWA `make seed-demo` as the product — that is synthetic sandbox only.  
+Trial script: [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).  
+Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 
 ---
 

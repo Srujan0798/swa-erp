@@ -27,6 +27,7 @@ import { InquiriesPage } from "@/pages/InquiriesPage";
 import { InquiryDetailPage } from "@/pages/InquiryDetailPage";
 import { AgreementsPage } from "@/pages/AgreementsPage";
 import { TokensPage } from "@/pages/TokensPage";
+import { DocumentReferencesPage } from "@/pages/DocumentReferencesPage";
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
         <Route path="/clients/:id" element={<ClientDetailPage />} />
         <Route path="/agreements" element={<AgreementsPage />} />
         <Route path="/tokens" element={<TokensPage />} />
+        <Route path="/document-references" element={<DocumentReferencesPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/new" element={<NewProjectPage />} />
         <Route path="/projects/:id" element={<ProjectDetailPage />} />

@@ -37,9 +37,10 @@ describe("Sidebar admin-only nav gating", () => {
     expect(screen.queryByRole("link", { name: "Users" })).not.toBeInTheDocument();
   });
 
-  it("renders core workflow links for every role", () => {
+  it("renders Excel workflow links for every role", () => {
     renderSidebar("viewer");
     expect(screen.getByRole("link", { name: "1. Inquiries" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "5. Projects" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "5. Document refs" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "6. Projects" })).toBeInTheDocument();
   });
 });

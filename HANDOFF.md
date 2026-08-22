@@ -3,6 +3,18 @@
 > **Role:** Session / orchestrator-switching protocol. Part of the front-door set — start at
 > [README.md](README.md).
 
+## Current state (2026-08-23 — RECOVERY MONTH / SWA-USABLE)
+
+**Feedback:** SWA said product felt unusable / “dummy”. Response is a **4-week recovery** focused on real Excel chain UX — not more test waves.
+
+**Week 1 in progress/done on main:** Document References first-class page; Excel-first sidebar; dashboard full chain; `make swa-live-local`; [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).
+
+Plan: session `plan.md` recovery (Weeks 1–4). Reports: `work/reports/recovery/`.
+
+---
+
+## Prior seal (still true)
+
 ## Current state (2026-08-23 — INDUSTRY-HARDENED)
 
 - **Product:** **v1.0.1** feature-complete (waves 1–31).
