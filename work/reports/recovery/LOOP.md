@@ -4,7 +4,7 @@
 
 **Focus:** Excel field parity (Time Logging + Inquiry Technical Lead) + Doc Refs / Login / Dashboard / real-data messaging polish.
 
-**Commit:** (filled after push)
+**Commit:** `cb1f07f` (pushed to `origin/main`)
 
 ### Changed
 
@@ -70,4 +70,4 @@ pytest tests/wave-7/test_time_tracking.py tests/wave-13/ -q
 | Real-data boot default story | yes (`swa-live-local`) |
 | VIRAJ_TRIAL_SCRIPT accurate | updated |
 | No Accme/demo-first path | yes |
-| Pushed to origin | pending this fire |
+| Pushed to origin | yes (`cb1f07f`) |
