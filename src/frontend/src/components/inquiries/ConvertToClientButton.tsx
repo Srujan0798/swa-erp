@@ -122,8 +122,8 @@ export function ConvertToClientButton({
             <DialogTitle>Convert Inquiry to Project</DialogTitle>
             <DialogDescription>
               {candidates
-                ? `Multiple clients named "${inquiryClientName}" exist. Choose one or create a new client.`
-                : `Create a Project for "${inquiryClientName}". A matching Client will be created if needed.`}
+                ? `Multiple clients named "${inquiryClientName}" exist. Choose one or create a new client — then you always land on the new Project.`
+                : `Check client → create if missing → always land on a Project (Meeting 2). Working from "${inquiryClientName}".`}
             </DialogDescription>
           </DialogHeader>
 

@@ -35,4 +35,4 @@ make swa-live-local, VIRAJ_TRIAL_SCRIPT.md
 
 ## Status
 
-IN PROGRESS — Week 1 of 4 (see recovery plan).
+Week 1 landed. Week 2 in progress — see `week-2.md` (Projects 0-row empty-state + convert UX).

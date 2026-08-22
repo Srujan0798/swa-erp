@@ -74,7 +74,8 @@ export function ProjectList(): ReactElement {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
           <p className="text-sm text-muted-foreground">
-            Open a project for BOQ, quotes, document references, sustainability.
+            Excel <span className="font-medium">Project Tracking</span> sheet — open a project for
+            tokens, document refs, time, and delivery work.
           </p>
         </div>
         {canCreate ? (
@@ -152,16 +153,43 @@ export function ProjectList(): ReactElement {
                     <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                       {debouncedSearch || statusFilter ? (
                         <>No projects match these filters. Clear search/status and try again.</>
-                      ) : canCreate ? (
-                        <>
-                          No projects yet.{" "}
-                          <Link className="underline font-medium text-foreground" to="/projects/new">
-                            Create a project
-                          </Link>{" "}
-                          after you have a client on file.
-                        </>
                       ) : (
-                        <>No projects yet. Ask a PM to create one from a client engagement.</>
+                        <div className="mx-auto max-w-lg space-y-2 text-sm">
+                          <p className="font-medium text-foreground">No projects in the database</p>
+                          <p>
+                            The sample{" "}
+                            <span className="font-medium">Project Tracking</span> sheet often has{" "}
+                            <span className="font-medium">0 rows</span> after{" "}
+                            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                              make bootstrap-real
+                            </code>
+                            — that is expected, not a broken import.
+                          </p>
+                          {canCreate ? (
+                            <p>
+                              Meeting 2 path: open{" "}
+                              <Link
+                                className="underline font-medium text-foreground"
+                                to="/inquiries"
+                              >
+                                Inquiries
+                              </Link>
+                              , convert one (check client → land on Project), or{" "}
+                              <Link
+                                className="underline font-medium text-foreground"
+                                to="/projects/new"
+                              >
+                                create a project
+                              </Link>{" "}
+                              after a client is on file.
+                            </p>
+                          ) : (
+                            <p>
+                              Ask a PM to convert an inquiry or create a project from a client
+                              engagement.
+                            </p>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>

@@ -92,11 +92,15 @@ describe("ConvertToClientButton", () => {
     expect(screen.getByRole("button", { name: /^convert$/i })).toBeDisabled();
   });
 
-  it("reuses an existing client when one is selected", async () => {
+  it("reuses an existing client when one is selected and navigates to the project", async () => {
     const user = userEvent.setup();
-    convertMutationMock.mutateAsync.mockRejectedValue(
-      new ApiError(300, { candidates })
-    );
+    convertMutationMock.mutateAsync
+      .mockRejectedValueOnce(new ApiError(300, { candidates }))
+      .mockResolvedValueOnce({
+        inquiry: {},
+        client_id: "client-1",
+        project_id: "project-42",
+      });
     renderButton();
 
     await user.click(screen.getByRole("button", { name: /convert to project/i }));
@@ -111,6 +115,7 @@ describe("ConvertToClientButton", () => {
         payload: expect.objectContaining({ client_id: "client-1" }),
       })
     );
+    expect(navigateMock).toHaveBeenCalledWith("/projects/project-42");
   });
 
   it("creates a new client when the new-client option is selected", async () => {

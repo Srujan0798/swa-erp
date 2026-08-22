@@ -79,8 +79,29 @@ describe("ProjectList", () => {
       { wrapper: createWrapper() }
     );
 
-    await screen.findByText(/No projects yet/);
+    await screen.findByText(/No projects in the database/i);
     expect(screen.queryByRole("link", { name: /new project/i })).not.toBeInTheDocument();
+  });
+
+  it("explains 0-row Project Tracking sample and points writers to Inquiries", async () => {
+    useCurrentUserMock.mockReturnValue({ data: { role: "pm" } });
+    vi.mocked(api.listProjects).mockResolvedValue({ items: [], total: 0 } as never);
+    render(
+      <MemoryRouter>
+        <ProjectList />
+      </MemoryRouter>,
+      { wrapper: createWrapper() }
+    );
+
+    expect(await screen.findByText(/No projects in the database/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 rows/i)).toBeInTheDocument();
+    expect(screen.getByText(/make bootstrap-real/i)).toBeInTheDocument();
+    expect(screen.getByText(/Meeting 2 path/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Inquiries/i })).toHaveAttribute("href", "/inquiries");
+    expect(screen.getByRole("link", { name: /create a project/i })).toHaveAttribute(
+      "href",
+      "/projects/new"
+    );
   });
 
   it("shows error banner and retries", async () => {
