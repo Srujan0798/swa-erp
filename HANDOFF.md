@@ -9,7 +9,7 @@
 
 **Week 1 done on main:** Document References first-class page; Excel-first sidebar; dashboard full chain; `make swa-live-local`; [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).
 
-**Week 2+ field parity (in progress on main):** Time Logging Sheet columns on model/API/UI/import; Inquiry `technical_lead`; Doc Refs list matches Excel columns; Login/Dashboard/`VIRAJ_TRIAL_SCRIPT` real-data messaging. See `work/reports/recovery/LOOP.md`.
+**Week 2+ field parity (on main):** Time Logging columns; Inquiry `technical_lead`; Tokens SWA/client employee names + Doc Ref Author (import no longer drops names); SA list shows client_name/end/notes; Login/Dashboard/`VIRAJ_TRIAL_SCRIPT` real-data-first. See `work/reports/recovery/LOOP.md`.
 
 Plan: session `plan.md` recovery (Weeks 1–4). Reports: `work/reports/recovery/`.
 
