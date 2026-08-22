@@ -26,6 +26,9 @@ class Token(Base):
     project_owner_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
+    # Excel free-text names (kept even when no matching system user)
+    swa_employee_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    project_owner_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     client_employee_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("projects.id"), nullable=True, index=True

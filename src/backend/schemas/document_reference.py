@@ -11,6 +11,7 @@ class DocumentReferenceCreate(BaseModel):
     document_type: str = Field(min_length=1, max_length=50)
     type_: str | None = Field(default=None, max_length=50, alias="type")
     author_id: uuid.UUID | None = None
+    author_name: str | None = Field(default=None, max_length=255)
     user_ref: str | None = Field(default=None, max_length=255)
     description: str | None = None
     revision: str = Field(default="R0", max_length=10)
@@ -25,6 +26,7 @@ class DocumentReferenceUpdate(BaseModel):
     document_type: str | None = Field(default=None, min_length=1, max_length=50)
     type_: str | None = Field(default=None, max_length=50, alias="type")
     author_id: uuid.UUID | None = None
+    author_name: str | None = Field(default=None, max_length=255)
     user_ref: str | None = Field(default=None, max_length=255)
     description: str | None = None
     revision: str | None = Field(default=None, max_length=10)
@@ -45,6 +47,7 @@ class DocumentReferenceRead(BaseModel):
     document_type: str
     type_: str | None = Field(alias="type")
     author_id: uuid.UUID | None
+    author_name: str | None = None
     user_ref: str | None
     description: str | None
     revision: str

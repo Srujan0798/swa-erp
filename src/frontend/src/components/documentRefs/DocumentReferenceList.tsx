@@ -53,6 +53,7 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
                   doc_date: formData.doc_date,
                   document_type: formData.document_type,
                   type: formData.type,
+                  author_name: formData.author_name || undefined,
                   user_ref: formData.user_ref,
                   description: formData.description,
                   revision: formData.revision,
@@ -90,6 +91,7 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {d.doc_date}
+                    {d.author_name ? ` · Author: ${d.author_name}` : ""}
                     {d.user_ref ? ` · ${d.user_ref}` : ""}
                     {d.type ? ` · ${d.type}` : ""}
                   </div>

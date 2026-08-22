@@ -17,7 +17,7 @@ import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 
 /**
- * Global Service Agreements inventory (consultancy core).
+ * Global Service Agreements inventory — maps to SWA "Service Agreements Sheet".
  * Create new SAs from Client detail; this page is for browse/search.
  */
 export function AgreementsPage(): ReactElement {
@@ -44,9 +44,10 @@ export function AgreementsPage(): ReactElement {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Service agreements</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Service Agreements</h1>
         <p className="text-sm text-muted-foreground">
-          Annual retainers (e.g. INSUDESIGN). Open a client to add a new agreement or tokens.
+          Excel <span className="font-medium">Service Agreements Sheet</span> — Agreement ID, Client,
+          Inquiry, Service Name (e.g. INSUDESIGN), Start/End, Total Tokens, Status, Notes.
         </p>
       </div>
 
@@ -73,33 +74,37 @@ export function AgreementsPage(): ReactElement {
             />
           )}
 
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Reference</TableHead>
+                  <TableHead>Agreement ID</TableHead>
+                  <TableHead>Client</TableHead>
                   <TableHead>Service</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Start</TableHead>
-                  <TableHead>Tokens budget</TableHead>
-                  <TableHead>Client</TableHead>
+                  <TableHead>End</TableHead>
+                  <TableHead>Tokens</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground">
                       Loading…
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                       {debounced ? (
                         <>No agreements match “{debounced}”. Try another reference or service name.</>
                       ) : (
                         <>
-                          No service agreements yet. Open a{" "}
+                          No service agreements yet. Load sheets with{" "}
+                          <code className="rounded bg-muted px-1">make swa-live-local</code>, or open
+                          a{" "}
                           <Link className="underline font-medium text-foreground" to="/clients">
                             client
                           </Link>{" "}
@@ -114,18 +119,25 @@ export function AgreementsPage(): ReactElement {
                       <TableCell className="font-mono text-xs font-semibold">
                         {a.reference_id}
                       </TableCell>
+                      <TableCell>
+                        <Link
+                          className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+                          to={`/clients/${a.client_id}`}
+                        >
+                          {a.client_name || "Open client"}
+                        </Link>
+                      </TableCell>
                       <TableCell className="font-medium">{a.service_name}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{a.status}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm">{a.start_date}</TableCell>
-                      <TableCell className="tabular-nums">
-                        {a.total_tokens ?? "—"}
+                      <TableCell className="text-sm whitespace-nowrap">{a.start_date}</TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {a.end_date ?? "—"}
                       </TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/clients/${a.client_id}`}>Open client</Link>
-                        </Button>
+                      <TableCell className="tabular-nums">{a.total_tokens ?? "—"}</TableCell>
+                      <TableCell className="max-w-[160px] truncate text-xs text-muted-foreground">
+                        {a.notes ?? "—"}
                       </TableCell>
                     </TableRow>
                   ))

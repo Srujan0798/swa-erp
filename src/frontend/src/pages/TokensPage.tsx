@@ -18,7 +18,8 @@ import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 
 /**
- * Global Tokens inventory. New tokens are created under a Client → Agreement.
+ * Global Tokens inventory — maps to SWA "Tokens Sheet".
+ * New tokens are created under Client → Agreement → Tokens.
  */
 export function TokensPage(): ReactElement {
   const [searchParams] = useSearchParams();
@@ -53,7 +54,9 @@ export function TokensPage(): ReactElement {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Tokens</h1>
         <p className="text-sm text-muted-foreground">
-          Units of work under a service agreement. Create from Client → Agreement → Tokens.
+          Excel <span className="font-medium">Tokens Sheet</span> — Date, Token ID, Agreement ID,
+          Type, Description, Status, Tokens Used, SWA employee, Project owner, Client employee.
+          Create from Client → Agreement → Tokens.
         </p>
       </div>
 
@@ -88,15 +91,17 @@ export function TokensPage(): ReactElement {
             </p>
           ) : null}
 
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Reference</TableHead>
+                  <TableHead>Token ID</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
                   <TableHead>Used</TableHead>
+                  <TableHead>SWA employee</TableHead>
+                  <TableHead>Client emp.</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Project</TableHead>
                 </TableRow>
@@ -104,13 +109,13 @@ export function TokensPage(): ReactElement {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                       Loading…
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                       {debounced || projectFilter ? (
                         <>
                           No tokens match this filter.{" "}
@@ -121,7 +126,9 @@ export function TokensPage(): ReactElement {
                         </>
                       ) : (
                         <>
-                          No tokens yet. Open a{" "}
+                          No tokens yet. Load sheets with{" "}
+                          <code className="rounded bg-muted px-1">make swa-live-local</code>, or open
+                          a{" "}
                           <Link className="underline font-medium text-foreground" to="/clients">
                             client
                           </Link>{" "}
@@ -136,13 +143,19 @@ export function TokensPage(): ReactElement {
                       <TableCell className="font-mono text-xs font-semibold">
                         {t.reference_id}
                       </TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">{t.token_date}</TableCell>
                       <TableCell>{t.token_type ?? "—"}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{t.token_status}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm">{t.token_date}</TableCell>
                       <TableCell className="tabular-nums">×{t.tokens_used}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-sm">
+                      <TableCell className="text-sm">
+                        {t.swa_employee_name || "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {t.client_employee_name || "—"}
+                      </TableCell>
+                      <TableCell className="max-w-[180px] truncate text-sm">
                         {t.description ?? "—"}
                       </TableCell>
                       <TableCell>

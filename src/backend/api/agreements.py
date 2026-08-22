@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
+from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
 from src.backend.db.session import get_db
+from src.backend.models.agreement import ServiceAgreement
 from src.backend.models.user import User
 from src.backend.schemas.agreement import (
     ServiceAgreementCreate,
@@ -22,6 +24,14 @@ from src.backend.services.agreement_service import (
 )
 
 router = APIRouter(prefix="/api/service-agreements", tags=["service-agreements"])
+
+
+def _to_read(db: Session, agreement: ServiceAgreement) -> ServiceAgreementRead:
+    read = ServiceAgreementRead.model_validate(agreement)
+    client = get_client_by_id(db, agreement.client_id)
+    if client is not None:
+        read.client_name = client.name
+    return read
 
 
 @router.get("", response_model=ServiceAgreementListResponse)
@@ -45,7 +55,7 @@ def list_agreements(
         q=q,
     )
     return ServiceAgreementListResponse(
-        items=[ServiceAgreementRead.model_validate(a) for a in items],
+        items=[_to_read(db, a) for a in items],
         total=total,
         page=page,
         page_size=page_size,
@@ -59,7 +69,7 @@ def create_agreement(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> ServiceAgreementRead:
     agreement = create_agreement_service(db, body, current_user.id)
-    return ServiceAgreementRead.model_validate(agreement)
+    return _to_read(db, agreement)
 
 
 @router.get("/{agreement_id}", response_model=ServiceAgreementRead)
@@ -71,7 +81,7 @@ def get_agreement(
     agreement = get_agreement_service(db, agreement_id)
     if not agreement:
         raise HTTPException(status_code=404, detail="Service agreement not found")
-    return ServiceAgreementRead.model_validate(agreement)
+    return _to_read(db, agreement)
 
 
 @router.patch("/{agreement_id}", response_model=ServiceAgreementRead)
@@ -87,7 +97,7 @@ def update_agreement(
         raise HTTPException(status_code=422, detail=str(e)) from e
     if not agreement:
         raise HTTPException(status_code=404, detail="Service agreement not found")
-    return ServiceAgreementRead.model_validate(agreement)
+    return _to_read(db, agreement)
 
 
 @router.delete("/{agreement_id}", status_code=status.HTTP_204_NO_CONTENT)

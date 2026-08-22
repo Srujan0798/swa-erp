@@ -41,10 +41,17 @@ export default function TimeTrackingPage(): ReactElement {
     activity_type: "",
     software_used: "",
     work_mode: "",
+    employee_name: "",
     employee_role: "",
     sheet_reference_id: "",
     billable_hours: "",
   });
+
+  useEffect(() => {
+    if (user?.name) {
+      setForm((prev) => (prev.employee_name ? prev : { ...prev, employee_name: user.name }));
+    }
+  }, [user?.name]);
 
   useEffect(() => {
     const fromUrl = searchParams.get("project") ?? "";
@@ -98,6 +105,7 @@ export default function TimeTrackingPage(): ReactElement {
         activity_type: form.activity_type.trim() || undefined,
         software_used: form.software_used.trim() || undefined,
         work_mode: form.work_mode.trim() || undefined,
+        employee_name: form.employee_name.trim() || undefined,
         employee_role: form.employee_role.trim() || undefined,
         sheet_reference_id: form.sheet_reference_id.trim() || undefined,
         billable_hours:
@@ -116,6 +124,7 @@ export default function TimeTrackingPage(): ReactElement {
         activity_type: "",
         software_used: "",
         work_mode: "",
+        employee_name: user?.name ?? "",
         employee_role: "",
         sheet_reference_id: "",
         billable_hours: "",
@@ -255,6 +264,14 @@ export default function TimeTrackingPage(): ReactElement {
                   value={form.activity_type}
                   onChange={(e) => setForm({ ...form, activity_type: e.target.value })}
                   placeholder="CON, DBR, CAL…"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Employee name</Label>
+                <Input
+                  value={form.employee_name}
+                  onChange={(e) => setForm({ ...form, employee_name: e.target.value })}
+                  placeholder="Defaults to signed-in user"
                 />
               </div>
               <div className="space-y-2">

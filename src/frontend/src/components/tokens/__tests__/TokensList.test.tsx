@@ -57,6 +57,8 @@ const token: Token = {
   tokens_used: 2,
   swa_employee_id: null,
   project_owner_id: null,
+  swa_employee_name: "Mihir",
+  project_owner_name: null,
   client_employee_name: "Ravi",
   project_id: null,
   created_at: "2026-01-10T00:00:00Z",
@@ -93,7 +95,9 @@ describe("TokensList role gating (canManageCommercial)", () => {
     renderList("pm");
     expect(screen.getByText("SWA-TOK-001")).toBeInTheDocument();
     expect(screen.getByText("×2")).toBeInTheDocument();
-    expect(screen.getByText("Design · 2026-01-10 · Ravi")).toBeInTheDocument();
+    expect(
+      screen.getByText("Design · 2026-01-10 · SWA: Mihir · Client: Ravi")
+    ).toBeInTheDocument();
     expect(screen.getByText("Preliminary sketches")).toBeInTheDocument();
   });
 
@@ -111,6 +115,8 @@ describe("TokensList role gating (canManageCommercial)", () => {
       description: undefined,
       token_status: undefined,
       tokens_used: undefined,
+      swa_employee_name: undefined,
+      project_owner_name: undefined,
       client_employee_name: undefined,
       project_id: undefined,
     });

@@ -47,6 +47,8 @@ export function TokensList({ agreementId }: TokensListProps) {
                   description: formData.description,
                   token_status: formData.token_status,
                   tokens_used: formData.tokens_used,
+                  swa_employee_name: formData.swa_employee_name || undefined,
+                  project_owner_name: formData.project_owner_name || undefined,
                   client_employee_name: formData.client_employee_name,
                   project_id: formData.project_id || undefined,
                 });
@@ -80,7 +82,8 @@ export function TokensList({ agreementId }: TokensListProps) {
                   </div>
                   <div className="text-sm">
                     {t.token_type ?? "Token"} · {t.token_date}
-                    {t.client_employee_name ? ` · ${t.client_employee_name}` : ""}
+                    {t.swa_employee_name ? ` · SWA: ${t.swa_employee_name}` : ""}
+                    {t.client_employee_name ? ` · Client: ${t.client_employee_name}` : ""}
                   </div>
                   {t.description && (
                     <div className="text-xs text-muted-foreground line-clamp-1">{t.description}</div>

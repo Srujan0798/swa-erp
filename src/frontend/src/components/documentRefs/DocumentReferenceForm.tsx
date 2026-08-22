@@ -20,6 +20,7 @@ const docRefSchema = z.object({
   doc_date: z.string().min(1, "Document date is required"),
   document_type: z.string().min(1, "Document type is required"),
   type: z.string().optional(),
+  author_name: z.string().optional(),
   user_ref: z.string().optional(),
   description: z.string().optional(),
   revision: z.string().default("R0"),
@@ -98,7 +99,7 @@ export function DocumentReferenceForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Category (optional)</Label>
+              <Label htmlFor="type">Type (Submittal / Internal…)</Label>
               <Input
                 id="type"
                 placeholder="Submittal, Internal…"
@@ -106,9 +107,22 @@ export function DocumentReferenceForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="user_ref">User / reviewer ref</Label>
-              <Input id="user_ref" {...form.register("user_ref")} />
+              <Label htmlFor="author_name">Author</Label>
+              <Input
+                id="author_name"
+                placeholder="Excel: Author name"
+                {...form.register("author_name")}
+              />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="user_ref">User / reviewer</Label>
+            <Input
+              id="user_ref"
+              placeholder="Client / Reviewer / Authority"
+              {...form.register("user_ref")}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

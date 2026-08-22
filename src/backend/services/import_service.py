@@ -626,11 +626,13 @@ def _import_tokens(s: Session, rows: list[dict], result: ImportResult) -> None:
                 values["tokens_used"] = tu
             emp = _txt(d.get("Swa Employee Name/Team Leader")) or _txt(d.get("Swa Employee Name"))
             if emp:
+                values["swa_employee_name"] = emp
                 u = _resolve_user_by_name(s, emp)
                 if u is not None:
                     values["swa_employee_id"] = u.id
             po = _txt(d.get("Project Owner"))
             if po:
+                values["project_owner_name"] = po
                 u = _resolve_user_by_name(s, po)
                 if u is not None:
                     values["project_owner_id"] = u.id
@@ -690,6 +692,7 @@ def _import_document_references(s: Session, rows: list[dict], result: ImportResu
             )
             author = _txt(d.get("Author"))
             if author:
+                values["author_name"] = author
                 u = _resolve_user_by_name(s, author)
                 if u is not None:
                     values["author_id"] = u.id

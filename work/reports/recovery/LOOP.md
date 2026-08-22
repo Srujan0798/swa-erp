@@ -71,3 +71,56 @@ pytest tests/wave-7/test_time_tracking.py tests/wave-13/ -q
 | VIRAJ_TRIAL_SCRIPT accurate | updated |
 | No Accme/demo-first path | yes |
 | Pushed to origin | yes (`cb1f07f`) |
+
+## Fire — 2026-08-23 (Tokens/SA/DocRef Excel names)
+
+**Focus:** Tokens Sheet employee names (import gap fix) + Service Agreements list excellence + Doc Ref Author + Time employee default.
+
+**Commit:** (filled after push)
+
+### Changed
+
+1. **Tokens Excel name parity**
+   - Migration `0032`: `swa_employee_name`, `project_owner_name` on `tokens`
+   - Import always stores sheet names (previously dropped when no system user matched)
+   - TokenForm + TokensPage + TokensList show SWA employee / client employee
+   - API test: `test_create_stores_excel_employee_names`
+
+2. **Document Reference Author**
+   - Migration `0032`: `author_name` on `document_references`
+   - Import stores Author text; form/list/global page show Author column
+
+3. **Service Agreements page**
+   - Excel sheet copy; End date + Notes columns
+   - API enriches `client_name` for Client Name column (sheet mental model)
+   - Empty-state → `make swa-live-local`
+
+4. **Time logging**
+   - Employee name field defaults from signed-in user
+
+5. **VIRAJ_TRIAL_SCRIPT** updated for SA/Tokens/DocRef column talk-track
+
+### Evidence
+
+```
+pytest tests/wave-9/ -q → 79 passed
+pytest tests/wave-13/test_import_service.py → 12 passed
+frontend TokensPage/TokensList/DocRefList/TimeTracking → 32 passed
+```
+
+### Next / residual
+
+- Apply `alembic upgrade head` when postgres is up (`make swa-live-local` recreates via create path / bootstrap)
+- Optional: agreement_id visible on Tokens global list
+
+### Stop-loop checklist
+
+| Criterion | Status |
+|-----------|--------|
+| Doc Refs excellent | yes (Author + sheet columns) |
+| Chain-first nav/dashboard | yes |
+| Convert + empty project paths | yes |
+| Real-data boot default story | yes |
+| VIRAJ_TRIAL_SCRIPT accurate | yes |
+| No Accme/demo-first path | yes |
+| Pushed to origin | pending this fire |

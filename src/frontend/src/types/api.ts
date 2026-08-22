@@ -650,6 +650,7 @@ export interface ServiceAgreement {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  client_name?: string | null;
 }
 
 export interface ServiceAgreementListResponse {
@@ -692,6 +693,8 @@ export interface Token {
   tokens_used: number;
   swa_employee_id: string | null;
   project_owner_id: string | null;
+  swa_employee_name: string | null;
+  project_owner_name: string | null;
   client_employee_name: string | null;
   project_id: string | null;
   created_at: string;
@@ -714,6 +717,8 @@ export interface TokenCreate {
   tokens_used?: number;
   swa_employee_id?: string;
   project_owner_id?: string;
+  swa_employee_name?: string;
+  project_owner_name?: string;
   client_employee_name?: string;
   project_id?: string;
 }
@@ -726,6 +731,8 @@ export interface TokenUpdate {
   tokens_used?: number;
   swa_employee_id?: string;
   project_owner_id?: string;
+  swa_employee_name?: string;
+  project_owner_name?: string;
   client_employee_name?: string;
   project_id?: string;
 }
@@ -741,6 +748,7 @@ export interface DocumentReference {
   document_type: string;
   type: string | null;
   author_id: string | null;
+  author_name: string | null;
   user_ref: string | null;
   description: string | null;
   revision: string;
@@ -764,6 +772,7 @@ export interface DocumentReferenceCreate {
   document_type: string;
   type?: string;
   author_id?: string;
+  author_name?: string;
   user_ref?: string;
   description?: string;
   revision?: string;
@@ -776,6 +785,7 @@ export interface DocumentReferenceUpdate {
   document_type?: string;
   type?: string;
   author_id?: string;
+  author_name?: string;
   user_ref?: string;
   description?: string;
   revision?: string;

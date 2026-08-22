@@ -45,6 +45,8 @@ class ServiceAgreementRead(BaseModel):
     notes: str | None
     created_at: datetime
     updated_at: datetime
+    # Enriched for Excel mental model (Client Name column)
+    client_name: str | None = None
 
 
 class ServiceAgreementListResponse(BaseModel):

@@ -13,6 +13,8 @@ class TokenCreate(BaseModel):
     tokens_used: int = Field(default=1, ge=1)
     swa_employee_id: uuid.UUID | None = None
     project_owner_id: uuid.UUID | None = None
+    swa_employee_name: str | None = Field(default=None, max_length=255)
+    project_owner_name: str | None = Field(default=None, max_length=255)
     client_employee_name: str | None = Field(default=None, max_length=255)
     project_id: uuid.UUID | None = None
 
@@ -25,6 +27,8 @@ class TokenUpdate(BaseModel):
     tokens_used: int | None = Field(default=None, ge=1)
     swa_employee_id: uuid.UUID | None = None
     project_owner_id: uuid.UUID | None = None
+    swa_employee_name: str | None = Field(default=None, max_length=255)
+    project_owner_name: str | None = Field(default=None, max_length=255)
     client_employee_name: str | None = Field(default=None, max_length=255)
     project_id: uuid.UUID | None = None
 
@@ -42,6 +46,8 @@ class TokenRead(BaseModel):
     tokens_used: int
     swa_employee_id: uuid.UUID | None
     project_owner_id: uuid.UUID | None
+    swa_employee_name: str | None = None
+    project_owner_name: str | None = None
     client_employee_name: str | None
     project_id: uuid.UUID | None
     created_at: datetime

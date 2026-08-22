@@ -28,6 +28,8 @@ const tokenSchema = z.object({
     },
     z.number().int().positive()
   ),
+  swa_employee_name: z.string().optional(),
+  project_owner_name: z.string().optional(),
   client_employee_name: z.string().optional(),
   project_id: z.string().optional(),
 });
@@ -100,6 +102,25 @@ export function TokenForm({ initialData, onSubmit, onCancel, isLoading }: TokenF
             <div className="space-y-2">
               <Label htmlFor="token_status">Status</Label>
               <Input id="token_status" {...form.register("token_status")} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="swa_employee_name">SWA employee / team lead</Label>
+              <Input
+                id="swa_employee_name"
+                placeholder="Excel: Swa Employee Name"
+                {...form.register("swa_employee_name")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project_owner_name">Project owner</Label>
+              <Input
+                id="project_owner_name"
+                placeholder="Excel: Project Owner"
+                {...form.register("project_owner_name")}
+              />
             </div>
           </div>
 

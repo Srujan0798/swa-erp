@@ -25,6 +25,8 @@ class DocumentReference(Base):
     author_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
+    # Excel "Author" free-text (kept when author is not a system user)
+    author_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     user_ref: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     revision: Mapped[str] = mapped_column(String(10), nullable=False, default="R0")

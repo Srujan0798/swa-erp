@@ -85,6 +85,26 @@ class TestTokenReferenceIdGeneration:
         assert token.token_status == "In Progress"
         assert token.tokens_used == 1
 
+    def test_create_stores_excel_employee_names(self, db_session):
+        actor = _seed_user(db_session)
+        client = _seed_client(db_session)
+        agreement = _seed_agreement(db_session, client)
+        token = create_token_service(
+            db_session,
+            TokenCreate(
+                agreement_id=agreement.id,
+                token_date=date(2026, 7, 1),
+                token_type="Query",
+                swa_employee_name="Mihir",
+                project_owner_name="Priya",
+                client_employee_name="Akash",
+            ),
+            actor.id,
+        )
+        assert token.swa_employee_name == "Mihir"
+        assert token.project_owner_name == "Priya"
+        assert token.client_employee_name == "Akash"
+
     def test_two_tokens_increment_seq(self, db_session):
         actor = _seed_user(db_session)
         client = _seed_client(db_session)

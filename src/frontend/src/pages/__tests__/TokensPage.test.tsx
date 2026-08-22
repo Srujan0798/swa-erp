@@ -42,7 +42,7 @@ describe("TokensPage", () => {
   it("renders header", async () => {
     await renderPage();
     expect(screen.getByText("Tokens")).toBeInTheDocument();
-    expect(screen.getByText(/Units of work under a service agreement/)).toBeInTheDocument();
+    expect(screen.getByText(/Tokens Sheet/i)).toBeInTheDocument();
   });
 
   it("shows search input", async () => {

@@ -128,6 +128,7 @@ export function DocumentReferencesPage(): ReactElement {
                   <TableHead>Date</TableHead>
                   <TableHead>Doc type</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Author</TableHead>
                   <TableHead>Rev</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>User</TableHead>
@@ -138,13 +139,13 @@ export function DocumentReferencesPage(): ReactElement {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-muted-foreground">
+                    <TableCell colSpan={10} className="text-muted-foreground">
                       Loading…
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
                       {debounced || typeFilter || projectFilter ? (
                         <>
                           No document references match this filter.{" "}
@@ -187,6 +188,7 @@ export function DocumentReferencesPage(): ReactElement {
                       <TableCell className="text-xs text-muted-foreground">
                         {d.type || "—"}
                       </TableCell>
+                      <TableCell className="text-xs">{d.author_name || "—"}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{d.revision}</Badge>
                       </TableCell>

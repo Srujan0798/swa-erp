@@ -82,6 +82,7 @@ def create_document_reference_service(
         "document_type": data.document_type,
         "type_": data.type_,
         "author_id": data.author_id,
+        "author_name": data.author_name,
         "user_ref": data.user_ref,
         "description": data.description,
         "revision": data.revision or "R0",
