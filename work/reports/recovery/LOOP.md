@@ -76,7 +76,7 @@ pytest tests/wave-7/test_time_tracking.py tests/wave-13/ -q
 
 **Focus:** Tokens Sheet employee names (import gap fix) + Service Agreements list excellence + Doc Ref Author + Time employee default.
 
-**Commit:** (filled after push)
+**Commit:**  (pushed to )
 
 ### Changed
 
@@ -123,4 +123,4 @@ frontend TokensPage/TokensList/DocRefList/TimeTracking → 32 passed
 | Real-data boot default story | yes |
 | VIRAJ_TRIAL_SCRIPT accurate | yes |
 | No Accme/demo-first path | yes |
-| Pushed to origin | pending this fire |
+| Pushed to origin | yes () |
