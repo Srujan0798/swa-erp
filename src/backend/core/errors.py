@@ -104,7 +104,7 @@ def init_sentry() -> bool:
         integrations=[
             FastApiIntegration(
                 transaction_style="endpoint",
-                failed_request_status_codes=range(400, 600),
+                failed_request_status_codes=set(range(400, 600)),
             ),
             SqlalchemyIntegration(),
             sentry_logging,
