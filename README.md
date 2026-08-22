@@ -2,7 +2,7 @@
 
 Internal ERP for **SWA Consultancy** (Ahmedabad) — an insulation engineering firm that today runs operations across ~20 live Excel sheets on OneDrive. This system digitizes that workflow: same business logic, one system, JWT + role-based access.
 
-**Product v1.0.1 is built.** Professional-grade quality track (waves 32–36, 39) is verified. Independent review (wave-37) and this packaging wave run in the final-close track — **not** claimed as “100% complete.”
+**Product v1.0.1 is built.** Professional-grade track **waves 32–39 shipped** (CI, coverage, frontend tests, load, observability, adversarial review + packaging, repo org). Company-server **deploy remains external** (Viraj / no IT dept). Residual ops risks are listed honestly in the wave-37 report — not claimed as “zero risk / 100% complete.”
 
 ---
 
@@ -35,7 +35,7 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | Area | Claim | Source |
 |------|--------|--------|
 | **Backend coverage** | **86%** overall (`8702` stmts); all `services/*.py` ≥70%; wave-33 closed five weakest services (pdf/quote/import/task/notification) | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-33/03-remaining-coverage.report.md`](work/reports/wave-33/03-remaining-coverage.report.md) |
-| **Backend suite** | **557 passed, 5 failed, 1 skipped** (5 standing 401-vs-403 auth assertion mismatches — FastAPI `HTTPBearer` returns 403 with no header) | Same verdict + wave-33 report |
+| **Backend suite** | **565 passed, 0 failed, 1 skipped** (industry-hardening re-verify after final-close stabilize) | `work/reports/FINAL-CLOSE.report.md`; re-run this session |
 | **Frontend coverage** | Vitest thresholds **60/50/60/60** (stmts/branches/fns/lines) **met**; independent remeasure **~61% statements** | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-34/02-frontend-page-coverage.report.md`](work/reports/wave-34/02-frontend-page-coverage.report.md) |
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client’s Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
@@ -100,7 +100,7 @@ Demo seed: `APP_ENV=dev python3 scripts/seed_demo.py` — see [`deliverables/DEM
 | Track | Status |
 |-------|--------|
 | Product MVP (waves 1–31) | Shipped (`v1.0.1`) — core ID chain, GST invoices, RBAC, importer, MinIO + Celery |
-| Professional-grade (32–36, 39) | Shipped — real CI, coverage, frontend suite, load, observability, repo org |
-| Wave-37 independent review | **In progress** — findings pending in parallel; not inventing verdicts here |
-| Wave-38 submission package | This packaging pass |
+| Professional-grade (32–39) | **All shipped** — CI, coverage, frontend suite, load, observability, adversarial review, packaging, repo org |
+| Wave-37 independent review | **Shipped** — [`work/reports/wave-37/01-independent-review.report.md`](work/reports/wave-37/01-independent-review.report.md) (critical fixes landed; residual RISKs documented) |
+| Wave-38 submission package | **Shipped** |
 | Company-server deploy | **External blocker** — no IT dept; server facts open ([`deliverables/SEND_IT.md`](deliverables/SEND_IT.md)) |

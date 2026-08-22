@@ -2,7 +2,7 @@
 
 **Audience:** engineers and internship evaluators who were not in the room.  
 **Date:** 2026-08-23  
-**Scope:** product v1.0.1 + professional-grade evidence track (waves 32–36, 39). Wave-37 independent review findings are **pending in parallel** and are not invented here.
+**Scope:** product v1.0.1 + professional-grade evidence track (waves 32–39, all shipped). Residual ops RISKs from wave-37 are listed in §5 — not claimed as zero.
 
 ---
 
@@ -78,12 +78,11 @@ Work was sequenced in **waves** — scoped briefs under `work/wave-N/`, acceptan
 | **34** | Real frontend Vitest suite; thresholds **60/50/60/60** met; cite **~61%** statements on independent remeasure | [`work/reports/wave-34/02-frontend-page-coverage.report.md`](../work/reports/wave-34/02-frontend-page-coverage.report.md) + verdict |
 | **35** | Locust load at 10/50/100/150 users on a **dev machine**; p95 ≈ 29–130 ms; no 5xx after fixes | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
 | **36** | Prometheus metrics, readiness, optional Sentry | [`docs/OBSERVABILITY.md`](../docs/OBSERVABILITY.md), wave-36 report 02 |
-| **37** | Independent adversarial review | **In flight** — scratch findings exist; final triage report pending in parallel |
-| **39** | Repo organization | Shipped |
+| **37** | Independent adversarial review | **Shipped** — path-traversal + hourly-rate settings fixed; residual RISKs documented | [`work/reports/wave-37/01-independent-review.report.md`](../work/reports/wave-37/01-independent-review.report.md) |
+| **38** | Submission package | **Shipped** | wave-38 report |
+| **39** | Repo organization | Shipped | |
 
 **Anti-fabrication:** this project documents past over-claims (wrong pass counts, “module X done” when files were missing). Closing rules live in [`work/FINAL-CLOSE/ANTI-FABRICATION.md`](../work/FINAL-CLOSE/ANTI-FABRICATION.md). Metrics in the README and this report use only verified wording (e.g. **not** “no backend module under 70%” globally — nine non-alembic modules remain under that line).
-
-Standing known issues called out for review (not papered over): five auth tests expecting 401 vs FastAPI’s 403; TaskCard overdue-day flake under Asia/Kolkata when tests use `toISOString()`.
 
 ---
 
@@ -95,8 +94,8 @@ Pulled from [`SUBMISSION.md`](SUBMISSION.md) §4 and current reality — not san
 2. **Load numbers are from a development machine**, not the client’s Windows Server (128 GB, VPN-only). Defensible claim: p95 ≈ 29–130 ms at 10–150 users **on this laptop-class stack**.
 3. **JWT is HS256**, fine for internal on-prem; RS256 would be needed for third-party token verification.
 4. **Coverage is strong, not total.** Backend 86% overall; services ≥70%; some API/repo modules still &lt;70%. Frontend meets configured thresholds at ~61% statements independently.
-5. **Suite is not “0 failed”** on the independent 2026-08-23 backend re-verify: **5 failed / 557 passed / 1 skipped** (401-vs-403 standing debt).
-6. **Wave-37 findings are not final yet.** Security/silent-failure scratch notes exist; do not treat them as closed triage.
+5. **Backend suite after final-close stabilize:** **565 passed / 0 failed / 1 skipped** (industry re-verify). Frontend **522 / 0**.
+6. **Wave-37 residual RISKs (documented, not all fixed):** `/metrics` auth posture; time/finance VIEWER reads vs Meeting 1 matrix (industry-hardening Phase C); import rollback counters; JWT refresh rotation. See wave-37 report.
 7. **Out of MVP by client decision:** HR, founder-only finance sheets, satisfaction/complaints, marketing analytics, client portal.
 8. **Excel → ERP cutover ownership** is still organizational (who runs the real import at go-live).
 

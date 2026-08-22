@@ -169,10 +169,10 @@ this meeting), dev
 
 ### 1. Production infrastructure — confirmed, with one caveat
 
-> **Note (2026-08-07):** "Confirmed" below = the client confirmed these are the intended
-> **target** decisions, not that they're built today. In the current code, file storage is a
-> local `uploads/` dir and there is no Celery worker (see `HIERARCHY.md`); MinIO and Celery
-> remain target-state.
+> **Note (updated 2026-08-23):** At meeting time these were **target** decisions. They are now
+> **built**: `StorageBackend` with `local` default + opt-in MinIO (`STORAGE_BACKEND=minio`,
+> wave-31); Celery workers + async export (wave-31). Local `uploads/` remains the default for
+> simple deploys. Windows Server / VPN / ports still need Viraj’s server facts before company go-live.
 
 | Item | Decision | Confidence |
 |------|----------|------------|
