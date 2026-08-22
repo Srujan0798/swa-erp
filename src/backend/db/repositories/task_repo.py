@@ -70,10 +70,15 @@ class TaskRepository:
         result = self.session.execute(stmt)
         return list(result.scalars().all())
 
+    _priority_int = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+
     def update(self, task: Task, data: TaskUpdate) -> Task:
         for field, value in data.model_dump(exclude_unset=True).items():
-            if field != "version":
-                setattr(task, field, value)
+            if field == "version":
+                continue
+            if field == "priority" and isinstance(value, str):
+                value = self._priority_int.get(value, 2)
+            setattr(task, field, value)
         task.version = (task.version or 0) + 1
         task.updated_at = datetime.now(tz=UTC)
         self.session.flush()
