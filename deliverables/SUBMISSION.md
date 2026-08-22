@@ -2,7 +2,7 @@
 
 **Product version:** 1.0.1 (tagged `v1.0.1`)  
 **Package refreshed:** 2026-08-23 (wave-38 — professional-grade metrics)  
-**Status:** Product MVP **shipped**. Professional-grade waves **32–39 all shipped**. Backend suite re-verify: **565 passed / 0 failed / 1 skipped**. **Company-server deploy remains external** (no IT dept; server facts open). Residual ops RISKs: see wave-37 report.
+**Status:** Product MVP **shipped**. Professional-grade waves **32–39 all shipped**. Industry-hardened. Backend suite: **566 passed / 0 failed / 1 skipped**. **Company-server deploy remains external** (no IT dept; server facts open).
 
 This is the single document handed over with the project. It is honest about what exists, what
 does not, and what is still waiting on the client's side. Evaluator front door: [`README.md`](../README.md).
@@ -18,7 +18,7 @@ Safe wording only — every row cites a report. See also [`work/reports/wave-38/
 |-------|--------|--------|
 | Backend coverage (overall) | **86%** (8702 stmts / 1201 miss) | [`COMPLETION-HANDOFF-VERDICT.md`](../work/reports/COMPLETION-HANDOFF-VERDICT.md); wave-33 report 03 |
 | Backend services layer | **All `services/*.py` ≥70%** | Same verdict (do **not** claim global “no module under 70%”) |
-| Backend suite (industry re-verify) | **565 passed, 0 failed, 1 skipped** | `work/reports/FINAL-CLOSE.report.md` + this pass |
+| Backend suite (industry re-verify) | **566 passed, 0 failed, 1 skipped** | `work/reports/industry-hardening/01-suite.report.md` |
 | CI coverage floor | `--cov-fail-under=82` (86% clears it) | Makefile + wave-32 |
 | Frontend thresholds | **60 / 50 / 60 / 60** met; cite **~61% statements** independently | Verdict + wave-34 report 02 |
 | Load test | **10–150 users**, p95 **≈ 29–130 ms**, no 5xx after fixes, **dev machine only** | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |

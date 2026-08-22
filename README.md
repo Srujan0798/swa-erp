@@ -35,7 +35,7 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | Area | Claim | Source |
 |------|--------|--------|
 | **Backend coverage** | **86%** overall (`8702` stmts); all `services/*.py` ≥70%; wave-33 closed five weakest services (pdf/quote/import/task/notification) | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-33/03-remaining-coverage.report.md`](work/reports/wave-33/03-remaining-coverage.report.md) |
-| **Backend suite** | **565 passed, 0 failed, 1 skipped** (industry-hardening re-verify after final-close stabilize) | `work/reports/FINAL-CLOSE.report.md`; re-run this session |
+| **Backend suite** | **566 passed, 0 failed, 1 skipped** (industry-hardening re-verify) | `work/reports/industry-hardening/01-suite.report.md` |
 | **Frontend coverage** | Vitest thresholds **60/50/60/60** (stmts/branches/fns/lines) **met**; independent remeasure **~61% statements** | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-34/02-frontend-page-coverage.report.md`](work/reports/wave-34/02-frontend-page-coverage.report.md) |
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client’s Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
