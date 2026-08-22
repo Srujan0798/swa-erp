@@ -1,13 +1,17 @@
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
+from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.session import get_db
+from src.backend.models.document_reference import DocumentReference
 from src.backend.models.user import User
 from src.backend.schemas.document_reference import (
+    DocumentReferenceCounters,
     DocumentReferenceCreate,
     DocumentReferenceListResponse,
     DocumentReferenceRead,
@@ -22,8 +26,17 @@ from src.backend.services.document_reference_service import (
     soft_delete_document_reference_service,
     update_document_reference_service,
 )
+from src.backend.services.reference_id_service import get_current_seq
 
 router = APIRouter(prefix="/api/document-references", tags=["document-references"])
+
+
+def _to_read(db: Session, doc: DocumentReference) -> DocumentReferenceRead:
+    read = DocumentReferenceRead.model_validate(doc)
+    project = get_project_by_id(db, doc.project_id)
+    if project is not None:
+        read.project_code = project.code
+    return read
 
 
 @router.get("", response_model=DocumentReferenceListResponse)
@@ -47,10 +60,26 @@ def list_document_references(
         q=q,
     )
     return DocumentReferenceListResponse(
-        items=[DocumentReferenceRead.model_validate(d) for d in items],
+        items=[_to_read(db, d) for d in items],
         total=total,
         page=page,
         page_size=page_size,
+    )
+
+
+@router.get("/counters", response_model=DocumentReferenceCounters)
+def get_document_reference_counters(
+    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> DocumentReferenceCounters:
+    """Expose DBR/KDR shared counter so the sheet mental model is visible in UI."""
+    year = datetime.now(UTC).year
+    last = get_current_seq(db, "DBR", year=year)
+    next_seq = last + 1
+    return DocumentReferenceCounters(
+        year=year,
+        dbr_kdr_last_seq=last,
+        dbr_kdr_next_preview=f"SWA-{year}-DBR-{next_seq:03d}",
     )
 
 
@@ -91,7 +120,7 @@ def create_document_reference(
         raise HTTPException(status_code=404, detail="Project not found") from e
     except TokenNotFoundError as e:
         raise HTTPException(status_code=404, detail="Token not found") from e
-    return DocumentReferenceRead.model_validate(doc_ref)
+    return _to_read(db, doc_ref)
 
 
 @router.get("/{doc_ref_id}", response_model=DocumentReferenceRead)
@@ -103,7 +132,7 @@ def get_document_reference(
     doc_ref = get_document_reference_service(db, doc_ref_id)
     if not doc_ref:
         raise HTTPException(status_code=404, detail="Document reference not found")
-    return DocumentReferenceRead.model_validate(doc_ref)
+    return _to_read(db, doc_ref)
 
 
 @router.patch("/{doc_ref_id}", response_model=DocumentReferenceRead)
@@ -116,7 +145,7 @@ def update_document_reference(
     doc_ref = update_document_reference_service(db, doc_ref_id, body, current_user.id)
     if not doc_ref:
         raise HTTPException(status_code=404, detail="Document reference not found")
-    return DocumentReferenceRead.model_validate(doc_ref)
+    return _to_read(db, doc_ref)
 
 
 @router.delete("/{doc_ref_id}", status_code=status.HTTP_204_NO_CONTENT)

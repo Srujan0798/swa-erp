@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -21,6 +21,9 @@ class Client(Base):
     gst_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     primary_email: Mapped[str] = mapped_column(String(320), nullable=False)
     primary_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    # Excel Clients Sheet: Primary Contact / Date Onboarded
+    primary_contact: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    date_onboarded: Mapped[date | None] = mapped_column(Date, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     industry: Mapped[str | None] = mapped_column(String(100), nullable=True)

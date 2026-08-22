@@ -18,6 +18,8 @@ vi.mock("@/hooks/useToast", () => ({
 vi.mock("@/lib/api", () => ({
   api: {
     listProjects: vi.fn(),
+    listTokens: vi.fn(),
+    listDocumentReferences: vi.fn(),
     listTimeEntries: vi.fn(),
     createTimeEntry: vi.fn(),
   },
@@ -51,6 +53,8 @@ describe("TimeTrackingPage", () => {
     useCurrentUserMock.mockReturnValue({ data: { role: "pm" } });
     useToastMock.mockReturnValue({ toast: vi.fn() });
     vi.mocked(api.listProjects).mockResolvedValue({ items: [project], total: 1 } as never);
+    vi.mocked(api.listTokens).mockResolvedValue({ items: [], total: 0 } as never);
+    vi.mocked(api.listDocumentReferences).mockResolvedValue({ items: [], total: 0 } as never);
     vi.mocked(api.listTimeEntries).mockResolvedValue({ items: [], total: 0 } as never);
   });
 

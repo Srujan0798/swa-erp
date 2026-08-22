@@ -149,6 +149,14 @@ export function ClientDetailPage(): ReactElement {
                 <p>{client.primary_phone ?? "—"}</p>
               </div>
               <div>
+                <Label className="text-muted-foreground">Primary Contact</Label>
+                <p>{client.primary_contact ?? "—"}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Date Onboarded</Label>
+                <p>{client.date_onboarded ?? "—"}</p>
+              </div>
+              <div>
                 <Label className="text-muted-foreground">City</Label>
                 <p>{client.city ?? "—"}</p>
               </div>

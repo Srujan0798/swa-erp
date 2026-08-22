@@ -17,6 +17,7 @@ import {
 import { api } from "@/lib/api";
 
 const docRefSchema = z.object({
+  project_id: z.string().min(1, "Project is required"),
   doc_date: z.string().min(1, "Document date is required"),
   document_type: z.string().min(1, "Document type is required"),
   type: z.string().optional(),
@@ -32,7 +33,8 @@ const docRefSchema = z.object({
 type DocRefFormData = z.infer<typeof docRefSchema>;
 
 interface DocumentReferenceFormProps {
-  projectId: string;
+  /** When set, project is locked (project-scoped create). */
+  projectId?: string;
   initialData?: Partial<DocRefFormData>;
   onSubmit: (data: DocRefFormData) => Promise<void>;
   onCancel?: () => void;
@@ -50,6 +52,7 @@ export function DocumentReferenceForm({
   const form = useForm<DocRefFormData>({
     resolver: zodResolver(docRefSchema),
     defaultValues: {
+      project_id: projectId || "",
       doc_date: today,
       revision: "R0",
       status: "Draft",
@@ -57,10 +60,18 @@ export function DocumentReferenceForm({
     },
   });
 
+  const selectedProjectId = form.watch("project_id") || projectId || "";
+
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-select-docref"],
+    queryFn: () => api.listProjects({ page_size: 100 }),
+    enabled: !projectId,
+  });
+
   const { data: tokensData } = useQuery({
-    queryKey: ["tokens-for-project", projectId],
-    queryFn: () => api.listTokens({ project_id: projectId, page_size: 100 }),
-    enabled: !!projectId,
+    queryKey: ["tokens-for-project", selectedProjectId],
+    queryFn: () => api.listTokens({ project_id: selectedProjectId, page_size: 100 }),
+    enabled: !!selectedProjectId,
   });
   const tokens = tokensData?.items ?? [];
   const tokenId = form.watch("token_id");
@@ -72,6 +83,35 @@ export function DocumentReferenceForm({
           <CardTitle>Document reference</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {!projectId ? (
+            <div className="space-y-2">
+              <Label>Associated project *</Label>
+              <Select
+                value={selectedProjectId || undefined}
+                onValueChange={(v) => {
+                  form.setValue("project_id", v, { shouldValidate: true });
+                  form.setValue("token_id", undefined);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project (Excel: Associated Project ID)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(projectsData?.items ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} — {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.project_id && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.project_id.message as string}
+                </p>
+              )}
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="doc_date">Document date *</Label>

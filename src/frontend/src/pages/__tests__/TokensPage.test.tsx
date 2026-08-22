@@ -13,10 +13,15 @@ vi.mock("@/lib/api", () => ({
 const token = {
   id: "tk1",
   reference_id: "TKN-001",
+  agreement_id: "ag1",
+  agreement_reference_id: "SWA-2025-SA-011",
   token_type: "Design",
   token_status: "active",
   token_date: "2026-08-20",
   tokens_used: 3,
+  swa_employee_name: "Mihir",
+  project_owner_name: "Priya",
+  client_employee_name: null,
   description: "Design tokens",
   project_id: "p1",
 };
@@ -54,8 +59,11 @@ describe("TokensPage", () => {
     vi.mocked(api.listTokens).mockResolvedValue({ items: [token], total: 1 } as never);
     await renderPage();
     expect(await screen.findByText("TKN-001")).toBeInTheDocument();
+    expect(screen.getByText("SWA-2025-SA-011")).toBeInTheDocument();
     expect(screen.getByText("Design")).toBeInTheDocument();
     expect(screen.getByText("active")).toBeInTheDocument();
+    expect(screen.getByText("Mihir")).toBeInTheDocument();
+    expect(screen.getByText("Priya")).toBeInTheDocument();
   });
 
   it("shows empty state", async () => {

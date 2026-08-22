@@ -123,6 +123,12 @@ def get_project_with_names(db: Session, project_id: uuid.UUID) -> dict | None:
     pm = get_user_by_id(db, project.pm_id) if project.pm_id else None
     designer = get_user_by_id(db, project.designer_id) if project.designer_id else None
     auditor = get_user_by_id(db, project.auditor_id) if project.auditor_id else None
+    inquiry_ref = None
+    if project.inquiry_id:
+        from src.backend.db.repositories.inquiry_repo import get_by_id as get_inquiry_by_id
+
+        inquiry = get_inquiry_by_id(db, project.inquiry_id)
+        inquiry_ref = inquiry.reference_id if inquiry else None
 
     return {
         "id": project.id,
@@ -140,6 +146,12 @@ def get_project_with_names(db: Session, project_id: uuid.UUID) -> dict | None:
         "start_date": project.start_date,
         "target_end_date": project.target_end_date,
         "actual_end_date": project.actual_end_date,
+        "inquiry_id": project.inquiry_id,
+        "milestone": project.milestone,
+        "progress_indicators": project.progress_indicators,
+        "team_leader_name": project.team_leader_name,
+        "project_owner_name": project.project_owner_name,
+        "notes": project.notes,
         "is_active": project.is_active,
         "created_at": project.created_at,
         "updated_at": project.updated_at,
@@ -148,6 +160,7 @@ def get_project_with_names(db: Session, project_id: uuid.UUID) -> dict | None:
         "pm_name": pm.name if pm else None,
         "designer_name": designer.name if designer else None,
         "auditor_name": auditor.name if auditor else None,
+        "inquiry_reference_id": inquiry_ref,
     }
 
 
@@ -166,12 +179,18 @@ def list_projects_with_names(
     from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
     from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
 
+    from src.backend.db.repositories.inquiry_repo import get_by_id as get_inquiry_by_id
+
     result = []
     for p in projects:
         client = get_client_by_id(db, p.client_id) if p.client_id else None
         pm = get_user_by_id(db, p.pm_id) if p.pm_id else None
         designer = get_user_by_id(db, p.designer_id) if p.designer_id else None
         auditor = get_user_by_id(db, p.auditor_id) if p.auditor_id else None
+        inquiry_ref = None
+        if p.inquiry_id:
+            inquiry = get_inquiry_by_id(db, p.inquiry_id)
+            inquiry_ref = inquiry.reference_id if inquiry else None
 
         item = {
             "id": p.id,
@@ -189,6 +208,12 @@ def list_projects_with_names(
             "start_date": p.start_date,
             "target_end_date": p.target_end_date,
             "actual_end_date": p.actual_end_date,
+            "inquiry_id": p.inquiry_id,
+            "milestone": p.milestone,
+            "progress_indicators": p.progress_indicators,
+            "team_leader_name": p.team_leader_name,
+            "project_owner_name": p.project_owner_name,
+            "notes": p.notes,
             "is_active": p.is_active,
             "created_at": p.created_at,
             "updated_at": p.updated_at,
@@ -197,6 +222,7 @@ def list_projects_with_names(
             "pm_name": pm.name if pm else None,
             "designer_name": designer.name if designer else None,
             "auditor_name": auditor.name if auditor else None,
+            "inquiry_reference_id": inquiry_ref,
         }
         result.append(item)
 

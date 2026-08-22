@@ -34,6 +34,15 @@ class Project(Base):
     start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     target_end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     actual_end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # Excel Project Tracking Sheet columns
+    inquiry_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("inquiries.id"), nullable=True, index=True
+    )
+    milestone: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    progress_indicators: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    team_leader_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    project_owner_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

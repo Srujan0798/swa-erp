@@ -55,6 +55,7 @@ class DocumentReferenceRead(BaseModel):
     remarks: str | None
     created_at: datetime
     updated_at: datetime
+    project_code: str | None = None
 
 
 class DocumentReferenceListResponse(BaseModel):
@@ -62,3 +63,12 @@ class DocumentReferenceListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class DocumentReferenceCounters(BaseModel):
+    """Visible shared DBR/KDR counter (Meeting 1) + last seq for other types."""
+
+    year: int
+    dbr_kdr_last_seq: int
+    dbr_kdr_next_preview: str
+    note: str = "DBR and KDR share one number sequence (counter key DBR)."

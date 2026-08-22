@@ -44,11 +44,11 @@ export function DocumentReferenceList({ projectId, tokenId }: DocumentReferenceL
         {showForm && write ? (
           <DocumentReferenceForm
             projectId={projectId}
-            initialData={tokenId ? { token_id: tokenId } : undefined}
+            initialData={tokenId ? { project_id: projectId, token_id: tokenId } : { project_id: projectId }}
             onSubmit={async (formData) => {
               try {
                 await createMutation.mutateAsync({
-                  project_id: projectId,
+                  project_id: formData.project_id || projectId,
                   token_id: formData.token_id || tokenId || undefined,
                   doc_date: formData.doc_date,
                   document_type: formData.document_type,

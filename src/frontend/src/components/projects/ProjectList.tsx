@@ -74,8 +74,9 @@ export function ProjectList(): ReactElement {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
           <p className="text-sm text-muted-foreground">
-            Excel <span className="font-medium">Project Tracking</span> sheet — open a project for
-            tokens, document refs, time, and delivery work.
+            Excel <span className="font-medium">Project Tracking</span> — Project ID, Client, Inquiry,
+            Start/End, Milestone, Progress, Team Leader, Project owner, Status. Open a row for
+            tokens, document refs, and time.
           </p>
         </div>
         {canCreate ? (
@@ -132,25 +133,27 @@ export function ProjectList(): ReactElement {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Project ID</TableHead>
+                  <TableHead>Project Name</TableHead>
                   <TableHead>Client</TableHead>
+                  <TableHead>Inquiry</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>PM</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>Milestone</TableHead>
+                  <TableHead>Team Leader</TableHead>
+                  <TableHead>Project owner</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                       Loading…
                     </TableCell>
                   </TableRow>
                 ) : projects.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                       {debouncedSearch || statusFilter ? (
                         <>No projects match these filters. Clear search/status and try again.</>
                       ) : (
@@ -199,13 +202,21 @@ export function ProjectList(): ReactElement {
                       <TableCell className="font-mono text-sm">{project.code}</TableCell>
                       <TableCell>{project.name}</TableCell>
                       <TableCell>{project.client_name ?? "—"}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {project.inquiry_reference_id ?? "—"}
+                      </TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${STATUS_COLORS[project.status]}`}>
                           {project.status}
                         </span>
                       </TableCell>
-                      <TableCell>{project.pm_name ?? "—"}</TableCell>
-                      <TableCell>{project.location ?? "—"}</TableCell>
+                      <TableCell className="text-sm">{project.milestone ?? "—"}</TableCell>
+                      <TableCell className="text-sm">
+                        {project.team_leader_name ?? project.pm_name ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {project.project_owner_name ?? "—"}
+                      </TableCell>
                       <TableCell>
                         <Button variant="ghost" asChild>
                           <Link to={`/projects/${project.id}`}>View</Link>

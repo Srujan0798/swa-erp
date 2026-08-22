@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -17,6 +17,8 @@ class ClientCreate(BaseModel):
     gst_number: str | None = Field(default=None, max_length=50)
     primary_email: EmailStr
     primary_phone: str | None = Field(default=None, max_length=50)
+    primary_contact: str | None = Field(default=None, max_length=255)
+    date_onboarded: date | None = None
     notes: str | None = None
     industry: str | None = Field(default=None, max_length=100)
     client_status: str = Field(default="Active", max_length=50)
@@ -34,6 +36,8 @@ class ClientUpdate(BaseModel):
     gst_number: str | None = Field(default=None, max_length=50)
     primary_email: EmailStr | None = None
     primary_phone: str | None = Field(default=None, max_length=50)
+    primary_contact: str | None = Field(default=None, max_length=255)
+    date_onboarded: date | None = None
     notes: str | None = None
     is_active: bool | None = None
     industry: str | None = Field(default=None, max_length=100)
@@ -54,6 +58,8 @@ class ClientRead(BaseModel):
     gst_number: str | None
     primary_email: str
     primary_phone: str | None
+    primary_contact: str | None = None
+    date_onboarded: date | None = None
     notes: str | None
     is_active: bool
     industry: str | None = None

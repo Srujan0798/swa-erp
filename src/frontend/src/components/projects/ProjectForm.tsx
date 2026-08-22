@@ -27,6 +27,11 @@ const projectSchema = z.object({
   estimated_value: z.number().optional(),
   start_date: z.string().optional(),
   target_end_date: z.string().optional(),
+  milestone: z.string().optional(),
+  progress_indicators: z.string().optional(),
+  team_leader_name: z.string().optional(),
+  project_owner_name: z.string().optional(),
+  notes: z.string().optional(),
   pm_id: z.string().optional(),
   designer_id: z.string().optional(),
   auditor_id: z.string().optional(),
@@ -132,13 +137,52 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_date">Start Date</Label>
+              <Label htmlFor="start_date">Start date</Label>
               <Input id="start_date" type="date" {...form.register("start_date")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="target_end_date">Target End Date</Label>
+              <Label htmlFor="target_end_date">End date</Label>
               <Input id="target_end_date" type="date" {...form.register("target_end_date")} />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="milestone">Milestone</Label>
+              <Input id="milestone" placeholder="Excel: Milestone" {...form.register("milestone")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="progress_indicators">Progress Indicators</Label>
+              <Input
+                id="progress_indicators"
+                placeholder="Excel: Progress Indicators"
+                {...form.register("progress_indicators")}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="team_leader_name">Team Leader</Label>
+              <Input
+                id="team_leader_name"
+                placeholder="Excel: Team Leader"
+                {...form.register("team_leader_name")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project_owner_name">Project owner</Label>
+              <Input
+                id="project_owner_name"
+                placeholder="Excel: Project owner"
+                {...form.register("project_owner_name")}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea id="notes" {...form.register("notes")} />
           </div>
 
           {showTeamFields ? (

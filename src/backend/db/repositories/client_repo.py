@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from sqlalchemy.orm import Session
 
@@ -45,6 +45,8 @@ def create(
     country: str = "India",
     gst_number: str | None = None,
     primary_phone: str | None = None,
+    primary_contact: str | None = None,
+    date_onboarded: date | None = None,
     notes: str | None = None,
     industry: str | None = None,
     client_status: str = "Active",
@@ -60,6 +62,8 @@ def create(
         country=country,
         gst_number=gst_number,
         primary_phone=primary_phone,
+        primary_contact=primary_contact,
+        date_onboarded=date_onboarded,
         notes=notes,
         industry=industry,
         client_status=client_status,

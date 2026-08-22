@@ -1,5 +1,64 @@
 # Recovery loop log
 
+## Fire — 2026-08-23 (Projects/Clients Excel + Doc Ref create + Tokens Agreement ID)
+
+**Focus:** MVP sheet parity close-out — Project Tracking + Clients Sheet columns; global Doc Ref create; DBR/KDR shared counter; Tokens Agreement ID; Time Token/Doc picker; convert→inquiry_id.
+
+**Commit:** _(pending — filled after push)_
+
+### Changed
+
+1. **Project Tracking Sheet parity**
+   - Migration `0033`: `inquiry_id`, `milestone`, `progress_indicators`, `team_leader_name`, `project_owner_name`, `notes`
+   - Import maps Excel columns; convert sets `inquiry_id`
+   - List/form show Milestone, Team Leader, Project owner, Inquiry
+
+2. **Clients Sheet parity**
+   - Migration `0033`: `primary_contact`, `date_onboarded`
+   - Import + create/update API + list/form/detail
+
+3. **Document References first-class**
+   - Global page: **New Document Reference** with project picker
+   - `GET /api/document-references/counters` — DBR/KDR shared next preview banner
+   - List shows `project_code`
+
+4. **Tokens Agreement ID**
+   - API enriches `agreement_reference_id`; Tokens page column + Project owner
+
+5. **Time logging**
+   - After Project pick: Token/Doc Ref dropdown fills Reference ID
+
+6. **VIRAJ_TRIAL_SCRIPT** aligned to new columns / create / counter talk-track
+
+### Evidence
+
+```
+frontend vitest TokensPage TimeTrackingPage ClientList ProjectList DocumentReferenceList
+→ 5 files / 37 passed
+
+pytest tests/wave-2/test_clients.py tests/wave-2/test_projects.py \
+  tests/wave-9/test_tokens.py tests/wave-9/test_document_references.py \
+  tests/wave-13/test_import_service.py -q
+→ 71 passed
+
+pytest tests/ -q → 572 passed, 1 skipped
+```
+
+### Stop-loop checklist (Weeks 1–3 north-star)
+
+| Criterion | Status |
+|-----------|--------|
+| Sheet parity MVP chain | **yes** (Inquiries/Clients/SA/Tokens/DocRefs/Time/Projects) |
+| Doc Refs excellent + create path | **yes** (global create + DBR/KDR counter) |
+| Chain-first nav/dashboard | yes |
+| Convert + empty project paths | yes (+ inquiry_id on convert) |
+| Real-data boot default story | yes (`swa-live-local`) |
+| VIRAJ_TRIAL_SCRIPT accurate | yes |
+| No Acme/demo-first path | yes |
+| Pushed to origin | _(after this commit)_ |
+
+**North-star Weeks 1–3 recovery: MET.** Residual only: apply `alembic upgrade head` / `make swa-live-local` on Viraj trial machine (live Postgres).
+
 ## Fire — 2026-08-23 (field parity + UX hardening)
 
 **Focus:** Excel field parity (Time Logging + Inquiry Technical Lead) + Doc Refs / Login / Dashboard / real-data messaging polish.

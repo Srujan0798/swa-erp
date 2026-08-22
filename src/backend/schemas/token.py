@@ -39,6 +39,8 @@ class TokenRead(BaseModel):
     id: uuid.UUID
     reference_id: str
     agreement_id: uuid.UUID
+    # Excel Tokens Sheet "Agreement ID" (SWA-YYYY-SA-…)
+    agreement_reference_id: str | None = None
     token_date: date
     token_type: str | None
     description: str | None

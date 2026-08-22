@@ -324,6 +324,25 @@ class TestTokenApi:
         assert r.status_code == 403
 
 
+
+    @pytest.mark.asyncio
+    async def test_list_includes_agreement_reference_id(self, authed_pm_client, db_session):
+        client = _seed_client(db_session, name="AgrRef", code="AGR-REF-C")
+        agreement = _seed_agreement(db_session, client)
+        actor = _seed_user(db_session)
+        create_token_service(
+            db_session,
+            TokenCreate(agreement_id=agreement.id, token_date=date(2026, 7, 1)),
+            actor.id,
+        )
+        r = await authed_pm_client.get("/api/tokens")
+        assert r.status_code == 200
+        items = r.json()["items"]
+        match = next((t for t in items if t.get("agreement_id") == str(agreement.id)), None)
+        assert match is not None
+        assert match["agreement_reference_id"] == agreement.reference_id
+
+
 class TestTokenConcurrency:
     def test_20_parallel_creates_produce_gapless_sequential_ids(self, db_session):
         actor = _seed_user(db_session)

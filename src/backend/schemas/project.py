@@ -30,6 +30,12 @@ class ProjectCreate(BaseModel):
     estimated_value: Decimal | None = None
     start_date: date | None = None
     target_end_date: date | None = None
+    inquiry_id: uuid.UUID | None = None
+    milestone: str | None = Field(default=None, max_length=255)
+    progress_indicators: str | None = Field(default=None, max_length=255)
+    team_leader_name: str | None = Field(default=None, max_length=255)
+    project_owner_name: str | None = Field(default=None, max_length=255)
+    notes: str | None = None
 
 
 class ProjectUpdate(BaseModel):
@@ -46,6 +52,12 @@ class ProjectUpdate(BaseModel):
     start_date: date | None = None
     target_end_date: date | None = None
     actual_end_date: date | None = None
+    inquiry_id: uuid.UUID | None = None
+    milestone: str | None = Field(default=None, max_length=255)
+    progress_indicators: str | None = Field(default=None, max_length=255)
+    team_leader_name: str | None = Field(default=None, max_length=255)
+    project_owner_name: str | None = Field(default=None, max_length=255)
+    notes: str | None = None
     is_active: bool | None = None
     expected_version: int | None = None
 
@@ -68,6 +80,12 @@ class ProjectRead(BaseModel):
     start_date: date | None
     target_end_date: date | None
     actual_end_date: date | None
+    inquiry_id: uuid.UUID | None = None
+    milestone: str | None = None
+    progress_indicators: str | None = None
+    team_leader_name: str | None = None
+    project_owner_name: str | None = None
+    notes: str | None = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -76,6 +94,7 @@ class ProjectRead(BaseModel):
     pm_name: str | None = None
     designer_name: str | None = None
     auditor_name: str | None = None
+    inquiry_reference_id: str | None = None
 
 
 class ProjectListResponse(BaseModel):

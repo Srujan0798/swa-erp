@@ -49,6 +49,8 @@ def create_client_service(
         country=data.country,
         gst_number=data.gst_number,
         primary_phone=data.primary_phone,
+        primary_contact=data.primary_contact,
+        date_onboarded=data.date_onboarded,
         notes=data.notes,
         industry=data.industry,
         client_status=data.client_status,
@@ -111,6 +113,10 @@ def update_client_service(
         client.primary_email = data.primary_email
     if data.primary_phone is not None:
         client.primary_phone = data.primary_phone
+    if data.primary_contact is not None:
+        client.primary_contact = data.primary_contact
+    if data.date_onboarded is not None:
+        client.date_onboarded = data.date_onboarded
     if data.notes is not None:
         client.notes = data.notes
     if data.is_active is not None:

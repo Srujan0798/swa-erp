@@ -118,3 +118,33 @@ async def test_assign_pm_to_project(authed_admin_client, admin_user, db_session)
     })
     assert r2.status_code == 201
     assert r2.json()["pm_id"] == str(admin_user.id)
+
+async def test_create_project_excel_tracking_fields(authed_admin_client, db_session):
+    r = await authed_admin_client.post(
+        "/api/clients",
+        json={"name": "TrackClient", "code": "TRK-C-001", "primary_email": "trk@example.com"},
+    )
+    assert r.status_code == 201
+    cid = r.json()["id"]
+
+    r2 = await authed_admin_client.post(
+        "/api/projects",
+        json={
+            "client_id": str(cid),
+            "name": "Tracking Project",
+            "code": "TRK-PRJ-001",
+            "status": "Design",
+            "milestone": "DBR submitted",
+            "progress_indicators": "60%",
+            "team_leader_name": "Mihir",
+            "project_owner_name": "Priya",
+            "notes": "From Project Tracking sheet",
+        },
+    )
+    assert r2.status_code == 201, r2.text
+    body = r2.json()
+    assert body["milestone"] == "DBR submitted"
+    assert body["progress_indicators"] == "60%"
+    assert body["team_leader_name"] == "Mihir"
+    assert body["project_owner_name"] == "Priya"
+    assert body["notes"] == "From Project Tracking sheet"

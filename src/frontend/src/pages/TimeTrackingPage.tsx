@@ -71,6 +71,19 @@ export default function TimeTrackingPage(): ReactElement {
   });
   const projects = projectsData?.items ?? [];
 
+  const { data: tokensForProject } = useQuery({
+    queryKey: ["tokens-for-time", projectId],
+    queryFn: () => api.listTokens({ project_id: projectId, page_size: 100 }),
+    enabled: !!projectId,
+  });
+  const { data: docsForProject } = useQuery({
+    queryKey: ["docrefs-for-time", projectId],
+    queryFn: () => api.listDocumentReferences({ project_id: projectId, page_size: 100 }),
+    enabled: !!projectId,
+  });
+  const projectTokens = tokensForProject?.items ?? [];
+  const projectDocs = docsForProject?.items ?? [];
+
   const { data: list, isLoading, isError, error, refetch } = useQuery<TimeEntryListResponse>({
     queryKey: timeKey("entries"),
     queryFn: async () => api.listTimeEntries({ page_size: 100 }),
@@ -299,12 +312,40 @@ export default function TimeTrackingPage(): ReactElement {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Reference ID</Label>
+                <Label>Reference ID (Token / Doc / Project)</Label>
                 <Input
                   value={form.sheet_reference_id}
                   onChange={(e) => setForm({ ...form, sheet_reference_id: e.target.value })}
-                  placeholder="SWA-… link"
+                  placeholder="SWA-… Excel Reference ID"
                 />
+                {projectId && (projectTokens.length > 0 || projectDocs.length > 0) ? (
+                  <Select
+                    value={form.sheet_reference_id || "manual"}
+                    onValueChange={(v) =>
+                      setForm({
+                        ...form,
+                        sheet_reference_id: v === "manual" ? "" : v,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pick Token or Doc Ref" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="manual">Type manually / clear</SelectItem>
+                      {projectTokens.map((t) => (
+                        <SelectItem key={t.id} value={t.reference_id}>
+                          Token {t.reference_id}
+                        </SelectItem>
+                      ))}
+                      {projectDocs.map((d) => (
+                        <SelectItem key={d.id} value={d.reference_id}>
+                          Doc {d.reference_id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : null}
               </div>
             </div>
             <div className="space-y-2">

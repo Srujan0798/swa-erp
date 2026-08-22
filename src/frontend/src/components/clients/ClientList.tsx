@@ -51,7 +51,9 @@ export function ClientList(): ReactElement {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
           <p className="text-sm text-muted-foreground">
-            From Clients Sheet / imports — open a row for Agreements & Tokens.
+            Excel <span className="font-medium">Clients Sheet</span> — Client ID, Name, Industry,
+            Date Onboarded, Primary Contact, Email, Phone, Status, Notes. Open a row for Agreements
+            & Tokens.
           </p>
         </div>
         {canCreate ? (
@@ -88,33 +90,37 @@ export function ClientList(): ReactElement {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Client ID</TableHead>
+                  <TableHead>Client Name</TableHead>
                   <TableHead>Industry</TableHead>
+                  <TableHead>Primary Contact</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Primary Email</TableHead>
+                  <TableHead>Onboarded</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                       Loading clients…
                     </TableCell>
                   </TableRow>
                 ) : clients.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                       {debouncedSearch ? (
                         <>No clients match “{debouncedSearch}”. Clear search or try another name.</>
                       ) : canCreate ? (
                         <>
-                          No clients yet.{" "}
+                          No clients yet. Load with{" "}
+                          <code className="rounded bg-muted px-1">make swa-live-local</code> or{" "}
                           <Link className="underline font-medium text-foreground" to="/clients/new">
-                            Add the first client
-                          </Link>{" "}
-                          to start agreements, projects, and tokens.
+                            add the first client
+                          </Link>
+                          .
                         </>
                       ) : (
                         <>No clients yet. Ask an admin or PM to add one.</>
@@ -127,9 +133,14 @@ export function ClientList(): ReactElement {
                       <TableCell className="font-mono text-xs">{client.code}</TableCell>
                       <TableCell className="font-medium">{client.name}</TableCell>
                       <TableCell>{client.industry ?? "—"}</TableCell>
-                      <TableCell>{client.client_status ?? "—"}</TableCell>
+                      <TableCell className="text-sm">{client.primary_contact ?? "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {client.primary_email}
+                      </TableCell>
+                      <TableCell className="text-sm">{client.primary_phone ?? "—"}</TableCell>
+                      <TableCell>{client.client_status ?? "—"}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">
+                        {client.date_onboarded ?? "—"}
                       </TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" asChild>

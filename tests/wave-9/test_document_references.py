@@ -514,3 +514,27 @@ class TestDocumentReferenceApi:
             },
         )
         assert r.status_code == 403
+
+
+    @pytest.mark.asyncio
+    async def test_counters_endpoint_shows_dbr_kdr_shared_preview(
+        self, authed_pm_client, db_session
+    ):
+        client = _seed_client(db_session)
+        project = _seed_project(db_session, client)
+        actor = _seed_user(db_session)
+        create_document_reference_service(
+            db_session,
+            DocumentReferenceCreate(
+                project_id=project.id,
+                doc_date=date(2026, 7, 1),
+                document_type="DBR",
+            ),
+            actor.id,
+        )
+        r = await authed_pm_client.get("/api/document-references/counters")
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["dbr_kdr_last_seq"] >= 1
+        assert "DBR" in body["dbr_kdr_next_preview"]
+        assert "shared" in body["note"].lower() or "DBR" in body["note"]

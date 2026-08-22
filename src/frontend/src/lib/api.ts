@@ -60,6 +60,7 @@ import type {
   DocumentReferenceListResponse,
   DocumentReferenceCreate,
   DocumentReferenceUpdate,
+  DocumentReferenceCounters,
   Notification,
 } from "@/types/api";
 import type {
@@ -906,6 +907,9 @@ export const api = {
     const query = searchParams.toString();
     return request<DocumentReferenceListResponse>(`/api/document-references${query ? `?${query}` : ""}`);
   },
+
+  getDocumentReferenceCounters: () =>
+    request<DocumentReferenceCounters>("/api/document-references/counters"),
 
   getDocumentReference: (id: string) => request<DocumentReference>(`/api/document-references/${id}`),
 

@@ -97,10 +97,12 @@ export function TokensPage(): ReactElement {
                 <TableRow>
                   <TableHead>Token ID</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Agreement ID</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Used</TableHead>
                   <TableHead>SWA employee</TableHead>
+                  <TableHead>Project owner</TableHead>
                   <TableHead>Client emp.</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Project</TableHead>
@@ -109,13 +111,13 @@ export function TokensPage(): ReactElement {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground">
+                    <TableCell colSpan={11} className="text-center text-muted-foreground">
                       Loading…
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={11} className="py-8 text-center text-muted-foreground">
                       {debounced || projectFilter ? (
                         <>
                           No tokens match this filter.{" "}
@@ -144,6 +146,9 @@ export function TokensPage(): ReactElement {
                         {t.reference_id}
                       </TableCell>
                       <TableCell className="text-sm whitespace-nowrap">{t.token_date}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {t.agreement_reference_id || "—"}
+                      </TableCell>
                       <TableCell>{t.token_type ?? "—"}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{t.token_status}</Badge>
@@ -151,6 +156,9 @@ export function TokensPage(): ReactElement {
                       <TableCell className="tabular-nums">×{t.tokens_used}</TableCell>
                       <TableCell className="text-sm">
                         {t.swa_employee_name || "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {t.project_owner_name || "—"}
                       </TableCell>
                       <TableCell className="text-sm">
                         {t.client_employee_name || "—"}

@@ -76,6 +76,12 @@ export interface Project {
   start_date: string | null;
   target_end_date: string | null;
   actual_end_date: string | null;
+  inquiry_id?: string | null;
+  milestone?: string | null;
+  progress_indicators?: string | null;
+  team_leader_name?: string | null;
+  project_owner_name?: string | null;
+  notes?: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -83,6 +89,7 @@ export interface Project {
   pm_name: string | null;
   designer_name: string | null;
   auditor_name: string | null;
+  inquiry_reference_id?: string | null;
 }
 
 export interface ProjectListResponse {
@@ -110,6 +117,8 @@ export interface Client {
   gst_number: string | null;
   primary_email: string;
   primary_phone: string | null;
+  primary_contact?: string | null;
+  date_onboarded?: string | null;
   notes: string | null;
   is_active: boolean;
   industry?: string | null;
@@ -686,6 +695,7 @@ export interface Token {
   id: string;
   reference_id: string;
   agreement_id: string;
+  agreement_reference_id?: string | null;
   token_date: string;
   token_type: string | null;
   description: string | null;
@@ -756,6 +766,14 @@ export interface DocumentReference {
   remarks: string | null;
   created_at: string;
   updated_at: string;
+  project_code?: string | null;
+}
+
+export interface DocumentReferenceCounters {
+  year: number;
+  dbr_kdr_last_seq: number;
+  dbr_kdr_next_preview: string;
+  note: string;
 }
 
 export interface DocumentReferenceListResponse {

@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { DocumentReferenceForm } from "@/components/documentRefs/DocumentReferenceForm";
+import { useCreateDocumentReference } from "@/hooks/useDocumentReferences";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
+import { canWrite } from "@/lib/permissions";
+import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 /**
  * Global Document Reference inventory — maps to SWA "Document Reference Sheet".
@@ -28,7 +33,13 @@ export function DocumentReferencesPage(): ReactElement {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [showForm, setShowForm] = useState(false);
   const pageSize = 20;
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const write = canWrite(user);
+  const createMutation = useCreateDocumentReference();
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -47,27 +58,87 @@ export function DocumentReferencesPage(): ReactElement {
       }),
   });
 
+  const { data: counters } = useQuery({
+    queryKey: ["document-reference-counters"],
+    queryFn: () => api.getDocumentReferenceCounters(),
+  });
+
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Document References</h1>
-        <p className="text-sm text-muted-foreground">
-          Excel <span className="font-medium">Document Reference Sheet</span> — columns: Date, DRN /
-          Doc Ref No, Associated Project, Author, Document Type, Type, User, Description, Revision,
-          Status, Remarks. DBR and KDR share one number sequence.
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Not the same as sidebar <strong>Files / drawings</strong> (uploads). Create new rows from a{" "}
-          <Link className="underline" to="/projects">
-            Project
-          </Link>
-          .
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Document References</h1>
+          <p className="text-sm text-muted-foreground">
+            Excel <span className="font-medium">Document Reference Sheet</span> — columns: Date, DRN /
+            Doc Ref No, Associated Project, Author, Document Type, Type, User, Description, Revision,
+            Status, Remarks.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Not the same as sidebar <strong>Files / drawings</strong> (uploads).
+          </p>
+        </div>
+        {write && !showForm ? (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Document Reference
+          </Button>
+        ) : null}
       </div>
+
+      {counters ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col gap-1 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <span className="font-medium">DBR / KDR shared counter</span>
+              <span className="text-muted-foreground">
+                {" "}
+                (Meeting 1) — year {counters.year}, last issued seq{" "}
+                <span className="font-mono">{counters.dbr_kdr_last_seq}</span>
+              </span>
+            </div>
+            <div className="text-xs sm:text-sm">
+              Next DBR/KDR preview:{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">
+                {counters.dbr_kdr_next_preview}
+              </code>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {showForm && write ? (
+        <DocumentReferenceForm
+          onSubmit={async (formData) => {
+            try {
+              await createMutation.mutateAsync({
+                project_id: formData.project_id,
+                token_id: formData.token_id || undefined,
+                doc_date: formData.doc_date,
+                document_type: formData.document_type,
+                type: formData.type,
+                author_name: formData.author_name || undefined,
+                user_ref: formData.user_ref,
+                description: formData.description,
+                revision: formData.revision,
+                status: formData.status,
+                remarks: formData.remarks,
+              });
+              toast({ title: "Document reference created" });
+              setShowForm(false);
+              void queryClient.invalidateQueries({ queryKey: ["document-references-global"] });
+              void queryClient.invalidateQueries({ queryKey: ["document-reference-counters"] });
+            } catch (err) {
+              toast({ title: (err as Error).message, variant: "destructive" });
+            }
+          }}
+          onCancel={() => setShowForm(false)}
+          isLoading={createMutation.isPending}
+        />
+      ) : null}
 
       <Card>
         <CardContent className="pt-6">
@@ -165,12 +236,28 @@ export function DocumentReferencesPage(): ReactElement {
                       ) : (
                         <>
                           No document references yet. Load SWA sheets with{" "}
-                          <code className="rounded bg-muted px-1">make swa-live-local</code>, or open
-                          a{" "}
-                          <Link className="underline font-medium text-foreground" to="/projects">
-                            Project
-                          </Link>{" "}
-                          → Document References to create one.
+                          <code className="rounded bg-muted px-1">make swa-live-local</code>
+                          {write ? (
+                            <>
+                              , or{" "}
+                              <button
+                                type="button"
+                                className="underline font-medium text-foreground"
+                                onClick={() => setShowForm(true)}
+                              >
+                                create one here
+                              </button>{" "}
+                              (pick a project).
+                            </>
+                          ) : (
+                            <>
+                              , or open a{" "}
+                              <Link className="underline font-medium text-foreground" to="/projects">
+                                Project
+                              </Link>
+                              .
+                            </>
+                          )}
                         </>
                       )}
                     </TableCell>
@@ -202,10 +289,10 @@ export function DocumentReferencesPage(): ReactElement {
                       <TableCell>
                         {d.project_id ? (
                           <Link
-                            className="text-sm text-primary underline-offset-2 hover:underline"
+                            className="text-sm text-primary underline-offset-2 hover:underline font-mono"
                             to={`/projects/${d.project_id}`}
                           >
-                            Open
+                            {d.project_code || "Open"}
                           </Link>
                         ) : (
                           "—"

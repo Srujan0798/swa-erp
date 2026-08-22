@@ -175,3 +175,23 @@ async def test_viewer_cannot_create_client(authed_viewer_client):
         "primary_email": "na@example.com",
     })
     assert r.status_code == 403
+
+
+async def test_create_client_excel_sheet_fields(authed_admin_client):
+    r = await authed_admin_client.post(
+        "/api/clients",
+        json={
+            "name": "SheetClient",
+            "code": "SC-EX-001",
+            "primary_email": "sheet@example.com",
+            "primary_contact": "Viraj Shah",
+            "date_onboarded": "2025-04-01",
+            "industry": "HVAC",
+            "client_status": "Active",
+        },
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["primary_contact"] == "Viraj Shah"
+    assert body["date_onboarded"] == "2025-04-01"
+    assert body["industry"] == "HVAC"

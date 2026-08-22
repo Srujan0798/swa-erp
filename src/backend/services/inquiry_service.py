@@ -278,6 +278,7 @@ def _create_project_from_inquiry(
         ),
         "start_date": req.start_date,
         "target_end_date": req.target_end_date,
+        "inquiry_id": inquiry.id,
     }
     project = create_project(db, payload)
     audit_repo.create_entry(

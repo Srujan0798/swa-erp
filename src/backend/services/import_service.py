@@ -470,6 +470,8 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
             slug = "".join(ch if ch.isalnum() else "-" for ch in code.lower()).strip("-")[:40]
             email = _txt(d.get("Email")) or f"import+{slug}@swa.internal"
             client = _client_by_code(s, code)
+            onboarded = _parse_date(d.get("Date Onboarded"))
+            primary_contact = _txt(d.get("Primary Contact"))
             if client is not None:
                 client.name = name
                 client.primary_email = email
@@ -478,6 +480,9 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                 client.address = _txt(d.get("Billing Address"))
                 client.client_status = _txt(d.get("Client Status")) or "Active"
                 client.notes = _txt(d.get("Notes"))
+                client.primary_contact = primary_contact
+                if onboarded is not None:
+                    client.date_onboarded = onboarded
                 fi = _txt(d.get("First Inquiry ID"))
                 if fi:
                     inq = _inquiry_by_ref(s, fi)
@@ -495,6 +500,8 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                     address=_txt(d.get("Billing Address")),
                     client_status=_txt(d.get("Client Status")) or "Active",
                     notes=_txt(d.get("Notes")),
+                    primary_contact=primary_contact,
+                    date_onboarded=onboarded,
                     country="India",
                     is_active=True,
                 )
@@ -724,13 +731,22 @@ def _import_projects(s: Session, rows: list[dict], result: ImportResult) -> None
                 result.add_error(i, "missing Project Name")
                 continue
             project = _project_by_code(s, code)
+            inquiry_ref = _txt(d.get("Inquiry ID"))
+            inquiry = _inquiry_by_ref(s, inquiry_ref) if inquiry_ref else None
+            notes = _txt(d.get("Notes"))
             values = dict(
                 client_id=client.id,
                 name=name,
-                description=_txt(d.get("Notes")),
+                description=notes,
+                notes=notes,
                 status=_txt(d.get("Status Updates")) or "Lead",
                 start_date=_parse_date(d.get("Start date")),
                 target_end_date=_parse_date(d.get("End date")),
+                inquiry_id=inquiry.id if inquiry else None,
+                milestone=_txt(d.get("Milestone")),
+                progress_indicators=_txt(d.get("Progress Indicators")),
+                team_leader_name=_txt(d.get("Team Leader")),
+                project_owner_name=_txt(d.get("Project owner")) or _txt(d.get("Project Owner")),
             )
             if project is not None:
                 for k, v in values.items():

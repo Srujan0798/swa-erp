@@ -12,6 +12,10 @@ const clientSchema = z.object({
   code: z.string().min(1, "Code is required"),
   primary_email: z.string().email("Valid email required"),
   primary_phone: z.string().optional(),
+  primary_contact: z.string().optional(),
+  date_onboarded: z.string().optional(),
+  industry: z.string().optional(),
+  client_status: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
@@ -78,20 +82,50 @@ export function ClientForm({ initialData, onSubmit, onCancel, isLoading }: Clien
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="primary_email">Primary Email *</Label>
+              <Label htmlFor="primary_email">Email *</Label>
               <Input id="primary_email" type="email" {...form.register("primary_email")} />
               {form.formState.errors.primary_email && (
                 <p className="text-sm text-red-500">{form.formState.errors.primary_email.message as string}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="primary_phone">Primary Phone</Label>
+              <Label htmlFor="primary_phone">Phone</Label>
               <Input id="primary_phone" {...form.register("primary_phone")} />
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="primary_contact">Primary Contact</Label>
+              <Input
+                id="primary_contact"
+                placeholder="Excel: Primary Contact"
+                {...form.register("primary_contact")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date_onboarded">Date Onboarded</Label>
+              <Input id="date_onboarded" type="date" {...form.register("date_onboarded")} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="industry">Industry</Label>
+              <Input id="industry" placeholder="HVAC, Process…" {...form.register("industry")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="client_status">Client Status</Label>
+              <Input
+                id="client_status"
+                placeholder="Active / Dormant…"
+                {...form.register("client_status")}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">Billing Address</Label>
             <Textarea id="address" {...form.register("address")} />
           </div>
 
