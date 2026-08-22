@@ -63,8 +63,8 @@ wave-1 (Foundation) ✅ SHIPPED
 | 34 | Frontend Vitest suite ≥60% | **SHIPPED** ✅ | 2/2 | `work/reports/wave-34/` |
 | 35 | Load validation 10–150 users | **SHIPPED** ✅ | 1/1 | `docs/PERFORMANCE.md` |
 | 36 | Observability | **SHIPPED** ✅ | 2/2 | code + `02-post-merge-fixes.report.md` (01 never written) |
-| 37 | Independent adversarial review | **IN-FLIGHT** | 0/1 | `work/FINAL-CLOSE/` + `work/wave-37/` |
-| 38 | Professional submission package | **QUEUED** | 0/1 | after 37 |
+| 37 | Independent adversarial review | **SHIPPED** ✅ | 1/1 | `work/reports/wave-37/01-independent-review.report.md` |
+| 38 | Professional submission package | **SHIPPED** ✅ | 1/1 | `work/reports/wave-38/01-submission-package.report.md` |
 | 39 | Repo organization | **SHIPPED** ✅ | 1/1 | `work/reports/wave-39/` |
 
 **Waves 1–36 and 39 are SHIPPED.** Live tracker: `work/ACTIVE.md`. Close pack: `work/FINAL-CLOSE/`.
@@ -122,5 +122,5 @@ directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY
 current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
 instead of duplicating it here.
 
-**Active wave:** **37** (final close) → then **38**. See `work/FINAL-CLOSE/` and `work/ACTIVE.md`.
-Product release remains **v1.0.1**; professional-grade evidence track is waves 32–39.
+**Active wave:** none — waves 32–39 SHIPPED. Engineering sealed in `work/reports/FINAL-CLOSE.report.md`.
+Product release remains **v1.0.1**. Deploy remains external (Viraj / no IT dept).

@@ -1,85 +1,106 @@
 # SWA ERP
 
-> **Role:** Front door / entry point. Every other top-level doc is one table away — see
-> "Where to look" below.
+Internal ERP for **SWA Consultancy** (Ahmedabad) — an insulation engineering firm that today runs operations across ~20 live Excel sheets on OneDrive. This system digitizes that workflow: same business logic, one system, JWT + role-based access.
 
-Internal ERP for SWA Consultancy Pvt. Ltd. — an insulation engineering startup (Ahmedabad). The ERP manages clients, projects, quotations/BOQ workflow, tasks, vendors/inventory, documents, compliance, time/financials, and reporting at startup scale.
+**Product v1.0.1 is built.** Professional-grade quality track (waves 32–36, 39) is verified. Independent review (wave-37) and this packaging wave run in the final-close track — **not** claimed as “100% complete.”
 
-**Not coupled to rfq2boq.** BOQ files are imported as uploads (JSON/Excel) — the ERP doesn't call the RFQ→BOQ extractor; it consumes outputs of any source.
+---
 
-## Where to look
+## The core business flow
 
-Nine top-level docs compete for your attention. This table says which one to open — you should
-never have to guess:
+What the client actually asked for (Meeting 1 + Meeting 2), not a generic CRM:
 
-| File | Who it's for | When to read it |
-|---|---|---|
-| [`README.md`](README.md) | everyone | **first** — you're here |
-| [`MASTER-FLOW.md`](MASTER-FLOW.md) | orchestrator + anyone lost | when you need "what to do next" as one line |
-| [`CLAUDE.md`](CLAUDE.md) / [`KIMI.md`](KIMI.md) | orchestrator agents | auto-loaded every session (same file) |
-| [`HANDOFF.md`](HANDOFF.md) | orchestrators | when a new session or orchestrator takes over |
-| [`HIERARCHY.md`](HIERARCHY.md) | everyone | when you need the repo map / where things live |
-| [`HOW_TO_RUN.md`](HOW_TO_RUN.md) | anyone running the project | before `make dev` or dispatching work |
-| [`CHANGELOG.md`](CHANGELOG.md) | everyone | for version history and release notes |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | contributors / workers | before contributing or writing a brief |
+```mermaid
+flowchart TD
+  INQ["Inquiry<br/>SWA-{year}-INQ-{seq}"] --> CONV{Client exists?}
+  CONV -->|No| CLT["Create Client<br/>SWA-{year}-CLT-{seq}"]
+  CONV -->|Yes| REUSE[Reuse existing Client]
+  CLT --> PROJ[Create Project]
+  REUSE --> PROJ
+  PROJ --> SA["Service Agreement<br/>SWA-{year}-SA-{seq}"]
+  SA --> TKN["Token (unit of work)<br/>SWA-{year}-TKN-{seq}"]
+  TKN --> DRN["Document Reference<br/>SWA-{year}-DBR-{seq}<br/>DBR/KDR share counter"]
+  DRN --> TIME[Time Log → Invoice / GST]
+  TIME --> SUST[Sustainability metrics]
+```
 
-Beyond these, `docs/` holds the reference docs (deployment, runbook, conventions, decisions,
-performance, observability) and `plan/` the strategy. Each of the nine files above carries a
-one-line role header linking back here.
+ID format everywhere: `SWA-{year}-{TYPE}-{seq:03d}`, counter resets each calendar year. Confirmed with Viraj — see [`docs/decisions/0002-core-id-chain-gap.md`](docs/decisions/0002-core-id-chain-gap.md).
 
-## Quick start
+---
+
+## Verified quality metrics
+
+Every number below traces to a wave report or independent re-verify. Safe wording only.
+
+| Area | Claim | Source |
+|------|--------|--------|
+| **Backend coverage** | **86%** overall (`8702` stmts); all `services/*.py` ≥70%; wave-33 closed five weakest services (pdf/quote/import/task/notification) | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-33/03-remaining-coverage.report.md`](work/reports/wave-33/03-remaining-coverage.report.md) |
+| **Backend suite** | **557 passed, 5 failed, 1 skipped** (5 standing 401-vs-403 auth assertion mismatches — FastAPI `HTTPBearer` returns 403 with no header) | Same verdict + wave-33 report |
+| **Frontend coverage** | Vitest thresholds **60/50/60/60** (stmts/branches/fns/lines) **met**; independent remeasure **~61% statements** | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-34/02-frontend-page-coverage.report.md`](work/reports/wave-34/02-frontend-page-coverage.report.md) |
+| **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client’s Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
+| **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
+| **Observability** | `/metrics` (Prometheus), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md), wave-36 |
+
+**Do not claim:** “no backend module under 70%” globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend **65.86%** without a fresh vitest paste.
+
+---
+
+## Tech stack (+ why)
+
+| Layer | Choice |
+|-------|--------|
+| Backend | Python 3.11 · FastAPI · SQLAlchemy 2 · Pydantic v2 · PostgreSQL · Redis |
+| Workers | **Celery** (built, wave-31) — async export `?async=true` + `GET /api/jobs/{id}` |
+| Storage | `StorageBackend` — **local** `uploads/` default; **MinIO** opt-in (`STORAGE_BACKEND=minio`, wave-31) |
+| Frontend | React 18 · Vite · TypeScript · Tailwind · shadcn/ui · TanStack Query |
+| Auth | JWT + bcrypt · RBAC (admin / pm / designer / auditor / viewer) |
+| Deploy | Docker Compose |
+
+Decision record: [`docs/decisions/0001-tech-stack.md`](docs/decisions/0001-tech-stack.md).
+
+---
+
+## Run it (3 commands)
 
 ```bash
-git clone <repo>
-cd swa-erp
 cp .env.example .env
 make install
 make dev
 ```
 
-Visit `http://localhost:3100` (frontend) and `http://localhost:8100/docs` (API).  
-(Ports **3100 / 8100** — not 3000/8000 — so SWA does not clash with other local apps.)
+| Surface | URL |
+|---------|-----|
+| UI | http://localhost:3100 |
+| API docs | http://localhost:8100/docs |
+| Health | http://localhost:8100/healthz |
 
-## How this project is built
+Ports **3100 / 8100** (not 3000/8000) so local apps don’t clash. Full ops: [`HOW_TO_RUN.md`](HOW_TO_RUN.md).
 
-Two-tier agentic workflow (per the project's methodology docs in `orchestrator/core/` and
-`HOW_TO_RUN.md`):
+Demo seed: `APP_ENV=dev python3 scripts/seed_demo.py` — see [`deliverables/DEMO_SCRIPT.md`](deliverables/DEMO_SCRIPT.md).
 
-- **Orchestrator** = Claude Code or Kimi (interchangeable). Plans, dispatches, reviews, merges.
-- **Workers** = OpenCode CLI in parallel windows. Execute self-contained task briefs.
+---
 
-See [`HOW_TO_RUN.md`](HOW_TO_RUN.md) for the full workflow.
+## Where the detail lives
 
-## Repository map
+| Doc | Purpose |
+|-----|---------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System diagrams (built vs target marked) |
+| [`deliverables/TECHNICAL_REPORT.md`](deliverables/TECHNICAL_REPORT.md) | Engineering case study (requirements misread → recovery) |
+| [`deliverables/SUBMISSION.md`](deliverables/SUBMISSION.md) | Handover package + honest limitations |
+| [`deliverables/DEMO_SCRIPT.md`](deliverables/DEMO_SCRIPT.md) | 5–10 min live demo script |
+| [`resources/MEETINGS_MASTER.md`](resources/MEETINGS_MASTER.md) | What the client said |
+| [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) | Load-test methodology + CSVs |
+| [`work/ACTIVE.md`](work/ACTIVE.md) | Live wave status (32–39) |
+| [`work/FINAL-CLOSE/ANTI-FABRICATION.md`](work/FINAL-CLOSE/ANTI-FABRICATION.md) | Metric honesty rules |
 
-See [`HIERARCHY.md`](HIERARCHY.md).
+---
 
-## Status
+## Status (honest)
 
-See [`plan/EXECUTION.md`](plan/EXECUTION.md) for wave progress.
-
-## Tech stack
-
-- **Backend:** Python 3.11 · FastAPI · SQLAlchemy 2 · Pydantic v2 · PostgreSQL · Redis
-- **Frontend:** React 18 · Vite · TypeScript · TailwindCSS · shadcn/ui · TanStack Query · React Router
-- **Auth:** JWT + bcrypt (role-based access control)
-- **Storage:** Local filesystem only — all uploads live in `uploads/` at the repo root
-- **Deploy:** Docker Compose
-
-**Corrected 2026-08-09.** Storage and background jobs are live. MinIO/S3 is wired via a storage
-abstraction (`src/backend/core/storage.py`, `STORAGE_BACKEND=local|minio`, compose `minio`
-service; default `local` keeps the historical `uploads/` layout). Celery is implemented
-(`src/backend/workers/` app + `@task`s, compose `worker` service, Redis broker/backend) and powers
-the async export endpoints (`?async=true` + `GET /api/jobs/{id}`). See `docs/runbook.md`.
-
-## Deliverables
-
-- Application: `src/backend/` + `src/frontend/`
-- Tests: `tests/`
-- Technical report: `deliverables/report/`
-- Slides: `deliverables/slides/`
-- Demo: `deliverables/demo/`
-
-## Company context
-
-SWA Consultancy is an insulation engineering firm (thermal, acoustic, passive fire) serving hospitality, manufacturing, education, and commercial sectors across India. ~750 projects in 3 years. Standards: NBC, ECBC, IGBC, IS fire codes. Products: INSUDESIGN (design + vendor + on-site) and INSUAUDIT.
+| Track | Status |
+|-------|--------|
+| Product MVP (waves 1–31) | Shipped (`v1.0.1`) — core ID chain, GST invoices, RBAC, importer, MinIO + Celery |
+| Professional-grade (32–36, 39) | Shipped — real CI, coverage, frontend suite, load, observability, repo org |
+| Wave-37 independent review | **In progress** — findings pending in parallel; not inventing verdicts here |
+| Wave-38 submission package | This packaging pass |
+| Company-server deploy | **External blocker** — no IT dept; server facts open ([`deliverables/SEND_IT.md`](deliverables/SEND_IT.md)) |

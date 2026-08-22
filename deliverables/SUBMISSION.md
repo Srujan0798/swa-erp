@@ -1,11 +1,33 @@
-# SWA Consultancy ERP — v1.0.1 Submission Package
+# SWA Consultancy ERP — Submission Package
 
-**Version:** 1.0.1 (client-submission release; tagged `v1.0.1`)
-**Date:** 2026-08-07 (wave-31 follow-up cut `1.0.1` on 2026-08-10)
-**Status:** READY TO SUBMIT
+**Product version:** 1.0.1 (tagged `v1.0.1`)  
+**Package refreshed:** 2026-08-23 (wave-38 — professional-grade metrics)  
+**Status:** Product MVP **shipped**. Quality track waves **32–36 + 39 shipped**. Wave-37 independent review **findings pending in parallel** (not claimed closed). **Company-server deploy remains external** (no IT dept; server facts open).
 
 This is the single document handed over with the project. It is honest about what exists, what
-does not, and what is still waiting on the client's side.
+does not, and what is still waiting on the client's side. Evaluator front door: [`README.md`](../README.md).
+Engineering narrative: [`TECHNICAL_REPORT.md`](TECHNICAL_REPORT.md).
+
+---
+
+## 0. Verified metrics (post wave-32–36)
+
+Safe wording only — every row cites a report. See also [`work/reports/wave-38/_draft-metrics.md`](../work/reports/wave-38/_draft-metrics.md).
+
+| Claim | Number | Source |
+|-------|--------|--------|
+| Backend coverage (overall) | **86%** (8702 stmts / 1201 miss) | [`COMPLETION-HANDOFF-VERDICT.md`](../work/reports/COMPLETION-HANDOFF-VERDICT.md); wave-33 report 03 |
+| Backend services layer | **All `services/*.py` ≥70%** | Same verdict (do **not** claim global “no module under 70%”) |
+| Backend suite (independent 2026-08-23) | **557 passed, 5 failed, 1 skipped** | Same (5× 401-vs-403 standing auth assertions) |
+| CI coverage floor | `--cov-fail-under=82` (86% clears it) | Makefile + wave-32 |
+| Frontend thresholds | **60 / 50 / 60 / 60** met; cite **~61% statements** independently | Verdict + wave-34 report 02 |
+| Load test | **10–150 users**, p95 **≈ 29–130 ms**, no 5xx after fixes, **dev machine only** | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
+| CI honesty | **0** `\|\| true` / `continue-on-error` in `.github/workflows/` | wave-32 report |
+| MinIO + Celery | **BUILT** (wave-31) | `src/backend/core/storage.py`, `src/backend/workers/`, compose |
+| Observability | `/metrics`, `/healthz`, `/readyz`, optional Sentry | [`docs/OBSERVABILITY.md`](../docs/OBSERVABILITY.md) |
+| Deploy on client server | **Not done** — facts OPEN | [`SEND_IT.md`](SEND_IT.md) |
+
+**Forbidden overclaims (anti-fabrication):** “100% complete”; “562 passed” as a pass count; “0 failed” while the five auth tests fail; global “no module under 70%”; stale frontend **65.86%** without a fresh vitest paste; “MinIO/Celery not built.”
 
 ---
 
@@ -60,61 +82,51 @@ Post-completion sustainability metrics
 
 ## 2. Verification evidence
 
-All commands below were run live on **2026-08-07** against the working tree that produced this
-release. Nothing is claimed from memory — outputs are pasted.
+### 2a. Professional-grade re-verify (2026-08-23) — prefer these numbers
 
-Backend test suite (expect 344+, actual 393):
+Independent backend coverage run after `swa_erp_test` reset (see completion verdict):
+
+```
+python3 -m pytest tests/ -q --cov=src/backend --cov-report=term
+# → 5 failed, 557 passed, 1 skipped
+# → TOTAL 8702 stmts, 1201 miss → 86%
+# Wave-33 targets: pdf 100%, quote 97%, import 80%, task 97%, notification 100%
+```
+
+Frontend: vitest thresholds **60/50/60/60** met; independent measurement **~61% statements**
+(do not cite report-02’s 65.86% without a fresh paste). Known flake: TaskCard overdue days under
+`TZ=Asia/Kolkata` when tests use UTC `toISOString()`.
+
+Load: see [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) — 10/50/100/150 users, p95 ≈ 29–130 ms
+**on a development machine**.
+
+CI: wave-32 removed all soft-fail escapes from workflows; security.yml runs real audits.
+
+### 2b. Original v1.0.1 cut evidence (2026-08-07) — historical
+
+All commands below were run live on **2026-08-07** against the working tree that produced the
+original client cut. Kept for provenance; **superseded for coverage/suite counts by §2a**.
+
+Backend test suite at that cut (393 passed):
 
 ```
 $ python3 -m pytest tests/ -q
 ================= 393 passed, 42 warnings in 135.26s (0:02:15) =================
-$ python3 -m pytest tests/ -q          # re-run after release edits
-================= 393 passed, 42 warnings in 129.70s (0:02:09) =================
 ```
 
-Lint / typecheck / build:
+Lint / typecheck / build at that cut: ruff clean; frontend `tsc` / eslint / `vite build` green.
+
+Docker cold boot at that cut used host port **8000** in the curl sample below; **current dev
+ports are 3100 (UI) / 8100 (API)**.
 
 ```
-$ ruff check src/backend/
-All checks passed!
-$ npx tsc --noEmit           (src/frontend)
-$ npx eslint . --ext ts,tsx --max-warnings 0     # exit 0, no warnings
-$ npx vite build             (src/frontend)
-✓ 1794 modules transformed.  ✓ built in 1.45s
-```
-
-Docker cold boot (`docker-compose down -v` then `up -d --build` — a fresh database, migrations
-run automatically):
-
-```
-$ docker-compose ps
-NAME                    STATUS
-wave-30-postgres-1      Up 10 seconds (healthy)
-wave-30-redis-1         Up 10 seconds (healthy)
-wave-30-backend-1       Up 16 seconds (healthy)
-wave-30-frontend-1      Up 15 seconds
-wave-30-adminer-1       Up 5 seconds
 $ curl -sf http://localhost:8000/healthz
-{"status":"ok"}                      # HTTP 200
+{"status":"ok"}                      # HTTP 200  (historical port)
 ```
 
-End-to-end browser tests:
+End-to-end browser tests at that cut: `npx playwright test tests/e2e/ --workers=1` → 7 passed.
 
-```
-$ npx playwright test tests/e2e/ --workers=1
-  7 passed (3.5s)
-```
-
-Alembic migration graph:
-
-```
-$ alembic -c src/backend/alembic.ini heads
-0011 (head)  0018 (head)  0020 (head)  0021 (head)  0022 (effective head)
-0023 (head)  0027 (head)
-```
-
-Live end-to-end business flow — walked via the real API as a real user would, with real
-reference IDs generated this session (all `SWA-{year}-{TYPE}-{seq:03d}`):
+Live end-to-end business flow — walked via the real API (all `SWA-{year}-{TYPE}-{seq:03d}`):
 
 | Step | Result | Reference ID |
 |---|---|---|
@@ -167,40 +179,31 @@ Also deliberately deferred, not forgotten:
 
 These are real and deliberately not hidden. None were discovered by the client first.
 
-1. **Celery is installed but not implemented.** `celery==5.4.0` is in `requirements.txt` only;
-   there is no Celery app, no worker, and no queue. Everything that *could* be async (PDF
-   generation, report export, email) runs **synchronously** and returns when done. Verified this
-   session: `grep -rn "celery" src/backend --include="*.py"` → zero code matches.
-   > **Update 2026-08-10 (wave-31): this is no longer true.** A real Celery app
-   > (`src/backend/workers/`), a `worker` compose service, an async export path
-   > (`?async=true` → 202 job_id + `GET /api/jobs/{id}` polling), and the runbook/HIERARCHY
-   > notes landed in wave-31 (commits `d5dd6f1`, `9d9f80e`). The synchronous path is unchanged.
-2. **File storage is local disk.** Uploads live in `uploads/` at the repo root. MinIO/S3 is not
-   wired (documented as target-state in `docs/IT_BRIEF.md` Part 3 and `docs/conventions.md`).
-   Backups must therefore cover the `uploads/` directory too (`make backup-files`).
-   > **Update 2026-08-10 (wave-31): MinIO/S3 is now wired.** A `StorageBackend` abstraction
-   > (`src/backend/core/storage.py`, `local` default | `minio`), a `minio` compose service, and
-   > the file-writing services routed through `get_storage()` landed in wave-31 (commit
-   > `d5dd6f1`). Default behavior (`local`) is byte-identical; `STORAGE_BACKEND=minio` is opt-in.
-   > Files written before wave-31 are not auto-migrated (manual, deployment-time concern).
+1. **Celery — BUILT (wave-31).** Real app in `src/backend/workers/`, compose `worker` service,
+   async export (`?async=true` → job_id + `GET /api/jobs/{id}`). Sync path still available.
+   *(Older drafts of this section said Celery was unmet — that claim is obsolete.)*
+2. **File storage — local default; MinIO BUILT (wave-31).** `StorageBackend` in
+   `src/backend/core/storage.py`; `STORAGE_BACKEND=local|minio`. Default `local` keeps
+   `uploads/`. Pre-wave-31 files are not auto-migrated. Backups must cover object storage too
+   (`make backup-files` for local).
 3. **JWT is HS256, not RS256.** A single shared secret signs tokens; fine for an internal
    on-prem app, but if SWA ever needs token verification by a third party, RS256 is the target.
-4. **Alembic migration graph has multiple heads.** Seven branch heads exist (see §2) and are
-   resolved by `upgrade heads` on boot, which works and is what the deploy does. There are no
-   merge migrations. Safe to operate, but a future cleanup should add merge points.
+4. **Alembic heads.** Wave-31 collapsed heads for the release line; always confirm with
+   `alembic heads` before a cold boot. Historical multi-head note from the Aug 7 cut is
+   provenance only.
 5. **Auth rate limiter is on by default (5 login/min per IP).** The dev compose file sets
-   `DISABLE_AUTH_RATE_LIMIT=true` so test suites (7 logins in under a minute) don't get
-   throttled. Production should keep the limiter on (or raise the limit if staff find it
-   annoying over VPN/NAT where everyone shares one IP).
- 6. **Wave-24's full test run was blocked at the time** by a test-database deadlock from a prior
-    session (environment issue, not code). That deadlock is long resolved — the suite has been
-    run green (413 passed, 6 skipped) many times since, including for the wave-31 verification.
-7. **Migration 0026 cold-boot ordering bug** (found and fixed this session): on a fresh database
-   the `documents` table could be missing when migration `0026` ran, because it lives on a
-   sibling branch. Fixed by declaring `depends_on = "0022"`; verified with a full `down -v` cold
-   boot. Also fixed this session: a missing `Notification` type import in the frontend API client
-   (resolved to the DOM global, causing 7 `tsc` errors), and 37 `B008` FastAPI-DI lint items that
-   had never received the repo's inline-`# noqa` convention.
+   `DISABLE_AUTH_RATE_LIMIT=true` so test suites don't get throttled. Production should keep
+   the limiter on (or raise it behind shared NAT/VPN).
+6. **Standing suite debt (2026-08-23):** five tests still expect **401** for missing
+   `Authorization`; FastAPI `HTTPBearer` returns **403**. Not a wave-38 regression — parked for
+   wave-37 triage. Frontend TaskCard overdue assertion can flake under IST.
+7. **Coverage is not “every module ≥70%.”** Overall backend 86%; services all ≥70%; nine
+   non-alembic modules still under 70% (see completion verdict).
+8. **Load results are not production-server results.** Measured on a development machine only.
+9. **`/metrics` is unauthenticated in app code** — treat as internal-only in production network
+   policy (called out again in wave-37 security scratch; final triage pending).
+10. **Wave-37 independent review** is not closed in this package — say “findings pending in
+    parallel,” do not invent a clean bill of health.
 
 ## 5. External blockers
 
@@ -266,19 +269,25 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 
 | Doc | Purpose |
 |---|---|
-| `README.md` | Entry point, quick start |
-| `CHANGELOG.md` | Full release history (this release is `[1.0.1]`; `[1.0.0]` was the original submission cut) |
-| `plan/EXECUTION.md` | Wave-by-wave status (all 31 waves shipped) |
+| `README.md` | Evaluator front door (60s) + verified metrics |
+| `docs/ARCHITECTURE.md` | Mermaid architecture (built vs target) |
+| `deliverables/TECHNICAL_REPORT.md` | Engineering case study |
+| `deliverables/DEMO_SCRIPT.md` | 5–10 min demo script |
+| `CHANGELOG.md` | Full release history (`[1.0.1]` product cut) |
+| `plan/EXECUTION.md` / `work/ACTIVE.md` | Wave status (1–31 product; 32–39 professional-grade) |
 | `docs/DEPLOYMENT_CHECKLIST.md` | Production deploy steps (see §6) |
-| `docs/IT_BRIEF.md` | The 8 IT questions + full deployment brief |
+| `docs/IT_BRIEF.md` / `deliverables/SEND_IT.md` | The 8 IT questions + deploy brief |
+| `docs/INSTALL_NO_IT.md` | Install path when there is no IT department |
 | `docs/decisions/0001..0004` | ADRs (tech stack, core ID chain, IT brief, meeting-2 flow) |
+| `docs/PERFORMANCE.md` | Load-test evidence |
+| `docs/OBSERVABILITY.md` | Metrics / health / Sentry |
 | `docs/runbook.md` + `docs/runbook_backup_restore.md` | Day-to-day ops + backup/restore |
 | `docs/api.md`, `docs/conventions.md`, `docs/SCOPE_GUARD.md` | API reference, conventions, scope |
 | `docs/PROJECT_HISTORY.md` | How the project got here (distilled history) |
 | `resources/MEETINGS_MASTER.md` | Consolidated record of both client meetings |
 | `resources/EXCEL_SHEETS_INVENTORY.md` | The 21 source sheets and their mapping |
 | `deliverables/handover/` | `ADMIN_GUIDE.md`, `USER_GUIDE.md`, `TRAINING_ONE_PAGER.md`, `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` |
-| `work/reports/wave-N/` | Per-wave verification reports (waves 1-31) |
+| `work/reports/wave-N/` | Per-wave verification reports |
 
 ## 9. Support / next steps
 
@@ -296,6 +305,7 @@ What a future developer picks up first:
    - (Resolved in wave-31: MinIO/S3 + Celery worker; Alembic heads collapsed.)
 
 Everything else — the core chain, RBAC matrix, GST invoicing, compliance, time tracking, and
-the backup/ops scripts — is verified working as of 2026-08-07 and ready to hand over.
-Wave-31's storage + Celery work was verified green (413 passed, 6 skipped) on 2026-08-10 and
-shipped in `1.0.1`.
+the backup/ops scripts — shipped in product `1.0.1`. Professional-grade evidence (real CI,
+86% backend coverage, frontend thresholds, load, observability) landed in waves 32–36.
+**Deploy to the company Windows Server is still an external step** — use `SEND_IT.md` /
+`INSTALL_NO_IT.md` when Viraj has bandwidth. Do not invent server facts.
