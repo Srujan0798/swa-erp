@@ -20,21 +20,26 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > lessons from the archived session handoffs (different slice of history — see that file's
 > header). Both now cross-reference each other instead of overlapping.
 
-## [Unreleased] — go-live prep (2026-08-11)
+## [Unreleased] — professional-grade close (2026-08-23)
 
-### Added
-- `scripts/seed_demo.py` now seeds the **core ID chain** (Inquiry → SA with service_name
-  `INSUDESIGN` → Token → DBR/KDR) plus APEX/INNER demo clients (Viraj-confirmed naming),
-  time entry, and sustainability metric. Idempotent re-run safe for contacts + chain.
-- `scripts/smoke_chain.py` + `make smoke` — live API smoke (login → Inquiry → convert → SA →
-  Token → DocRef).
-- `make seed-demo` / `make seed-dev` shortcuts.
-- `deliverables/DEMO_WALKTHROUGH.md` — 15‑minute Viraj/training script.
-- Async PDF export for project slides (`?async=true` + Celery task
-  `generate_project_slides_pdf`); tests in wave-31.
+### Added (waves 32–39 evidence track)
+- **Wave-32:** real CI gates (removed `|| true` / `continue-on-error`); ruff/black/mypy/pytest enforce.
+- **Wave-33:** backend coverage → **86%** overall; target services (pdf/quote/import/task/notification) ≥70%.
+- **Wave-34:** frontend Vitest suite; thresholds ≥60/50/60/60 (cite fresh runs, ~61% stmts).
+- **Wave-35:** Locust load validation 10/50/100/150 users — `docs/PERFORMANCE.md`.
+- **Wave-36:** Prometheus `/metrics`, Sentry (opt-in), `/healthz` `/readyz`.
+- **Wave-39:** repo organization (`work/ACTIVE.md` / `ARCHIVE.md`, performance-runs archive).
+- **CI:** `npx vitest run` gated in frontend job.
+- **Final-close pack:** `work/FINAL-CLOSE/` (protocols P01–P20).
+
+### Fixed
+- TaskCard overdue test timezone flake (`toISOString` UTC vs local IST).
+- Viraj architecture overview: MinIO/Celery status corrected (shipped wave-31).
+- Single `_PRIORITY_MAP` in `task_repo.py` (removed triplicate priority dicts).
 
 ### Docs
 - Viraj data answers locked (ADR-0002); `docs/INSTALL_NO_IT.md` for no-IT-dept install.
+- Go-live seed/smoke (`scripts/seed_demo.py`, `make smoke`) retained from 2026-08-11 prep.
 
 ## [1.0.1] — 2026-08-10 — deferred-feature release (wave-31)
 

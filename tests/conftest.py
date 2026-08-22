@@ -33,6 +33,20 @@ TestingSessionLocal = sessionmaker(
 )
 
 
+def _stamp_alembic_head() -> None:
+    """Mark test DB as at Alembic head so /readyz migrations check passes.
+
+    Tests build schema via create_all (not alembic upgrade), so without a stamp
+    readyz correctly reports migrations pending (current=None) and returns 503.
+    """
+    from alembic.config import Config
+    from alembic import command
+
+    cfg = Config("src/backend/alembic.ini")
+    cfg.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
+    command.stamp(cfg, "head")
+
+
 def _reset_tables():
     with engine.connect() as conn:
         result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
@@ -47,6 +61,7 @@ def _reset_tables():
                     conn.execute(text(f"DROP TABLE IF EXISTS {t} CASCADE"))
         conn.commit()
     Base.metadata.create_all(bind=engine)
+    _stamp_alembic_head()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -55,6 +70,7 @@ def setup_test_db():
         conn.execute(text("DROP SCHEMA public CASCADE"))
         conn.execute(text("CREATE SCHEMA public"))
     Base.metadata.create_all(bind=engine)
+    _stamp_alembic_head()
     with engine.connect() as conn:
         result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
         created = [r[0] for r in result]

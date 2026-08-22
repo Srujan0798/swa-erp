@@ -18,15 +18,13 @@ server). No external paid services, no public internet exposure.
 2. **Frontend (the website)** — what staff click. React, served as static files.
 3. **Database** — PostgreSQL. Where every Client, Project, Token, Document, etc.
    permanently lives.
-4. **File storage** — currently a local folder on the server disk. Holds
-   uploaded PDFs/drawings so big files stay out of the database. (MinIO — a
-   more scalable S3-style storage option — was planned but not built yet; the
-   current local-folder approach works fine for now and can be upgraded later
-   without disrupting anything.)
-5. **Background jobs** — currently handled directly, in real time, when a
-   staff member clicks the action (e.g. generating a PDF happens immediately,
-   not queued). Redis + Celery are installed and ready for this but not yet
-   wired up — fine at current scale, worth revisiting once volume grows.
+4. **File storage** — local folder on disk by default (`uploads/`). MinIO
+   (S3-compatible, same server) is built and optional — turn on with
+   `STORAGE_BACKEND=minio` in compose when you want object storage. Either way,
+   big files stay out of the database.
+5. **Background jobs** — Redis + Celery are wired. Heavy work (async PDF/report
+   export via `?async=true`) can run in a worker so staff don't wait. Simple
+   actions still complete on the request path when that is enough.
 6. **Login/security** — username + password (JWT). Five roles (admin, PM,
    designer, auditor, viewer) see different things, matching today's sheet
    access rules.

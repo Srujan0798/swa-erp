@@ -12,6 +12,7 @@ from src.backend.db.repositories.project_cost_repo import (
     soft_delete_cost,
 )
 from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
+from src.backend.core.config import settings
 from src.backend.schemas.pnl import (
     CostBreakdownItem,
     ProjectCostCreate,
@@ -20,7 +21,11 @@ from src.backend.schemas.pnl import (
     ProjectPnLSummary,
 )
 
-DEFAULT_HOURLY_RATE = Decimal("5000.00")
+
+def get_default_hourly_rate() -> Decimal:
+    """Company default billing rate from settings (env-overridable)."""
+    return Decimal(settings.DEFAULT_HOURLY_RATE_INR)
+
 
 COST_CATEGORIES = ["time", "material", "vendor", "overhead", "other"]
 
@@ -53,7 +58,7 @@ def _get_time_cost(db: Session, project_id: uuid.UUID) -> tuple[Decimal, int]:
         .all()
     )
     total_hours = sum(e.hours for e in entries)
-    cost = total_hours * DEFAULT_HOURLY_RATE
+    cost = total_hours * get_default_hourly_rate()
     return cost, len(entries)
 
 

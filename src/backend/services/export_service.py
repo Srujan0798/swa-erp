@@ -15,7 +15,7 @@ from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
 from src.backend.models.boq import BOQItem
 from src.backend.models.project_cost import ProjectCost
 from src.backend.models.quote import Quote
-from src.backend.services.project_pnl_service import DEFAULT_HOURLY_RATE
+from src.backend.services.project_pnl_service import get_default_hourly_rate
 
 
 class _SWAPdf(FPDF):
@@ -221,7 +221,7 @@ def export_financial_report(db: Session, start_date: date, end_date: date) -> by
         )
         .scalar()
     )
-    time_cost = sum(billable_hours.values()) * DEFAULT_HOURLY_RATE
+    time_cost = sum(billable_hours.values()) * get_default_hourly_rate()
     total_costs = Decimal(manual_costs) + time_cost
     net_pnl = total_revenue - total_costs
 

@@ -39,17 +39,35 @@ class LocalStorage:
     def __init__(self, root: Path | str = UPLOAD_ROOT) -> None:
         self.root = Path(root)
 
+    def _ensure_under_root(self, path: Path) -> Path:
+        root = self.root.resolve()
+        candidate = path.resolve()
+        try:
+            candidate.relative_to(root)
+        except ValueError as e:
+            raise ValueError("storage key escapes upload root") from e
+        return path
+
     def _path(self, key: str) -> Path:
-        path = Path(key)
-        if path.is_absolute() or str(path).startswith(str(self.root)):
-            return path
-        return self.root / path
+        """Map a key or legacy stored path onto a location under ``root``.
+
+        Relative keys are joined under root. Absolute keys / paths that already
+        start with the root prefix (legacy ``save`` return values like
+        ``uploads/foo``) are accepted only when they resolve under root. Any
+        path that escapes root (including ``..`` traversal) is rejected.
+        """
+        raw = Path(key)
+        if raw.is_absolute() or str(raw).startswith(str(self.root)):
+            return self._ensure_under_root(raw)
+        return self._ensure_under_root(self.root / raw)
 
     def save(self, key: str, content: bytes) -> str:
-        path = self.root / key
+        if Path(key).is_absolute():
+            raise ValueError("absolute storage keys are not allowed")
+        path = self._path(key)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
-        return str(path)
+        return str(self.root / key)
 
     def read(self, key: str) -> bytes:
         return self._path(key).read_bytes()
@@ -63,7 +81,6 @@ class LocalStorage:
 
     def url(self, key: str) -> str:
         return str(self._path(key))
-
 
 class MinIOStorage:
     """S3-compatible object storage backend (MinIO) via the ``minio`` client.

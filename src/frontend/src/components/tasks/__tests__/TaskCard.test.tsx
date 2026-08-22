@@ -63,7 +63,14 @@ describe("TaskCard", () => {
 
   it("renders overdue, due today, and tomorrow labels", () => {
     const today = new Date();
-    const fmt = (d: Date) => d.toISOString().split("T")[0];
+    // Local Y-M-D — matches TaskCard parsing of `dueDate + "T00:00:00"` as local time.
+    // toISOString() is UTC and flips the calendar day under IST near midnight.
+    const fmt = (d: Date): string => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
 
     const past = new Date(today);
     past.setDate(past.getDate() - 3);

@@ -4,110 +4,50 @@
 > [README.md](README.md).
 
 ## Why this file exists
-Switching orchestrators (Claude ↔ Kimi) or starting a fresh session shouldn't require re-explaining the project. This file lets the new session catch up in < 5 minutes.
+Switching orchestrators or starting a fresh session shouldn't require re-explaining the project.
+This file lets the new session catch up in < 5 minutes.
 
-## Current state (2026-08-11 — PROJECT COMPLETE: v1.0.1)
+## Current state (2026-08-23 — FINAL CLOSE IN PROGRESS)
 
-- **Status:** Waves 1-31 ✅ SHIPPED, verified, and **pushed to `origin/main`**
-  (GitHub `Srujan0798/swa-erp`). Final release **`v1.0.1`** (tagged + pushed), replacing
-  `v1.0.0`. Version files (`pyproject.toml`, `src/frontend/package.json`,
-  `package-lock.json`) all say **1.0.1**. Working tree clean, no worktrees/branches/stashes.
-- **v1.0.1 (wave-31, 2026-08-10) closed the last deferred features:**
-  - **Object storage:** `StorageBackend` (`src/backend/core/storage.py`) — `local` `uploads/`
-    default (byte-identical to 1.0.0), opt-in `minio` (`STORAGE_BACKEND=minio`, compose `minio`
-    service). Files from before wave-31 are not auto-migrated (deployment-time concern).
-  - **Celery worker:** `src/backend/workers/` (`celery_app` + `@task`s), compose `worker`
-    service, Redis broker/backend; async export via `?async=true` → `202 job_id` + poll
-    `GET /api/jobs/{id}`. Sync export path unchanged. Email is the one integration still on the
-    request path.
-  - Alembic migration graph collapsed from 7 heads → 1 (`c4dd496`).
-- **Cleanup sweep (2026-08-11, `0748c7f`):** `backups/` untracked + gitignored (runtime
-  output); FileBrowser "New Folder" dialog wired to `useCreateFolder` (was a dead `TODO`).
-- **Verification (all run this session against the live stack):** backend suite
-  **413 passed / 6 skipped / 0 failed**; `ruff check src/backend/` clean; frontend
-  `npm run build` (tsc) clean; wave-31 tests 20 passed / 6 skipped. Historical evidence in
-  `work/reports/wave-30/` and `work/reports/wave-31/`.
-- **Client submission package:** `deliverables/SUBMISSION.md` (v1.0.1) — what was built,
-  verification evidence, explicit drop list, known limitations, deploy pointer, Excel import
-  pointer, docs map, and support/next steps.
-- **Group chat (2026-08-11):** Viraj answered data Qs; said **there is no IT department**
-  (server questions deferred: "will discuss when time comes"). **Lead ID columns completely removed**
-  per his instruction: "remove Lead ID columns everywhere, don't keep even for historical values."
-- **Viraj data Qs — ANSWERED:** APEX/INNER = clients; INSUDESIGN = service name; yearly ID
-   reset everywhere; no Leads sheet. Locked in ADR-0002. **No code change.** Reply sent:
-   `deliverables/REPLY_VIRAJ.md` (includes LDI example he asked for).
-- **Lead ID columns — REMOVED (2026-08-11):** Per Viraj's instruction "remove Lead ID columns
-   everywhere, don't keep even for historical values," all Lead ID fields dropped from models,
-   schemas, database, and importer. Migration `0018_drop_lead_id_columns.py` applied.
-- **Deploy blocker:** server facts (Docker/WSL/ports/HTTPS/hostname/etc.) — owned by **Viraj**
-  (no IT dept), slow path. Until then product stays complete but not company-server live.
-- **Where to start:** `MASTER-FLOW.md` → wait / help when Viraj has bandwidth for server.
-- **Real Excel path (2026-08-11):** source of truth is
-  `resources/ERP_Sheets_Extracted/ERP Sheets/`. Use `make import-real` (dry-run) or
-  `make import-real-commit` (wipe + load). Importer hardened for real multi-row headers.
-  Doc: `docs/REAL_DATA.md`. Demo seed is **not** client data. Ports: UI **3100**, API **8100**.
-  Install when free: `docs/INSTALL_NO_IT.md`.
+- **Product:** **v1.0.1** feature-complete (waves 1–31). Core chain, Excel import, MinIO opt-in,
+  Celery workers — shipped earlier.
+- **Professional-grade track (waves 32–39):**
+  - **SHIPPED:** 32 (real CI), 33 (backend 86% cov), 34 (frontend ≥60%), 35 (load tests),
+    36 (metrics/Sentry/readyz — task-01 report missing, 02+code landed), 39 (repo org).
+  - **IN-FLIGHT:** **37** independent adversarial review.
+  - **QUEUED:** **38** submission package (after 37).
+- **HEAD baseline when close started:** `4b8ba31` (+ stabilize commits landing now).
+- **Close pack (authoritative):** [`work/FINAL-CLOSE/`](work/FINAL-CLOSE/) — protocols P01–P20,
+  paste prompts, definition of done.
+- **Living verdict:** [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md)
+- **Live wave table:** [`work/ACTIVE.md`](work/ACTIVE.md) (not this file’s Aug-11 freeze).
 
-## Where to start a new session
-1. Read this file
-2. Read `CLAUDE.md` (kernel)
-3. Read `plan/EXECUTION.md` (wave status)
-4. Read most recent ADR in `docs/decisions/`
-5. Run `/status` to see live state
+### Stabilize fixes in the close
+- TaskCard overdue test: local Y-M-D dates (not `toISOString` UTC).
+- CI: `npx vitest run` in frontend job.
+- Viraj architecture overview: MinIO/Celery status corrected.
+- `task_repo` priority maps consolidated to one `_PRIORITY_MAP`.
+- Note: live unauthenticated responses are **401** in this stack; do not “fix” tests to 403 without re-measuring.
+
+### Client / deploy (external — does not block engineering close)
+- Viraj data Qs **answered** (ADR-0002). Lead ID columns removed.
+- **No IT department** — server facts slow path; use `docs/INSTALL_NO_IT.md` when he has time.
+- Do **not** re-blast `SEND_IT.md` / `SEND_VIRAJ.md`.
+
+### Where to start a new session
+1. This file
+2. `work/FINAL-CLOSE/README.md` if closing
+3. `work/ACTIVE.md` for wave status
+4. `Claude.md` kernel
 
 ## When you've just merged a wave
-Update this file:
-- Bump "Active wave" to wave-N+1
-- Summarize what shipped
-- Note open issues / carry-overs to next wave
-
-## When switching Claude ↔ Kimi
-- No file changes needed
-- Both read root CLAUDE.md (Kimi treats KIMI.md as alias — identical content)
-- Same workflow, same commands
-- Auto-memory in `orchestrator/memory/MEMORY.md` is shared
-
-## When onboarding a worker (rare — workers should be stateless)
-Workers DON'T read this file. Their task brief in `work/<wave>/` is self-contained.
-Workers receive:
-1. `work/WORKER_PROMPT.md` (universal prefix)
-2. One task file from `work/wave-N/`
-That's it. No project memory needed.
+Update `work/ACTIVE.md` (SoT) and this file’s “Current state” bullet.
 
 ## Open decisions (live)
-- _None yet — see ADRs in docs/decisions/ as they accumulate_
+- Server/deploy 8 facts — Viraj / nominee (external)
+- Excel migration owner + freeze date — Viraj (external)
 
 ## Wave roadmap recap
-1. Foundation (auth, users, roles, base data model, shell) — ✅ SHIPPED `df1b779`
-2. Clients + Projects core (CRM-lite, project CRUD) — ✅ SHIPPED `d1e3017`
-3. Quotation/BOQ workflow (upload BOQ, quote versions, approvals) — ✅ SHIPPED `f49eac1`
-4. Task management (per-project tasks, assignments, deps) — ✅ SHIPPED (`ed71fac` bulk commit)
-5. Vendor + Inventory (vendor DB, materials catalog, RFQ-to-vendor) — ✅ SHIPPED (`ed71fac`)
-6. Documents + compliance tracking (NBC/ECBC/IGBC/IS checklist) — ✅ SHIPPED (`ed71fac`)
-7. Time tracking + financials (timesheets, invoicing, project P&L) — ✅ SHIPPED (`ed71fac`)
-8. Reports + dashboards + deliverables (paper/report/slides/demo) — ✅ SHIPPED `58864df`
-9. Core ID chain — Inquiry, Service Agreement, Token, Document Reference — ✅ SHIPPED, closed
-   the real client-requested MVP gap (`c3367fa`)
-10. Sustainability metrics — ✅ SHIPPED (`a155000`)
-11. Reconcile dangling uncommitted frontend work — ✅ SHIPPED (`4e0655d`)
-12. Independent verification (real test run, Docker, E2E) — ✅ SHIPPED (`9852ec0`)
-13. Excel → ERP data migration importer — ✅ SHIPPED (`466d8ae`)
-14. Docker Compose auto-migration + seed fix — ✅ SHIPPED (`ab0a786`)
-15. E2E test fixes — ✅ SHIPPED (`4be7536`)
-16. Model/migration drift sweep — ✅ SHIPPED (`d5b2790`)
- 17-21. Notifications mount, security hardening, backup scripts, prod config templates,
-   handover docs — ✅ SHIPPED (see `work/reports/wave-N/` and the status table in
-   `plan/EXECUTION.md`)
- 22-30. Audit fixes (RBAC, correctness, dead-code/UI), security/lint, doc consolidation, and the
-   **v1.0.0 release** — ✅ SHIPPED; see `plan/EXECUTION.md` status table and
-   `deliverables/SUBMISSION.md`
- 31. Deferred features — MinIO/S3 storage + Celery worker — ✅ SHIPPED (**v1.0.1**, 2026-08-10)
-
-## Key project context
-- **Tech stack:** Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2, PostgreSQL, Redis, React 18, Vite, TS, Tailwind, shadcn/ui, TanStack Query. Celery is implemented (`src/backend/workers/`, compose `worker` service, Redis broker/backend) and powers async export endpoints (`?async=true` → `GET /api/jobs/{id}`). Storage goes through `StorageBackend` (`src/backend/core/storage.py`) — `local` `uploads/` default, opt-in `minio` backend. See `HIERARCHY.md`.
-- **Auth:** JWT + RBAC (roles: admin, pm, designer, auditor, viewer)
-- **Money:** Decimal(18,2), INR default, multi-currency ready
-- **Compliance standards:** NBC, ECBC, IGBC, IS fire codes (explicit references required)
-- **Project lifecycle:** Lead → Quote → Awarded → Design → Vendor → Execution → Validation → Closed
-- **BOQ ingestion:** JSON or Excel; never call rfq2boq directly (independent product)
-- **Time tracking:** 15-min increments; billable vs non-billable flag
+1–31 product MVP → v1.0.1 ✅  
+32–36 + 39 professional evidence ✅  
+37 review → 38 package → seal (this close)

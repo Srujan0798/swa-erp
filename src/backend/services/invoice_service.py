@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from src.backend.core.config import settings
 from src.backend.db.repositories.invoice_repo import (
     create_invoice,
     generate_invoice_number,
@@ -135,7 +136,9 @@ def generate_from_time_entries(
     if not entries:
         raise ValueError("No billable time entries found for the given date range")
 
-    rate_per_hour = Decimal("5000.00")
+    # Rate from settings (DEFAULT_HOURLY_RATE_INR), not a silent magic number in logic.
+    rate_per_hour = Decimal(settings.DEFAULT_HOURLY_RATE_INR)
+    tax_rate = Decimal("18.00")  # GST % — invoice-level default; configurable later
 
     items_data: list[dict[str, Any]] = []
     for entry in entries:
@@ -157,7 +160,7 @@ def generate_from_time_entries(
         user_id=user_id,
         due_date=None,
         notes=f"Invoice for period {start_date} to {end_date}",
-        tax_rate=Decimal("18.00"),
+        tax_rate=tax_rate,
         items_data=items_data,
     )
 

@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session, selectinload
 from src.backend.models.task import Task, TaskComment, TaskDependency
 from src.backend.schemas.task import TaskCreate, TaskFilter, TaskUpdate
 
+_PRIORITY_MAP = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+
 
 class TaskRepository:
     def __init__(self, session: Session):
@@ -63,21 +65,19 @@ class TaskRepository:
         if filters.search:
             stmt = stmt.where(Task.title.ilike(f"%{filters.search}%"))
         if filters.priority:
-            _p = {"low": 1, "medium": 2, "high": 3, "critical": 4}.get(filters.priority, None)
+            _p = _PRIORITY_MAP.get(filters.priority)
             if _p is not None:
                 stmt = stmt.where(Task.priority == _p)
         stmt = stmt.order_by(Task.position, Task.created_at).offset(skip).limit(limit)
         result = self.session.execute(stmt)
         return list(result.scalars().all())
 
-    _priority_int = {"low": 1, "medium": 2, "high": 3, "critical": 4}
-
     def update(self, task: Task, data: TaskUpdate) -> Task:
         for field, value in data.model_dump(exclude_unset=True).items():
             if field == "version":
                 continue
             if field == "priority" and isinstance(value, str):
-                value = self._priority_int.get(value, 2)
+                value = _PRIORITY_MAP.get(value, 2)
             setattr(task, field, value)
         task.version = (task.version or 0) + 1
         task.updated_at = datetime.now(tz=UTC)
@@ -136,9 +136,6 @@ class TaskRepository:
 _repo = TaskRepository.__dict__
 
 
-_priority_map = {"low": 1, "medium": 2, "high": 3, "critical": 4}
-
-
 def create_task(
     db: Session,
     *,
@@ -150,7 +147,7 @@ def create_task(
     assignee_id: UUID | None = None,
     due_date=None,
 ) -> Task:
-    priority_int = _priority_map.get(priority, 2)
+    priority_int = _PRIORITY_MAP.get(priority, 2)
     task = Task(
         project_id=project_id,
         title=title,

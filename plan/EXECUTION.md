@@ -58,18 +58,17 @@ wave-1 (Foundation) ✅ SHIPPED
 | 29 | Stale claim fixes | **SHIPPED** ✅ | 1/1 | `work/reports/wave-29/01-stale-claim-fixes.report.md`; 9 docs corrected to match real repo state (backups, GST, Celery/MinIO target-state, test counts, version/tag reconciliation) |
 | 30 | Final release + submission package | **SHIPPED** ✅ | 1/1 | this file; full verification sweep + live end-to-end business-flow validation, version cut at 1.0.0, `deliverables/SUBMISSION.md` produced. See `work/reports/wave-30/01-final-release-and-submission.report.md` |
 | 31 | Deferred features: MinIO storage + Celery worker | **SHIPPED** ✅ | 2/2 | `work/reports/wave-31/01-wire-minio-storage.report.md`, `work/reports/wave-31/02-wire-celery-worker.report.md`; object storage abstraction (`src/backend/core/storage.py`, `local` default | `minio` opt-in) + Celery app (`src/backend/workers/`) with async export endpoints. Version cut 1.0.1. See `CHANGELOG.md` |
+| 32 | Real CI quality gates | **SHIPPED** ✅ | 1/1 | See `work/ACTIVE.md` + `work/reports/wave-32/` |
+| 33 | Backend coverage ≥85% | **SHIPPED** ✅ | 3/3 | `work/reports/wave-33/` — 86% overall; 5 target services ≥70% |
+| 34 | Frontend Vitest suite ≥60% | **SHIPPED** ✅ | 2/2 | `work/reports/wave-34/` |
+| 35 | Load validation 10–150 users | **SHIPPED** ✅ | 1/1 | `docs/PERFORMANCE.md` |
+| 36 | Observability | **SHIPPED** ✅ | 2/2 | code + `02-post-merge-fixes.report.md` (01 never written) |
+| 37 | Independent adversarial review | **IN-FLIGHT** | 0/1 | `work/FINAL-CLOSE/` + `work/wave-37/` |
+| 38 | Professional submission package | **QUEUED** | 0/1 | after 37 |
+| 39 | Repo organization | **SHIPPED** ✅ | 1/1 | `work/reports/wave-39/` |
 
-**Waves 17-31 are all SHIPPED** (see status table above; per-wave reports in `work/reports/wave-N/`).
-All of the audit-driven fixes (22-24), the security/lint pass (27), the docs-consolidation
-passes (26, 28, 29), and the deferred-feature close (31) landed and were verified.
-**Wave-30 cut the first real release — `1.0.0`** (2026-08-07), replacing the stale `0.2.0`
-version files, and produced the client submission package at `deliverables/SUBMISSION.md`.
-**Wave-31 (2026-08-10) cut `1.0.1`**, shipping MinIO/S3 object storage and a real Celery
-worker for background PDF/report jobs (the two features previously marked target-state).
-
-The only remaining external blockers are Viraj's 3 open decisions
-(`docs/decisions/0002-core-id-chain-gap.md`) and IT's 8 answers (`docs/IT_BRIEF.md`) — nothing
-in code can resolve those.
+**Waves 1–36 and 39 are SHIPPED.** Live tracker: `work/ACTIVE.md`. Close pack: `work/FINAL-CLOSE/`.
+Viraj data Qs locked (ADR-0002). Server/deploy facts still external (no IT dept).
 
 **Note on waves 4-8:** these were committed in one mega-commit (`ed71fac`) rather than the
 per-task worker/report process this file describes — `work/reports/` is empty for waves 5, 6,
@@ -123,8 +122,5 @@ directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY
 current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
 instead of duplicating it here.
 
-**Active wave:** none — waves 1-31 shipped (see status table above). Wave-30 cut the
-`1.0.0` client-submission release and produced `deliverables/SUBMISSION.md`; wave-31 cut
-`1.0.1`, shipping the last deferred features (MinIO object storage + Celery worker).
-**Next action:** hand over per `deliverables/SUBMISSION.md` (deploy checklist, Excel import,
-support/next steps).
+**Active wave:** **37** (final close) → then **38**. See `work/FINAL-CLOSE/` and `work/ACTIVE.md`.
+Product release remains **v1.0.1**; professional-grade evidence track is waves 32–39.
