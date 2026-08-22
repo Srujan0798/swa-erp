@@ -42,5 +42,5 @@ exclude = ["src/backend/alembic/versions", "src/backend/db/repositories/__init__
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --import-mode=importlib"
 asyncio_mode = "auto"
