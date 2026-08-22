@@ -23,6 +23,16 @@ class TimeEntry(Base):
     hours: Mapped[Decimal] = mapped_column(Numeric(4, 2), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     is_billable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Excel Time Logging Sheet columns (high-frequency)
+    employee_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    employee_role: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    work_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    sheet_reference_id: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    revision: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    activity_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    software_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    work_mode: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    billable_hours: Mapped[Decimal | None] = mapped_column(Numeric(4, 2), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

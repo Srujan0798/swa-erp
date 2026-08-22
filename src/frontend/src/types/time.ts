@@ -7,6 +7,16 @@ export interface TimeEntry {
   hours: number;
   description: string;
   is_billable: boolean;
+  /** Excel Time Logging Sheet columns */
+  employee_name?: string | null;
+  employee_role?: string | null;
+  work_type?: string | null;
+  sheet_reference_id?: string | null;
+  revision?: string | null;
+  activity_type?: string | null;
+  software_used?: string | null;
+  work_mode?: string | null;
+  billable_hours?: number | null;
   created_at: string;
   deleted_at: string | null;
   user_name?: string;
@@ -20,6 +30,15 @@ export interface TimeEntryCreate {
   hours: number;
   description: string;
   is_billable: boolean;
+  employee_name?: string;
+  employee_role?: string;
+  work_type?: string;
+  sheet_reference_id?: string;
+  revision?: string;
+  activity_type?: string;
+  software_used?: string;
+  work_mode?: string;
+  billable_hours?: number;
 }
 
 export interface TimeEntryUpdate {
@@ -29,6 +48,15 @@ export interface TimeEntryUpdate {
   hours?: number;
   description?: string;
   is_billable?: boolean;
+  employee_name?: string;
+  employee_role?: string;
+  work_type?: string;
+  sheet_reference_id?: string;
+  revision?: string;
+  activity_type?: string;
+  software_used?: string;
+  work_mode?: string;
+  billable_hours?: number;
 }
 
 export interface TimeEntryListResponse {

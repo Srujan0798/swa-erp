@@ -19,6 +19,7 @@ const inquirySchema = z.object({
   ),
   priority: z.string().optional(),
   status: z.string().default("New"),
+  technical_lead: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -95,6 +96,15 @@ export function InquiryForm({ initialData, onSubmit, onCancel, isLoading }: Inqu
               <Label htmlFor="priority">Priority</Label>
               <Input id="priority" placeholder="e.g. High, Medium, Low" {...form.register("priority")} />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="technical_lead">Technical lead</Label>
+            <Input
+              id="technical_lead"
+              placeholder="Excel: Technical Lead name"
+              {...form.register("technical_lead")}
+            />
           </div>
 
           <div className="space-y-2">

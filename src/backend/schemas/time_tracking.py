@@ -21,6 +21,15 @@ class TimeEntryCreate(BaseModel):
     hours: Decimal = Field(gt=0, le=24)
     description: str = Field(min_length=1, max_length=2000)
     is_billable: bool = True
+    employee_name: str | None = Field(default=None, max_length=255)
+    employee_role: str | None = Field(default=None, max_length=50)
+    work_type: str | None = Field(default=None, max_length=50)
+    sheet_reference_id: str | None = Field(default=None, max_length=50)
+    revision: str | None = Field(default=None, max_length=20)
+    activity_type: str | None = Field(default=None, max_length=50)
+    software_used: str | None = Field(default=None, max_length=100)
+    work_mode: str | None = Field(default=None, max_length=50)
+    billable_hours: Decimal | None = Field(default=None, ge=0, le=24)
 
 
 class TimeEntryUpdate(BaseModel):
@@ -28,6 +37,15 @@ class TimeEntryUpdate(BaseModel):
     hours: Decimal | None = Field(default=None, gt=0, le=24)
     description: str | None = Field(default=None, min_length=1, max_length=2000)
     is_billable: bool | None = None
+    employee_name: str | None = Field(default=None, max_length=255)
+    employee_role: str | None = Field(default=None, max_length=50)
+    work_type: str | None = Field(default=None, max_length=50)
+    sheet_reference_id: str | None = Field(default=None, max_length=50)
+    revision: str | None = Field(default=None, max_length=20)
+    activity_type: str | None = Field(default=None, max_length=50)
+    software_used: str | None = Field(default=None, max_length=100)
+    work_mode: str | None = Field(default=None, max_length=50)
+    billable_hours: Decimal | None = Field(default=None, ge=0, le=24)
 
 
 class TimeEntryRead(BaseModel):
@@ -41,6 +59,15 @@ class TimeEntryRead(BaseModel):
     hours: Decimal
     description: str
     is_billable: bool
+    employee_name: str | None = None
+    employee_role: str | None = None
+    work_type: str | None = None
+    sheet_reference_id: str | None = None
+    revision: str | None = None
+    activity_type: str | None = None
+    software_used: str | None = None
+    work_mode: str | None = None
+    billable_hours: Decimal | None = None
     created_at: datetime
     user_name: str | None = None
     project_name: str | None = None

@@ -50,8 +50,10 @@ export function LoginPage() {
         <CardHeader>
           <CardTitle>SWA Consultancy ERP</CardTitle>
           <CardDescription>
-            Sign in with your SWA account. Local install: open this app on port{" "}
-            <strong>3100</strong>.
+            Sign in with your SWA account. Local install: UI on port{" "}
+            <strong>3100</strong>. First-time real data: run{" "}
+            <code className="rounded bg-muted px-1 text-xs">make swa-live-local</code> then use
+            admin@swa.co.in / admin123!.
           </CardDescription>
         </CardHeader>
         <CardContent>

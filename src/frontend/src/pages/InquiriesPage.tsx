@@ -136,9 +136,11 @@ export function InquiriesPage() {
                 <TableRow>
                   <TableHead>Reference</TableHead>
                   <TableHead>Client</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
+                  <TableHead>Tech lead</TableHead>
                   <TableHead>Estimated Value</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -146,17 +148,17 @@ export function InquiriesPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">Loading...</TableCell>
+                    <TableCell colSpan={9} className="text-center">Loading...</TableCell>
                   </TableRow>
                 ) : isError ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                       Unable to load inquiries.
                     </TableCell>
                   </TableRow>
                 ) : inquiries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                       {hasFilters ? (
                         <>No inquiries match your filters. Clear search or status and try again.</>
                       ) : write ? (
@@ -169,6 +171,8 @@ export function InquiriesPage() {
                           >
                             Create the first inquiry
                           </button>
+                          {" "}or load sheets with{" "}
+                          <code className="rounded bg-muted px-1">make swa-live-local</code>.
                         </>
                       ) : (
                         <>No inquiries yet.</>
@@ -180,6 +184,7 @@ export function InquiriesPage() {
                     <TableRow key={inquiry.id}>
                       <TableCell className="font-mono text-sm">{inquiry.reference_id}</TableCell>
                       <TableCell className="font-medium">{inquiry.client_name}</TableCell>
+                      <TableCell className="text-sm">{inquiry.inquiry_type ?? "—"}</TableCell>
                       <TableCell>{inquiry.inquiry_date}</TableCell>
                       <TableCell>
                         <Badge
@@ -190,6 +195,7 @@ export function InquiriesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{inquiry.priority ?? "—"}</TableCell>
+                      <TableCell className="text-sm">{inquiry.technical_lead ?? "—"}</TableCell>
                       <TableCell>
                         {inquiry.estimated_value != null
                           ? `₹${inquiry.estimated_value.toLocaleString()}`
@@ -249,7 +255,8 @@ export function InquiriesPage() {
           <DialogHeader>
             <DialogTitle>New Inquiry</DialogTitle>
             <DialogDescription>
-              Capture initial inquiry details. You can convert it to a Project later.
+              Capture Excel Inquiries Sheet fields. When won: convert → check existing client →
+              always land on a Project (Meeting 2).
             </DialogDescription>
           </DialogHeader>
           <InquiryForm

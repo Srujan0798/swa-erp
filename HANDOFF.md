@@ -7,7 +7,9 @@
 
 **Feedback:** SWA said product felt unusable / “dummy”. Response is a **4-week recovery** focused on real Excel chain UX — not more test waves.
 
-**Week 1 in progress/done on main:** Document References first-class page; Excel-first sidebar; dashboard full chain; `make swa-live-local`; [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).
+**Week 1 done on main:** Document References first-class page; Excel-first sidebar; dashboard full chain; `make swa-live-local`; [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).
+
+**Week 2+ field parity (in progress on main):** Time Logging Sheet columns on model/API/UI/import; Inquiry `technical_lead`; Doc Refs list matches Excel columns; Login/Dashboard/`VIRAJ_TRIAL_SCRIPT` real-data messaging. See `work/reports/recovery/LOOP.md`.
 
 Plan: session `plan.md` recovery (Weeks 1–4). Reports: `work/reports/recovery/`.
 

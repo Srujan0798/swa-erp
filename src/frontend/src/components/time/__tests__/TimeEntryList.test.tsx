@@ -24,6 +24,9 @@ const entry: TimeEntry = {
   hours: 2.5,
   description: "Design review",
   is_billable: true,
+  work_type: "PROJECT",
+  activity_type: "DBR",
+  software_used: "CAD",
   created_at: "2026-01-05T00:00:00Z",
   deleted_at: null,
   project_name: "Acme Office",
@@ -47,18 +50,18 @@ describe("TimeEntryList role gating (canWrite)", () => {
     expect(screen.getAllByRole("button")).toHaveLength(2);
     expect(screen.getByRole("button", { name: "Edit entry" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete entry" })).toBeInTheDocument();
-    expect(screen.queryByText("—")).not.toBeInTheDocument();
   });
 
   it("hides edit/delete controls for a viewer", () => {
     renderList("viewer");
-    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Edit entry" })).not.toBeInTheDocument();
     expect(document.querySelectorAll("button")).toHaveLength(0);
   });
 
   it("hides edit/delete controls when no user is loaded", () => {
     renderList(undefined);
-    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Edit entry" })).not.toBeInTheDocument();
+    expect(document.querySelectorAll("button")).toHaveLength(0);
   });
 
   it("renders a loading row while loading", () => {
@@ -78,6 +81,7 @@ describe("TimeEntryList role gating (canWrite)", () => {
     expect(screen.getByText("Acme Office")).toBeInTheDocument();
     expect(screen.getByText("2.50")).toBeInTheDocument();
     expect(screen.getByText("Design review")).toBeInTheDocument();
+    // Billable column shows Yes when billable_hours is unset but is_billable
     expect(screen.getByText("Yes")).toBeInTheDocument();
   });
 

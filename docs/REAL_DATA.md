@@ -28,19 +28,22 @@ Out of MVP (not imported): HR, marketing, complaints, research, training — per
 ## Commands
 
 ```bash
-# Dry-run (no DB writes) — always first
+# Preferred one-shot for local SWA trials (wipe + real sheets + link inquiries→projects + users)
+make swa-live-local
+# same as: make bootstrap-real
+
+# Dry-run import only (no DB writes) — always first when validating a new extract
 make import-real
 
-# Wipe core domain tables + commit real sheets + ensure admin user
+# Wipe + commit sheets only (no inquiry→project linking)
 make import-real-commit
-# equivalent:
-# python3 scripts/import_real_sheets.py --commit --wipe
 ```
 
-Login after commit: `admin@swa.co.in` / `admin123!`
+Login after bootstrap: `admin@swa.co.in` / `admin123!`
 
 App ports: UI **http://127.0.0.1:3100** · API **http://127.0.0.1:8100**
 
+**Do not** use `make seed-demo` / `scripts/seed_demo.py` for client review.
 ## Sample extract reality check (2026-08)
 
 The extracted workbooks are **partial samples** from SWA, not a full OneDrive dump:

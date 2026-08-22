@@ -95,6 +95,10 @@ export function InquiryDetailPage() {
                 <p>{inquiry.priority ?? "—"}</p>
               </div>
               <div>
+                <Label className="text-muted-foreground">Technical lead</Label>
+                <p>{inquiry.technical_lead ?? "—"}</p>
+              </div>
+              <div>
                 <Label className="text-muted-foreground">Estimated Value</Label>
                 <p>
                   {inquiry.estimated_value != null

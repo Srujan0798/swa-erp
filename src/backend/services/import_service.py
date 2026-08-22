@@ -533,6 +533,7 @@ def _import_inquiries(s: Session, rows: list[dict], result: ImportResult) -> Non
                 estimated_value=_parse_decimal(d.get("Estimated Value")),
                 priority=_txt(d.get("Priority")),
                 status=status,
+                technical_lead=_txt(d.get("Technical Lead")),
                 notes=_txt(d.get("Notes")),
                 converted_client_id=client.id if client else None,
             )
@@ -783,14 +784,13 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
             if hours is None:
                 result.add_error(i, "missing Hours Logged")
                 continue
-            description = _txt(d.get("Activity Type")) or "Imported time log"
-            remarks = _txt(d.get("Remarks (optional)")) or _txt(d.get("Remarks"))
-            if remarks:
-                description = f"{description} — {remarks}"
             employee = _txt(d.get("Employee Name"))
-            if employee:
-                description = f"[{employee}] {description}"
+            activity = _txt(d.get("Activity Type"))
+            remarks = _txt(d.get("Remarks (optional)")) or _txt(d.get("Remarks"))
+            # Prefer remarks as description; fall back to activity type (Excel buckets)
+            description = remarks or activity or "Imported time log"
             billable = _parse_decimal(d.get("Billable Hours")) or Decimal("0")
+            sheet_ref = ref if _looks_like_swa_id(ref) else None
             exists = s.scalar(
                 select(TimeEntry).where(
                     TimeEntry.project_id == project.id,
@@ -811,6 +811,15 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
                     hours=hours,
                     description=description,
                     is_billable=billable > 0,
+                    employee_name=employee,
+                    employee_role=_txt(d.get("Employee Role")),
+                    work_type=_txt(d.get("Work Type")),
+                    sheet_reference_id=sheet_ref,
+                    revision=_txt(d.get("Revision")),
+                    activity_type=activity,
+                    software_used=_txt(d.get("Software Used")),
+                    work_mode=_txt(d.get("Work Mode")),
+                    billable_hours=billable if billable > 0 else None,
                 )
             )
             result.created += 1

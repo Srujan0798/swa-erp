@@ -53,6 +53,39 @@ async def test_create_time_entry(authed_admin_client, db_session):
     assert body["project_id"] == project_id
 
 
+async def test_create_time_entry_excel_fields(authed_admin_client, db_session):
+    """Time Logging Sheet high-frequency columns round-trip on create."""
+    project_id = await _setup_project(authed_admin_client)
+    today = date.today().isoformat()
+    r = await authed_admin_client.post(
+        "/api/time-entries",
+        json={
+            "project_id": project_id,
+            "date": today,
+            "hours": 1.5,
+            "description": "Concept Development",
+            "is_billable": False,
+            "employee_name": "Swa_Eng_02",
+            "employee_role": "AE",
+            "work_type": "PROJECT",
+            "sheet_reference_id": "SWA-2025-ID-001",
+            "revision": "No",
+            "activity_type": "CON",
+            "software_used": "CAD",
+            "work_mode": "Manual",
+            "billable_hours": 0,
+        },
+    )
+    assert r.status_code == 201
+    body = r.json()
+    assert body["work_type"] == "PROJECT"
+    assert body["activity_type"] == "CON"
+    assert body["software_used"] == "CAD"
+    assert body["work_mode"] == "Manual"
+    assert body["employee_role"] == "AE"
+    assert body["sheet_reference_id"] == "SWA-2025-ID-001"
+
+
 async def test_create_entry_invalid_hours(authed_admin_client, db_session):
     project_id = await _setup_project(authed_admin_client)
     today = date.today().isoformat()

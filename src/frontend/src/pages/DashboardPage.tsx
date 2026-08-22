@@ -102,6 +102,10 @@ export function DashboardPage() {
     queryKey: ["dash-drn"],
     queryFn: () => api.listDocumentReferences({ page: 1, page_size: 1 }),
   });
+  const time = useQuery({
+    queryKey: ["dash-time"],
+    queryFn: () => api.listTimeEntries({ page: 1, page_size: 1 }),
+  });
 
   const totals = {
     inq: inq.data?.total ?? 0,
@@ -110,13 +114,21 @@ export function DashboardPage() {
     tkn: tkn.data?.total ?? 0,
     drn: drn.data?.total ?? 0,
     prj: prj.data?.total ?? 0,
-    time: 0,
+    time: time.data?.total ?? 0,
   };
 
   const anyError =
-    inq.isError || cli.isError || prj.isError || sa.isError || tkn.isError || drn.isError;
+    inq.isError ||
+    cli.isError ||
+    prj.isError ||
+    sa.isError ||
+    tkn.isError ||
+    drn.isError ||
+    time.isError;
   const looksEmpty =
     !anyError && totals.inq === 0 && totals.cli === 0 && totals.sa === 0 && totals.tkn === 0;
+  const projectsSparse =
+    !looksEmpty && !anyError && totals.prj === 0 && (totals.tkn > 0 || totals.drn > 0 || totals.inq > 0);
 
   return (
     <div className="space-y-6">
@@ -144,12 +156,28 @@ export function DashboardPage() {
             extract:
           </p>
           <pre className="mt-2 overflow-x-auto rounded bg-muted px-3 py-2 font-mono text-xs">
-            make bootstrap-real
+            make swa-live-local
           </pre>
           <p className="mt-2 text-muted-foreground">
             Then login <code className="rounded bg-muted px-1">admin@swa.co.in</code> /{" "}
             <code className="rounded bg-muted px-1">admin123!</code> — you should see{" "}
-            <code className="rounded bg-muted px-1">SWA-2025-…</code> IDs.
+            <code className="rounded bg-muted px-1">SWA-2025-…</code> IDs under Inquiries, Tokens,
+            Document refs.
+          </p>
+        </div>
+      )}
+
+      {projectsSparse && (
+        <div className="rounded-lg border border-sky-500/40 bg-sky-500/5 px-4 py-3 text-sm">
+          <p className="font-medium text-foreground">Projects list looks empty</p>
+          <p className="mt-1 text-muted-foreground">
+            Sample <strong>Project Tracking</strong> sheet often has 0 rows.{" "}
+            <code className="rounded bg-muted px-1">make swa-live-local</code> links converted
+            inquiries → projects, and Doc Ref / Time imports may create stub projects. Or{" "}
+            <Link className="underline font-medium text-foreground" to="/inquiries">
+              convert an inquiry
+            </Link>{" "}
+            (Meeting 2: check client → always land on Project).
           </p>
         </div>
       )}
@@ -184,9 +212,7 @@ export function DashboardPage() {
                   <f.icon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                    {f.key === "time" ? "→" : totals[f.key]}
-                  </div>
+                  <div className="text-2xl font-bold tabular-nums">{totals[f.key]}</div>
                   <p className="text-xs text-muted-foreground">{f.desc}</p>
                 </CardContent>
               </Card>
@@ -217,7 +243,7 @@ export function DashboardPage() {
           </p>
           <p>
             <span className="font-medium text-foreground">Load real Excel</span> —{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">make bootstrap-real</code>
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">make swa-live-local</code>
           </p>
           <p>
             <span className="font-medium text-foreground">App URL</span> —{" "}

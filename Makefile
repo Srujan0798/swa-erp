@@ -113,14 +113,16 @@ import-real-commit:
 bootstrap-real:
 	APP_ENV=dev python3 scripts/bootstrap_real.py
 	@echo ""
-	@echo "=== SWA local trial ready ==="
+	@echo "=== SWA local trial ready (REAL Excel — not seed_demo) ==="
 	@echo "1. make dev   (if stack not up) → UI http://127.0.0.1:3100  API :8100"
 	@echo "2. Login admin@swa.co.in / admin123!"
-	@echo "3. Open: Inquiries → Document refs (left nav). Expect SWA-2025-… IDs"
-	@echo "4. Note: sample Project Tracking sheet may be empty — create via Inquiry convert"
+	@echo "3. Excel workflow nav: Inquiries → Clients → SA → Tokens → Document refs → Time"
+	@echo "4. Expect SWA-2025-… IDs. Project Tracking sample often 0 rows — bootstrap links"
+	@echo "   converted inquiries → projects; or convert an inquiry live (Meeting 2)."
 
 # Alias — prefer this name when talking to SWA / evaluators
 swa-live-local: bootstrap-real
+	@echo "(Alias of bootstrap-real — preferred name for SWA trials)"
 
 smoke:
 	python3 scripts/smoke_chain.py

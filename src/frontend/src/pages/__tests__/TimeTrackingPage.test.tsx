@@ -56,7 +56,7 @@ describe("TimeTrackingPage", () => {
 
   it("renders header and stats cards", async () => {
     await renderPage();
-    expect(screen.getByText("Time tracking")).toBeInTheDocument();
+    expect(screen.getByText("Time logging")).toBeInTheDocument();
     expect(screen.getByText("Total hours")).toBeInTheDocument();
     expect(screen.getByText("Entries")).toBeInTheDocument();
   });

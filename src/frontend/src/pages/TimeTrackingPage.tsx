@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactElement } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,13 @@ export default function TimeTrackingPage(): ReactElement {
     hours: "",
     description: "",
     is_billable: true,
+    work_type: "",
+    activity_type: "",
+    software_used: "",
+    work_mode: "",
+    employee_role: "",
+    sheet_reference_id: "",
+    billable_hours: "",
   });
 
   useEffect(() => {
@@ -59,7 +66,7 @@ export default function TimeTrackingPage(): ReactElement {
 
   const { data: list, isLoading, isError, error, refetch } = useQuery<TimeEntryListResponse>({
     queryKey: timeKey("entries"),
-    queryFn: async () => api.listTimeEntries(),
+    queryFn: async () => api.listTimeEntries({ page_size: 100 }),
   });
 
   const entries: TimeEntry[] = list?.items ?? [];
@@ -74,21 +81,45 @@ export default function TimeTrackingPage(): ReactElement {
       toast({ title: "Hours must be between 0.25 and 24", variant: "destructive" });
       return;
     }
-    if (!form.description.trim()) {
-      toast({ title: "Description required", variant: "destructive" });
+    if (!form.description.trim() && !form.activity_type.trim()) {
+      toast({ title: "Remarks or activity type required", variant: "destructive" });
       return;
     }
+    const billableParsed =
+      form.billable_hours.trim() === "" ? undefined : parseFloat(form.billable_hours);
     try {
       await api.createTimeEntry({
         project_id: projectId,
         date: form.date,
         hours,
-        description: form.description,
+        description: form.description.trim() || form.activity_type.trim(),
         is_billable: form.is_billable,
+        work_type: form.work_type.trim() || undefined,
+        activity_type: form.activity_type.trim() || undefined,
+        software_used: form.software_used.trim() || undefined,
+        work_mode: form.work_mode.trim() || undefined,
+        employee_role: form.employee_role.trim() || undefined,
+        sheet_reference_id: form.sheet_reference_id.trim() || undefined,
+        billable_hours:
+          billableParsed !== undefined && !Number.isNaN(billableParsed)
+            ? billableParsed
+            : undefined,
       });
       toast({ title: "Time entry saved" });
       qc.invalidateQueries({ queryKey: timeKey("entries") });
-      setForm({ date: today, hours: "", description: "", is_billable: true });
+      setForm({
+        date: today,
+        hours: "",
+        description: "",
+        is_billable: true,
+        work_type: "",
+        activity_type: "",
+        software_used: "",
+        work_mode: "",
+        employee_role: "",
+        sheet_reference_id: "",
+        billable_hours: "",
+      });
     } catch (e) {
       toast({
         title: (e as Error).message || "Failed to save",
@@ -98,18 +129,36 @@ export default function TimeTrackingPage(): ReactElement {
   };
 
   const weeklyHours = entries.reduce((sum, e) => sum + Number(e.hours || 0), 0);
-  const billableHours = entries
-    .filter((e) => e.is_billable)
-    .reduce((s, e) => s + Number(e.hours || 0), 0);
+  const billableHours = entries.reduce((s, e) => {
+    if (e.billable_hours != null) return s + Number(e.billable_hours);
+    return e.is_billable ? s + Number(e.hours || 0) : s;
+  }, 0);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Time tracking</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Time logging</h1>
         <p className="text-sm text-muted-foreground">
-          Log hours against a real project (15-minute style increments supported as 0.25).
+          Same columns as the Excel <span className="font-medium">Time Logging Sheet</span> — work
+          type, activity, software, mode, hours, billable hours. Increments: 0.25h (Excel often
+          0.5h).
         </p>
       </div>
+
+      {projects.length === 0 && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm">
+          <p className="font-medium">No projects to log against yet</p>
+          <p className="mt-1 text-muted-foreground">
+            Sample Project Tracking sheet is often empty. Run{" "}
+            <code className="rounded bg-muted px-1">make swa-live-local</code> (creates projects from
+            converted inquiries) or{" "}
+            <Link className="underline font-medium text-foreground" to="/inquiries">
+              convert an inquiry
+            </Link>
+            .
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
@@ -159,7 +208,7 @@ export default function TimeTrackingPage(): ReactElement {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-2">
                 <Label>Date</Label>
                 <Input
@@ -169,7 +218,7 @@ export default function TimeTrackingPage(): ReactElement {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Hours</Label>
+                <Label>Hours logged</Label>
                 <Input
                   type="number"
                   step="0.25"
@@ -180,13 +229,73 @@ export default function TimeTrackingPage(): ReactElement {
                   placeholder="e.g. 1.5"
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Billable hours</Label>
+                <Input
+                  type="number"
+                  step="0.25"
+                  min="0"
+                  max="24"
+                  value={form.billable_hours}
+                  onChange={(e) => setForm({ ...form, billable_hours: e.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Work type</Label>
+                <Input
+                  value={form.work_type}
+                  onChange={(e) => setForm({ ...form, work_type: e.target.value })}
+                  placeholder="PROJECT / PRE-PROJECT / INTERNAL"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Activity type</Label>
+                <Input
+                  value={form.activity_type}
+                  onChange={(e) => setForm({ ...form, activity_type: e.target.value })}
+                  placeholder="CON, DBR, CAL…"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Employee role</Label>
+                <Input
+                  value={form.employee_role}
+                  onChange={(e) => setForm({ ...form, employee_role: e.target.value })}
+                  placeholder="AE / RE / SE"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Software used</Label>
+                <Input
+                  value={form.software_used}
+                  onChange={(e) => setForm({ ...form, software_used: e.target.value })}
+                  placeholder="CAD, EASE, RPS…"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Work mode</Label>
+                <Input
+                  value={form.work_mode}
+                  onChange={(e) => setForm({ ...form, work_mode: e.target.value })}
+                  placeholder="Manual / Automated"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Reference ID</Label>
+                <Input
+                  value={form.sheet_reference_id}
+                  onChange={(e) => setForm({ ...form, sheet_reference_id: e.target.value })}
+                  placeholder="SWA-… link"
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>Remarks</Label>
               <Input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="What did you work on?"
+                placeholder="Excel Remarks (optional if activity set)"
               />
             </div>
             <label className="flex items-center gap-2 text-sm">
@@ -211,9 +320,7 @@ export default function TimeTrackingPage(): ReactElement {
           <CardTitle className="text-base">Recent entries</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading && (
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          )}
+          {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {isError && (
             <QueryErrorBanner
               message="Failed to load time entries"
@@ -223,7 +330,7 @@ export default function TimeTrackingPage(): ReactElement {
           )}
           {!isLoading && !isError && entries.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              No entries yet. Pick a project above, enter hours (0.25 steps), and click Add entry.
+              No entries yet. Pick a project, fill the Excel-style fields, and click Add entry.
             </p>
           )}
           {entries.length > 0 && (
@@ -232,17 +339,29 @@ export default function TimeTrackingPage(): ReactElement {
                 <thead>
                   <tr className="border-b bg-muted/40">
                     <th className="px-3 py-2 text-left">Date</th>
+                    <th className="px-3 py-2 text-left">Work</th>
+                    <th className="px-3 py-2 text-left">Activity</th>
                     <th className="px-3 py-2 text-left">Hours</th>
                     <th className="px-3 py-2 text-left">Billable</th>
-                    <th className="px-3 py-2 text-left">Description</th>
+                    <th className="px-3 py-2 text-left">Software</th>
+                    <th className="px-3 py-2 text-left">Remarks</th>
                   </tr>
                 </thead>
                 <tbody>
                   {entries.slice(0, 50).map((e) => (
                     <tr key={e.id} className="border-b last:border-0">
                       <td className="px-3 py-2">{e.date}</td>
+                      <td className="px-3 py-2 text-xs">{e.work_type ?? "—"}</td>
+                      <td className="px-3 py-2 text-xs">{e.activity_type ?? "—"}</td>
                       <td className="px-3 py-2 tabular-nums">{e.hours}</td>
-                      <td className="px-3 py-2">{e.is_billable ? "Yes" : "No"}</td>
+                      <td className="px-3 py-2 tabular-nums text-xs">
+                        {e.billable_hours != null
+                          ? e.billable_hours
+                          : e.is_billable
+                            ? "Yes"
+                            : "No"}
+                      </td>
+                      <td className="px-3 py-2 text-xs">{e.software_used ?? "—"}</td>
                       <td className="max-w-md truncate px-3 py-2">{e.description}</td>
                     </tr>
                   ))}

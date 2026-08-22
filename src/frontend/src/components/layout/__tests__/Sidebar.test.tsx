@@ -40,7 +40,11 @@ describe("Sidebar admin-only nav gating", () => {
   it("renders Excel workflow links for every role", () => {
     renderSidebar("viewer");
     expect(screen.getByRole("link", { name: "1. Inquiries" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "3. Service Agreements" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "5. Document refs" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "6. Projects" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "7. Time logging" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Files / drawings" })).toBeInTheDocument();
+    expect(screen.getByText(/make swa-live-local/i)).toBeInTheDocument();
   });
 });

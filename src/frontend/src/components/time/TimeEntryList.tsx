@@ -34,46 +34,68 @@ export function TimeEntryList({ entries, isLoading, onEdit }: TimeEntryListProps
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Project</TableHead>
+                <TableHead>Work type</TableHead>
+                <TableHead>Activity</TableHead>
                 <TableHead>Hours</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Billable</TableHead>
+                <TableHead>Billable hrs</TableHead>
+                <TableHead>Software</TableHead>
+                <TableHead>Remarks</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                  <TableCell colSpan={9} className="text-center">
+                    Loading...
+                  </TableCell>
                 </TableRow>
               ) : entries.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center">No time entries found</TableCell>
+                  <TableCell colSpan={9} className="text-center">
+                    No time entries found
+                  </TableCell>
                 </TableRow>
               ) : (
                 entries.map((entry) => (
                   <TableRow key={entry.id} className={entry.is_billable ? "" : "bg-muted/50"}>
                     <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
                     <TableCell>{entry.project_name ?? "—"}</TableCell>
+                    <TableCell className="text-xs">{entry.work_type ?? "—"}</TableCell>
+                    <TableCell className="text-xs">{entry.activity_type ?? "—"}</TableCell>
                     <TableCell className="font-mono">{entry.hours.toFixed(2)}</TableCell>
-                    <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${entry.is_billable ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                        {entry.is_billable ? "Yes" : "No"}
-                      </span>
+                    <TableCell className="font-mono text-xs">
+                      {entry.billable_hours != null
+                        ? Number(entry.billable_hours).toFixed(2)
+                        : entry.is_billable
+                          ? "Yes"
+                          : "No"}
                     </TableCell>
+                    <TableCell className="text-xs">{entry.software_used ?? "—"}</TableCell>
+                    <TableCell className="max-w-xs truncate">{entry.description}</TableCell>
                     <TableCell>
                       {write ? (
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => onEdit(entry)} aria-label="Edit entry">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(entry)}
+                            aria-label="Edit entry"
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(entry.id)} aria-label="Delete entry">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(entry.id)}
+                            aria-label="Delete entry"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

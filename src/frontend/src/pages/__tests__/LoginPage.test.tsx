@@ -20,6 +20,7 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { name: /swa consultancy erp/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toHaveValue("admin@swa.co.in");
     expect(screen.getByLabelText(/password/i)).toHaveValue("admin123!");
+    expect(screen.getByText(/make swa-live-local/i)).toBeInTheDocument();
   });
 
   it("shows validation errors for an invalid email and empty password", async () => {

@@ -126,7 +126,7 @@ export function Sidebar() {
         <p className="font-medium text-foreground/80">SWA sheet chain</p>
         <p>Inquiry → Client → SA → Token → Doc Ref → Time</p>
         <p className="mt-1">
-          Data: <span className="font-mono">make bootstrap-real</span>
+          Data: <span className="font-mono">make swa-live-local</span>
         </p>
       </div>
     </aside>

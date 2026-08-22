@@ -24,6 +24,8 @@ class Inquiry(Base):
     owner_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
+    # Excel "Technical Lead" — free-text name (sheet stores names, not user UUIDs)
+    technical_lead: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     converted_client_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("clients.id"), nullable=True

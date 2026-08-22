@@ -40,6 +40,8 @@ const inquiry = {
   reference_id: "INQ-001",
   client_name: "Acme Corp",
   inquiry_date: "2026-01-15",
+  inquiry_type: "Design",
+  technical_lead: "Vatsal",
   status: "New",
   priority: "High",
   estimated_value: 500000,
@@ -181,7 +183,7 @@ describe("InquiriesPage", () => {
       refetch: vi.fn(),
     });
     await renderPage();
-    expect(screen.getByText("\u2014")).toBeInTheDocument();
+    expect(screen.getAllByText("\u2014").length).toBeGreaterThanOrEqual(1);
   });
 
   it("displays inquiry with no estimated value", async () => {
@@ -193,7 +195,7 @@ describe("InquiriesPage", () => {
       refetch: vi.fn(),
     });
     await renderPage();
-    expect(screen.getByText("\u2014")).toBeInTheDocument();
+    expect(screen.getAllByText("\u2014").length).toBeGreaterThanOrEqual(1);
   });
 
   it("shows delete button for write users with inquiries", async () => {
