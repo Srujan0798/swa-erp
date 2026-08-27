@@ -30,7 +30,7 @@ describe("ClientForm", () => {
 
     await user.type(screen.getByLabelText(/^name \*/i), "Acme Corp");
     await user.type(screen.getByLabelText(/^code \*/i), "AC-001");
-    await user.type(screen.getByLabelText(/primary email \*/i), "billing@acme.com");
+    await user.type(screen.getByLabelText(/^email \*/i), "billing@acme.com");
     await user.type(screen.getByLabelText(/city/i), "Mumbai");
     await user.click(screen.getByRole("button", { name: "Save" }));
 

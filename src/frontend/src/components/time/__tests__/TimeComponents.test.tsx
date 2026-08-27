@@ -73,7 +73,7 @@ describe("TimeEntryForm", () => {
     const user = userEvent.setup();
     render(<TimeEntryForm projects={projects} onSuccess={vi.fn()} onCancel={vi.fn()} />);
 
-    const hours = screen.getByLabelText(/hours/i);
+    const hours = screen.getByLabelText(/hours logged/i);
     await user.clear(hours);
     await user.type(hours, "0.1");
     await user.click(screen.getByRole("button", { name: "Add Entry" }));
@@ -84,7 +84,7 @@ describe("TimeEntryForm", () => {
     const user = userEvent.setup();
     render(<TimeEntryForm projects={projects} onSuccess={vi.fn()} onCancel={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: "Add Entry" }));
-    expect(screen.getByText("Description is required")).toBeInTheDocument();
+    expect(screen.getByText("Description / remarks is required")).toBeInTheDocument();
   });
 
   it("updates an existing entry and surfaces mutation errors", async () => {

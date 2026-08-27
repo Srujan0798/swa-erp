@@ -53,18 +53,24 @@ class TestMaterialsAuth:
     def test_material_categories_requires_auth(self, test_client, db_session):
         """Test that material-categories endpoint requires auth"""
         response = test_client.get("/api/material-categories")
-        assert response.status_code == 401
+        # FastAPI HTTPBearer(auto_error=True) returns 403 when Authorization header is absent entirely.
+        # 401 is reserved for malformed/invalid credentials. This asserts the real production behaviour.
+        assert response.status_code == 403
 
     def test_materials_requires_auth(self, test_client, db_session):
         """Test that materials endpoint requires auth"""
         response = test_client.get("/api/materials")
-        assert response.status_code == 401
+        # FastAPI HTTPBearer(auto_error=True) returns 403 when Authorization header is absent entirely.
+        # 401 is reserved for malformed/invalid credentials. This asserts the real production behaviour.
+        assert response.status_code == 403
 
     def test_material_requires_auth(self, test_client, db_session):
         """Test that materials/{id} endpoint requires auth"""
         material_id = uuid.uuid4()
         response = test_client.get(f"/api/materials/{material_id}")
-        assert response.status_code == 401
+        # FastAPI HTTPBearer(auto_error=True) returns 403 when Authorization header is absent entirely.
+        # 401 is reserved for malformed/invalid credentials. This asserts the real production behaviour.
+        assert response.status_code == 403
 
 
 class TestProjectPnlRoleEnforcement:
