@@ -1,0 +1,15 @@
+{
+  "name": "verify_and_merge",
+  "description": "Verify worker report acceptance commands, then merge.",
+  "inputs": [
+    { "name": "report", "type": "string", "required": true },
+    { "name": "target_branch", "type": "string", "required": true }
+  ],
+  "steps": [
+    { "id": "acceptance", "agent": "orchestrator" },
+    { "id": "review", "agent": "orchestrator" },
+    { "id": "merge", "agent": "orchestrator" }
+  ],
+  "state_file": "orchestrator/memory/states/verify_and_merge.state.json",
+  "blast_radius": ["r0", "r1", "r2", "r3", "r4", "r5"]
+}

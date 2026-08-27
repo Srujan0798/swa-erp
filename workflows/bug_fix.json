@@ -1,0 +1,16 @@
+{
+  "name": "bug_fix",
+  "description": "Diagnose a repo bug, patch behind green tests, revert if acceptance fails.",
+  "inputs": [
+    { "name": "module", "type": "string", "required": true },
+    { "name": "symptom", "type": "string", "required": true }
+  ],
+  "steps": [
+    { "id": "diagnose", "agent": "worker" },
+    { "id": "fix", "agent": "worker" },
+    { "id": "verify", "run": "pytest tests/ -q" },
+    { "id": "rollback", "if": "verify.failed", "run": "git revert --no-commit HEAD" }
+  ],
+  "state_file": "orchestrator/memory/states/bug_fix.state.json",
+  "blast_radius": ["r2", "r3"]
+}

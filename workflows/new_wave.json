@@ -1,0 +1,16 @@
+{
+  "name": "new_wave",
+  "description": "Create a new wave brief, run it, write report, commit.",
+  "inputs": [
+    { "name": "wave", "type": "integer", "required": true },
+    { "name": "tasks", "type": "array", "required": true }
+  ],
+  "steps": [
+    { "id": "dispatch", "run": "orchestrator/commands/dispatch.md" },
+    { "id": "execute", "agent": "worker" },
+    { "id": "report", "run": "orchestrator/commands/report.md" },
+    { "id": "commit", "run": "orchestrator/commands/commit.md" }
+  ],
+  "state_file": "orchestrator/memory/states/new_wave.state.json",
+  "blast_radius": ["r0", "r1", "r2", "r3"]
+}
