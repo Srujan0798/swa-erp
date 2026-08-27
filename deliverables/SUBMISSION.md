@@ -2,7 +2,7 @@
 
 **Product version:** 1.0.1 (tagged `v1.0.1`)  
 **Package refreshed:** 2026-08-23 (wave-38 — professional-grade metrics)  
-**Status:** Product MVP **shipped**. Professional-grade waves **32–39 all shipped**. Industry-hardened. Backend suite: **566 passed / 0 failed / 1 skipped**. **Company-server deploy remains external** (no IT dept; server facts open).
+**Status:** Product MVP **shipped**. Professional-grade waves **32–39 all shipped**. Industry-hardened. Backend suite: **NOT MEASURED** — Postgres was unavailable in this session (`server closed the connection unexpectedly`); on a machine with Docker/Postgres/Redis/MinIO, rerun `python3 -m pytest tests/ -q --tb=no` and record the actual output. **Company-server deploy remains external** (no IT dept; server facts open).
 
 This is the single document handed over with the project. It is honest about what exists, what
 does not, and what is still waiting on the client's side. Evaluator front door: [`README.md`](../README.md).
@@ -18,7 +18,7 @@ Safe wording only — every row cites a report. See also [`work/reports/wave-38/
 |-------|--------|--------|
 | Backend coverage (overall) | **86%** (8702 stmts / 1201 miss) | [`COMPLETION-HANDOFF-VERDICT.md`](../work/reports/COMPLETION-HANDOFF-VERDICT.md); wave-33 report 03 |
 | Backend services layer | **All `services/*.py` ≥70%** | Same verdict (do **not** claim global “no module under 70%”) |
-| Backend suite (industry re-verify) | **566 passed, 0 failed, 1 skipped** | `work/reports/industry-hardening/01-suite.report.md` |
+|| Backend suite (industry re-verify) | **NOT MEASURED** — Postgres was unavailable in this session (`server closed the connection unexpectedly`); on a machine with Docker/Postgres/Redis/MinIO, rerun `python3 -m pytest tests/ -q --tb=no` and record the actual output | `work/reports/industry-hardening/01-suite.report.md` |
 | CI coverage floor | `--cov-fail-under=82` (86% clears it) | Makefile + wave-32 |
 | Frontend thresholds | **60 / 50 / 60 / 60** met; cite **~61% statements** independently | Verdict + wave-34 report 02 |
 | Load test | **10–150 users**, p95 **≈ 29–130 ms**, no 5xx after fixes, **dev machine only** | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
@@ -27,7 +27,7 @@ Safe wording only — every row cites a report. See also [`work/reports/wave-38/
 | Observability | `/metrics`, `/healthz`, `/readyz`, optional Sentry | [`docs/OBSERVABILITY.md`](../docs/OBSERVABILITY.md) |
 | Deploy on client server | **Not done** — facts OPEN | [`SEND_IT.md`](SEND_IT.md) |
 
-**Forbidden overclaims (anti-fabrication):** “100% complete / zero residual risk”; “562 passed” as a pass count; global “no module under 70%”; stale frontend **65.86%** without a fresh vitest paste; “MinIO/Celery not built”; claiming client Windows Server was load-tested.
+**Forbidden overclaims (anti-fabrication):** “100% complete / zero residual risk”; stale pass counts such as “566 passed / 0 failed / 1 skipped” without a current session output; global “no module under 70%”; stale frontend **65.86%** without a fresh vitest paste; “MinIO/Celery not built”; claiming client Windows Server was load-tested. Corrected 2026-08-28: prior backend suite figure was not reproduced in this session; frontend suite independently verified at **523 passed / 0 failed** via `npx vitest run` on this worktree.
 
 ---
 
@@ -88,12 +88,12 @@ Independent backend coverage run after `swa_erp_test` reset (see completion verd
 
 ```
 python3 -m pytest tests/ -q
-# → 565 passed, 1 skipped, 0 failed
+# → NOT MEASURED — Postgres was unavailable in this session (`server closed the connection unexpectedly`). On a machine with Docker/Postgres/Redis/MinIO, rerun and record the actual output.
 # Coverage (wave-33/FINAL-CLOSE): TOTAL 86%; services ≥70%
 # Wave-33 targets: pdf 100%, quote 97%, import 80%, task 97%, notification 100%
 ```
 
-Frontend: `npx vitest run` → **522 passed / 0 failed**; thresholds **60/50/60/60** met
+Frontend: `npx vitest run` → **523 passed / 0 failed**; thresholds **60/50/60/60** met
 (~61% statements on independent earlier measure). TaskCard IST flake fixed in final-close.
 
 Load: see [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) — 10/50/100/150 users, p95 ≈ 29–130 ms

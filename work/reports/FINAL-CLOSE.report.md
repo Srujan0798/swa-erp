@@ -10,12 +10,12 @@
 ```
 # Backend (solo, after stabilize + wave-37 storage/rate fixes)
 python3 -m pytest tests/ -q --tb=no
-=========== 565 passed, 1 skipped, 484 warnings in 154.62s (0:02:34) ===========
+# NOT MEASURED — Postgres was unavailable in this session (`server closed the connection unexpectedly`). On a machine with Docker/Postgres/Redis/MinIO, rerun and record the actual output.
 
 # Frontend
 cd src/frontend && npx vitest run
 Test Files  61 passed (61)
-Tests  522 passed (522)
+Tests  523 passed (523)
 ```
 
 ## Phases completed
@@ -31,8 +31,8 @@ Tests  522 passed (522)
 
 ## Safe metrics (do not inflate)
 
-- Backend: **565 passed / 0 failed / 1 skipped**; coverage previously verified **86%** overall; services ≥70%
-- Frontend: **522 passed / 0 failed**; thresholds ≥60/50/60/60 (cite ~61% stmts from independent earlier measure)
+- Backend: **NOT MEASURED** — Postgres was unavailable in this session (`server closed the connection unexpectedly`); on a machine with Docker/Postgres/Redis/MinIO, rerun `python3 -m pytest tests/ -q --tb=no` and record the actual output; coverage previously verified **86%** overall; services ≥70%
+- Frontend: **523 passed / 0 failed**; thresholds ≥60/50/60/60 (cite ~61% stmts from independent earlier measure)
 - Load: 10/50/100/150 users on **dev machine** — `docs/PERFORMANCE.md`
 - CI: real gates + vitest
 
