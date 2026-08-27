@@ -1,0 +1,67 @@
+# Wave-43 Eval Task 004
+# Client workflow: a logged time entry surfaces correctly in aggregates.
+id: 004-time-log-to-dashboard
+name: "Time log to dashboard aggregation"
+description: |
+  A billable time entry must surface in three aggregate views:
+  (a) the timesheet for that user/week (total_hours, billable_hours),
+  (b) the project P&L (billable cost = billable_hours * DEFAULT_HOURLY_RATE_INR),
+  (c) the invoice generate-from-time endpoint.
+  Time tracking uses 15-minute increments (constitution §domain). Hours are
+  Decimal(4,2). Money is Decimal(18,2). This task validates the numbers, not UI.
+input:
+  hours: 8.00          # 2h billable + 1h non-billable + 5h billable = 8h total, 7h billable
+  billable_hours_subset: 7.00
+  rate: "5000.00"      # DEFAULT_HOURLY_RATE_INR from settings
+  expected_billable_cost: "35000.00"   # 7 * 5000
+agent_steps:
+  - step: 1
+    actor: "admin"
+    action: "POST /api/clients"
+    body: { name: "Time Client", code: "TIME-C-001", primary_email: "time@test.com" }
+    expect_status: 201
+    capture: client_id
+  - step: 2
+    actor: "admin"
+    action: "POST /api/projects"
+    body: { client_id: $ref step1.id, name: "Time Project", code: "TIME-P-001", status: "Lead" }
+    expect_status: 201
+    capture: project_id
+  - step: 3
+    actor: "admin"
+    action: "POST /api/time-entries"
+    body:
+      project_id: $ref step2.id
+      date: "2026-08-24"   # a Monday
+      hours: "7.00"
+      description: "Billable engineering"
+      is_billable: true
+    expect_status: 201
+    capture: entry_billable
+  - step: 4
+    actor: "admin"
+    action: "POST /api/time-entries"
+    body:
+      project_id: $ref step2.id
+      date: "2026-08-25"
+      hours: "1.00"
+      description: "Internal meeting (non-billable)"
+      is_billable: false
+    expect_status: 201
+    capture: entry_nonb
+  - step: 5
+    actor: "admin"
+    action: "POST /api/timesheets/generate?week_start=2026-08-24"
+    expect_status: 200
+    capture: timesheet
+verification: |
+  code_based.004_time_aggregation:
+    - timesheet.total_hours == Decimal("8.00")
+    - timesheet.billable_hours == Decimal("7.00")
+    - timesheet.status == "draft"
+    - DB: count(time_entries where project_id == step2.id) == 2
+    - DB: hours stored as Decimal, not float
+    - invoice generated from these entries has total == 35000.00 + 18% GST == 41300.00
+      (i.e. generate-from-time endpoint produces the correct billable cost + GST)
+grader: code_based.004_time_aggregation
+trials: 3

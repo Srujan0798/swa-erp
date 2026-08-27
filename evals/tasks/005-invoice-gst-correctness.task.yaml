@@ -1,0 +1,59 @@
+# Wave-43 Eval Task 005
+# Client workflow: Invoice GST correctness — money stays Decimal(18,2).
+id: 005-invoice-gst-correctness
+name: "Invoice GST correctness"
+description: |
+  Invoices carry GST at 18% (default). The breakdown must be arithmetically exact:
+    subtotal + gst_amount == total
+    gst_amount == subtotal * 18 / 100  (quantized to 0.01)
+    total == subtotal + gst_amount
+  Money must NEVER be float — all fields are Decimal(18,2) and JSON-serialize as
+  strings (constitution §8, wave-18 fix). This task also checks a 3-line invoice
+  with mixed quantities to prove rounding is handled per-line then summed, not
+  applied once to a float subtotal.
+input:
+  items:
+    - { description: "Consulting A", quantity: "2.00", rate: "1000.00", category: "time" }   # 2000.00
+    - { description: "Consulting B", quantity: "1.50", rate: "500.00",  category: "time" }   #  750.00
+    - { description: "Travel",       quantity: "1.00", rate: "200.00",  category: "expense" }#  200.00
+    # subtotal = 2950.00, gst(18%) = 531.00, total = 3481.00
+  expected_subtotal: "2950.00"
+  expected_gst_amount: "531.00"
+  expected_total: "3481.00"
+  default_tax_rate: "18.00"
+agent_steps:
+  - step: 1
+    actor: "admin"
+    action: "POST /api/clients"
+    body: { name: "GST Client", code: "GST-C-001", primary_email: "gst@test.com" }
+    expect_status: 201
+    capture: client_id
+  - step: 2
+    actor: "admin"
+    action: "POST /api/projects"
+    body: { client_id: $ref step1.id, name: "GST Project", code: "GST-P-001", status: "Lead" }
+    expect_status: 201
+    capture: project_id
+  - step: 3
+    actor: "pm"
+    action: "POST /api/projects/{step2.id}/invoices"
+    body:
+      due_date: "2026-09-28"
+      tax_rate: "18.00"
+      items:
+        - { description: "Consulting A", quantity: "2.00", rate: "1000.00", category: "time" }
+        - { description: "Consulting B", quantity: "1.50", rate: "500.00",  category: "time" }
+        - { description: "Travel",       quantity: "1.00", rate: "200.00",  category: "expense" }
+    expect_status: 201
+    capture: invoice
+verification: |
+  code_based.005_gst:
+    - invoice.subtotal == Decimal("2950.00")
+    - invoice.gst_percent == Decimal("18.00")
+    - invoice.gst_amount == Decimal("531.00")   # 2950 * 18% = 531.00 exactly
+    - invoice.total == Decimal("3481.00")       # 2950 + 531
+    - invoice.subtotal + invoice.gst_amount == invoice.total   (no rounding gap)
+    - all money fields are str (not float) in the JSON response
+    - item amounts: 2000.00, 750.00, 200.00 (per-line qty*rate before aggregation)
+grader: code_based.005_gst
+trials: 3
