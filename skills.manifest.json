@@ -1,0 +1,98 @@
+{
+  "$schema": "https://raw.githubusercontent.com/agentskills/agentskills.io/main/schemas/skills.manifest.json",
+  "version": "2026.1",
+  "generated": "2026-08-28",
+  "skills": [
+    {
+      "name": "caveman",
+      "description": "Compressed communication mode. ~75% token reduction. Use for handoffs and long-context summaries.",
+      "version": "1.0.0",
+      "category": "communication",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "diagnose",
+      "description": "Systematic debug guidance when a worker report is BLOCKED or tests are failing in unclear ways.",
+      "version": "1.0.0",
+      "category": "debugging",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "merge-work",
+      "description": "Safely integrate approved worker output into the repo. Runs hooks, formats, tests, updates state.",
+      "version": "1.0.0",
+      "category": "workflow",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "plan-wave",
+      "description": "Decompose a PRD section into a wave with spec, plan, tasks, and contracts. Use at the start of every wave.",
+      "version": "1.0.0",
+      "category": "planning",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "review-report",
+      "description": "Verify a worker report against acceptance contracts and spec. Boris's #1 rule — always run commands yourself.",
+      "version": "1.0.0",
+      "category": "review",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "self-evolve",
+      "description": "After each wave, capture lessons that should change the orchestrator's behavior. Hermes-style learning loop.",
+      "version": "1.0.0",
+      "category": "process",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "status-report",
+      "description": "Generate a standardized weekly project status report.",
+      "version": "1.0.0",
+      "category": "reporting",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "to-issues",
+      "description": "Decompose a PRD section into vertical-slice waves. Each wave ships an end-to-end demo.",
+      "version": "1.0.0",
+      "category": "planning",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "to-prd",
+      "description": "Convert a discussion or rough scope into a formal PRD section. Use when user describes new requirements.",
+      "version": "1.0.0",
+      "category": "planning",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "triage",
+      "description": "Categorize incoming work — bug / feature / question / scope creep — and route appropriately.",
+      "version": "1.0.0",
+      "category": "process",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "verify-work",
+      "description": "Boris's #1 rule. Run executable acceptance criteria yourself, never trust worker's claim.",
+      "version": "1.0.0",
+      "category": "review",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "write-task-file",
+      "description": "Produce self-contained worker task briefs that require zero project context to execute. Use when dispatching work to OpenCode CLI workers.",
+      "version": "1.0.0",
+      "category": "workflow",
+      "scope": "orchestrator"
+    },
+    {
+      "name": "zoom-out",
+      "description": "When stuck in details, request broader context. Re-read PRD, ARCHITECTURE, EXECUTION before deciding.",
+      "version": "1.0.0",
+      "category": "process",
+      "scope": "orchestrator"
+    }
+  ]
+}

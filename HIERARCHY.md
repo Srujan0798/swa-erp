@@ -9,7 +9,7 @@
 |---|---|---|
 | `README.md` | orchestrator | entry point + quick start |
 | `MASTER-FLOW.md` | orchestrator | the single-path answer: what to do, ask, continue |
-| `CLAUDE.md`, `KIMI.md` | orchestrator | always-loaded kernel (identical content) |
+|| `CLAUDE.md`, `KIMI.md`, `AGENTS.md` | orchestrator | always-loaded kernel (identical content; AGENTS.md is a symlink to CLAUDE.md) |
 | `HANDOFF.md` | orchestrator | session/orchestrator switching protocol |
 | `HIERARCHY.md` | orchestrator | this file — repo map |
 | `HOW_TO_RUN.md` | orchestrator | dual-tier workflow guide |
@@ -50,6 +50,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 ## Directory inventory (all top-level entries)
 - `CHANGELOG.md`
 - `CLAUDE.md`
+- `AGENTS.md`
 - `CONTRIBUTING.md`
 - `Dockerfile`
 - `Dockerfile.frontend`
@@ -60,6 +61,9 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `MASTER-FLOW.md`
 - `Makefile`
 - `README.md`
+- `pytest.ini`
+- `skills-lock.json`
+- `skills.manifest.json`
 - `attic/`
 - `backups/`
 - `deliverables/`
