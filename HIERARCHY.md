@@ -27,16 +27,18 @@
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
 | `attic/` | nobody (frozen) | superseded work, never deleted |
 | `scripts/` | workers + orchestrator | automation utilities (import tool, backup scripts) |
-| `.github/workflows/` | CI | automated checks (ci, test, security) |
-| `.claude/` | Claude Code | settings.local.json (minimal) |
-| `resources/` | orchestrator + workers | reference material (client meeting master record, IT brief source) |
+|| `.github/workflows/` | CI | automated checks (ci, test, security) |
+|| `.claude/` | Claude Code | settings.local.json (minimal) |
+|| `prompts/` | orchestrator | worker prompts in use: current/, archive/, INDEX.md |
+|| `resources/` | orchestrator + workers | reference material (client meeting master record, IT brief source) |
 | `uploads/` | runtime | uploaded files — gitignored, created when the app runs |
 | `backups/` | runtime | backup/restore script output — gitignored, created by `scripts/backup_db.sh` |
 | `node_modules/` | build | frontend npm dependencies — gitignored, created by `npm install` |
 
-**Corrected 2026-07-21**: `data/`, `prompts/`, `config/`, and `schema/` were listed here from the
+**Corrected 2026-07-21**: `data/`, `config/`, and `schema/` were listed here from the
 generic project template but were never actually instantiated for this project — none of these
-four directories exist in the repo. Runtime uploads actually live in a flat `uploads/` directory
+three directories exist in the repo. `prompts/` was also listed then but is now instantiated
+(see row above). Runtime uploads actually live in a flat `uploads/` directory
 at repo root (see `docs/conventions.md`). Removed from the table above rather than leaving
 entries for directories that don't exist.
 
@@ -76,6 +78,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `plan/`
 - `playwright.config.ts`
 - `pyproject.toml`
+- `prompts/`
 - `requirements.txt`
 - `resources/`
 - `scripts/`
