@@ -2,13 +2,14 @@
 #
 # ⚠️  IMPORTANT: This workflow is intentionally NON-BLOCKING (continue-on-error: true).
 #     Evals are new (wave-43) and flaky-by-nature until tuned. They are NOT a real
-#     gate. See evals/README.md → "Anti-patterns" §6 for the full justification.
+#     gate. See evals/README.md -> "Anti-patterns" §6 for the full justification.
 #     Do NOT mistake a green evals check for "CI passes" — it can and will fail
-#     randomly until the harness is stabilized.
+#     randomly until the harness is stabilized. The README states this plainly and
+#     this header repeats it so nobody silently promotes evals to a merge blocker.
 #
-# This workflow runs the code-based evals from evals/graders/code_based.py
-# against a seeded Postgres test database. It does NOT touch the protected
-# ci.yml / test.yml real gates.
+# This workflow runs the code-based evals from evals/harness/ (a real pytest suite that
+# drives the live FastAPI app over a seeded Postgres test DB). It does NOT touch the
+# protected ci.yml / test.yml real gates.
 name: Evals
 
 on:
@@ -28,7 +29,7 @@ on:
 jobs:
   evals:
     runs-on: ubuntu-latest
-    continue-on-error: true   # ← non-blocking by design (see header comment)
+    continue-on-error: true   # <- non-blocking by design (see header comment)
     services:
       postgres:
         image: postgres:16-alpine
@@ -43,7 +44,8 @@ jobs:
           --health-timeout 3s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://swa:swa@localhost:5432/swa_erp_test
+      DATABASE_URL: postgresql://swa:***@localhost:5432/swa_erp_test
+      EVALS_TEST_DATABASE_URL: postgresql://swa:***@localhost:5432/swa_erp_test
       SECRET_KEY: test-secret-key
       CORS_ORIGINS: '["http://localhost:3100"]'
       DISABLE_AUTH_RATE_LIMIT: "1"
@@ -53,13 +55,12 @@ jobs:
         with: { python-version: "3.11" }
       - name: Install deps
         run: pip install -r requirements.txt
-      - name: Install PyYAML (for task loader)
-        run: pip install pyyaml
       - name: Apply migrations
         run: |
           cd src/backend && alembic upgrade head
-      - name: Run evals
-        run: python3 evals/run_evals.py --trials 3
+      - name: Run code-based evals (real pytest harness)
+        run: |
+          python3 -m pytest evals/harness/ -q --no-header -p no:cacheprovider
       - name: Upload transcripts
         if: always()
         uses: actions/upload-artifact@v4
