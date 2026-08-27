@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "evidence": "  PASS: inquiry.reference_id matches format (got SWA-2026-INQ-001)\n  PASS: agreement.reference_id matches format (got SWA-2026-SA-001)\n  PASS: token.reference_id matches format (got SWA-2026-TKN-001)\n  PASS: docref.reference_id matches format (got SWA-2026-DBR-001)\n  PASS: all IDs share the same year\n  PASS: sequences monotonic: [1, 1, 1, 1]\n  PASS: agreement.client_id links to client\n  PASS: agreement.inquiry_id links to inquiry\n  PASS: token.agreement_id links to agreement\n  PASS: docref.token_id links to token\n  PASS: docref.project_id links to project",
+  "ctx": {
+    "step1": {
+      "client_id": "549e0a59-0d7d-4325-a27d-62e9d43e1cc2"
+    },
+    "step2": {
+      "inquiry_id": "57dac34b-a086-4f6e-845c-17feb8bacd04"
+    },
+    "step3": {
+      "response_body": {
+        "inquiry": {
+          "id": "57dac34b-a086-4f6e-845c-17feb8bacd04",
+          "reference_id": "SWA-2026-INQ-001",
+          "inquiry_date": "2026-08-28",
+          "inquiry_type": null,
+          "inquiry_source": null,
+          "client_name": "Chain Client",
+          "requirement_summary": "Eval 002 \u2014 ID chain",
+          "estimated_value": null,
+          "priority": null,
+          "status": "Converted",
+          "owner_id": null,
+          "technical_lead": null,
+          "notes": null,
+          "converted_client_id": "549e0a59-0d7d-4325-a27d-62e9d43e1cc2",
+          "converted_project_id": "92086c34-89c0-420c-938d-00ef1854dca5",
+          "created_at": "2026-08-28T04:10:18.126217+05:30",
+          "updated_at": "2026-08-28T04:10:18.136030+05:30"
+        },
+        "client_id": "549e0a59-0d7d-4325-a27d-62e9d43e1cc2",
+        "project_id": "92086c34-89c0-420c-938d-00ef1854dca5"
+      },
+      "project_id": "92086c34-89c0-420c-938d-00ef1854dca5"
+    },
+    "step4": {
+      "agreement_id": "ebd712e6-d60e-46e4-9041-cc4f0fa34fa6"
+    },
+    "step5": {
+      "token_id": "70d65390-2835-4750-b995-121e5d0ea29f"
+    },
+    "step6": {
+      "docref_id": "d8af120d-75a4-42e9-9e53-8a46b7fd8dca"
+    }
+  }
+}

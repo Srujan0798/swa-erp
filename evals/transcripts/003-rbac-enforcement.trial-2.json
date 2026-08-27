@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "evidence": "  PASS: viewer read projects allowed (got 200)\n  PASS: viewer create client -> 403 (got 403)\n  PASS: viewer update project -> 403 (got 403)\n  PASS: no 'HACK-001' client created by viewer\n  PASS: project.name unchanged ('RBAC Project')",
+  "ctx": {
+    "step2": {
+      "project_id": "322fe91c-f497-4aa7-8788-78fc4bc83ab3"
+    },
+    "step3_status": 200,
+    "step4_status": 403,
+    "step5_status": 403
+  }
+}

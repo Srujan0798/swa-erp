@@ -22,5 +22,101 @@
         "evidence": "  PASS: inquiry.status == 'Converted' (got Converted)\n  PASS: inquiry.converted_project_id is set\n  PASS: step2 returned >=1 candidate (got 2)\n  PASS: inquiry.converted_client_id == picked candidate\n  PASS: client was reused (not newly created) \u2014 matches candidates[0].id\n  PASS: project.code == 'APC-001' (got APC-001)\n  PASS: project.client_id links to the reused client"
       }
     ]
+  },
+  "002-agreement-token-docref-chain": {
+    "trials": 3,
+    "passed": 3,
+    "pass@k": 1.0,
+    "pass^k": 1.0,
+    "grader": "002_id_chain",
+    "results": [
+      {
+        "trial": 1,
+        "passed": true,
+        "evidence": "  PASS: inquiry.reference_id matches format (got SWA-2026-INQ-001)\n  PASS: agreement.reference_id matches format (got SWA-2026-SA-001)\n  PASS: token.reference_id matches format (got SWA-2026-TKN-001)\n  PASS: docref.reference_id matches format (got SWA-2026-DBR-001)\n  PASS: all IDs share the same year\n  PASS: sequences monotonic: [1, 1, 1, 1]\n  PASS: agreement.client_id links to client\n  PASS: agreement.inquiry_id links to inquiry\n  PASS: token.agreement_id links to agreement\n  PASS: docref.token_id links to token\n  PASS: docref.project_id links to project"
+      },
+      {
+        "trial": 2,
+        "passed": true,
+        "evidence": "  PASS: inquiry.reference_id matches format (got SWA-2026-INQ-001)\n  PASS: agreement.reference_id matches format (got SWA-2026-SA-001)\n  PASS: token.reference_id matches format (got SWA-2026-TKN-001)\n  PASS: docref.reference_id matches format (got SWA-2026-DBR-001)\n  PASS: all IDs share the same year\n  PASS: sequences monotonic: [1, 1, 1, 1]\n  PASS: agreement.client_id links to client\n  PASS: agreement.inquiry_id links to inquiry\n  PASS: token.agreement_id links to agreement\n  PASS: docref.token_id links to token\n  PASS: docref.project_id links to project"
+      },
+      {
+        "trial": 3,
+        "passed": true,
+        "evidence": "  PASS: inquiry.reference_id matches format (got SWA-2026-INQ-001)\n  PASS: agreement.reference_id matches format (got SWA-2026-SA-001)\n  PASS: token.reference_id matches format (got SWA-2026-TKN-001)\n  PASS: docref.reference_id matches format (got SWA-2026-DBR-001)\n  PASS: all IDs share the same year\n  PASS: sequences monotonic: [1, 1, 1, 1]\n  PASS: agreement.client_id links to client\n  PASS: agreement.inquiry_id links to inquiry\n  PASS: token.agreement_id links to agreement\n  PASS: docref.token_id links to token\n  PASS: docref.project_id links to project"
+      }
+    ]
+  },
+  "003-rbac-enforcement": {
+    "trials": 3,
+    "passed": 3,
+    "pass@k": 1.0,
+    "pass^k": 1.0,
+    "grader": "003_rbac",
+    "results": [
+      {
+        "trial": 1,
+        "passed": true,
+        "evidence": "  PASS: viewer read projects allowed (got 200)\n  PASS: viewer create client -> 403 (got 403)\n  PASS: viewer update project -> 403 (got 403)\n  PASS: no 'HACK-001' client created by viewer\n  PASS: project.name unchanged ('RBAC Project')"
+      },
+      {
+        "trial": 2,
+        "passed": true,
+        "evidence": "  PASS: viewer read projects allowed (got 200)\n  PASS: viewer create client -> 403 (got 403)\n  PASS: viewer update project -> 403 (got 403)\n  PASS: no 'HACK-001' client created by viewer\n  PASS: project.name unchanged ('RBAC Project')"
+      },
+      {
+        "trial": 3,
+        "passed": true,
+        "evidence": "  PASS: viewer read projects allowed (got 200)\n  PASS: viewer create client -> 403 (got 403)\n  PASS: viewer update project -> 403 (got 403)\n  PASS: no 'HACK-001' client created by viewer\n  PASS: project.name unchanged ('RBAC Project')"
+      }
+    ]
+  },
+  "004-time-log-to-dashboard": {
+    "trials": 3,
+    "passed": 3,
+    "pass@k": 1.0,
+    "pass^k": 1.0,
+    "grader": "004_time_aggregation",
+    "results": [
+      {
+        "trial": 1,
+        "passed": true,
+        "evidence": "  PASS: timesheet.total_hours == 8.00 (got 8.00)\n  PASS: timesheet.billable_hours == 7.00 (got 7.00)\n  PASS: timesheet.status == 'draft' (got draft)\n  PASS: 2 time entries exist (got 2)\n  PASS: sum of entry hours == 8.00 (got 8.00)\n  PASS: invoice total == 41300.00 (got 41300.00)\n  PASS: invoice gst_amount == 6300.00 (got 6300.00)\n  PASS: invoice subtotal == 35000.00 (got 35000.00)\n  PASS: invoice subtotal + gst_amount == total (no rounding gap)\n  PASS: DB invoice.subtotal is Decimal (got Decimal)"
+      },
+      {
+        "trial": 2,
+        "passed": true,
+        "evidence": "  PASS: timesheet.total_hours == 8.00 (got 8.00)\n  PASS: timesheet.billable_hours == 7.00 (got 7.00)\n  PASS: timesheet.status == 'draft' (got draft)\n  PASS: 2 time entries exist (got 2)\n  PASS: sum of entry hours == 8.00 (got 8.00)\n  PASS: invoice total == 41300.00 (got 41300.00)\n  PASS: invoice gst_amount == 6300.00 (got 6300.00)\n  PASS: invoice subtotal == 35000.00 (got 35000.00)\n  PASS: invoice subtotal + gst_amount == total (no rounding gap)\n  PASS: DB invoice.subtotal is Decimal (got Decimal)"
+      },
+      {
+        "trial": 3,
+        "passed": true,
+        "evidence": "  PASS: timesheet.total_hours == 8.00 (got 8.00)\n  PASS: timesheet.billable_hours == 7.00 (got 7.00)\n  PASS: timesheet.status == 'draft' (got draft)\n  PASS: 2 time entries exist (got 2)\n  PASS: sum of entry hours == 8.00 (got 8.00)\n  PASS: invoice total == 41300.00 (got 41300.00)\n  PASS: invoice gst_amount == 6300.00 (got 6300.00)\n  PASS: invoice subtotal == 35000.00 (got 35000.00)\n  PASS: invoice subtotal + gst_amount == total (no rounding gap)\n  PASS: DB invoice.subtotal is Decimal (got Decimal)"
+      }
+    ]
+  },
+  "005-invoice-gst-correctness": {
+    "trials": 3,
+    "passed": 3,
+    "pass@k": 1.0,
+    "pass^k": 1.0,
+    "grader": "005_gst",
+    "results": [
+      {
+        "trial": 1,
+        "passed": true,
+        "evidence": "  PASS: subtotal == 2950.00 (got 2950.00)\n  PASS: gst_percent == 18.00 (got 18.00)\n  PASS: gst_amount == 531.00 (got 531.00)\n  PASS: total == 3481.00 (got 3481.00)\n  PASS: subtotal + gst_amount == total (no rounding gap)\n  PASS: DB subtotal is Decimal not float (got Decimal)\n  PASS: DB total is Decimal not float (got Decimal)\n  PASS: DB gst_amount is Decimal not float (got Decimal)\n  PASS: DB gst_percent is Decimal not float (got Decimal)\n  PASS: DB tax_amount is Decimal not float (got Decimal)\n  PASS: item amounts == [200, 750, 2000] (got [Decimal('200.00'), Decimal('750.00'), Decimal('2000.00')])"
+      },
+      {
+        "trial": 2,
+        "passed": true,
+        "evidence": "  PASS: subtotal == 2950.00 (got 2950.00)\n  PASS: gst_percent == 18.00 (got 18.00)\n  PASS: gst_amount == 531.00 (got 531.00)\n  PASS: total == 3481.00 (got 3481.00)\n  PASS: subtotal + gst_amount == total (no rounding gap)\n  PASS: DB subtotal is Decimal not float (got Decimal)\n  PASS: DB total is Decimal not float (got Decimal)\n  PASS: DB gst_amount is Decimal not float (got Decimal)\n  PASS: DB gst_percent is Decimal not float (got Decimal)\n  PASS: DB tax_amount is Decimal not float (got Decimal)\n  PASS: item amounts == [200, 750, 2000] (got [Decimal('200.00'), Decimal('750.00'), Decimal('2000.00')])"
+      },
+      {
+        "trial": 3,
+        "passed": true,
+        "evidence": "  PASS: subtotal == 2950.00 (got 2950.00)\n  PASS: gst_percent == 18.00 (got 18.00)\n  PASS: gst_amount == 531.00 (got 531.00)\n  PASS: total == 3481.00 (got 3481.00)\n  PASS: subtotal + gst_amount == total (no rounding gap)\n  PASS: DB subtotal is Decimal not float (got Decimal)\n  PASS: DB total is Decimal not float (got Decimal)\n  PASS: DB gst_amount is Decimal not float (got Decimal)\n  PASS: DB gst_percent is Decimal not float (got Decimal)\n  PASS: DB tax_amount is Decimal not float (got Decimal)\n  PASS: item amounts == [200, 750, 2000] (got [Decimal('200.00'), Decimal('750.00'), Decimal('2000.00')])"
+      }
+    ]
   }
 }

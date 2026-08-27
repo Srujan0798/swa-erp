@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "evidence": "  PASS: timesheet.total_hours == 8.00 (got 8.00)\n  PASS: timesheet.billable_hours == 7.00 (got 7.00)\n  PASS: timesheet.status == 'draft' (got draft)\n  PASS: 2 time entries exist (got 2)\n  PASS: sum of entry hours == 8.00 (got 8.00)\n  PASS: invoice total == 41300.00 (got 41300.00)\n  PASS: invoice gst_amount == 6300.00 (got 6300.00)\n  PASS: invoice subtotal == 35000.00 (got 35000.00)\n  PASS: invoice subtotal + gst_amount == total (no rounding gap)\n  PASS: DB invoice.subtotal is Decimal (got Decimal)",
+  "ctx": {
+    "step2": {
+      "project_id": "006f1a9a-93f6-43d9-8427-169203da1c1d"
+    },
+    "step5": {
+      "timesheet": {
+        "id": "9f16e7b2-8180-430f-9468-4baad77a4ef4",
+        "user_id": "29f70ed0-a727-4a63-9856-56b57c09f1d4",
+        "week_start": "2026-08-24",
+        "week_end": "2026-08-30",
+        "status": "draft",
+        "total_hours": "8.00",
+        "billable_hours": "7.00",
+        "approved_by": null,
+        "approved_at": null,
+        "created_at": "2026-08-28T04:10:23.436356+05:30",
+        "user_name": "Pm",
+        "approved_by_name": null,
+        "entries": [
+          {
+            "id": "c6f09d14-8c04-4123-a9cb-1829d2f6f1fd",
+            "project_id": "006f1a9a-93f6-43d9-8427-169203da1c1d",
+            "task_id": null,
+            "user_id": "29f70ed0-a727-4a63-9856-56b57c09f1d4",
+            "date": "2026-08-25",
+            "hours": "7.00",
+            "description": "Entry 1",
+            "is_billable": true,
+            "employee_name": null,
+            "employee_role": null,
+            "work_type": null,
+            "sheet_reference_id": null,
+            "revision": null,
+            "activity_type": null,
+            "software_used": null,
+            "work_mode": null,
+            "billable_hours": null,
+            "created_at": "2026-08-28T04:10:23.424838+05:30",
+            "user_name": "Pm",
+            "project_name": "Time Project"
+          },
+          {
+            "id": "a8fb0022-4940-45b1-9f78-b48881db4ebd",
+            "project_id": "006f1a9a-93f6-43d9-8427-169203da1c1d",
+            "task_id": null,
+            "user_id": "29f70ed0-a727-4a63-9856-56b57c09f1d4",
+            "date": "2026-08-25",
+            "hours": "1.00",
+            "description": "Entry 2",
+            "is_billable": false,
+            "employee_name": null,
+            "employee_role": null,
+            "work_type": null,
+            "sheet_reference_id": null,
+            "revision": null,
+            "activity_type": null,
+            "software_used": null,
+            "work_mode": null,
+            "billable_hours": null,
+            "created_at": "2026-08-28T04:10:23.431579+05:30",
+            "user_name": "Pm",
+            "project_name": "Time Project"
+          }
+        ]
+      }
+    },
+    "step6": {
+      "invoice": {
+        "id": "0da14256-4be8-41b5-b2bc-352c3fc9f036",
+        "project_id": "006f1a9a-93f6-43d9-8427-169203da1c1d",
+        "invoice_number": "INV-202608-0001",
+        "status": "draft",
+        "subtotal": "35000.00",
+        "tax_rate": "18.00",
+        "tax_amount": "6300.00",
+        "gst_percent": "18.00",
+        "gst_amount": "6300.00",
+        "total": "41300.00",
+        "currency": "INR",
+        "due_date": null,
+        "notes": "Invoice for period 2026-08-24 to 2026-08-30",
+        "created_by": "29f70ed0-a727-4a63-9856-56b57c09f1d4",
+        "paid_at": null,
+        "created_at": "2026-08-28T04:10:23.441081+05:30",
+        "items": [
+          {
+            "id": "45f34820-ce11-4995-ab0e-e800f3787cfb",
+            "invoice_id": "0da14256-4be8-41b5-b2bc-352c3fc9f036",
+            "description": "Services \u2014 7.00h @ 5000.00/h",
+            "quantity": "7.00",
+            "rate": "5000.00",
+            "amount": "35000.0000",
+            "category": "time",
+            "time_entry_id": "c6f09d14-8c04-4123-a9cb-1829d2f6f1fd",
+            "created_at": "2026-08-28T04:10:23.441081+05:30"
+          }
+        ],
+        "project_name": "Time Project",
+        "created_by_name": "Pm"
+      }
+    }
+  }
+}
