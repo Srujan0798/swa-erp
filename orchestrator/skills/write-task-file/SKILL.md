@@ -1,6 +1,15 @@
 ---
 name: write-task-file
 description: Produce self-contained worker task briefs that require zero project context to execute. Use when dispatching work to OpenCode CLI workers. Critical skill for orchestrator-workers pattern.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - patch
+  - terminal
+  - search_files
+invocation: both
+subagent: false
 ---
 
 # write-task-file

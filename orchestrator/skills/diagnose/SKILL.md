@@ -1,6 +1,13 @@
 ---
 name: diagnose
 description: Systematic debug guidance when a worker report is BLOCKED or tests are failing in unclear ways.
+version: 1.0.0
+allowed-tools:
+  - read_file
+  - search_files
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # diagnose

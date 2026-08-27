@@ -1,6 +1,15 @@
 ---
 name: triage
 description: Categorize incoming work — bug / feature / question / scope creep — and route appropriately.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - search_files
+  - patch
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # triage

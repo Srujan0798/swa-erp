@@ -1,6 +1,15 @@
 ---
 name: to-prd
 description: Convert a discussion or rough scope into a formal PRD section. Use when user describes new requirements.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - search_files
+  - patch
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # to-prd

@@ -1,6 +1,15 @@
 ---
 name: merge-work
 description: Safely integrate approved worker output into the repo. Runs hooks, formats, tests, updates state.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - patch
+  - terminal
+  - search_files
+invocation: both
+subagent: false
 ---
 
 # merge-work

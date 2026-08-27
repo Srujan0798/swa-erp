@@ -1,6 +1,15 @@
 ---
 name: plan-wave
 description: Decompose a PRD section into a wave with spec, plan, tasks, and contracts. Use at the start of every wave.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - search_files
+  - patch
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # plan-wave

@@ -1,6 +1,15 @@
 ---
 name: to-issues
 description: Decompose a PRD section into vertical-slice waves. Each wave ships an end-to-end demo.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - search_files
+  - patch
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # to-issues
