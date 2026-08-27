@@ -16,8 +16,8 @@ evals/tasks/*.task.yaml (under the `llm_rubric` key). This module provides:
   - format_report(scores) -> str
 
 We do NOT call an LLM from here. This module scores pre-collected transcripts
-against the rubric. The actual LLM call (if needed) happens in run_evals.py
-or an external reviewer step — keeping this importable without network/secrets.
+against the rubric. The actual LLM call (if needed) happens in an external reviewer step
+or the evals CI job — keeping this importable without network/secrets.
 This keeps the grader deterministic and offline-testable.
 """
 from __future__ import annotations

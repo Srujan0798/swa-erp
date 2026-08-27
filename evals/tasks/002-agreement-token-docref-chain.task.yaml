@@ -1,6 +1,6 @@
 # Wave-43 Eval Task 002
 # Client workflow: Agreement -> Token -> Document Reference ID chain
-# Verifies reference_id format + sequence monotonicity across the INQ/SA/TKN/DBR entities.
+# Verifies reference_id format + sequence monotonicity across INQ/SA/TKN/DBR entities.
 id: 002-agreement-token-docref-chain
 name: "Agreement-Token-DocRef ID chain"
 description: |
@@ -37,48 +37,48 @@ agent_steps:
     capture: inquiry_id
   - step: 3
     actor: "pm"
-    action: "POST /api/inquiries/{step2.inquiry_id}/convert"
+    action: "POST /api/inquiries/$ref:step.2.inquiry_id/convert"
     body:
       project_name: "Chain Project"
       project_code: "CHN-PRJ-001"
-      client_id: $ref step1.client_id
+      client_id: $ref:step.1.client_id
     expect_status: 200
-    capture: convert_result
+    capture: result
   - step: 4
     actor: "pm"
     action: "POST /api/service-agreements"
     body:
-      client_id: $ref step1.client_id
-      inquiry_id: $ref step2.inquiry_id
+      client_id: $ref:step.1.client_id
+      inquiry_id: $ref:step.2.inquiry_id
       service_name: "Annual Maintenance Contract"
       start_date: "2026-01-01"
       end_date: "2026-12-31"
       total_tokens: 100
     expect_status: 201
-    capture: agreement
+    capture: agreement_id
   - step: 5
     actor: "pm"
     action: "POST /api/tokens"
     body:
-      agreement_id: $ref step4.agreement_id
+      agreement_id: $ref:step.4.agreement_id
       token_date: "2026-08-28"
       token_type: "SA"
       description: "Eval token"
       tokens_used: 1
-      project_id: $ref step3.project_id
+      project_id: $ref:step.3.result.project_id
     expect_status: 201
-    capture: token
+    capture: token_id
   - step: 6
     actor: "pm"
     action: "POST /api/document-references"
     body:
-      project_id: $ref step3.project_id
-      token_id: $ref step5.token_id
+      project_id: $ref:step.3.result.project_id
+      token_id: $ref:step.5.token_id
       document_type: "DBR"
       doc_date: "2026-08-28"
       description: "Eval docref"
     expect_status: 201
-    capture: docref
+    capture: docref_id
 verification: |
   code_based.002_id_chain:
     - inquiry.reference_id matches /^SWA-\d{4}-INQ-\d{3}$/
@@ -87,8 +87,9 @@ verification: |
     - docref.reference_id matches /^SWA-\d{4}-DBR-\d{3}$/
     - sequences monotonic: seq(inquiry) < seq(agreement) < seq(token) < seq(docref)
     - agreement.client_id == step1.client_id
+    - agreement.inquiry_id == step2.inquiry_id
     - token.agreement_id == step4.agreement_id
     - docref.token_id == step5.token_id
-    - docref.project_id == step3.project_id
+    - docref.project_id == step3.result.project_id
 grader: code_based.002_id_chain
 trials: 3

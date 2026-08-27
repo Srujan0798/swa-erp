@@ -1,9 +1,6 @@
 # Wave-43 Eval Task 001
 # Client workflow: Inquiry -> Client conversion (incl. ambiguous-match branch)
 # Covers: create inquiry, convert to client+project, ambiguous client match branch
-#
-# Schema fields (per evals/README.md §2):
-#   id, name, description, input, agent_steps, verification, grader, trials
 id: 001-inquiry-to-client-conversion
 name: "Inquiry to client conversion"
 description: |
@@ -12,7 +9,7 @@ description: |
   (b) create a new client if no match, or
   (c) raise an ambiguous-match error (300) if >1 client shares the name.
   The conversion must also produce a client with a valid SWA-{year}-CLT-{seq:03d}
-  reference code and a project with a PRJ-{year}-{seq:03d} code.
+  reference code and a project with the user-supplied code.
 input:
   client_name: "Ambiguous Test Client"   # deliberately shared by two pre-seeded clients
   project_name: "Ambiguous Project"
@@ -30,7 +27,7 @@ agent_steps:
     capture: inquiry_id
   - step: 2
     actor: "pm"
-    action: "POST /api/inquiries/{inquiry_id}/convert"
+    action: "POST /api/inquiries/$ref:step.1.inquiry_id/convert"
     body:
       project_name: "Ambiguous Project"
       project_code: "APC-001"
@@ -38,12 +35,11 @@ agent_steps:
     capture: error_body
   - step: 3
     actor: "pm"
-    action: "POST /api/inquiries/{inquiry_id}/convert"
+    action: "POST /api/inquiries/$ref:step.1.inquiry_id/convert"
     body:
       project_name: "Ambiguous Project"
       project_code: "APC-001"
-      client_id:          # explicitly pick one of the two existing clients
-        $ref: step2.candidates[0].id
+      client_id: $ref:step.2.response_body.candidates[0].id
     expect_status: 200
     capture: result
 verification: |
@@ -51,9 +47,9 @@ verification: |
     - inquiry.status == "Converted"
     - inquiry.converted_client_id == step2.candidates[0].id (the picked client, NOT a new one)
     - inquiry.converted_project_id != nil
-    - client.id == step2.candidates[0].id   # reused, not created
+    - client.id == step2.candidates[0].id   (reused, not created)
     - project.code == "APC-001"
-    - client.code matches /^SWA-\d{4}-CLT-\d{3}$/
-    - project.code == "APC-001" (the explicitly provided code)
+    # NOTE: in the ambiguous-REUSE branch the existing client keeps its own code;
+    # the SWA-{year}-CLT-{seq:03d} format is only minted in the *new-client* branch.
 grader: code_based.001_inquiry_conversion
 trials: 3

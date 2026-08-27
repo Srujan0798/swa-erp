@@ -17,28 +17,39 @@ agent_steps:
   - step: 1   # setup: admin creates a client + project
     actor: "admin"
     action: "POST /api/clients"
-    body: { name: "RBAC Client", code: "RBAC-C-001", primary_email: "rbac@test.com" }
+    body:
+      name: "RBAC Client"
+      code: "RBAC-C-001"
+      primary_email: "rbac@test.com"
     expect_status: 201
     capture: client_id
   - step: 2
     actor: "admin"
     action: "POST /api/projects"
-    body: { client_id: $ref step1.id, name: "RBAC Project", code: "RBAC-PRJ-001", status: "Lead" }
+    body:
+      client_id: $ref:step.1.client_id
+      name: "RBAC Project"
+      code: "RBAC-PRJ-001"
+      status: "Lead"
     expect_status: 201
     capture: project_id
   - step: 3   # read: viewer can read projects (require_role VIEWER)
     actor: "viewer"
-    action: "GET /api/projects/{step2.id}"
+    action: "GET /api/projects/$ref:step.2.project_id"
     expect_status: 200
   - step: 4   # mutate: viewer cannot create a client (require_role PM)
     actor: "viewer"
     action: "POST /api/clients"
-    body: { name: "Hack Client", code: "HACK-001", primary_email: "hack@test.com" }
+    body:
+      name: "Hack Client"
+      code: "HACK-001"
+      primary_email: "hack@test.com"
     expect_status: 403
-  - step: 5   # mutate: viewer cannot change project status (require_role PM on PATCH)
+  - step: 5   # mutate: viewer cannot change project (require_role PM on PATCH)
     actor: "viewer"
-    action: "PATCH /api/projects/{step2.id}"
-    body: { name: "Hacked Name" }
+    action: "PATCH /api/projects/$ref:step.2.project_id"
+    body:
+      name: "Hacked Name"
     expect_status: 403
 verification: |
   code_based.003_rbac:

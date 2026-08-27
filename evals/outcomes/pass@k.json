@@ -1,0 +1,26 @@
+{
+  "001-inquiry-to-client-conversion": {
+    "trials": 3,
+    "passed": 3,
+    "pass@k": 1.0,
+    "pass^k": 1.0,
+    "grader": "001_inquiry_conversion",
+    "results": [
+      {
+        "trial": 1,
+        "passed": true,
+        "evidence": "  PASS: inquiry.status == 'Converted' (got Converted)\n  PASS: inquiry.converted_project_id is set\n  PASS: step2 returned >=1 candidate (got 2)\n  PASS: inquiry.converted_client_id == picked candidate\n  PASS: client was reused (not newly created) \u2014 matches candidates[0].id\n  PASS: project.code == 'APC-001' (got APC-001)\n  PASS: project.client_id links to the reused client"
+      },
+      {
+        "trial": 2,
+        "passed": true,
+        "evidence": "  PASS: inquiry.status == 'Converted' (got Converted)\n  PASS: inquiry.converted_project_id is set\n  PASS: step2 returned >=1 candidate (got 2)\n  PASS: inquiry.converted_client_id == picked candidate\n  PASS: client was reused (not newly created) \u2014 matches candidates[0].id\n  PASS: project.code == 'APC-001' (got APC-001)\n  PASS: project.client_id links to the reused client"
+      },
+      {
+        "trial": 3,
+        "passed": true,
+        "evidence": "  PASS: inquiry.status == 'Converted' (got Converted)\n  PASS: inquiry.converted_project_id is set\n  PASS: step2 returned >=1 candidate (got 2)\n  PASS: inquiry.converted_client_id == picked candidate\n  PASS: client was reused (not newly created) \u2014 matches candidates[0].id\n  PASS: project.code == 'APC-001' (got APC-001)\n  PASS: project.client_id links to the reused client"
+      }
+    ]
+  }
+}

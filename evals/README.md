@@ -5,15 +5,15 @@
 
 ## Status (2026-08-28)
 
-- ✅ `evals/` scaffolded: README + 5 task specs + 3 graders + workflow + run harness.
-- ✅ Code-based grader runs and produces real pass/fail (see `evals/reports/2026-08-28-baseline.md`).
+- ✅ `evals/` scaffolded: README + 5 task specs + 3 graders + workflow + runnable pytest harness (`evals/harness/`).
+- ✅ Code-based grader runs and produces real pass/fail via `pytest evals/harness/` (see `evals/reports/2026-08-28-baseline.md` for measured numbers).
 - ⚠️ `.github/workflows/evals.yml` is **intentionally non-blocking** (`continue-on-error: true`).
   This is documented here and in the workflow header. Evals are new and flaky-by-nature
   until tuned; they are NOT a real gate. See "Anti-patterns" below.
 
 ## Framework choice
 
-We use a **plain pytest harness** (`evals/graders/code_based.py` + `evals/run_evals.py`).
+We use a **plain pytest harness** (`evals/harness/` + graders in `evals/graders/code_based.py`).
 
 We did **not** use Harbor / Braintrust / Phoenix. Justification (honest):
 - This is an early-stage internship submission. The team does not yet have a shared
@@ -21,7 +21,7 @@ We did **not** use Harbor / Braintrust / Phoenix. Justification (honest):
   service. Standing up one now would consume the entire wave-43 time budget and
   would need an ADR (constitution §35: new dependencies need justification).
 - The app already runs real pytest against a real Postgres (see `tests/conftest.py`).
-  Reusing that stack — `ASGITransport` + HTTpx + the existing `db_session` fixture —
+  Reusing that stack — `ASGITransport` + the existing `db_session` fixture pattern —
   means evals exercise the *actual running application*, not a stub. That is more
   honest than a hosted platform we can't maintain.
 - All eval tasks run **in-process** via FastAPI's `AsyncClient(ASGITransport)`. No
@@ -48,20 +48,20 @@ A task with `0 < pass@k < 1` is **flaky** and must be investigated (constitution
    Primary grader. Each task's `grader` references a function here by name.
 3. `evals/graders/llm_judge.py` — rubric-based grading for subjective outcomes only.
 4. `evals/graders/human_review_template.md` — template for things neither can judge.
-5. `evals/run_evals.py` — the runner. Loads `tests/conftest.py` fixtures, runs each
-   task N times, collects pass/fail, writes `evals/transcripts/<id>.trial-N.json`
-   and appends to `evals/outcomes/pass@k.json`.
+5. `evals/harness/` — the runner. `conftest.py` reuses the project's real Postgres
+   test stack (live ASGI app, per-trial DB reset); `test_evals.py` drives each task
+   through the real HTTP API and calls its grader. Runs N trials, writes
+   `evals/transcripts/<id>.trial-N.json` and appends to `evals/outcomes/pass@k.json`.
 6. `evals/reports/<date>-baseline.md` — the results report with measured numbers.
 
 Run locally:
 ```
 cd /Users/srujansai/Desktop/swa-erp-worktrees/w43
-pytest -x evals/graders/code_based.py -q
-# or the full harness:
-python3 evals/run_evals.py --trials 3
+# needs a Postgres at postgresql://swa:***@localhost:5432/swa_erp_test
+pytest evals/harness/ -q
 ```
 
-Requires a Postgres at `postgresql://swa:swa@localhost:5432/swa_erp_test`
+Requires a Postgres at `postgresql://swa:***@localhost:5432/swa_erp_test`
 (same as the existing test DB — see `.env.example`).
 
 ## Anti-patterns (§4.24 / §6.9)
@@ -106,7 +106,9 @@ evals/
 │   ├── code_based.py         (deterministic — primary)
 │   ├── llm_judge.py          (rubric — subjective only)
 │   └── human_review_template.md
-├── run_evals.py              (harness: runs tasks N times, writes outcomes)
+├── harness/
+│   ├── conftest.py           (reuses real Postgres test stack, per-trial reset)
+│   └── test_evals.py        (drives each task through the live API, calls graders)
 ├── trials/
 │   └── .gitkeep
 ├── transcripts/
