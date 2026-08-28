@@ -20,6 +20,7 @@
 | `orchestrator/` | orchestrator | commands, skills, agents, hooks, recipes, rules |
 | `work/` | orchestrator (write) / workers (read) | task bridge |
 | `work/reports/` | workers (write) / orchestrator (read) | report bridge |
+| `workflows/` | orchestrator | declarative workflow definitions + state files |
 | `src/backend/` | workers | FastAPI backend (api, core, db, models, schemas, services, workers) |
 | `src/frontend/` | workers | React + Vite frontend |
 | `tests/` | workers | unit/integration/e2e/golden/fuzz/performance/security |
@@ -76,6 +77,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `node_modules/`
 - `orchestrator/`
 - `plan/`
+- `workflows/`
 - `playwright.config.ts`
 - `pyproject.toml`
 - `prompts/`
