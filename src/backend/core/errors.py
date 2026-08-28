@@ -5,14 +5,15 @@ Env-gated: absent SENTRY_DSN -> no-op, zero overhead, no crash.
 Captures unhandled exceptions with request context + request ID.
 Scrubs PII and secrets before sending.
 """
-import os
+
 import logging
-from typing import Optional
+import os
+from typing import Literal
 
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 from src.backend.core.config import settings
 
@@ -23,7 +24,7 @@ _sentry_initialized = False
 def scrub_pii(event, hint):
     """
     Scrub PII and secrets from Sentry events before sending.
-    
+
     This is critical as the system handles real client business data.
     """
     # Remove sensitive headers
@@ -76,29 +77,29 @@ def scrub_pii(event, hint):
 def init_sentry() -> bool:
     """
     Initialize Sentry SDK if SENTRY_DSN is configured.
-    
+
     Returns True if initialized, False if DSN not set (no-op mode).
     """
     global _sentry_initialized
-    
+
     dsn = os.getenv("SENTRY_DSN") or getattr(settings, "SENTRY_DSN", None)
-    
+
     if not dsn:
         # No DSN configured - run in no-op mode
         logging.getLogger(__name__).info(
             "SENTRY_DSN not configured; error tracking disabled (no-op mode)"
         )
         return False
-    
+
     if _sentry_initialized:
         return True
-    
+
     # Configure logging integration to capture logs as breadcrumbs
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,        # Capture info and above as breadcrumbs
-        event_level=logging.ERROR  # Send errors as events
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=logging.ERROR,  # Send errors as events
     )
-    
+
     sentry_sdk.init(
         dsn=dsn,
         integrations=[
@@ -124,7 +125,7 @@ def init_sentry() -> bool:
         # Send default PII (we scrub it in before_send)
         send_default_pii=False,
     )
-    
+
     _sentry_initialized = True
     logging.getLogger(__name__).info("Sentry error tracking initialized")
     return True
@@ -133,42 +134,49 @@ def init_sentry() -> bool:
 def capture_exception(exc: Exception, request=None, **context):
     """
     Capture an exception with request context.
-    
+
     Safe to call even if Sentry is not initialized (no-op).
     """
     if not _sentry_initialized:
         return
-    
+
     with sentry_sdk.push_scope() as scope:
         # Add request context if available
         if request:
-            scope.set_context("request", {
-                "method": request.method,
-                "url": str(request.url),
-                "headers": dict(request.headers),
-                "client": request.client.host if request.client else None,
-            })
+            scope.set_context(
+                "request",
+                {
+                    "method": request.method,
+                    "url": str(request.url),
+                    "headers": dict(request.headers),
+                    "client": request.client.host if request.client else None,
+                },
+            )
             # Add request ID if present (from our middleware)
             request_id = request.headers.get("X-Request-ID")
             if request_id:
                 scope.set_tag("request_id", request_id)
-        
+
         # Add custom context
         for key, value in context.items():
             scope.set_context(key, value)
-        
+
         sentry_sdk.capture_exception(exc)
 
 
-def capture_message(message: str, level: str = "info", **context):
+def capture_message(
+    message: str,
+    level: Literal["fatal", "critical", "error", "warning", "info", "debug"] = "info",
+    **context,
+):
     """
     Capture a message with context.
-    
+
     Safe to call even if Sentry is not initialized (no-op).
     """
     if not _sentry_initialized:
         return
-    
+
     with sentry_sdk.push_scope() as scope:
         for key, value in context.items():
             scope.set_context(key, value)
@@ -178,12 +186,12 @@ def capture_message(message: str, level: str = "info", **context):
 def add_breadcrumb(message: str, category: str = "custom", level: str = "info", **data):
     """
     Add a breadcrumb for debugging context.
-    
+
     Safe to call even if Sentry is not initialized (no-op).
     """
     if not _sentry_initialized:
         return
-    
+
     sentry_sdk.add_breadcrumb(
         message=message,
         category=category,

@@ -82,6 +82,7 @@ class LocalStorage:
     def url(self, key: str) -> str:
         return str(self._path(key))
 
+
 class MinIOStorage:
     """S3-compatible object storage backend (MinIO) via the ``minio`` client.
 

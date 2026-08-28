@@ -177,9 +177,8 @@ def list_projects_with_names(
     )
 
     from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
-    from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
-
     from src.backend.db.repositories.inquiry_repo import get_by_id as get_inquiry_by_id
+    from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
 
     result = []
     for p in projects:

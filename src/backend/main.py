@@ -35,12 +35,11 @@ from src.backend.api.vendors import router as vendors_router
 from src.backend.core.config import settings
 from src.backend.core.deps import get_current_user
 from src.backend.core.errors import init_sentry
-from src.backend.core.middleware import RequestIdMiddleware
 from src.backend.core.metrics import registry, setup_metrics
+from src.backend.core.middleware import RequestIdMiddleware
 from src.backend.core.rate_limit import install_auth_rate_limiter
 from src.backend.db.session import engine
 from src.backend.models.user import User
-
 
 # Setup metrics BEFORE creating the app (to avoid "Cannot add middleware after app started")
 # This creates the instrumentator and adds the middleware
@@ -52,9 +51,9 @@ async def lifespan(app: FastAPI):
     # Startup
     # Initialize Sentry (no-op if SENTRY_DSN not set)
     init_sentry()
-    
+
     yield
-    
+
     # Shutdown
     engine.dispose()
 
@@ -109,7 +108,6 @@ if not getattr(app.state, "_swa_metrics_instrumented", False):
     app.state._swa_metrics_instrumented = True
 
 
-
 @app.get("/metrics", include_in_schema=False)
-def metrics_endpoint(_: User = Depends(get_current_user)) -> Response:
+def metrics_endpoint(_: User = Depends(get_current_user)) -> Response:  # noqa: B008
     return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
