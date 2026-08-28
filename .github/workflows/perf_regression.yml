@@ -1,0 +1,83 @@
+name: Performance Regression
+
+on:
+  push:
+    branches: [main, "wave-*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Weekly guard so a dependency bump can't silently regress latency.
+    - cron: "17 4 * * 1"
+
+jobs:
+  perf-budget:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-perf-secret-do-not-use-in-prod
+      STORAGE_BACKEND: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the stack (postgres + redis + backend)
+        run: |
+          docker compose -f docker-compose.yml up -d --wait
+          # Wait for the backend liveness probe.
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8100/healthz >/dev/null 2>&1; then
+              echo "backend up"; break
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:8100/readyz || true
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install Locust
+        run: pip install locust==2.43.4
+
+      - name: Run load test (50 users, 2 min)
+        run: |
+          locust -f tests/performance/locustfile.py \
+            --host=http://localhost:8100 \
+            --users=50 --spawn-rate=5 --run-time=2m \
+            --headless \
+            --csv=load-test-results
+
+      - name: Enforce SLO minimums (regression guard)
+        run: |
+          python3 - <<'PY'
+          import csv, sys, glob, os
+          # SLO floors from docs/operational/PERFORMANCE_SLOS.md (Minimum column).
+          P95_FLOOR_MS = 500.0
+          MAX_FLOOR_MS = 1000.0
+          stats = glob.glob("load-test-results_stats.csv")
+          if not stats:
+              print("No locust stats CSV found; failing.")
+              sys.exit(1)
+          bad = []
+          with open(stats[0], newline="") as f:
+              reader = csv.DictReader(f)
+              for row in reader:
+                  name = row.get("Name", "")
+                  try:
+                      p95 = float(row.get("95%") or 0)
+                      mx = float(row.get("Max Response Time") or 0)
+                  except ValueError:
+                      continue
+                  if p95 > P95_FLOOR_MS:
+                      bad.append(f"{name}: p95={p95}ms > {P95_FLOOR_MS}ms floor")
+                  if mx > MAX_FLOOR_MS:
+                      bad.append(f"{name}: max={mx}ms > {MAX_FLOOR_MS}ms floor")
+          if bad:
+              print("PERFORMANCE REGRESSION — SLO minimums exceeded:")
+              for b in bad:
+                  print("  -", b)
+              sys.exit(1)
+          print("OK: all endpoints within SLO minimums (p95<=500ms, max<=1000ms).")
+          PY
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

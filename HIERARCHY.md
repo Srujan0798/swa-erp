@@ -72,6 +72,8 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `deliverables/`
 - `docker-compose.prod.yml`
 - `docker-compose.yml`
+- `docker-compose.dev.yml`
+- `prometheus.yml`
 - `docs/`
 - `evals/`
 - `mcp.json`
