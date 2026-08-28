@@ -11,13 +11,15 @@ from src.backend.db.repositories.user_repo import get_by_id
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 
-security_scheme = HTTPBearer()
+security_scheme = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(security_scheme),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> User:
+    if creds is None:
+        raise HTTPException(status_code=403, detail="Authentication required")
     try:
         payload = decode_token(creds.credentials)
     except Exception as e:
