@@ -8,19 +8,6 @@ from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
-
-
-def _is_admin(user: User) -> bool:
-    return user.role == Role.ADMIN.value
-
-
-def _scoped_user_id(current_user: User, requested: uuid.UUID | None) -> uuid.UUID | None:
-    """Meeting 1: time log is owner-only; Admin may see all / filter any user."""
-    if _is_admin(current_user):
-        return requested
-    if requested is not None and requested != current_user.id:
-        raise HTTPException(status_code=403, detail="Cannot view another user's time data")
-    return current_user.id
 from src.backend.schemas.time_tracking import (
     TimeEntryCreate,
     TimeEntryListResponse,
@@ -41,6 +28,20 @@ from src.backend.services.time_service import (
     submit_timesheet_service,
     update_time_entry_service,
 )
+
+
+def _is_admin(user: User) -> bool:
+    return user.role == Role.ADMIN.value
+
+
+def _scoped_user_id(current_user: User, requested: uuid.UUID | None) -> uuid.UUID | None:
+    """Meeting 1: time log is owner-only; Admin may see all / filter any user."""
+    if _is_admin(current_user):
+        return requested
+    if requested is not None and requested != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot view another user's time data")
+    return current_user.id
+
 
 time_entries_router = APIRouter(prefix="/api/time-entries", tags=["time-entries"])
 timesheets_router = APIRouter(prefix="/api/timesheets", tags=["timesheets"])

@@ -7,10 +7,9 @@ Exposes /metrics endpoint with:
 - Celery queue depth and task success/failure counts
 - Business counters (failed logins, 5xx rate)
 """
-from prometheus_client import Counter, Histogram, Gauge, CollectorRegistry
-from prometheus_fastapi_instrumentator import Instrumentator, metrics
-from prometheus_fastapi_instrumentator.metrics import Info
 
+from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram
+from prometheus_fastapi_instrumentator import Instrumentator, metrics
 
 # Custom metrics registry
 registry = CollectorRegistry()
@@ -89,11 +88,11 @@ http_5xx_total = Counter(
 def setup_metrics(app) -> Instrumentator:
     """
     Configure and install Prometheus metrics instrumentation.
-    
+
     Two-phase setup:
     - Phase 1 (app=None): Create instrumentator and add middleware (must be before app starts)
     - Phase 2 (app=FastAPI): Expose /metrics endpoint (after app is created)
-    
+
     Returns the Instrumentator instance for further customization.
     """
     instrumentator = Instrumentator(
@@ -134,7 +133,7 @@ def setup_metrics(app) -> Instrumentator:
     # Phase 1: Install middleware (must be done before app starts)
     if app is not None:
         instrumentator.instrument(app)
-    
+
     return instrumentator
 
 

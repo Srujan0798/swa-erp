@@ -3,6 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from sqlalchemy.orm import Session
 
+from src.backend.core.config import settings
 from src.backend.db.repositories.project_cost_repo import (
     create_project_cost,
     get_costs_by_category,
@@ -12,7 +13,6 @@ from src.backend.db.repositories.project_cost_repo import (
     soft_delete_cost,
 )
 from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
-from src.backend.core.config import settings
 from src.backend.schemas.pnl import (
     CostBreakdownItem,
     ProjectCostCreate,

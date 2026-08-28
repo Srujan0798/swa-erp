@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from src.backend.core.deps import get_current_user, require_role
+from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
@@ -83,7 +83,9 @@ def generate_from_time_endpoint(
 )
 def list_invoices_endpoint(
     project_id: uuid.UUID,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008  # Meeting: finance not VIEWER
+    current_user: User = Depends(
+        require_role(Role.PM)
+    ),  # noqa: B008  # Meeting: finance not VIEWER
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
