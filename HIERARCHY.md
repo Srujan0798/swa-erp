@@ -65,7 +65,6 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `MASTER-FLOW.md`
 - `Makefile`
 - `README.md`
-- `pytest.ini`
 - `skills-lock.json`
 - `skills.manifest.json`
 - `attic/`
