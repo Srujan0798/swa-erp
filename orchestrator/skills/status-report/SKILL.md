@@ -1,6 +1,13 @@
 ---
 name: status-report
 description: Generate a standardized weekly project status report.
+version: 1.0.0
+allowed-tools:
+  - read_file
+  - search_files
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # status-report

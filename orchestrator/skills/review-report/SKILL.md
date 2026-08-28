@@ -1,6 +1,15 @@
 ---
 name: review-report
 description: Verify a worker report against acceptance contracts and spec. Boris's #1 rule — always run commands yourself.
+version: 1.0.0
+allowed-tools:
+  - write_file
+  - read_file
+  - search_files
+  - patch
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # review-report

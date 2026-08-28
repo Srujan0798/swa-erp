@@ -1,6 +1,13 @@
 ---
 name: verify-work
 description: Boris's #1 rule. Run executable acceptance criteria yourself, never trust worker's claim.
+version: 1.0.0
+allowed-tools:
+  - read_file
+  - search_files
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # verify-work

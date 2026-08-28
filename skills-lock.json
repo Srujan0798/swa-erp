@@ -1,0 +1,98 @@
+{
+  "$schema": "https://raw.githubusercontent.com/agentskills/agentskills.io/main/schemas/skills.lock.json",
+  "version": "2026.1",
+  "locked_at": "2026-08-28",
+  "skills": [
+    {
+      "name": "caveman",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "1514ebf6604a6e987d5105b4ff32eefe0120b3f8d56aff9677dc74f8a8b1ce7f",
+      "path": "orchestrator/skills/caveman/SKILL.md"
+    },
+    {
+      "name": "diagnose",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "b5a089b4834ddee2f90cecf1f77ccc7cd6f7657252ce2924cb4f6bcea63b0b39",
+      "path": "orchestrator/skills/diagnose/SKILL.md"
+    },
+    {
+      "name": "merge-work",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "e3a8f371ac000dcbfa25f861138f81a39f0ab1b0b374e63733bbc4eb4031e4e7",
+      "path": "orchestrator/skills/merge-work/SKILL.md"
+    },
+    {
+      "name": "plan-wave",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "4906d029ddf1ecc1d29ed835923ccc41c1a216f7f94ceed4ac56e01a82ef6341",
+      "path": "orchestrator/skills/plan-wave/SKILL.md"
+    },
+    {
+      "name": "review-report",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "fa577a954b92d477f5c1d46525af0d49c06bc568d3abf8c048b14a4729a509f5",
+      "path": "orchestrator/skills/review-report/SKILL.md"
+    },
+    {
+      "name": "self-evolve",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "9d0ea7fead017506346522f2e85534a0b38447071f103559ba5903dba2aff451",
+      "path": "orchestrator/skills/self-evolve/SKILL.md"
+    },
+    {
+      "name": "status-report",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "f3113cd4dfc6b93ecec9272898ba0c74802a0a0c4b1c555c303d2742b7b540bb",
+      "path": "orchestrator/skills/status-report/SKILL.md"
+    },
+    {
+      "name": "to-issues",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "0da276ae25aec63cd09dadee77e0eeb9f5d34a17846ad276a95cf1bcdf17a4b6",
+      "path": "orchestrator/skills/to-issues/SKILL.md"
+    },
+    {
+      "name": "to-prd",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "cbf7b90853b03c7c43f800d2e21397793d62ffd0868348a75981ac327305dc97",
+      "path": "orchestrator/skills/to-prd/SKILL.md"
+    },
+    {
+      "name": "triage",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "314326bd4c4eebab3412b664f01064123f6847df55848cd3eb4ec6b191a8f64c",
+      "path": "orchestrator/skills/triage/SKILL.md"
+    },
+    {
+      "name": "verify-work",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "a25483d2086d7f7a5a0d0c62f87ada513f7272fb4cee67d35e237d8264197793",
+      "path": "orchestrator/skills/verify-work/SKILL.md"
+    },
+    {
+      "name": "write-task-file",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "c5ab5a1e1bd9e7973251d035486f91eaaa6031bcb7a8ac86f61c8b623dd3d9c6",
+      "path": "orchestrator/skills/write-task-file/SKILL.md"
+    },
+    {
+      "name": "zoom-out",
+      "version": "git-tracked",
+      "schema_version": "2026.1",
+      "checksum_sha256": "60120e6d729ff77f0d6bd8d09733c13a01f88512a9de8e71cd8e48a09715c01b",
+      "path": "orchestrator/skills/zoom-out/SKILL.md"
+    }
+  ]
+}

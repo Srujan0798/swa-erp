@@ -1,6 +1,13 @@
 ---
 name: zoom-out
 description: When stuck in details, request broader context. Re-read PRD, ARCHITECTURE, EXECUTION before deciding.
+version: 1.0.0
+allowed-tools:
+  - read_file
+  - search_files
+  - terminal
+invocation: agent
+subagent: true
 ---
 
 # zoom-out
