@@ -23,6 +23,7 @@
 | `workflows/` | orchestrator | declarative workflow definitions + state files |
 | `src/backend/` | workers | FastAPI backend (api, core, db, models, schemas, services, workers) |
 | `src/frontend/` | workers | React + Vite frontend |
+| `evals/` | workers | Evaluation tasks + graders + runner (wave-43+) |
 | `tests/` | workers | unit/integration/e2e/golden/fuzz/performance/security |
 | `deliverables/` | orchestrator + workers | admin/user guides, architecture summary — built wave-21 |
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
@@ -73,6 +74,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `docker-compose.prod.yml`
 - `docker-compose.yml`
 - `docs/`
+- `evals/`
 - `mcp.json`
 - `node_modules/`
 - `orchestrator/`

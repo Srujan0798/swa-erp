@@ -1,0 +1,55 @@
+# Wave-43 Eval Task 001
+# Client workflow: Inquiry -> Client conversion (incl. ambiguous-match branch)
+# Covers: create inquiry, convert to client+project, ambiguous client match branch
+id: 001-inquiry-to-client-conversion
+name: "Inquiry to client conversion"
+description: |
+  An inquiry arrives with a client name. Converting it must:
+  (a) match an existing client with the same name (reuse it), or
+  (b) create a new client if no match, or
+  (c) raise an ambiguous-match error (300) if >1 client shares the name.
+  The conversion must also produce a client with a valid SWA-{year}-CLT-{seq:03d}
+  reference code and a project with the user-supplied code.
+input:
+  client_name: "Ambiguous Test Client"   # deliberately shared by two pre-seeded clients
+  project_name: "Ambiguous Project"
+  project_code: "APC-001"
+  inquiry_date: "2026-08-28"
+agent_steps:
+  - step: 1
+    actor: "pm"
+    action: "POST /api/inquiries"
+    body:
+      inquiry_date: "2026-08-28"
+      client_name: "Ambiguous Test Client"
+      requirement_summary: "Eval 001 — ambiguous client match"
+    expect_status: 201
+    capture: inquiry_id
+  - step: 2
+    actor: "pm"
+    action: "POST /api/inquiries/$ref:step.1.inquiry_id/convert"
+    body:
+      project_name: "Ambiguous Project"
+      project_code: "APC-001"
+    expect_status: 300   # ambiguous-client-match branch
+    capture: error_body
+  - step: 3
+    actor: "pm"
+    action: "POST /api/inquiries/$ref:step.1.inquiry_id/convert"
+    body:
+      project_name: "Ambiguous Project"
+      project_code: "APC-001"
+      client_id: $ref:step.2.response_body.candidates[0].id
+    expect_status: 200
+    capture: result
+verification: |
+  code_based.001_inquiry_conversion:
+    - inquiry.status == "Converted"
+    - inquiry.converted_client_id == step2.candidates[0].id (the picked client, NOT a new one)
+    - inquiry.converted_project_id != nil
+    - client.id == step2.candidates[0].id   (reused, not created)
+    - project.code == "APC-001"
+    # NOTE: in the ambiguous-REUSE branch the existing client keeps its own code;
+    # the SWA-{year}-CLT-{seq:03d} format is only minted in the *new-client* branch.
+grader: code_based.001_inquiry_conversion
+trials: 3

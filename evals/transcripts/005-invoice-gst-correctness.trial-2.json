@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "evidence": "  PASS: subtotal == 2950.00 (got 2950.00)\n  PASS: gst_percent == 18.00 (got 18.00)\n  PASS: gst_amount == 531.00 (got 531.00)\n  PASS: total == 3481.00 (got 3481.00)\n  PASS: subtotal + gst_amount == total (no rounding gap)\n  PASS: DB subtotal is Decimal not float (got Decimal)\n  PASS: DB total is Decimal not float (got Decimal)\n  PASS: DB gst_amount is Decimal not float (got Decimal)\n  PASS: DB gst_percent is Decimal not float (got Decimal)\n  PASS: DB tax_amount is Decimal not float (got Decimal)\n  PASS: item amounts == [200, 750, 2000] (got [Decimal('200.00'), Decimal('750.00'), Decimal('2000.00')])",
+  "ctx": {
+    "step3": {
+      "invoice_id": "c361673e-bc72-4520-8743-ec5011873e20"
+    }
+  }
+}
