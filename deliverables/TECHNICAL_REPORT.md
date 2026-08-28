@@ -77,7 +77,7 @@ Work was sequenced in **waves** — scoped briefs under `work/wave-N/`, acceptan
 | **33** | Backend coverage raised; overall **86%**; all service modules ≥70%; five former weak services (pdf/quote/import/task/notification) closed | [`work/reports/wave-33/03-remaining-coverage.report.md`](../work/reports/wave-33/03-remaining-coverage.report.md), [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](../work/reports/COMPLETION-HANDOFF-VERDICT.md) |
 | **34** | Real frontend Vitest suite; thresholds **60/50/60/60** met; cite **~61%** statements on independent remeasure | [`work/reports/wave-34/02-frontend-page-coverage.report.md`](../work/reports/wave-34/02-frontend-page-coverage.report.md) + verdict |
 | **35** | Locust load at 10/50/100/150 users on a **dev machine**; p95 ≈ 29–130 ms; no 5xx after fixes | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
-| **36** | Prometheus metrics, readiness, optional Sentry | [`docs/OBSERVABILITY.md`](../docs/OBSERVABILITY.md), wave-36 report 02 |
+| **36** | Prometheus metrics, readiness, optional Sentry | [`docs/operational/OBSERVABILITY.md`](../docs/operational/OBSERVABILITY.md), wave-36 report 02 |
 | **37** | Independent adversarial review | **Shipped** — path-traversal + hourly-rate settings fixed; residual RISKs documented | [`work/reports/wave-37/01-independent-review.report.md`](../work/reports/wave-37/01-independent-review.report.md) |
 | **38** | Submission package | **Shipped** | wave-38 report |
 | **39** | Repo organization | Shipped | |

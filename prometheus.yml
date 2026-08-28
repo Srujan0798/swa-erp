@@ -1,0 +1,35 @@
+# Prometheus scrape configuration for SWA ERP
+#
+# Service names below match docker-compose.yml exactly (backend, worker, postgres, redis).
+# The backend exposes /metrics (authenticated) on its internal port 8000.
+# NOTE: /metrics requires a valid JWT (src/backend/main.py), so the Prometheus
+# scraper must carry credentials or run on an authenticated sidecar. For an
+# internal-only deployment, bind the backend metrics port to the scrape network.
+#
+# Compose service ports (internal):
+#   backend  -> 8000  (/metrics)
+#   postgres -> 5432  (needs postgres-exporter, not deployed by default)
+#   redis    -> 6379  (needs redis-exporter, not deployed by default)
+#   worker   -> Celery; no metrics endpoint exposed by default
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: "swa-erp"
+    env: "dev"
+
+scrape_configs:
+  # Backend API — the only service that currently exposes Prometheus metrics.
+  - job_name: "swa-erp-backend"
+    metrics_path: "/metrics"
+    scheme: http
+    static_configs:
+      - targets: ["backend:8000"]
+        labels:
+          tier: "api"
+
+  # Self-monitoring: if you run Prometheus in-container, uncomment.
+  # - job_name: "prometheus"
+  #   static_configs:
+  #     - targets: ["localhost:9090"]

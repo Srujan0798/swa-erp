@@ -39,7 +39,7 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | **Frontend coverage** | Vitest thresholds **60/50/60/60** (stmts/branches/fns/lines) **met**; independent remeasure **~61% statements** | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-34/02-frontend-page-coverage.report.md`](work/reports/wave-34/02-frontend-page-coverage.report.md) |
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client’s Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
-| **Observability** | `/metrics` (Prometheus), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md), wave-36 |
+| **Observability** | `/metrics` (Prometheus), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
 
 **Do not claim:** “no backend module under 70%” globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend **65.86%** without a fresh vitest paste.
 

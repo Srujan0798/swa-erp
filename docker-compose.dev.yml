@@ -1,0 +1,39 @@
+# Dev overrides for SWA ERP — hot reload + optional Prometheus.
+#
+# Usage:
+#   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# What this changes vs the base docker-compose.yml:
+#   - backend  : mounts ./src/backend into the container and runs uvicorn --reload
+#   - worker   : mounts ./src/backend and runs celery --autoreload
+#   - prometheus: (optional) scrapes backend:8000 using prometheus.yml
+#
+# It does NOT change ports, env, or the database — those stay as defined in the base file.
+
+services:
+  backend:
+    volumes:
+      - ./src/backend:/app/src/backend
+    command: ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      DEBUG: "true"
+    # Optional: uncomment if you launch uvicorn with --debugpy and want to attach an IDE
+    # ports:
+    #   - "5678:5678"
+
+  worker:
+    volumes:
+      - ./src/backend:/app/src/backend
+    command: ["celery", "-A", "src.backend.workers.celery_app", "worker", "--loglevel=info", "--autoreload"]
+
+  # Optional Prometheus for local metrics viewing. Scrapes backend:8000 (see prometheus.yml).
+  # NOTE: /metrics requires a JWT (src/backend/main.py), so out-of-the-box Prometheus will get
+  # 401s — run an authenticated sidecar or relax auth on the internal scrape network for dev only.
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
