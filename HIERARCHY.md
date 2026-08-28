@@ -9,7 +9,7 @@
 |---|---|---|
 | `README.md` | orchestrator | entry point + quick start |
 | `MASTER-FLOW.md` | orchestrator | the single-path answer: what to do, ask, continue |
-|| `CLAUDE.md`, `KIMI.md`, `AGENTS.md` | orchestrator | always-loaded kernel (identical content; AGENTS.md is a symlink to CLAUDE.md) |
+| `CLAUDE.md`, `KIMI.md`, `AGENTS.md` | orchestrator | always-loaded kernel (identical content; AGENTS.md is a symlink to CLAUDE.md) |
 | `HANDOFF.md` | orchestrator | session/orchestrator switching protocol |
 | `HIERARCHY.md` | orchestrator | this file — repo map |
 | `HOW_TO_RUN.md` | orchestrator | dual-tier workflow guide |
@@ -29,10 +29,11 @@
 | `docs/` | orchestrator | reference + decisions + runbook + conventions |
 | `attic/` | nobody (frozen) | superseded work, never deleted |
 | `scripts/` | workers + orchestrator | automation utilities (import tool, backup scripts) |
-|| `.github/workflows/` | CI | automated checks (ci, test, security) |
-|| `.claude/` | Claude Code | settings.local.json (minimal) |
-|| `prompts/` | orchestrator | worker prompts in use: current/, archive/, INDEX.md |
-|| `resources/` | orchestrator + workers | reference material (client meeting master record, IT brief source) |
+| `.github/workflows/` | CI | automated checks (ci, test, security) |
+| `.claude/` | Claude Code | settings.local.json (minimal) |
+| `prompts/` | orchestrator | worker prompts in use: current/, archive/, INDEX.md |
+| `resources/` | orchestrator + workers | reference material (client meeting master record, IT brief source) |
+| `schema/` | orchestrator | DB schema dump (`db_struct.sql`) + ERD source |
 | `uploads/` | runtime | uploaded files — gitignored, created when the app runs |
 | `backups/` | runtime | backup/restore script output — gitignored, created by `scripts/backup_db.sh` |
 | `node_modules/` | build | frontend npm dependencies — gitignored, created by `npm install` |
@@ -67,6 +68,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `README.md`
 - `skills-lock.json`
 - `skills.manifest.json`
+- `architecture.png`
 - `attic/`
 - `backups/`
 - `deliverables/`
@@ -80,6 +82,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `node_modules/`
 - `orchestrator/`
 - `plan/`
+- `schema/`
 - `workflows/`
 - `playwright.config.ts`
 - `pyproject.toml`
