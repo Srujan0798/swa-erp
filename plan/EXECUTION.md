@@ -66,9 +66,10 @@ wave-1 (Foundation) ✅ SHIPPED
 | 37 | Independent adversarial review | **SHIPPED** ✅ | 1/1 | `work/reports/wave-37/01-independent-review.report.md` |
 | 38 | Professional submission package | **SHIPPED** ✅ | 1/1 | `work/reports/wave-38/01-submission-package.report.md` |
 | 39 | Repo organization | **SHIPPED** ✅ | 1/1 | `work/reports/wave-39/` |
+| 40-47 | Final seal passes (gates, 0-failed suite, DoD A–E) | **SHIPPED** ✅ | 5/5 | `96852fe` on worktree `w47`; report `work/reports/wave-47/01-final-seal.report.md` |
 
-**Waves 1–36 and 39 are SHIPPED.** Live tracker: `work/ACTIVE.md`. Close pack: `work/FINAL-CLOSE/`.
-Viraj data Qs locked (ADR-0002). Server/deploy facts still external (no IT dept).
+**Waves 1–39, 43–47 are SHIPPED.** Engineering closed 2026-08-28.
+Product release remains **v1.0.1**. Deploy remains external (Viraj / no IT dept).
 
 **Note on waves 4-8:** these were committed in one mega-commit (`ed71fac`) rather than the
 per-task worker/report process this file describes — `work/reports/` is empty for waves 5, 6,
@@ -122,5 +123,6 @@ directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY
 current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
 instead of duplicating it here.
 
-**Active wave:** none — waves 32–39 SHIPPED. Engineering sealed in `work/reports/FINAL-CLOSE.report.md`.
+**Active wave:** none — waves 32–39, 43–47 SHIPPED. Engineering sealed by wave-47 (2026-08-28).
+Full-stack pytest: 572 passed / 1 skipped / 0 failed. Coverage: 85%. Vitest: 523 passed / 0 failed.
 Product release remains **v1.0.1**. Deploy remains external (Viraj / no IT dept).

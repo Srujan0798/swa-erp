@@ -22,17 +22,29 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] — professional-grade close (2026-08-23)
 
-### Added (waves 32–39 evidence track)
+### Added (waves 32–47 evidence track)
 - **Wave-32:** real CI gates (removed `|| true` / `continue-on-error`); ruff/black/mypy/pytest enforce.
 - **Wave-33:** backend coverage → **86%** overall; target services (pdf/quote/import/task/notification) ≥70%.
 - **Wave-34:** frontend Vitest suite; thresholds ≥60/50/60/60 (cite fresh runs, ~61% stmts).
 - **Wave-35:** Locust load validation 10/50/100/150 users — `docs/PERFORMANCE.md`.
 - **Wave-36:** Prometheus `/metrics`, Sentry (opt-in), `/healthz` `/readyz`.
 - **Wave-39:** repo organization (`work/ACTIVE.md` / `ARCHIVE.md`, performance-runs archive).
+- **Wave-43:** evals scaffold (`evals/` with 5 task specs, 3 graders, run_evals.py runner, GitHub Actions workflow).
+- **Wave-44:** metrics hardening — `/metrics`, `/healthz`, `/readyz` endpoints instrumented with Prometheus.
+- **Wave-45:** skill schema 2.1 — frontmatter standardisation across orchestrator skills.
+- **Wave-46:** FINAL-CLOSE.report.md rewritten with reproducible numbers (572 pass / 1 skip / 0 fail).
+- **Wave-47:** final seal — all six gate commands (ruff/black/mypy/tsc/eslint/vite) clean;
+  full-stack pytest 572 passed / 1 skipped / **0 failed**; 85% coverage; 5/5 target services ≥70%.
 - **CI:** `npx vitest run` gated in frontend job.
 - **Final-close pack:** `work/FINAL-CLOSE/` (protocols P01–P20).
 
 ### Fixed
+- **Wave-47:** 401/403 RBAC gap — `HTTPBearer(auto_error=False)` + 403 in `get_current_user`
+  so missing Authorization returns 403 (not 401). Fixes 5 tests in waves 4/8/22.
+- **Wave-47:** ruff W293/E402/B008 across 9 backend files auto-fixed.
+- **Wave-47:** mypy `Literal` type for `sentry_sdk.capture_message` level param.
+- **Wave-47:** tsc — added missing `author_name` to test mock; created `FileBrowser` stub
+  for `DocumentsPage` route (component was referenced but never created).
 - TaskCard overdue test timezone flake (`toISOString` UTC vs local IST).
 - Viraj architecture overview: MinIO/Celery status corrected (shipped wave-31).
 - Single `_PRIORITY_MAP` in `task_repo.py` (removed triplicate priority dicts).
