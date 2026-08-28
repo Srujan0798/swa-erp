@@ -2,6 +2,18 @@
 
 This document explains what observability data SWA ERP collects, how to read it, and how to set up alerting. Written for a team with **no dedicated IT/ops department** — the system must be self-explanatory.
 
+> **Operational companion docs (read these alongside this one):**
+> - [`PRODUCTION_WALKTHROUGH.md`](PRODUCTION_WALKTHROUGH.md) — what a healthy system looks like
+> - [`PERFORMANCE_SLOS.md`](PERFORMANCE_SLOS.md) — speed targets and where they come from
+> - [`INCIDENT_RESPONSE_PLAYBOOK.md`](INCIDENT_RESPONSE_PLAYBOOK.md) — what to do when something breaks
+> - [`SECURITY_PERIMETER_GUIDE.md`](SECURITY_PERIMETER_GUIDE.md) — what is protected and how
+> - [`DATA_INTAKE_PROTOCOL.md`](DATA_INTAKE_PROTOCOL.md) — how client Excel sheets get imported
+
+> **Heads-up on `/readyz` and Redis:** `/readyz` returns HTTP `503` when Redis is unreachable
+> (or Postgres is down, or migrations are not at head). On machines without Docker (or with Redis
+> stopped), two health-related tests will fail — that is expected, not a code bug. See
+> `INCIDENT_RESPONSE_PLAYBOOK.md` → "Redis down".
+
 ---
 
 ## What We Have (Implemented in Wave-36)

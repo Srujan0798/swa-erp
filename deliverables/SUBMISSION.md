@@ -24,7 +24,7 @@ Safe wording only — every row cites a report. See also [`work/reports/wave-38/
 | Load test | **10–150 users**, p95 **≈ 29–130 ms**, no 5xx after fixes, **dev machine only** | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
 | CI honesty | **0** `\|\| true` / `continue-on-error` in `.github/workflows/` | wave-32 report |
 | MinIO + Celery | **BUILT** (wave-31) | `src/backend/core/storage.py`, `src/backend/workers/`, compose |
-| Observability | `/metrics`, `/healthz`, `/readyz`, optional Sentry | [`docs/OBSERVABILITY.md`](../docs/OBSERVABILITY.md) |
+| Observability | `/metrics`, `/healthz`, `/readyz`, optional Sentry | [`docs/operational/OBSERVABILITY.md`](../docs/operational/OBSERVABILITY.md) |
 | Deploy on client server | **Not done** — facts OPEN | [`SEND_IT.md`](SEND_IT.md) |
 
 **Forbidden overclaims (anti-fabrication):** “100% complete / zero residual risk”; stale pass counts such as “566 passed / 0 failed / 1 skipped” without a current session output; global “no module under 70%”; stale frontend **65.86%** without a fresh vitest paste; “MinIO/Celery not built”; claiming client Windows Server was load-tested. Corrected 2026-08-28: prior backend suite figure was not reproduced in this session; frontend suite independently verified at **523 passed / 0 failed** via `npx vitest run` on this worktree.
@@ -279,7 +279,7 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 | `docs/INSTALL_NO_IT.md` | Install path when there is no IT department |
 | `docs/decisions/0001..0004` | ADRs (tech stack, core ID chain, IT brief, meeting-2 flow) |
 | `docs/PERFORMANCE.md` | Load-test evidence |
-| `docs/OBSERVABILITY.md` | Metrics / health / Sentry |
+| `docs/operational/OBSERVABILITY.md` | Metrics / health / Sentry |
 | `docs/runbook.md` + `docs/runbook_backup_restore.md` | Day-to-day ops + backup/restore |
 | `docs/api.md`, `docs/conventions.md`, `docs/SCOPE_GUARD.md` | API reference, conventions, scope |
 | `docs/PROJECT_HISTORY.md` | How the project got here (distilled history) |
