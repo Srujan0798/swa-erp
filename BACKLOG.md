@@ -44,6 +44,12 @@ deferred** as documented RISK — not hidden. Listed here so they are tracked, n
   user action), but a dormant integration — either wire it up for large exports or
   document it as backend-only capability for future use.
 
+- **DB index coverage checked, no gap found** — spot-checked `tasks.assignee_id`
+  (composite index with status), `invoices.project_id`, `time_entries.{project_id,task_id,user_id}`,
+  and `document_references.{project_id,token_id}` — all properly indexed. This item
+  can be considered closed; re-check only if a new frequently-filtered column is
+  added without an index.
+
 ## Larger structural debt (parked, out of this wave's scope)
 - **Vitest coverage suppression on failure** — fixed mechanically by
   `generate_metrics.sh` (records `null` + reason), but the upstream vitest behaviour
