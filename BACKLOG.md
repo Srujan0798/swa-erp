@@ -37,6 +37,13 @@ deferred** as documented RISK — not hidden. Listed here so they are tracked, n
 - **Guard:** these are recorded as RISK in the wave-37 report; a future wave should
   close them with TDD. They must NOT be re-classified as "fixed" without a test.
 
+- **Async export (Celery) is fully built but never triggered from the UI** — retries
+  (max_retries=2), failure tracking, and a real `GET /api/jobs/{id}` status endpoint
+  all work correctly, but zero frontend hooks or components reference `/api/jobs` or
+  `async=true`. Not a live bug (nothing currently reaches the failure path from a real
+  user action), but a dormant integration — either wire it up for large exports or
+  document it as backend-only capability for future use.
+
 ## Larger structural debt (parked, out of this wave's scope)
 - **Vitest coverage suppression on failure** — fixed mechanically by
   `generate_metrics.sh` (records `null` + reason), but the upstream vitest behaviour
