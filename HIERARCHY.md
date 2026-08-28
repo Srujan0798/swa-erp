@@ -54,6 +54,8 @@ rows above are gitignored runtime/build directories: they appear only when the s
 
 ## Directory inventory (all top-level entries)
 - `CHANGELOG.md`
+- `BACKLOG.md`
+- `HALL_OF_SHAME.md`
 - `CLAUDE.md`
 - `AGENTS.md`
 - `CONTRIBUTING.md`
