@@ -1,0 +1,37 @@
+flowchart TB
+    subgraph External["External Actors"]
+        Viraj["Viraj / Client - Ahmedabad India"] -->|SWA sheets decisions GST rules| A
+        IT["IT Dept Server - Windows Server 128GB - Docker Desktop + MinIO + PG + Redis - EXTERNAL BLOCKER"] -.->|Not yet deployed| D
+        Supplier["Vendor / Supplier - External"] -->|RFQ responses| B
+    end
+
+    subgraph Browser["Client Browser"]
+        FE["React 18 SPA - Vite TypeScript Tailwind shadcn/ui - TanStack Query - 27 pages - 19 hooks - 91 components - BUILT"] -->|fetch /api/*| B
+    end
+
+    subgraph Backend["Backend - Python 3.11 / FastAPI / SQLAlchemy 2"]
+        B["FastAPI :8100 - 26 routers - 97 endpoint paths - 153 decorator methods - BUILT"] -->|SQLAlchemy 2 ORM| P
+        subgraph Routers["API Routers 26 files"]
+            direction LR
+            R1["auth.py"] & R2["clients.py"] & R3["inquiries.py"] & R4["agreements.py"] & R5["tokens.py"] & R6["doc_refs.py"] & R7["projects.py"] & R8["quotes.py"] & R9["boqs.py"] & R10["rfqs.py"] & R11["invoices.py"] & R12["time_tracking.py"] & R13["tasks.py"] & R14["compliance.py"] & R15["sustainability.py"] & R16["vendors.py"] & R17["materials.py"] & R18["documents.py"] & R19["exports.py"] & R20["jobs.py"] & R21["reports.py"] & R22["project_pnl.py"] & R23["lifecycle.py"] & R24["notifications.py"] & R25["health.py"]
+        end
+        B -->|depend| SVC["Services Layer - reference_id_service - client_service - inquiry_service - agreement_service - project_service - token_service - document_reference_service - import_service - invoice_service - quote_service - sustainability_service - notification_service - task_service - time_tracking_service - vendor_service - material_service - compliance_service - report_service - export_service - BUILT"]
+        SVC -->|atomic| RID["reference_id_service.py - generate_reference_id(db entity_type) - SWA year TYPE seq - atomic per-year counter - BUILT"]
+    end
+
+    subgraph DB["PostgreSQL"]
+        P["34 tables - 25 models - 33 migrations - BUILT"] -->|Alembic| M["Alembic - 33 versions 0001 to 0033 - zero-padded - one per concern - BUILT"]
+    end
+
+    subgraph Infra["Infrastructure"]
+        CELERY["Celery Workers - Redis broker/backend - src/backend/workers/ - tasks.py PDF generation - BUILT"] -->|async export| EXPORT["Export endpoints - async=true - GET /jobs/{id} - BUILT"]
+        STORAGE["Storage Backend - StorageBackend protocol - local uploads/ default - BUILT"] -.opt-in.-> MINIO["MinIO - STORAGE_BACKEND=minio - PARTIAL not active by default"]
+    end
+
+    subgraph Deploy["Deployment"]
+        DC["Docker Compose - docker-compose.yml - backend frontend postgres redis worker - BUILT"] -->|target state| DEPLOYED["Windows Server 128GB - Docker Desktop + MinIO + PostgreSQL + Redis - TARGET NOT YET DEPLOYED - IT blocker no IT dept"]
+    end
+
+    Viraj -.->|requirements| A
+    IT -.->|server facts| DEPLOYED
+    Supplier -.->|RFQ data| R18

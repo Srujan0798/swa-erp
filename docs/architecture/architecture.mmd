@@ -1,0 +1,183 @@
+---
+title: SWA ERP — System Architecture
+description: System context, core business chain, request lifecycle, deployment topology. Built vs target-state marked.
+generated: 2026-08-28
+---
+
+# SWA ERP — System Architecture
+
+Generated: 2026-08-28. Ground truth measured from the repo before drawing.
+
+**Legend:**
+- 🟢 BUILT — exists and verified
+- 🟡 PARTIAL — exists but stubs/incomplete
+- 🔴 TARGET — planned, not yet built
+- ⚪ EXTERNAL — depends on external party
+
+---
+
+## System Context
+
+```mermaid
+flowchart TB
+    subgraph External["External Actors"]
+        Viraj[("Viraj / Client<br/>Ahmedabad, India")] -->|SWA sheets, decisions, GST rules| A
+        IT[("IT Dept / Server<br/>Windows Server 128GB<br/>Docker Desktop + MinIO + PG + Redis<br/>EXTERNAL BLOCKER")] -.->|Not yet deployed| D
+        Supplier[("Vendor / Supplier<br/>External")] -->|RFQ responses| B
+    end
+
+    subgraph Browser["Client Browser"]
+        FE[React 18 SPA<br/>Vite · TypeScript · Tailwind · shadcn/ui<br/>TanStack Query<br/>27 pages · 19 hooks · 91 components<br/>🟢 BUILT] -->|fetch /api/*| B
+    end
+
+    subgraph Backend["Backend — Python 3.11 / FastAPI / SQLAlchemy 2"]
+        B[FastAPI :8100<br/>26 routers · 97 endpoint paths · 153 decorator methods<br/>🟢 BUILT] -->|SQLAlchemy 2 ORM| P
+        subgraph Routers["API Routers (26 files)"]
+            direction LR
+            R1[auth.py] & R2[clients.py] & R3[inquiries.py] & R4[agreements.py] & R5[tokens.py] & R6[doc_refs.py] & R7[projects.py] & R8[quotes.py] & R9[boqs.py] & R10[rfqs.py] & R11[invoices.py] & R12[time_tracking.py] & R13[tasks.py] & R14[compliance.py] & R15[sustainability.py] & R16[vendors.py] & R17[materials.py] & R18[documents.py] & R19[exports.py] & R20[jobs.py] & R21[reports.py] & R22[project_pnl.py] & R23[lifecycle.py] & R24[notifications.py] & R25[health.py]
+        end
+        B -->|depend| SVC[Services Layer<br/>reference_id_service · client_service · inquiry_service · agreement_service · project_service · token_service · document_reference_service · import_service · invoice_service · quote_service · sustainability_service · notification_service · task_service · time_tracking_service · vendor_service · material_service · compliance_service · report_service · export_service<br/>🟢 BUILT]
+        SVC -->|== atomic ==| RID[reference_id_service.py<br/>generate_reference_id(db, entity_type)<br/>SWA-{year}-{TYPE}-{seq:03d}<br/>atomic per-year counter<br/>🟢 BUILT]
+    end
+
+    subgraph DB[(PostgreSQL)]
+        P[34 tables · 25 models · 33 migrations<br/>🟢 BUILT] -->|Alembic| M[Alembic<br/>33 versions · 0001..0033<br/>zero-padded · one per concern<br/>🟢 BUILT]
+    end
+
+    subgraph Infra["Infrastructure"]
+        CELERY[("Celery Workers<br/>Redis broker/backend<br/>src/backend/workers/<br/>tasks.py: PDF generation<br/>🟢 BUILT")] -->|async export| EXPORT[("Export endpoints<br/>?async=true → GET /jobs/{id}<br/>🟢 BUILT")]
+        STORAGE[("Storage Backend<br/>StorageBackend protocol<br/>local uploads/ default<br/>🟢 BUILT")] -.opt-in.-> MINIO[("MinIO<br/>STORAGE_BACKEND=minio<br/>🟡 PARTIAL · not active by default")]
+    end
+
+    subgraph Deploy["Deployment"]
+        DC[("Docker Compose<br/>docker-compose.yml<br/>backend · frontend · postgres · redis · worker<br/>🟢 BUILT")] -->|target state| DEPLOYED[("Windows Server 128GB<br/>Docker Desktop + MinIO + PostgreSQL + Redis<br/>🔴 TARGET · NOT YET DEPLOYED<br/>IT blocker · no IT dept")]
+    end
+
+    Viraj -.->|requirements| A
+    IT -.->|server facts| DEPLOYED
+    Supplier -.->|RFQ data| R18
+
+    style DEPLOYED fill:#ffcccc,stroke:#cc0000,stroke-dasharray: 5 5
+    style MINIO fill:#fff3cd,stroke:#ffc107,stroke-dasharray: 5 5
+    style RID fill:#ccffcc,stroke:#006600
+    style CELERY fill:#ccffcc,stroke:#006600
+    style EXPORT fill:#ccffcc,stroke:#006600
+    style STORAGE fill:#ccffcc,stroke:#006600
+```
+
+---
+
+## Core Business Chain — The Intellectual Core
+
+The client's real workflow (Meeting 1 + Meeting 2), NOT a generic CRM:
+
+```mermaid
+flowchart LR
+    INQ[("Inquiry<br/>SWA-{year}-INQ-{seq:03d}<br/>🟢 BUILT")] -->|convert| CLIEST{"Client exists?"}
+    CLIEST -->|No| CLT[("Create Client<br/>SWA-{year}-CLT-{seq:03d}<br/>🟢 BUILT")]
+    CLIEST -->|Yes| REUSE[("Reuse existing Client<br/>🟢 BUILT")]
+    CLT --> PROJ[("Project<br/>SWA-{year}-PRJ-{seq:03d}<br/>🟢 BUILT")]
+    REUSE --> PROJ
+    PROJ --> SA[("Service Agreement<br/>SWA-{year}-SA-{seq:03d}<br/>🟢 BUILT")]
+    SA --> TKN[("Token (unit of work)<br/>SWA-{year}-TKN-{seq:03d}<br/>🟢 BUILT")]
+    TKN --> DRN[("Document Reference<br/>SWA-{year}-DBR-{seq:03d}<br/>DBR/KDR share counter<br/>🟢 BUILT")]
+    DRN --> TIME[("Time Log → Invoice / GST<br/>🟢 BUILT")]
+    TIME --> SUST[("Sustainability metrics<br/>SWA-{year}-SM-{seq:03d}<br/>🟢 BUILT")]
+
+    INQ -->|Meeting 1 + Meeting 2<br/>Viraj confirmed| VERIFIED[("ID scheme confirmed<br/>not guessed<br/>ADR-0002<br/>🟢 BUILT")]
+    VERIFIED -.-> INQ
+```
+
+**Reference IDs:** `SWA-{year}-{TYPE}-{seq:03d}`, generated atomically by `reference_id_service.py`, counters reset per calendar year. Confirmed by Viraj Aug 2026 — see `docs/decisions/0002-core-id-chain-gap.md`.
+
+**Key flows:**
+- Inquiry → Client (convert: check if exists, only create if not) — `POST /inquiries/{id}/convert`
+- Client → Project (lifecycle state machine) — `POST /projects/{id}/transition`
+- Project → Service Agreement → Token → Document Reference
+- Document Reference → Time Log → Invoice (with GST) → Sustainability metrics
+
+---
+
+## Request Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant U as Browser (React)
+    participant A as FastAPI :8100
+    participant S as Service Layer
+    participant RID as reference_id_service
+    participant DB as PostgreSQL
+    participant W as Celery Worker
+    participant ST as Storage (local/MinIO)
+
+    Note over U,ST: Built path: synchronous CRUD
+    U->>A: POST /api/clients (JWT auth)
+    A->>A: dependency injection<br/>get_db() → Session<br/>get_current_user()
+    A->>S: client_service.create_client(db, actor_id, data)
+    S->>RID: generate_reference_id(db, "CLT")
+    RID-->>S: SWA-2025-CLT-001
+    S->>DB: INSERT clients (...) RETURNING
+    DB-->>S: row
+    S-->>A: ClientRead.model_dump()
+    A-->>U: 201 Created { data: {...} }
+
+    Note over U,ST: Built path: async export via Celery
+    U->>A: GET /api/projects/{id}/summary.pdf?async=true
+    A->>A: enqueue job<br/>celery_task = generate_project_pdf.delay(project_id, format="pdf")
+    A-->>U: 202 Accepted { job_id: "..." }
+    U->>A: GET /api/jobs/{job_id}
+    A->>W: Celery worker picks up task
+    W->>ST: render PDF to storage
+    W-->>A: job complete
+    A-->>U: 200 { status: "ready", result_url: "..." }
+    U->>A: GET /storage/{path}
+    A->>ST: serve file (local or MinIO)
+    ST-->>U: PDF bytes
+```
+
+---
+
+## Deployment Topology
+
+```mermaid
+flowchart TB
+    subgraph docker["Docker Compose (BUILT)"]
+        direction TB
+        POSTGRES[("PostgreSQL<br/>primary store<br/>🟢 BUILT")]
+        REDIS[("Redis<br/>broker + backend for Celery<br/>🟢 BUILT")]
+        B_CONT[("Backend Container<br/>uvicorn :8100<br/>🟢 BUILT")]
+        F_CONT[("Frontend Container<br/>nginx serving Vite build<br/>🟢 BUILT")]
+        WORKER_CONT[("Worker Container<br/>celery -A src.backend.workers.celery_app worker<br/>🟢 BUILT")]
+    end
+
+    B_CONT -->|SQLAlchemy 2| POSTGRES
+    B_CONT -->|Redis| REDIS
+    WORKER_CONT -->|Redis| REDIS
+    WORKER_CONT -->|SQLAlchemy 2| POSTGRES
+    F_CONT -->|proxy| B_CONT
+
+    subgraph target["Target Deployment (NOT BUILT)"]
+        WINDOWS[("Windows Server 128GB<br/>Docker Desktop<br/>MinIO · PostgreSQL · Redis<br/>🔴 TARGET-STATE · NOT DEPLOYED<br/>IT BLOCKER · no IT dept")]
+    end
+
+    docker -.->|intended target| WINDOWS
+```
+
+---
+
+## Built vs Target-State Summary
+
+| Component | Status | Evidence |
+|-----------|--------|----------|
+| 26 API routers, 97 endpoint paths, 153 methods | 🟢 BUILT | Measured: `ls src/backend/api/*.py`, `grep -r @router` |
+| 25 models, 34 tables | 🟢 BUILT | `psql -c "\dt"` returns 34 tables |
+| 33 Alembic migrations | 🟢 BUILT | `ls src/backend/alembic/versions/*.py` |
+| Core chain (Inquiry→Client→SA→Token→DocRef→TimeLog→Sustainability) | 🟢 BUILT | All models + API endpoints exist |
+| Reference ID service (atomic, per-year counter) | 🟢 BUILT | `reference_id_service.py`, `reference_counters` table |
+| Celery workers + async export | 🟢 BUILT | `src/backend/workers/`, `docker-compose.yml` worker service |
+| StorageBackend (local default, MinIO opt-in) | 🟢 BUILT | `src/backend/core/storage.py` |
+| GST on invoices | 🟢 BUILT | wave-18, commit 2073c36 |
+| MinIO active by default | 🔴 NOT BUILT | STORAGE_BACKEND=minio required; opt-in only |
+| Windows Server deployment | 🔴 NOT BUILT | No IT dept; server facts still open |
+| NBC/ECBC/IGBC/IS compliance standard versions | 🟡 PARTIAL | Standards exist, versions still open (ADR-0002 #5) |
+| Notifications router (BUILT) + handlers (STUB) | 🟡 PARTIAL | Router mounted, handlers return []/{} |
