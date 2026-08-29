@@ -62,9 +62,22 @@ code/tests wins; fix the drift rather than trusting the more convenient one.
 - Excel freeze date + migration owner — Viraj
 
 ## Queued, not yet dispatched
-A live product audit (waves 48–49) found real gaps beyond the close-out scope — see
-`work/wave-48/` (rate limiting, audit-log coverage, error boundary, accessibility, pagination,
-idempotency, CSP/token rotation, service-layer logging) and `work/wave-49/01-transaction-atomicity.md`
-(**critical** — the core Inquiry→Client→Project flow can leave orphaned rows on a partial
-failure; not yet fixed). Also `work/wave-40/02-metrics-script-fix.md` for two real bugs found
-mid-audit. None of these are dispatched — they're ready whenever assigned.
+
+**Start at [`work/DISPATCH-PLAN.md`](work/DISPATCH-PLAN.md)** — the full remaining roadmap
+to submission: 10 tasks in 6 dependency-ordered rounds, with which tasks are safe to run
+in parallel and why the order can't be shuffled.
+
+Summary of what it covers:
+- `work/wave-49/01-transaction-atomicity.md` — **critical, dispatch first.** The core
+  Inquiry→Client→Project flow can leave orphaned rows on a partial failure.
+- `work/wave-48/` (5 tasks) — rate limiting, audit-log coverage, error boundary,
+  accessibility, pagination, idempotency, CSP/token rotation, service-layer logging,
+  frontend loading states, bundle splitting.
+- `work/wave-50/` (2 tasks) — closes two wave-37 RISKs that were deferred and never
+  revisited (job IDOR on `/api/jobs`, unauthenticated `/metrics`), and makes the suite
+  green on a machine without Redis instead of showing 2 unexplained failures.
+- `work/wave-51/01-final-reseal-and-submission.md` — **dispatch last.** Re-measures every
+  number, reconciles every front-door doc, refreshes the submission package.
+- `work/wave-40/02-metrics-script-fix.md` — two real bugs found mid-audit.
+
+None of these are dispatched — they're ready whenever assigned.
