@@ -55,13 +55,15 @@ describe("api request core", () => {
 
     fetchMock
       .mockResolvedValueOnce(jsonResponse({ detail: "expired" }, 401))
-      .mockResolvedValueOnce(jsonResponse({ access_token: "new-access" }))
+      .mockResolvedValueOnce(
+        jsonResponse({ access_token: "new-access", refresh_token: "refresh-2" })
+      )
       .mockResolvedValueOnce(jsonResponse({ id: "u1" }));
 
     const user = await api.me();
     expect(user).toEqual({ id: "u1" });
     expect(localStorage.getItem("access_token")).toBe("new-access");
-    expect(localStorage.getItem("refresh_token")).toBe("refresh-1");
+    expect(localStorage.getItem("refresh_token")).toBe("refresh-2");
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 

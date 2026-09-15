@@ -11,7 +11,7 @@ from src.backend.core.security import (
 )
 from src.backend.db.repositories.refresh_token_repo import create as create_refresh_token_record
 from src.backend.db.repositories.refresh_token_repo import find_valid as find_valid_refresh_token
-from src.backend.db.repositories.refresh_token_repo import revoke_all_for_user
+from src.backend.db.repositories.refresh_token_repo import revoke_all_for_user, revoke_single
 from src.backend.db.repositories.user_repo import get_by_email
 from src.backend.schemas.auth import AccessTokenResponse, TokenResponse, UserPublic
 from src.backend.services.audit_service import record_event
@@ -78,10 +78,17 @@ def refresh_access_token(db: Session, refresh_token: str) -> AccessTokenResponse
         return None
 
     new_access_token = create_access_token(user.id, user.role)
+    new_refresh_token = create_refresh_token(user.id)
+
+    create_refresh_token_record(db, user.id, new_refresh_token, settings.JWT_REFRESH_TTL_DAYS)
+    revoke_single(db, valid_token.id)
 
     record_event(db, "auth.token_refresh", user_id=user.id)
 
-    return AccessTokenResponse(access_token=new_access_token)
+    return AccessTokenResponse(
+        access_token=new_access_token,
+        refresh_token=new_refresh_token,
+    )
 
 
 def logout(

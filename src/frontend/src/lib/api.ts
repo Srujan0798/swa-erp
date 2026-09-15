@@ -129,7 +129,7 @@ async function request<T>(
         });
         if (refreshResponse.ok) {
           const tokens: AccessTokenResponse = await refreshResponse.json();
-          setTokens(tokens.access_token, refresh);
+          setTokens(tokens.access_token, tokens.refresh_token ?? refresh);
           headers["Authorization"] = `Bearer ${tokens.access_token}`;
           response = await fetch(path, { ...options, headers });
         } else {

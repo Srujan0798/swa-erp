@@ -111,3 +111,13 @@ if not getattr(app.state, "_swa_metrics_instrumented", False):
 @app.get("/metrics", include_in_schema=False)
 def metrics_endpoint(_: User = Depends(get_current_user)) -> Response:  # noqa: B008
     return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.middleware("http")
+async def set_security_headers(request, call_next):
+    response = await call_next(request)
+    # Strict CSP: API is JSON-only, no inline/scripts needed on responses.
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
