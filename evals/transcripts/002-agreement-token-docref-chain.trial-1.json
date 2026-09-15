@@ -3,15 +3,15 @@
   "evidence": "  PASS: inquiry.reference_id matches format (got SWA-2026-INQ-001)\n  PASS: agreement.reference_id matches format (got SWA-2026-SA-001)\n  PASS: token.reference_id matches format (got SWA-2026-TKN-001)\n  PASS: docref.reference_id matches format (got SWA-2026-DBR-001)\n  PASS: all IDs share the same year\n  PASS: sequences monotonic: [1, 1, 1, 1]\n  PASS: agreement.client_id links to client\n  PASS: agreement.inquiry_id links to inquiry\n  PASS: token.agreement_id links to agreement\n  PASS: docref.token_id links to token\n  PASS: docref.project_id links to project",
   "ctx": {
     "step1": {
-      "client_id": "4c1fdd0d-7aa5-450a-9dbd-0d644c0c4896"
+      "client_id": "c92c763b-d31e-49ba-befc-40085b93ef39"
     },
     "step2": {
-      "inquiry_id": "1574f03e-1d2b-4ce1-9891-a943f6d808b5"
+      "inquiry_id": "9d7e176f-dde8-4a20-bf28-dfe9087ca2de"
     },
     "step3": {
       "response_body": {
         "inquiry": {
-          "id": "1574f03e-1d2b-4ce1-9891-a943f6d808b5",
+          "id": "9d7e176f-dde8-4a20-bf28-dfe9087ca2de",
           "reference_id": "SWA-2026-INQ-001",
           "inquiry_date": "2026-08-28",
           "inquiry_type": null,
@@ -24,24 +24,24 @@
           "owner_id": null,
           "technical_lead": null,
           "notes": null,
-          "converted_client_id": "4c1fdd0d-7aa5-450a-9dbd-0d644c0c4896",
-          "converted_project_id": "4cc67500-7100-4858-8487-931c39289896",
-          "created_at": "2026-08-28T04:10:15.798320+05:30",
-          "updated_at": "2026-08-28T04:10:15.808793+05:30"
+          "converted_client_id": "c92c763b-d31e-49ba-befc-40085b93ef39",
+          "converted_project_id": "17adf740-f557-4e76-a816-7419cb14cfca",
+          "created_at": "2026-09-15T18:21:18.623059+05:30",
+          "updated_at": "2026-09-15T18:21:18.623059+05:30"
         },
-        "client_id": "4c1fdd0d-7aa5-450a-9dbd-0d644c0c4896",
-        "project_id": "4cc67500-7100-4858-8487-931c39289896"
+        "client_id": "c92c763b-d31e-49ba-befc-40085b93ef39",
+        "project_id": "17adf740-f557-4e76-a816-7419cb14cfca"
       },
-      "project_id": "4cc67500-7100-4858-8487-931c39289896"
+      "project_id": "17adf740-f557-4e76-a816-7419cb14cfca"
     },
     "step4": {
-      "agreement_id": "a66bbe8b-3b43-454f-b986-275568d26f76"
+      "agreement_id": "276171af-ae3e-416e-94b6-6c586ce6b540"
     },
     "step5": {
-      "token_id": "658349d8-32f9-4f3e-951c-ab898f5c6f65"
+      "token_id": "910fc30e-258e-4e5a-9cfa-8b345a483ac0"
     },
     "step6": {
-      "docref_id": "16cccd76-7b17-46b5-9fb5-07d15fcbdecc"
+      "docref_id": "19c89f6d-32ad-4a0a-828b-78c49414bb70"
     }
   }
 }

@@ -11,6 +11,7 @@ async def test_healthz(client: AsyncClient):
 
 
 async def test_readyz_db_ok(client_with_db: AsyncClient):
+    """DB connection works (test DB uses create_all, not migrations)."""
     r = await client_with_db.get("/readyz")
     assert r.status_code == 200
     assert r.json()["checks"]["db"] == "ok"

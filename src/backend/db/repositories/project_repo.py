@@ -8,6 +8,18 @@ from sqlalchemy.orm import Session
 from src.backend.models.project import Project
 
 
+def user_has_project_access(db: Session, user_id: uuid.UUID, project_id: uuid.UUID) -> bool:
+    """Return True when *user_id* is the PM, designer, or auditor of *project_id*."""
+    project = get_by_id(db, project_id)
+    if project is None:
+        return False
+    # PM, designer, and auditor all have project-level access
+    for role_id in (project.pm_id, project.designer_id, project.auditor_id):
+        if role_id and role_id == user_id:
+            return True
+    return False
+
+
 def list_projects(
     db: Session,
     page: int = 1,

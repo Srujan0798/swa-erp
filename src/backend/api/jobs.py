@@ -1,13 +1,31 @@
 from celery.result import AsyncResult  # type: ignore[import-untyped]
 from fastapi import APIRouter, Depends, HTTPException, Response
+import uuid
+from sqlalchemy.orm import Session
 
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
 from src.backend.core.storage import get_storage
+from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
+from src.backend.db.repositories.project_repo import user_has_project_access
+from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.workers.celery_app import app
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
+
+
+def _require_project_access(
+    db: Session,
+    project_id: uuid.UUID,
+    user: User,
+) -> None:
+    """Raise 403 when *user* does not belong to *project_id*."""
+    if not user_has_project_access(db, user.id, project_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this project's jobs",
+        )
 
 
 @router.get("/{job_id}")

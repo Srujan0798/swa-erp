@@ -128,7 +128,7 @@ async function request<T>(
           body: JSON.stringify({ refresh_token: refresh }),
         });
         if (refreshResponse.ok) {
-          const tokens: AccessTokenResponse = await refreshResponse.json();
+          const tokens: AccessTokenResponse & { refresh_token?: string } = await refreshResponse.json();
           setTokens(tokens.access_token, tokens.refresh_token ?? refresh);
           headers["Authorization"] = `Bearer ${tokens.access_token}`;
           response = await fetch(path, { ...options, headers });

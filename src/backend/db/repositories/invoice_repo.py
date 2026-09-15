@@ -2,9 +2,27 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.backend.models.invoice import Invoice, InvoiceItem
+
+_SEQ_NAME = "invoice_number_seq"
+
+
+def _next_invoice_number(db: Session) -> str:
+    """Atomically obtain the next invoice number from the DB sequence.
+
+    Uses ``nextval('invoice_number_seq')`` inside the current transaction so
+    concurrent calls never produce the same suffix.
+    """
+    now = datetime.now(tz=UTC)
+    prefix = f"INV-{now:%Y%m}-"
+    row = db.execute(text(f"SELECT nextval('{_SEQ_NAME}') AS n")).fetchone()
+    if row is None:
+        raise RuntimeError("db sequence nextval returned no row")
+    seq = int(row.n)
+    return f"{prefix}{seq:04d}"
 
 
 def create_invoice(
@@ -79,22 +97,8 @@ def update_invoice_status(
 
 
 def generate_invoice_number(db: Session) -> str:
-    now = datetime.now(tz=UTC)
-    prefix = f"INV-{now:%Y%m}-"
-    last_invoice = (
-        db.query(Invoice)
-        .filter(
-            Invoice.invoice_number.like(f"{prefix}%"),
-            Invoice.deleted_at.is_(None),
-        )
-        .order_by(Invoice.invoice_number.desc())
-        .first()
-    )
-    if last_invoice:
-        seq = int(last_invoice.invoice_number.split("-")[-1]) + 1
-    else:
-        seq = 1
-    return f"{prefix}{seq:04d}"
+    """Public wrapper around ``_next_invoice_number``."""
+    return _next_invoice_number(db)
 
 
 def soft_delete_invoice(db: Session, invoice_id: uuid.UUID) -> bool:

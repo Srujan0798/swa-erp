@@ -50,6 +50,17 @@ def _reset_tables():
     # Build schema from models. NOTE: tests do NOT validate migrations —
     # tests/test_migrations.py does. This is intentional for speed.
     Base.metadata.create_all(bind=engine)
+    # Seed alembic_version so readyz doesn't fail (it's alembic-managed, not in Base.metadata)
+    from alembic import script
+    from alembic.config import Config
+    alembic_cfg = Config("src/backend/alembic.ini")
+    script_dir = script.ScriptDirectory.from_config(alembic_cfg)
+    head = script_dir.get_current_head()
+    with engine.connect() as conn:
+        conn.execute(text("CREATE TABLE IF NOT EXISTS alembic_version (version_num VARCHAR(32) NOT NULL PRIMARY KEY)"))
+        conn.execute(text(f"DELETE FROM alembic_version"))
+        conn.execute(text(f"INSERT INTO alembic_version (version_num) VALUES ('{head}')"))
+        conn.commit()
 
 
 @pytest.fixture(scope="session", autouse=True)

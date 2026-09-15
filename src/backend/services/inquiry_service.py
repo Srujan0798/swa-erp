@@ -153,7 +153,13 @@ def convert_inquiry(
     req: InquiryConvertRequest,
     actor_id: uuid.UUID,
 ) -> dict[str, Any]:
-    inquiry = get_inquiry_by_id(db, inquiry_id)
+    # Lock the inquiry row so concurrent conversions cannot race.
+    inquiry = (
+        db.query(Inquiry)
+        .filter(Inquiry.id == inquiry_id, Inquiry.deleted_at.is_(None))
+        .with_for_update()
+        .first()
+    )
     if not inquiry:
         raise InquiryConversionError(404, {"detail": "Inquiry not found"})
     if inquiry.status == "Converted":

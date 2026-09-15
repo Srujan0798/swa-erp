@@ -23,19 +23,26 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(user_id: uuid.UUID | str, role: str | None = None) -> str:
+def create_access_token(
+    user_id: uuid.UUID | str,
+    role: str | None = None,
+    token_version: int | None = None,
+) -> str:
     if isinstance(user_id, dict):
         payload_in = user_id
         user_id = uuid.UUID(payload_in["sub"]) if "sub" in payload_in else uuid.uuid4()
         role = role or payload_in.get("role", "viewer")
+        token_version = payload_in.get("token_version", token_version)
     now = datetime.now(UTC)
-    payload = {
+    payload: dict[str, Any] = {
         "sub": str(user_id),
         "role": role,
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=settings.JWT_ACCESS_TTL_MIN)).timestamp()),
         "type": "access",
     }
+    if token_version is not None:
+        payload["v"] = int(token_version)
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
