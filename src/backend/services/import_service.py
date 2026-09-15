@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import os
+import structlog
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
@@ -22,6 +23,8 @@ from src.backend.models import (
     Token,
     User,
 )
+
+logger = structlog.get_logger(__name__)
 
 # When False, import will not create stub clients/projects (e.g. SWA-SYS-UNLINKED).
 # Override per call via import_sheet(allow_stubs=...) or env IMPORT_ALLOW_STUBS=1|true|yes.
@@ -513,6 +516,13 @@ def _import_clients(s: Session, rows: list[dict], result: ImportResult) -> None:
                 s.add(client)
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.clients.row_failed",
+                row=i,
+                code=_txt(d.get("Client ID")) or "",
+                name=_txt(d.get("Client Name")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -552,6 +562,13 @@ def _import_inquiries(s: Session, rows: list[dict], result: ImportResult) -> Non
                 s.add(Inquiry(reference_id=reference_id, **values))
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.inquiries.row_failed",
+                row=i,
+                reference_id=_txt(d.get("Inquiry ID")) or "",
+                client_name=_txt(d.get("Client Name")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -602,6 +619,13 @@ def _import_agreements(s: Session, rows: list[dict], result: ImportResult) -> No
                 s.add(ServiceAgreement(reference_id=reference_id, **values))
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.agreements.row_failed",
+                row=i,
+                reference_id=_txt(d.get("Agreement ID")) or "",
+                client_name=_txt(d.get("Client Name")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -652,6 +676,13 @@ def _import_tokens(s: Session, rows: list[dict], result: ImportResult) -> None:
                 s.add(Token(reference_id=reference_id, **values))
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.tokens.row_failed",
+                row=i,
+                reference_id=_txt(d.get("Token ID")) or "",
+                agreement_id=_txt(d.get("Agreement ID")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -712,6 +743,13 @@ def _import_document_references(s: Session, rows: list[dict], result: ImportResu
                 s.add(DocumentReference(reference_id=reference_id, **values))
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.documents.row_failed",
+                row=i,
+                reference_id=_txt(_record_get(d, "Doc Ref No", "DRN")) or "",
+                associated=_txt(_record_get(d, "Associated Project/Token ID", "Associated Project ID")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -756,6 +794,13 @@ def _import_projects(s: Session, rows: list[dict], result: ImportResult) -> None
                 s.add(Project(code=code, **values))
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.projects.row_failed",
+                row=i,
+                code=_txt(d.get("Project ID")) or "",
+                client_id=_txt(d.get("Client ID")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -843,6 +888,15 @@ def _import_time_logs(s: Session, rows: list[dict], result: ImportResult) -> Non
             )
             result.created += 1
         except Exception as e:
+            ref_val = _txt(d.get("Reference ID")) or ""
+            logger.error(
+                "import.timelogs.row_failed",
+                row=i,
+                reference_id=ref_val,
+                project_code=ref_val if _looks_like_swa_id(ref_val) else "",
+                employee=_txt(d.get("Employee Name")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -903,6 +957,12 @@ def _import_sustainability(s: Session, rows: list[dict], result: ImportResult) -
                 s.add(SustainabilityMetric(reference_id=reference_id, **values))
                 result.created += 1
         except Exception as e:
+            logger.error(
+                "import.sustainability.row_failed",
+                row=i,
+                reference_id=_txt(d.get("Reference ID")) or "",
+                error=str(e),
+            )
             result.add_error(i, str(e))
 
 
@@ -981,6 +1041,13 @@ def import_sheet(
     result = ImportResult(sheet_type=sheet_type)
     stubs = _env_allow_stubs() if allow_stubs is None else bool(allow_stubs)
     token = _allow_stubs.set(stubs)
+    logger.info(
+        "import.sheet_started",
+        sheet_type=sheet_type,
+        file_path=file_path,
+        allow_stubs=stubs,
+        commit=commit,
+    )
     try:
         try:
             rows = read_rows(
@@ -994,6 +1061,12 @@ def import_sheet(
             alt = cfg.get("alt_signatures")
             if not alt:
                 raise
+            logger.warning(
+                "import.sheet_alt_signatures",
+                sheet_type=sheet_type,
+                original_signatures=cfg["signatures"],
+                alt_signatures=alt,
+            )
             rows = read_rows(
                 file_path,
                 alt,
@@ -1005,14 +1078,26 @@ def import_sheet(
         cfg["fn"](session, rows, result)
         if commit:
             session.commit()
+            logger.info("import.sheet_committed", sheet_type=sheet_type, total_rows=result.total_rows)
         else:
             session.rollback()
+            logger.info("import.sheet_rolled_back", sheet_type=sheet_type, total_rows=result.total_rows)
     except Exception as e:
         session.rollback()
         # Do not report inflated create/update counts after a full rollback
         result.created = 0
         result.updated = 0
         result.add_error(0, f"Fatal: {e}")
+        logger.error("import.sheet_fatal", sheet_type=sheet_type, error=str(e))
     finally:
         _allow_stubs.reset(token)
+    logger.info(
+        "import.sheet_completed",
+        sheet_type=sheet_type,
+        total_rows=result.total_rows,
+        created=result.created,
+        updated=result.updated,
+        skipped=result.skipped,
+        error_count=len(result.errors),
+    )
     return result
