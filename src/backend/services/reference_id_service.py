@@ -26,7 +26,7 @@ def generate_reference_id(db: Session, entity_type: str) -> str:
     result = db.execute(
         stmt, {"new_id": new_id, "entity_type": entity_type, "year": year}
     ).scalar_one()
-    db.commit()
+    db.flush()
     return f"SWA-{year}-{entity_type}-{result:03d}"
 
 

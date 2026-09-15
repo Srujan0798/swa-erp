@@ -45,6 +45,6 @@ def create_entry(
         user_agent=user_agent,
     )
     db.add(entry)
-    db.commit()
+    db.flush()
     db.refresh(entry)
     return entry

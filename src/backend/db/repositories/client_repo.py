@@ -69,7 +69,7 @@ def create(
         client_status=client_status,
     )
     db.add(client)
-    db.commit()
+    db.flush()
     db.refresh(client)
     return client
 
