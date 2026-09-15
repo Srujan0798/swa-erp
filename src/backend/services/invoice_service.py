@@ -1,4 +1,5 @@
 import uuid
+import structlog
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
@@ -6,6 +7,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.backend.core.config import settings
+
+logger = structlog.get_logger(__name__)
 from src.backend.db.repositories.invoice_repo import (
     create_invoice,
     generate_invoice_number,
@@ -111,6 +114,15 @@ def create_invoice_service(
     }
 
     invoice = create_invoice(db, invoice_data, items_data)
+    logger.info(
+        "invoice.created",
+        invoice_id=str(invoice.id),
+        invoice_number=invoice_number,
+        project_id=str(project_id),
+        subtotal=str(subtotal),
+        total=str(total),
+        user_id=str(user_id),
+    )
     return _invoice_to_read(invoice, db)
 
 
