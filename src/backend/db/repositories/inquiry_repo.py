@@ -48,7 +48,7 @@ def get_by_reference_id(db: Session, reference_id: str) -> Inquiry | None:
 def create(db: Session, data: dict[str, Any]) -> Inquiry:
     inquiry = Inquiry(**data)
     db.add(inquiry)
-    db.commit()
+    db.flush()
     db.refresh(inquiry)
     return inquiry
 

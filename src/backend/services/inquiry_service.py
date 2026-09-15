@@ -179,7 +179,7 @@ def convert_inquiry(
         else:
             client = _create_client_from_inquiry(db, inquiry, req, actor_id)
             client.first_inquiry_id = inquiry.id
-            db.commit()
+            db.flush()
             db.refresh(client)
 
     project = _create_project_from_inquiry(db, client, inquiry, req, actor_id)
@@ -187,7 +187,7 @@ def convert_inquiry(
     inquiry.status = "Converted"
     inquiry.converted_client_id = client.id
     inquiry.converted_project_id = project.id
-    db.commit()
+    db.flush()
     db.refresh(inquiry)
 
     audit_repo.create_entry(
@@ -236,7 +236,7 @@ def _create_client_from_inquiry(
     )
     if req.client_industry:
         client.industry = req.client_industry
-        db.commit()
+        db.flush()
         db.refresh(client)
     audit_repo.create_entry(
         db,

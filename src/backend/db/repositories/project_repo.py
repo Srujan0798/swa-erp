@@ -71,7 +71,7 @@ def _get_by_id_locked(db: Session, project_id: uuid.UUID) -> Project | None:
 def create_project(db: Session, data: dict[str, Any]) -> Project:
     project = Project(**data)
     db.add(project)
-    db.commit()
+    db.flush()
     db.refresh(project)
     return project
 
