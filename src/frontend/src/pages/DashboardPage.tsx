@@ -5,6 +5,8 @@ import { RecentProjects } from "@/components/dashboard/RecentProjects";
 import { RecentClients } from "@/components/dashboard/RecentClients";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import {
   ArrowRight,
@@ -15,7 +17,6 @@ import {
   FileText,
   FolderKanban,
   Inbox,
-  AlertCircle,
 } from "lucide-react";
 
 const FLOW = [
@@ -106,6 +107,26 @@ export function DashboardPage() {
     queryKey: ["dash-time"],
     queryFn: () => api.listTimeEntries({ page: 1, page_size: 1 }),
   });
+
+  const loadingByKey = {
+    inq: inq.isLoading,
+    cli: cli.isLoading,
+    sa: sa.isLoading,
+    tkn: tkn.isLoading,
+    drn: drn.isLoading,
+    prj: prj.isLoading,
+    time: time.isLoading,
+  };
+
+  const errorByKey = {
+    inq: inq.isError,
+    cli: cli.isError,
+    sa: sa.isError,
+    tkn: tkn.isError,
+    drn: drn.isError,
+    prj: prj.isError,
+    time: time.isError,
+  };
 
   const totals = {
     inq: inq.data?.total ?? 0,
@@ -199,25 +220,38 @@ export function DashboardPage() {
           Core business chain (Excel sheets)
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {FLOW.map((f) => (
-            <Link key={f.step} to={f.to}>
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                      {f.step}
-                    </span>
-                    <CardTitle className="text-sm font-semibold">{f.title}</CardTitle>
-                  </div>
-                  <f.icon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">{totals[f.key]}</div>
-                  <p className="text-xs text-muted-foreground">{f.desc}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          {FLOW.map((f) => {
+            const loading = loadingByKey[f.key];
+            const errored = errorByKey[f.key];
+            return (
+              <Link key={f.step} to={f.to}>
+                <Card className="h-full transition-shadow hover:shadow-md">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                        {f.step}
+                      </span>
+                      <CardTitle className="text-sm font-semibold">{f.title}</CardTitle>
+                    </div>
+                    <f.icon className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <Skeleton className="h-8 w-16" />
+                    ) : errored ? (
+                      <div className="flex items-center gap-1 text-xs text-destructive">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        Error
+                      </div>
+                    ) : (
+                      <div className="text-2xl font-bold tabular-nums">{totals[f.key]}</div>
+                    )}
+                    <p className="text-xs text-muted-foreground">{f.desc}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       </div>
 

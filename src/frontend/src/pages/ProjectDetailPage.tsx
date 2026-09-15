@@ -3,7 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { ArrowLeft, Plus } from "lucide-react";
 import { ProjectDetail } from "@/components/projects/ProjectDetail";
 import {
@@ -38,7 +40,13 @@ export function ProjectDetailPage(): ReactElement | null {
   const write = canWrite(user);
   const commercial = canManageCommercial(user);
 
-  const { data: project } = useQuery({
+  const {
+    data: project,
+    isLoading: projectLoading,
+    isError: projectError,
+    error: projectErr,
+    refetch: refetchProject,
+  } = useQuery({
     queryKey: ["project", id],
     queryFn: () => api.getProject(id!),
     enabled: !!id,
@@ -75,6 +83,19 @@ export function ProjectDetailPage(): ReactElement | null {
           </Link>
         </Button>
       </div>
+
+      {projectLoading ? (
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+      ) : projectError ? (
+        <QueryErrorBanner
+          message="Failed to load project"
+          error={projectErr}
+          onRetry={() => void refetchProject()}
+        />
+      ) : null}
 
       <ProjectQuickLinks
         projectId={id}

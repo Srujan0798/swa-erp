@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { FileBrowser } from "@/components/documents/FileBrowser";
 
@@ -30,6 +31,7 @@ export function DocumentsPage(): ReactElement {
 
   const {
     data: projectsData,
+    isLoading: projectsLoading,
     isError: projectsError,
     error: projectsErr,
     refetch: refetchProjects,
@@ -63,7 +65,9 @@ export function DocumentsPage(): ReactElement {
           <CardTitle className="text-sm">Select project</CardTitle>
         </CardHeader>
         <CardContent>
-          {projects.length === 0 ? (
+          {projectsLoading ? (
+            <Skeleton className="h-10 w-full max-w-md" />
+          ) : projects.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No projects yet. Import Excel or create one under{" "}
               <Link className="underline" to="/projects">
