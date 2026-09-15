@@ -25,7 +25,7 @@ from src.backend.models.client import Client
 from src.backend.models.project import Project
 from src.backend.models.user import User
 
-TEST_DATABASE_URL = "postgresql://swa:swa@localhost:5432/swa_erp_test"
+TEST_DATABASE_URL = "postgresql://swa:***@localhost:5432/swa_erp_test"
 
 engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True, future=True)
 TestingSessionLocal = sessionmaker(
@@ -33,21 +33,8 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-def _stamp_alembic_head() -> None:
-    """Mark test DB as at Alembic head so /readyz migrations check passes.
-
-    Tests build schema via create_all (not alembic upgrade), so without a stamp
-    readyz correctly reports migrations pending (current=None) and returns 503.
-    """
-    from alembic.config import Config
-    from alembic import command
-
-    cfg = Config("src/backend/alembic.ini")
-    cfg.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
-    command.stamp(cfg, "head")
-
-
 def _reset_tables():
+    """Clear all tables and rebuild schema via create_all."""
     with engine.connect() as conn:
         result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
         existing = {r[0] for r in result}
@@ -60,8 +47,9 @@ def _reset_tables():
                 for t in tables:
                     conn.execute(text(f"DROP TABLE IF EXISTS {t} CASCADE"))
         conn.commit()
+    # Build schema from models. NOTE: tests do NOT validate migrations —
+    # tests/test_migrations.py does. This is intentional for speed.
     Base.metadata.create_all(bind=engine)
-    _stamp_alembic_head()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -70,7 +58,6 @@ def setup_test_db():
         conn.execute(text("DROP SCHEMA public CASCADE"))
         conn.execute(text("CREATE SCHEMA public"))
     Base.metadata.create_all(bind=engine)
-    _stamp_alembic_head()
     with engine.connect() as conn:
         result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
         created = [r[0] for r in result]
@@ -234,20 +221,6 @@ async def authed_pm_client(client_with_db, pm_user):
     token = r.json()["access_token"]
     client_with_db.headers["Authorization"] = f"Bearer {token}"
     return client_with_db
-
-
-@pytest.fixture(scope="function")
-def viewer_user(db_session):
-    u = User(
-        email="viewer@swa.co.in",
-        name="Viewer",
-        password_hash=hash_password("viewer123!"),
-        role="viewer",
-    )
-    db_session.add(u)
-    db_session.commit()
-    db_session.refresh(u)
-    return u
 
 
 @pytest.fixture(scope="function")

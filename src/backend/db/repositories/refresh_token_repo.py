@@ -50,3 +50,10 @@ def revoke_all_for_user(db: Session, user_id: uuid.UUID) -> None:
         RefreshToken.revoked_at.is_(None),
     ).update({RefreshToken.revoked_at: datetime.now(UTC)})
     db.commit()
+
+
+def revoke_single(db: Session, token_id: uuid.UUID) -> None:
+    db.query(RefreshToken).filter(RefreshToken.id == token_id).update(
+        {RefreshToken.revoked_at: datetime.now(UTC)}
+    )
+    db.commit()

@@ -180,19 +180,27 @@ def seed_checklist_items(
     return created
 
 
-def get_standards(db: Session) -> list[ComplianceStandard]:
-    return db.query(ComplianceStandard).order_by(ComplianceStandard.name).all()
+def get_standards(
+    db: Session, page: int = 1, page_size: int = 100
+) -> tuple[list[ComplianceStandard], int]:
+    query = db.query(ComplianceStandard)
+    total = query.count()
+    offset = (page - 1) * page_size
+    items = query.order_by(ComplianceStandard.name).offset(offset).limit(page_size).all()
+    return items, total
 
 
 def get_checklist_items_by_standard(
-    db: Session, standard_id: uuid.UUID
-) -> list[ComplianceChecklistItem]:
-    return (
+    db: Session, standard_id: uuid.UUID, page: int = 1, page_size: int = 100
+) -> tuple[list[ComplianceChecklistItem], int]:
+    query = (
         db.query(ComplianceChecklistItem)
         .filter(ComplianceChecklistItem.standard_id == standard_id)
-        .order_by(ComplianceChecklistItem.category)
-        .all()
     )
+    total = query.count()
+    offset = (page - 1) * page_size
+    items = query.order_by(ComplianceChecklistItem.category).offset(offset).limit(page_size).all()
+    return items, total
 
 
 def get_checklist_item_by_id(
@@ -243,7 +251,7 @@ def create_project_compliance_item(
 def bulk_create_project_items(
     db: Session, project_id: uuid.UUID, standard_id: uuid.UUID
 ) -> list[ProjectComplianceItem]:
-    items = get_checklist_items_by_standard(db, standard_id)
+    items, _ = get_checklist_items_by_standard(db, standard_id)
     existing = {
         pci.checklist_item_id
         for pci in db.query(ProjectComplianceItem)

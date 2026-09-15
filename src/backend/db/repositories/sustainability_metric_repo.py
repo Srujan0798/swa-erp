@@ -42,12 +42,19 @@ def get_metric(db: Session, metric_id: uuid.UUID) -> SustainabilityMetric | None
 
 
 def list_metrics(
-    db: Session, project_id: uuid.UUID, reference_id: str | None = None
-) -> list[SustainabilityMetric]:
+    db: Session,
+    project_id: uuid.UUID,
+    reference_id: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> tuple[list[SustainabilityMetric], int]:
     query = db.query(SustainabilityMetric).filter(SustainabilityMetric.project_id == project_id)
     if reference_id:
         query = query.filter(SustainabilityMetric.reference_id == reference_id)
-    return query.order_by(desc(SustainabilityMetric.recorded_date)).all()
+    total = query.count()
+    offset = (page - 1) * page_size
+    items = query.order_by(desc(SustainabilityMetric.recorded_date)).offset(offset).limit(page_size).all()
+    return items, total
 
 
 def update_metric(db: Session, metric_id: uuid.UUID, **kwargs) -> SustainabilityMetric | None:
