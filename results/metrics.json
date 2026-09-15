@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-09-15T11:11:52Z",
+  "git_sha": "6a80f4a80cc47568ae58026ca325e9c72dd7f231",
+  "backend": {
+    "measured": false,
+    "passed": null,
+    "failed": null,
+    "skipped": null
+  },
+  "frontend": {
+    "passed": 0,
+    "failed": 0,
+    "coverage": {
+      "statements": 0.0
+    }
+  },
+  "environmental_failures": [
+    "pytest tests/ timed out after 600s \u2014 backend counts not measured on this machine (env timeout)"
+  ]
+}
