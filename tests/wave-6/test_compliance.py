@@ -118,8 +118,9 @@ class TestInitializeCompliance:
         resp = client.get("/api/compliance/standards", headers=auth_headers)
         assert resp.status_code == 200
         standards = resp.json()
-        assert len(standards) == 4
-        names = {s["name"] for s in standards}
+        assert standards["total"] == 4
+        assert len(standards["items"]) == 4
+        names = {s["name"] for s in standards["items"]}
         assert names == {"NBC", "ECBC", "IGBC", "IS"}
 
     def test_initialize_idempotent(self, client, auth_headers, db_session):
@@ -128,7 +129,7 @@ class TestInitializeCompliance:
 
         resp = client.get("/api/compliance/standards", headers=auth_headers)
         assert resp.status_code == 200
-        assert len(resp.json()) == 4
+        assert resp.json()["total"] == 4
 
 
 class TestGetStandards:
@@ -136,7 +137,11 @@ class TestGetStandards:
         _seed_standards_direct(db_session)
         resp = client.get("/api/compliance/standards", headers=auth_headers)
         assert resp.status_code == 200
-        assert len(resp.json()) == 4
+        data = resp.json()
+        assert data["total"] == 4
+        assert len(data["items"]) == 4
+        assert data["page"] == 1
+        assert data["page_size"] == 20
 
 
 class TestGetChecklistItems:
@@ -145,8 +150,10 @@ class TestGetChecklistItems:
         std = db_session.query(ComplianceStandard).filter(ComplianceStandard.name == "NBC").first()
         resp = client.get(f"/api/compliance/standards/{std.id}/checklist", headers=auth_headers)
         assert resp.status_code == 200
-        items = resp.json()
+        data = resp.json()
+        items = data["items"]
         assert len(items) >= 5
+        assert data["total"] >= 5
         assert all(i["standard_id"] == str(std.id) for i in items)
 
 

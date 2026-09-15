@@ -42,7 +42,8 @@ async def test_list_sustainability_metrics_scoped_by_project(authed_pm_client, t
         f"/api/projects/{project_id}/sustainability/metrics"
     )
     assert r.status_code == 200, r.text
-    items = r.json()
+    data = r.json()
+    items = data["items"]
     assert len(items) >= 1
     assert all(i["project_id"] == project_id for i in items)
 

@@ -83,3 +83,17 @@ class ComplianceSummaryResponse(BaseModel):
     project_id: uuid.UUID
     standards: list[ComplianceDashboardResponse]
     overall_percentage: float
+
+
+class ComplianceStandardListResponse(BaseModel):
+    items: list[ComplianceStandardRead]
+    total: int
+    page: int
+    page_size: int
+
+
+class ComplianceChecklistItemListResponse(BaseModel):
+    items: list[ComplianceChecklistItemRead]
+    total: int
+    page: int
+    page_size: int

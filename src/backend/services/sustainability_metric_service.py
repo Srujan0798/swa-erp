@@ -35,10 +35,14 @@ def get_metric_service(db: Session, metric_id: uuid.UUID) -> dict[str, Any] | No
 
 
 def list_metrics_service(
-    db: Session, project_id: uuid.UUID, reference_id: str | None = None
-) -> list[dict[str, Any]]:
-    metrics = list_metrics(db, project_id, reference_id)
-    return [_to_dict(m) for m in metrics]
+    db: Session,
+    project_id: uuid.UUID,
+    reference_id: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> tuple[list[dict[str, Any]], int, int, int]:
+    metrics, total = list_metrics(db, project_id, reference_id, page=page, page_size=page_size)
+    return [_to_dict(m) for m in metrics], total, page, page_size
 
 
 def update_metric_service(

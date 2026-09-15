@@ -35,12 +35,18 @@ def initialize_compliance(db: Session) -> int:
     return total_items
 
 
-def get_standards_list(db: Session) -> list:
-    return get_standards(db)
+def get_standards_list(
+    db: Session, page: int = 1, page_size: int = 100
+) -> tuple[list, int, int, int]:
+    items, total = get_standards(db, page=page, page_size=page_size)
+    return items, total, page, page_size
 
 
-def get_checklist_items_list(db: Session, standard_id: uuid.UUID) -> list:
-    return get_checklist_items_by_standard(db, standard_id)
+def get_checklist_items_list(
+    db: Session, standard_id: uuid.UUID, page: int = 1, page_size: int = 100
+) -> tuple[list, int, int, int]:
+    items, total = get_checklist_items_by_standard(db, standard_id, page=page, page_size=page_size)
+    return items, total, page, page_size
 
 
 def create_project_compliance_item_service(

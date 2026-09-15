@@ -46,3 +46,10 @@ class SustainabilityMetricRead(BaseModel):
     notes: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class SustainabilityMetricListResponse(BaseModel):
+    items: list[SustainabilityMetricRead]
+    total: int
+    page: int
+    page_size: int

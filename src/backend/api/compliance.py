@@ -9,6 +9,8 @@ from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.compliance import (
     ComplianceChecklistItemRead,
+    ComplianceChecklistItemListResponse,
+    ComplianceStandardListResponse,
     ComplianceStandardRead,
     ComplianceSummaryResponse,
     ProjectComplianceItemRead,
@@ -42,21 +44,42 @@ def initialize(
     return {"message": "compliance initialized", "items_created": total}
 
 
-@router.get("/standards", response_model=list[ComplianceStandardRead])
+@router.get("/standards", response_model=ComplianceStandardListResponse)
 def list_standards(
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
-) -> list[ComplianceStandardRead]:
-    return get_standards_list(db)
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+) -> ComplianceStandardListResponse:
+    items, total, page, page_size = get_standards_list(db, page=page, page_size=page_size)
+    return ComplianceStandardListResponse(
+        items=[ComplianceStandardRead.model_validate(s) for s in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
-@router.get("/standards/{standard_id}/checklist", response_model=list[ComplianceChecklistItemRead])
+@router.get(
+    "/standards/{standard_id}/checklist",
+    response_model=ComplianceChecklistItemListResponse,
+)
 def list_checklist(
     standard_id: uuid.UUID,
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
-) -> list[ComplianceChecklistItemRead]:
-    return get_checklist_items_list(db, standard_id)
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+) -> ComplianceChecklistItemListResponse:
+    items, total, page, page_size = get_checklist_items_list(
+        db, standard_id, page=page, page_size=page_size
+    )
+    return ComplianceChecklistItemListResponse(
+        items=[ComplianceChecklistItemRead.model_validate(i) for i in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.patch("/items/{item_id}", response_model=ProjectComplianceItemRead)

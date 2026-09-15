@@ -9,6 +9,7 @@ from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.sustainability_metric import (
     SustainabilityMetricCreate,
+    SustainabilityMetricListResponse,
     SustainabilityMetricRead,
     SustainabilityMetricUpdate,
 )
@@ -39,15 +40,24 @@ def create_metric(
     return SustainabilityMetricRead(**result)
 
 
-@router.get("", response_model=list[SustainabilityMetricRead])
+@router.get("", response_model=SustainabilityMetricListResponse)
 def list_metrics(
     project_id: uuid.UUID,
     reference_id: str | None = Query(default=None),
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
-) -> list[SustainabilityMetricRead]:
-    results = list_metrics_service(db, project_id, reference_id)
-    return [SustainabilityMetricRead(**r) for r in results]
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+) -> SustainabilityMetricListResponse:
+    items, total, page, page_size = list_metrics_service(
+        db, project_id, reference_id, page=page, page_size=page_size
+    )
+    return SustainabilityMetricListResponse(
+        items=[SustainabilityMetricRead(**r) for r in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{metric_id}", response_model=SustainabilityMetricRead)
