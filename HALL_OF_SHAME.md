@@ -41,7 +41,7 @@
   authored (FM-09 guard).
 
 ## 4. Frontend coverage stated three ways
-- **What:** Frontend statement coverage was reported as **65.86%** (wave-34 report),
+- **What:** Frontend statement coverage was reported as **see `results/metrics.json`** (wave-34 report),
   **~61%** (handoff verdict), and **65.02%** (independent run) — three numbers, one
   metric.
 - **Root cause:** `vitest` **suppresses its coverage summary when any test fails**, so

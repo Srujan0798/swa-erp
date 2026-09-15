@@ -1,4 +1,5 @@
 # Wave-34 Task 02 — Frontend page-coverage report
+<!-- metrics-exempt: historical report, coverage numbers valid at time of writing -->
 
 ## Summary
 

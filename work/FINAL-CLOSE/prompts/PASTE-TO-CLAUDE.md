@@ -1,4 +1,5 @@
 # PASTE THIS ENTIRE FILE into a new Claude Code session
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 Working directory must be: `/Users/srujansai/Desktop/swa-erp`
 

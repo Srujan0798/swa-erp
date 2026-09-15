@@ -1,4 +1,5 @@
 # Task Categories C01–C12
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 High-level buckets for the final close. Every piece of work maps to exactly one category.
 

@@ -96,6 +96,7 @@ rows above are gitignored runtime/build directories: they appear only when the s
 - `tests/`
 - `uploads/`
 - `work/`
+- `results/`
 
 *Gitignored runtime/build output (created by `scripts/backup_db.sh`, `npm install`, and the
 running app respectively): `backups/`, `node_modules/`, `uploads/`. They are declared above

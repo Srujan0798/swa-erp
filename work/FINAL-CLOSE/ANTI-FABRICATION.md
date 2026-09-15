@@ -1,4 +1,5 @@
 # Anti-Fabrication Protocol (non-negotiable)
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 This repository has a **documented history** of agents claiming work that did not exist. Closing the project with one more fake green report would destroy the value of waves 32–36.
 

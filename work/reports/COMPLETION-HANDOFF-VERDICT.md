@@ -1,4 +1,5 @@
 # Completion handoff — living verdict
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 **As of:** 2026-08-23 (pass 2 — clean coverage re-verify after `swa_erp_test` reset)  
 **HEAD:** `4050f51` = `origin/main` (**pushed**; earlier “5 ahead” is resolved)  

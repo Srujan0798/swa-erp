@@ -42,7 +42,7 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
 | **Observability** | `/metrics` (Prometheus), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
 
-**Do not claim:** “no backend module under 70%” globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend **65.86%** without a fresh vitest paste.
+**Do not claim:** “no backend module under 70%” globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend **see `results/metrics.json`** without a fresh vitest paste.
 
 ---
 

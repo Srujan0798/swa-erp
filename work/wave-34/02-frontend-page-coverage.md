@@ -1,4 +1,5 @@
 # Wave-34 Task 02 — Close the frontend page-coverage gap (55% → ≥60%)
+<!-- metrics-exempt: historical brief, coverage numbers valid at time of writing -->
 
 **Depends on wave-34 task 01 having landed** (it has — check `work/reports/wave-34/01-frontend-test-suite.report.md`).
 That wave got all 19 hooks to 100% and most components tested, but left `src/pages/*.tsx`

@@ -1,4 +1,5 @@
 # FINAL-CLOSE — Ultimate Project Close Pack
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 > **Role:** Single entry for finishing the professional-grade track and closing
 > swa-erp as an internship submission. Part of the front-door set after

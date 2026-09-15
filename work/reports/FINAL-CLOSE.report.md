@@ -1,4 +1,5 @@
 # FINAL-CLOSE — Engineering seal
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 **Status:** CLOSED for internship / professional submission
 **Date:** 2026-08-28

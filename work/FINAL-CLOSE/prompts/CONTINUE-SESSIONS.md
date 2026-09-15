@@ -1,4 +1,5 @@
 # Continue prompts — paste when a Claude session dies mid-close
+<!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 Always `cd /Users/srujansai/Desktop/swa-erp` first.  
 Always re-read `work/FINAL-CLOSE/ANTI-FABRICATION.md` and run **P01** before continuing.

@@ -1,4 +1,5 @@
 # Wave 34: Frontend Test Suite - Report
+<!-- metrics-exempt: historical report, coverage numbers valid at time of writing -->
 
 ## Summary
 

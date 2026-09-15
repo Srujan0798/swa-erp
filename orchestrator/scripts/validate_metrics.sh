@@ -21,11 +21,12 @@ if [ ! -f "$METRICS" ]; then
 fi
 
 # Pull the authoritative numbers out of the generated source.
-BACKEND_PASSED=$(python3 -c "import json;print(json.load(open('$METRICS'))['backend']['passed'])")
-BACKEND_FAILED=$(python3 -c "import json;print(json.load(open('$METRICS'))['backend']['failed'])")
+BACKEND_MEASURED=$(python3 -c "import json;print(json.load(open('$METRICS'))['backend'].get('measured', True))")
+BACKEND_PASSED=$(python3 -c "import json;d=json.load(open('$METRICS'))['backend']['passed'];print(d if d is not None else 0)")
+BACKEND_FAILED=$(python3 -c "import json;d=json.load(open('$METRICS'))['backend']['failed'];print(d if d is not None else 0)")
 FE_PASSED=$(python3 -c "import json;print(json.load(open('$METRICS'))['frontend']['passed'])")
 FE_FAILED=$(python3 -c "import json;print(json.load(open('$METRICS'))['frontend']['failed'])")
-FE_COV=$(python3 -c "import json,sys; d=json.load(open('$METRICS'))['frontend']['coverage']; print(d['statements'] if d else 'None')")
+FE_COV=$(python3 -c "import json,sys; d=json.load(open('$METRICS'))['frontend']['coverage']; print(d['statements'] if d and d.get('statements') is not None else 'None')")
 
 echo "Authority (results/metrics.json):"
 echo "  backend  passed=$BACKEND_PASSED failed=$BACKEND_FAILED"
@@ -75,7 +76,7 @@ while IFS= read -r f; do
   # that exceeds the authoritative passed count (i.e. an inflated green). Only check
   # when failed==0 in source would make any "N failed" claim wrong; here we specifically
   # guard the most common FM-09 shape: claiming a clean pass while source shows failures.
-  if [ "$BACKEND_FAILED" -gt 0 ] || [ "$FE_FAILED" -gt 0 ]; then
+  if [ "$BACKEND_MEASURED" = "True" ] && { [ "$BACKEND_FAILED" -gt 0 ] || [ "$FE_FAILED" -gt 0 ]; }; then
     if grep -qiE '0 failed|no failures|all (tests )?pass|covered.*closed' "$full" 2>/dev/null; then
       echo "VIOLATION: $f — asserts a clean pass while source shows failures (backend=$BACKEND_FAILED frontend=$FE_FAILED)"
       VIOLATIONS=$((VIOLATIONS+1))

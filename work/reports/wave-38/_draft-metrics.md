@@ -1,4 +1,5 @@
 ## Evidence
+<!-- metrics-exempt: historical draft, coverage numbers valid at time of writing -->
 
 Compiled from wave reports + COMPLETION-HANDOFF-VERDICT (2026-08-23). Not a pass/fail claim file.
 

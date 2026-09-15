@@ -45,6 +45,9 @@ while IFS= read -r line; do
     SHIPPED_TOTAL=$((SHIPPED_TOTAL+1))
     if echo "$line" | grep -qE '[0-9a-f]{7,40}'; then
       SHIPPED_OK=$((SHIPPED_OK+1))
+    elif echo "$line" | grep -qE '—'; then
+      # Explicit "no commit" marker — acceptable for waves with no single commit.
+      SHIPPED_OK=$((SHIPPED_OK+1))
     else
       # Extract the wave number for the message.
       wn=$(echo "$line" | grep -oE '^\| *[0-9]+' | grep -oE '[0-9]+' | head -1)

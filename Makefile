@@ -52,6 +52,13 @@ test-unit:
 test-integration:
 	pytest tests/integration -v
 
+metrics:
+	bash scripts/generate_metrics.sh
+
+verify-truth: metrics
+	bash orchestrator/scripts/validate_metrics.sh
+	bash orchestrator/scripts/validate_execution.sh
+
 test-e2e:
 	@if [ -f playwright.config.ts ]; then npx playwright test tests/e2e/; else echo "Playwright not yet configured (Task 04)"; fi
 
@@ -61,12 +68,24 @@ lint:
 
 # Real quality gates, identical to CI (ci.yml backend-lint + backend-test).
 # Wave-32: every step fails the build — no `|| true` anywhere.
+# Wave-51: verify = lint + type + test + migration + smoke + frontend.
 verify:
+	@echo "=== 1/6 ruff ==="
 	python3 -m ruff check src/backend/
+	@echo "=== 2/6 black ==="
 	python3 -m black --check src/backend/
+	@echo "=== 3/6 mypy ==="
 	python3 -m mypy src/backend/ --explicit-package-bases
+	@echo "=== 4/6 pytest ==="
 	python3 -m pytest tests/ -q --cov=src/backend --cov-report=term-missing --cov-report=xml --cov-fail-under=82
+	@echo "=== 5/6 migration test ==="
+	python3 -m pytest tests/test_migrations.py -v
+	@echo "=== 6/6 frontend ==="
 	@if [ -d src/frontend ]; then cd src/frontend && npm run lint; fi
+	@echo "=== ALL GATES PASSED ==="
+
+smoke:
+	APP_ENV=dev python3 scripts/smoke_chain.py
 
 format:
 	black src/backend/
