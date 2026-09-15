@@ -1,10 +1,13 @@
 import uuid
+import structlog
 from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories import audit_repo
+
+logger = structlog.get_logger(__name__)
 from src.backend.db.repositories.client_repo import create as create_client
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
 from src.backend.db.repositories.inquiry_repo import create as create_inquiry
@@ -156,58 +159,89 @@ def convert_inquiry(
     if inquiry.status == "Converted":
         raise InquiryConversionError(409, {"detail": "Inquiry already converted"})
 
-    client: Client | None = None
-    if req.client_id is not None:
-        client = get_client_by_id(db, req.client_id)
-        if not client:
-            raise InquiryConversionError(404, {"detail": "Specified client not found"})
-    else:
-        candidates = _find_clients_exact(db, inquiry.client_name)
-        if len(candidates) == 1:
-            client = candidates[0]
-        elif len(candidates) > 1:
-            raise InquiryConversionError(
-                300,
-                {
-                    "detail": "Ambiguous client match",
-                    "inquiry_client_name": inquiry.client_name,
-                    "candidates": [
-                        {"id": str(c.id), "name": c.name, "code": c.code} for c in candidates
-                    ],
-                },
+    try:
+        client: Client | None = None
+        if req.client_id is not None:
+            client = get_client_by_id(db, req.client_id)
+            if not client:
+                raise InquiryConversionError(404, {"detail": "Specified client not found"})
+            logger.info(
+                "inquiry.convert.client_reused",
+                inquiry_id=str(inquiry_id),
+                client_id=str(req.client_id),
+                actor_id=str(actor_id),
             )
         else:
-            client = _create_client_from_inquiry(db, inquiry, req, actor_id)
-            client.first_inquiry_id = inquiry.id
-            db.flush()
-            db.refresh(client)
+            candidates = _find_clients_exact(db, inquiry.client_name)
+            if len(candidates) == 1:
+                client = candidates[0]
+            elif len(candidates) > 1:
+                raise InquiryConversionError(
+                    300,
+                    {
+                        "detail": "Ambiguous client match",
+                        "inquiry_client_name": inquiry.client_name,
+                        "candidates": [
+                            {"id": str(c.id), "name": c.name, "code": c.code} for c in candidates
+                        ],
+                    },
+                )
+            else:
+                client = _create_client_from_inquiry(db, inquiry, req, actor_id)
+                client.first_inquiry_id = inquiry.id
+                db.flush()
+                db.refresh(client)
+                logger.info(
+                    "inquiry.convert.new_client_created",
+                    inquiry_id=str(inquiry_id),
+                    client_id=str(client.id),
+                    client_code=client.code,
+                    actor_id=str(actor_id),
+                )
 
-    project = _create_project_from_inquiry(db, client, inquiry, req, actor_id)
+        project = _create_project_from_inquiry(db, client, inquiry, req, actor_id)
+        logger.info(
+            "inquiry.convert.project_created",
+            inquiry_id=str(inquiry_id),
+            project_code=str(project.code),
+            client_id=str(client.id),
+        )
 
-    inquiry.status = "Converted"
-    inquiry.converted_client_id = client.id
-    inquiry.converted_project_id = project.id
-    db.flush()
-    db.refresh(inquiry)
+        inquiry.status = "Converted"
+        inquiry.converted_client_id = client.id
+        inquiry.converted_project_id = project.id
+        db.flush()
+        db.refresh(inquiry)
 
-    audit_repo.create_entry(
-        db,
-        action="inquiry.convert",
-        entity_type="inquiry",
-        entity_id=inquiry.id,
-        user_id=actor_id,
-        after_json={
-            "inquiry_id": str(inquiry.id),
-            "client_id": str(client.id),
-            "project_id": str(project.id),
-        },
-    )
+        audit_repo.create_entry(
+            db,
+            action="inquiry.convert",
+            entity_type="inquiry",
+            entity_id=inquiry.id,
+            user_id=actor_id,
+            after_json={
+                "inquiry_id": str(inquiry.id),
+                "client_id": str(client.id),
+                "project_id": str(project.id),
+            },
+        )
 
-    return {
-        "inquiry": inquiry,
-        "client": client,
-        "project": project,
-    }
+        db.commit()
+
+        return {
+            "inquiry": inquiry,
+            "client": client,
+            "project": project,
+        }
+    except Exception as e:
+        logger.error(
+            "inquiry.convert_failed",
+            inquiry_id=str(inquiry_id),
+            actor_id=str(actor_id),
+            error=str(e),
+        )
+        db.rollback()
+        raise
 
 
 def _create_client_from_inquiry(
