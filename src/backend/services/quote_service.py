@@ -1,4 +1,5 @@
 import uuid
+import structlog
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
@@ -6,6 +7,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.backend.core.quote_workflow import can_transition, get_allowed_transitions
+
+logger = structlog.get_logger(__name__)
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.boq_repo import get_by_id as get_boq_by_id
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
@@ -137,6 +140,14 @@ def _transition(
         after_json={"status": to_status},
     )
 
+    logger.info(
+        "quote.transitioned",
+        quote_id=str(quote_id),
+        from_status=before_status,
+        to_status=to_status,
+        actor_id=str(actor_id),
+    )
+
     return _quote_to_enriched_dict(updated, db)
 
 
@@ -212,6 +223,17 @@ def generate_quote(
     }
 
     quote = create_quote(db, quote_data, items_data)
+
+    logger.info(
+        "quote.generated",
+        quote_id=str(quote.id),
+        project_id=str(project_id),
+        boq_id=str(boq_id),
+        total_amount=str(total_amount),
+        markup_percent=str(markup_percent),
+        tax_percent=str(tax_percent),
+        created_by=str(created_by),
+    )
 
     _record_event(
         db,
