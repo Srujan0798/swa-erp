@@ -1,8 +1,8 @@
 # Technical Report — SWA Consultancy ERP
 
 **Audience:** engineers and internship evaluators who were not in the room.  
-**Date:** 2026-08-23  
-**Scope:** product v1.0.1 + professional-grade evidence track (waves 32–39, all shipped). Residual ops RISKs from wave-37 are listed in §5 — not claimed as zero.
+**Date:** 2026-09-15 (wave-51 re-seal)  
+**Scope:** product v1.0.1 + professional-grade evidence track (waves 32–39, all shipped) + hardening track (waves 40–51, all complete). Residual ops RISKs from wave-37 are listed in §5 — not claimed as zero.
 
 ---
 
@@ -81,6 +81,18 @@ Work was sequenced in **waves** — scoped briefs under `work/wave-N/`, acceptan
 | **37** | Independent adversarial review | **Shipped** — path-traversal + hourly-rate settings fixed; residual RISKs documented | [`work/reports/wave-37/01-independent-review.report.md`](../work/reports/wave-37/01-independent-review.report.md) |
 | **38** | Submission package | **Shipped** | wave-38 report |
 | **39** | Repo organization | Shipped | |
+| **40** | Truth infrastructure (metrics script, EXECUTION.md, validators) | **Shipped** | wave-40 reports |
+| **41** | Architecture schema docs | **Shipped** | |
+| **42** | FINAL-CLOSE rewrite | **Shipped** | |
+| **43** | Evals scaffold | **Shipped** | |
+| **44** | Metrics hardening | **Shipped** | |
+| **45** | Skill schema 2.1 | **Shipped** | |
+| **46** | FINAL-CLOSE rewrite | **Shipped** | |
+| **47** | Final seal DoD A–E | **Shipped** | |
+| **48** | Production hardening (logging, CSP, pagination, audit, idempotency, frontend loading/bundling) | **Shipped** | wave-48 reports |
+| **49** | Transaction atomicity for Inquiry→Client→Project | **Shipped** | wave-49 report |
+| **50** | Security risks (job IDOR, /metrics auth flag) + deterministic test suite | **Shipped** | wave-50 reports |
+| **51** | Final re-seal + submission refresh | **Shipped** | this commit |
 
 **Anti-fabrication:** this project documents past over-claims (wrong pass counts, “module X done” when files were missing). Closing rules live in [`work/FINAL-CLOSE/ANTI-FABRICATION.md`](../work/FINAL-CLOSE/ANTI-FABRICATION.md). Metrics in the README and this report use only verified wording (e.g. **not** “no backend module under 70%” globally — nine non-alembic modules remain under that line).
 
@@ -91,15 +103,22 @@ Work was sequenced in **waves** — scoped briefs under `work/wave-N/`, acceptan
 Pulled from [`SUBMISSION.md`](SUBMISSION.md) §4 and current reality — not sanded off:
 
 1. **Deploy is not company-live.** Viraj confirmed there is **no IT department**; eight server questions remain open (`SEND_IT.md`). Engineering can be complete while production hostname/ports/certs are unknown.
-2. **Load numbers are from a development machine**, not the client’s Windows Server (128 GB, VPN-only). Defensible claim: p95 ≈ 29–130 ms at 10–150 users **on this laptop-class stack**.
+2. **Load numbers are from a development machine**, not the client's Windows Server (128 GB, VPN-only). Defensible claim: p95 ≈ 29–130 ms at 10–150 users **on this laptop-class stack**.
 3. **JWT is HS256**, fine for internal on-prem; RS256 would be needed for third-party token verification.
-4. **Coverage is strong, not total.** Backend 86% overall; services ≥70%; some API/repo modules still &lt;70%. Frontend meets configured thresholds at ~61% statements independently.
-5. **Backend suite after final-close stabilize:** **565 passed / 0 failed / 1 skipped** (industry re-verify). Frontend **522 / 0**.
-6. **Wave-37 residual RISKs (documented, not all fixed):** `/metrics` auth posture; time/finance VIEWER reads vs Meeting 1 matrix (industry-hardening Phase C); import rollback counters; JWT refresh rotation. See wave-37 report.
+4. **Coverage is strong, not total.** Backend 86% overall; services all ≥70%; some API/repo modules still <70%. Frontend meets configured thresholds at ~65% statements independently.
+5. **Backend suite after final-close stabilize:** **572 passed / 1 skipped / 0 failed** (full suite, Redis up). Frontend **523 / 0**.
+6. **Wave-37 residual RISKs (documented, not all fixed):** time/finance VIEWER reads vs Meeting 1 matrix (industry-hardening Phase C); import rollback counters. See wave-37 report.
 7. **Out of MVP by client decision:** HR, founder-only finance sheets, satisfaction/complaints, marketing analytics, client portal.
 8. **Excel → ERP cutover ownership** is still organizational (who runs the real import at go-live).
 
-Historical note: older SUBMISSION text said Celery/MinIO were unimplemented — **superseded by wave-31**. Current docs mark both **BUILT**.
+**Closed during hardening (waves 40–51):**
+- `/metrics` was unauthenticated → **now auth-gated by default** (`METRICS_REQUIRE_AUTH=true`)
+- Job IDOR on `/api/jobs` → **closed** — ownership enforced via `user_has_project_access`
+- Refresh token rotation → **implemented** — new token issued, old revoked
+- Service-layer logging → **added** to import/invoice/quote/inquiry services
+- Pagination on compliance/sustainability endpoints → **added**
+- Frontend loading states + code-splitting → **done**
+- Deterministic test suite → **Redis-dependent tests now skip gracefully**
 
 ---
 

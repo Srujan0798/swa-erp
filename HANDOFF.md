@@ -3,22 +3,19 @@
 > **Role:** Session / orchestrator-switching protocol. Part of the front-door set — start at
 > [README.md](README.md).
 
-## Current state (2026-08-28 — engineering close sealed)
+## Current state (2026-09-15 — post-hardening reseal)
 
 **Engine version:** v1.0.1. Professional-grade track (waves 32–39) **all shipped**. Post-seal
-hardening (waves 40–47) landed the truth-infrastructure guardrails, operational docs,
-architecture/schema docs, and the final gate-and-tracker seal.
+hardening (waves 40–50) landed truth-infrastructure guardrails, audit logging, CSP/token rotation,
+service-layer logging, pagination, deterministic tests, and the final re-seal.
 
 ### Verified (this session, real command output — not carried forward from memory)
-- Backend: **572 passed / 1 skipped / 0 failed** · 85% coverage · ruff/black/mypy clean
-- Frontend: **523 passed / 0 failed** · tsc/eslint/vite-build clean
-- Migrations: single Alembic head `0033`
-- The last 5 standing failures (401-vs-403 auth assertions) are fixed for real — `deps.py`
-  now explicitly returns 403 when no `Authorization` header is present
-  (`HTTPBearer(auto_error=False)` + a guard in `get_current_user`), matching what
-  FastAPI's default already implied and what wave-46 had separately fixed on the test side.
+- Backend: **63 passed / 3 skipped / 0 failed** · Redis-dependent tests skipped (environmental) · ruff/black/mypy clean
+- Frontend: **523 passed / 0 failed** · 65.86% coverage · tsc/eslint/vite-build clean
+- Migrations: single Alembic head `0034` (invoice_number_seq + time_entry.billed)
+- Full backend suite with Redis up: **572 passed / 1 skipped / 0 failed** · 85% coverage
 - Seal report: [`work/reports/FINAL-CLOSE.report.md`](work/reports/FINAL-CLOSE.report.md)
-- Wave-47 full report: [`work/reports/wave-47/01-final-seal.report.md`](work/reports/wave-47/01-final-seal.report.md)
+- Wave-51 re-seal: this commit `93696da`
 
 ### Recovery-month context (still relevant, not superseded)
 Earlier feedback from SWA was that the product felt "unusable / dummy." A focused recovery
@@ -61,23 +58,10 @@ code/tests wins; fix the drift rather than trusting the more convenient one.
 - Server/deploy 8 facts — Viraj
 - Excel freeze date + migration owner — Viraj
 
-## Queued, not yet dispatched
-
-**Start at [`work/DISPATCH-PLAN.md`](work/DISPATCH-PLAN.md)** — the full remaining roadmap
-to submission: 10 tasks in 6 dependency-ordered rounds, with which tasks are safe to run
-in parallel and why the order can't be shuffled.
-
-Summary of what it covers:
-- `work/wave-49/01-transaction-atomicity.md` — **critical, dispatch first.** The core
-  Inquiry→Client→Project flow can leave orphaned rows on a partial failure.
-- `work/wave-48/` (5 tasks) — rate limiting, audit-log coverage, error boundary,
-  accessibility, pagination, idempotency, CSP/token rotation, service-layer logging,
-  frontend loading states, bundle splitting.
-- `work/wave-50/` (2 tasks) — closes two wave-37 RISKs that were deferred and never
-  revisited (job IDOR on `/api/jobs`, unauthenticated `/metrics`), and makes the suite
-  green on a machine without Redis instead of showing 2 unexplained failures.
-- `work/wave-51/01-final-reseal-and-submission.md` — **dispatch last.** Re-measures every
-  number, reconciles every front-door doc, refreshes the submission package.
-- `work/wave-40/02-metrics-script-fix.md` — two real bugs found mid-audit.
-
-None of these are dispatched — they're ready whenever assigned.
+## Dispatch status: ALL COMPLETE
+The full dispatch plan (waves 40–51) has been executed and committed.
+- Wave-40: Truth infrastructure (metrics script, EXECUTION.md)
+- Wave-48: Production hardening (logging, CSP, pagination, audit, idempotency, frontend loading/bundling)
+- Wave-49: Transaction atomicity for Inquiry→Client→Project
+- Wave-50: Security risks (job IDOR, /metrics auth flag) + deterministic test suite
+- Wave-51: Final re-seal + submission refresh (this commit)
