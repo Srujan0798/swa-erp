@@ -94,7 +94,7 @@ async def test_login_rate_limit_triggers_on_6th_attempt(client_with_db, monkeypa
     broader suite has set DISABLE_AUTH_RATE_LIMIT=1.
     """
     if not _rate_limit_middleware_active():
-        monkeypatch.setenv("DISABLE_AUTH_RATE_LIMIT", "0")
+        monkeypatch.delenv("DISABLE_AUTH_RATE_LIMIT", raising=False)
     from src.backend.core import rate_limit as rl_mod
 
     auth_rate_limiter_inst = rl_mod._auth_limiter

@@ -1,16 +1,15 @@
+import uuid
+
 from celery.result import AsyncResult  # type: ignore[import-untyped]
 from fastapi import APIRouter, Depends, HTTPException, Response
-import uuid
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
 from src.backend.core.storage import get_storage
-from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.repositories.project_repo import user_has_project_access
-from src.backend.db.session import get_db
 from src.backend.models.user import User
-from src.backend.workers.celery_app import app
+from src.backend.workers.celery_app import app as celery_app
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
@@ -33,7 +32,7 @@ def get_job_status(
     job_id: str,
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
 ) -> dict:
-    result = AsyncResult(job_id, app=app)
+    result = AsyncResult(job_id, app=celery_app)
     response: dict = {"job_id": job_id, "status": result.state.lower()}
 
     if result.state == "PENDING":
@@ -52,7 +51,7 @@ def get_job_result(
     job_id: str,
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
 ) -> Response:
-    result = AsyncResult(job_id, app=app)
+    result = AsyncResult(job_id, app=celery_app)
     if result.state != "SUCCESS":
         raise HTTPException(
             status_code=404,

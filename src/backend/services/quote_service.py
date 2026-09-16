@@ -1,9 +1,9 @@
 import uuid
-import structlog
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.core.quote_workflow import can_transition, get_allowed_transitions

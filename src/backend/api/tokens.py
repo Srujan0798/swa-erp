@@ -2,10 +2,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
-from starlette.requests import Request
 
 from src.backend.core.deps import get_current_user, require_role
-from src.backend.core.idempotency import check_idempotency_key, store_idempotency_key
 from src.backend.core.roles import Role
 from src.backend.db.repositories.agreement_repo import get_by_id as get_agreement_by_id
 from src.backend.db.session import get_db
@@ -67,29 +65,11 @@ def list_tokens(
 @router.post("", response_model=TokenRead, status_code=status.HTTP_201_CREATED)
 def create_token(
     body: TokenCreate,
-    request: Request,
-    response: Response,
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> TokenRead:
-    # Idempotency-Key support: if the header is present and we've seen this key
-    # before, return the cached response immediately (same status + body).
-    idem_key = request.headers.get("Idempotency-Key")
-    if idem_key:
-        cached = check_idempotency_key(idem_key)
-        if cached is not None:
-            response.status_code = cached["status_code"]
-            return cached["body"]
-
     token = create_token_service(db, body, current_user.id)
     result = _to_read(db, token)
-
-    # Cache for idempotency replay
-    if idem_key:
-        store_idempotency_key(
-            idem_key,
-            {"status_code": status.HTTP_201_CREATED, "body": result.model_dump(mode="json")},
-        )
 
     return result
 

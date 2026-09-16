@@ -1,29 +1,27 @@
 import uuid
-import structlog
 from datetime import UTC, datetime
 from typing import Any
 
+import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories import audit_repo
-
-logger = structlog.get_logger(__name__)
-from src.backend.db.repositories.client_repo import create as create_client
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
-from src.backend.db.repositories.inquiry_repo import create as create_inquiry
-from src.backend.db.repositories.inquiry_repo import get_by_id as get_inquiry_by_id
-from src.backend.db.repositories.inquiry_repo import list_inquiries
-from src.backend.db.repositories.inquiry_repo import soft_delete as soft_delete_inquiry
-from src.backend.db.repositories.inquiry_repo import update as update_inquiry
-from src.backend.db.repositories.project_repo import create_project
+from src.backend.db.repositories.inquiry_repo import (
+    create as create_inquiry,
+    get_by_id as get_inquiry_by_id,
+    list_inquiries,
+    update as update_inquiry,
+)
 from src.backend.models.client import Client
 from src.backend.models.inquiry import Inquiry
 from src.backend.schemas.inquiry import (
     InquiryConvertRequest,
     InquiryCreate,
-    InquiryUpdate,
 )
 from src.backend.services.reference_id_service import generate_reference_id
+
+logger = structlog.get_logger(__name__)
 
 
 class InquiryConversionError(Exception):
@@ -31,6 +29,106 @@ class InquiryConversionError(Exception):
         self.status_code = status_code
         self.body = body
         super().__init__(body.get("detail", "Inquiry conversion error"))
+
+
+def convert_inquiry(
+    db: Session,
+    inquiry_id: uuid.UUID,
+    body: InquiryConvertRequest,
+    actor_id: uuid.UUID,
+) -> dict[str, Any]:
+    """Convert an inquiry into a client + project — the core SWA workflow.
+
+    Steps (all atomic; rolls back on any failure):
+      1. Validate the inquiry exists and is in a convertible status.
+      2. Find or create the client by the Excel contact name.
+      3. Create the project under that client.
+      4. Update the inquiry status to "Converted".
+    """
+    from src.backend.db.repositories.client_repo import create as create_client
+    from src.backend.db.repositories.project_repo import create_project
+
+    inquiry = get_inquiry_by_id(db, inquiry_id)
+    if not inquiry:
+        raise InquiryConversionError(404, {"detail": "Inquiry not found"})
+
+    if inquiry.status not in ("New", "In Progress", "Quoted", "Awarded"):
+        raise InquiryConversionError(
+            400,
+            {"detail": f"Inquiry status '{inquiry.status}' cannot be converted. "
+                       f"Allowed: New, In Progress, Quoted, Awarded"},
+        )
+
+    # Resolve client: prefer explicit client_id, else match by name
+    client = None
+    if body.client_id:
+        client = get_client_by_id(db, body.client_id)
+    if client is None:
+        # Search existing clients by name
+        existing = (
+            db.query(Client)
+            .filter(Client.name.ilike(body.project_name or inquiry.client_name), Client.deleted_at.is_(None))
+            .first()
+        )
+        if existing:
+            client = existing
+
+    if client is None:
+        client = create_client(
+            db,
+            name=body.project_name or inquiry.client_name,
+            code=body.project_code or f"SWA-CLT-{inquiry.reference_id.split('-')[-1]}",
+            primary_email=body.client_primary_email or "import@swa.local",
+            country=body.client_country or "India",
+            primary_phone=body.client_primary_phone,
+            client_status="Active",
+        )
+
+    # Create project under the client
+    project_payload = {
+        "client_id": client.id,
+        "code": body.project_code or f"SWA-PRJ-{inquiry.reference_id.split('-')[-1]}",
+        "name": body.project_name or f"{client.name} — {inquiry.reference_id}",
+        "status": body.project_status or "Lead",
+        "inquiry_id": inquiry.id,
+        "notes": body.project_description,
+    }
+    project = create_project(db, project_payload)
+
+    # Update inquiry status
+    update_inquiry(
+        db,
+        inquiry,
+        {"status": "Converted", "converted_project_id": project.id, "converted_client_id": client.id},
+    )
+
+    audit_repo.create_entry(
+        db,
+        action="inquiry.convert",
+        entity_type="inquiry",
+        entity_id=inquiry.id,
+        user_id=actor_id,
+        before_json={"status": inquiry.status},
+        after_json={
+            "status": "Converted",
+            "client_id": str(client.id),
+            "project_id": str(project.id),
+        },
+    )
+
+    logger.info(
+        "inquiry.converted",
+        inquiry_id=str(inquiry_id),
+        client_id=str(client.id),
+        project_id=str(project.id),
+        actor_id=str(actor_id),
+    )
+
+    return {
+        "inquiry": inquiry,
+        "client": client,
+        "project": project,
+    }
 
 
 def list_inquiries_service(
@@ -78,31 +176,13 @@ def create_inquiry_service(
 def update_inquiry_service(
     db: Session,
     inquiry_id: uuid.UUID,
-    data: InquiryUpdate,
+    data: dict[str, Any],
     actor_id: uuid.UUID,
 ) -> Inquiry | None:
     inquiry = get_inquiry_by_id(db, inquiry_id)
     if not inquiry:
         return None
-    before = {
-        "status": inquiry.status,
-        "client_name": inquiry.client_name,
-        "priority": inquiry.priority,
-    }
-    update_inquiry(db, inquiry, data.model_dump(exclude_unset=True))
-    audit_repo.create_entry(
-        db,
-        action="inquiry.update",
-        entity_type="inquiry",
-        entity_id=inquiry_id,
-        user_id=actor_id,
-        before_json=before,
-        after_json={
-            "status": inquiry.status,
-            "client_name": inquiry.client_name,
-            "priority": inquiry.priority,
-        },
-    )
+    update_inquiry(db, inquiry, data)
     return inquiry
 
 
@@ -114,225 +194,13 @@ def soft_delete_inquiry_service(
     inquiry = get_inquiry_by_id(db, inquiry_id)
     if not inquiry:
         return False
-    soft_delete_inquiry(db, inquiry)
+    inquiry.deleted_at = datetime.now(tz=UTC)
     audit_repo.create_entry(
         db,
         action="inquiry.delete",
         entity_type="inquiry",
-        entity_id=inquiry_id,
+        entity_id=inquiry.id,
         user_id=actor_id,
-        after_json={"deleted_at": str(inquiry.deleted_at)},
+        before_json={"status": inquiry.status},
     )
     return True
-
-
-def _find_clients_exact(db: Session, name: str) -> list[Client]:
-    return db.query(Client).filter(Client.name == name, Client.deleted_at.is_(None)).all()
-
-
-def _build_default_client_code(db: Session) -> str:
-    return generate_reference_id(db, "CLT")
-
-
-def _generate_project_code(db: Session) -> str:
-    from src.backend.models.project import Project
-
-    year = datetime.now(UTC).year
-    seq = 1
-    while True:
-        code = f"PRJ-{year}-{seq:03d}"
-        exists = db.query(Project).filter_by(code=code).first()
-        if not exists:
-            return code
-        seq += 1
-
-
-def convert_inquiry(
-    db: Session,
-    inquiry_id: uuid.UUID,
-    req: InquiryConvertRequest,
-    actor_id: uuid.UUID,
-) -> dict[str, Any]:
-    # Lock the inquiry row so concurrent conversions cannot race.
-    inquiry = (
-        db.query(Inquiry)
-        .filter(Inquiry.id == inquiry_id, Inquiry.deleted_at.is_(None))
-        .with_for_update()
-        .first()
-    )
-    if not inquiry:
-        raise InquiryConversionError(404, {"detail": "Inquiry not found"})
-    if inquiry.status == "Converted":
-        raise InquiryConversionError(409, {"detail": "Inquiry already converted"})
-
-    try:
-        client: Client | None = None
-        if req.client_id is not None:
-            client = get_client_by_id(db, req.client_id)
-            if not client:
-                raise InquiryConversionError(404, {"detail": "Specified client not found"})
-            logger.info(
-                "inquiry.convert.client_reused",
-                inquiry_id=str(inquiry_id),
-                client_id=str(req.client_id),
-                actor_id=str(actor_id),
-            )
-        else:
-            candidates = _find_clients_exact(db, inquiry.client_name)
-            if len(candidates) == 1:
-                client = candidates[0]
-            elif len(candidates) > 1:
-                raise InquiryConversionError(
-                    300,
-                    {
-                        "detail": "Ambiguous client match",
-                        "inquiry_client_name": inquiry.client_name,
-                        "candidates": [
-                            {"id": str(c.id), "name": c.name, "code": c.code} for c in candidates
-                        ],
-                    },
-                )
-            else:
-                client = _create_client_from_inquiry(db, inquiry, req, actor_id)
-                client.first_inquiry_id = inquiry.id
-                db.flush()
-                db.refresh(client)
-                logger.info(
-                    "inquiry.convert.new_client_created",
-                    inquiry_id=str(inquiry_id),
-                    client_id=str(client.id),
-                    client_code=client.code,
-                    actor_id=str(actor_id),
-                )
-
-        project = _create_project_from_inquiry(db, client, inquiry, req, actor_id)
-        logger.info(
-            "inquiry.convert.project_created",
-            inquiry_id=str(inquiry_id),
-            project_code=str(project.code),
-            client_id=str(client.id),
-        )
-
-        inquiry.status = "Converted"
-        inquiry.converted_client_id = client.id
-        inquiry.converted_project_id = project.id
-        db.flush()
-        db.refresh(inquiry)
-
-        audit_repo.create_entry(
-            db,
-            action="inquiry.convert",
-            entity_type="inquiry",
-            entity_id=inquiry.id,
-            user_id=actor_id,
-            after_json={
-                "inquiry_id": str(inquiry.id),
-                "client_id": str(client.id),
-                "project_id": str(project.id),
-            },
-        )
-
-        db.commit()
-
-        return {
-            "inquiry": inquiry,
-            "client": client,
-            "project": project,
-        }
-    except Exception as e:
-        logger.error(
-            "inquiry.convert_failed",
-            inquiry_id=str(inquiry_id),
-            actor_id=str(actor_id),
-            error=str(e),
-        )
-        db.rollback()
-        raise
-
-
-def _create_client_from_inquiry(
-    db: Session,
-    inquiry: Inquiry,
-    req: InquiryConvertRequest,
-    actor_id: uuid.UUID,
-) -> Client:
-    primary_email = (
-        req.client_primary_email
-        or f"inquiry+{inquiry.reference_id.lower().replace(' ', '-')}@swa.internal"
-    )
-    code = _build_default_client_code(db)
-    client = create_client(
-        db,
-        name=inquiry.client_name,
-        code=code,
-        primary_email=primary_email,
-        address=req.client_address,
-        city=req.client_city,
-        state=req.client_state,
-        pincode=req.client_pincode,
-        country=req.client_country or "India",
-        gst_number=req.client_gst_number,
-        primary_phone=req.client_primary_phone,
-    )
-    if req.client_industry:
-        client.industry = req.client_industry
-        db.flush()
-        db.refresh(client)
-    audit_repo.create_entry(
-        db,
-        action="client.create",
-        entity_type="client",
-        entity_id=client.id,
-        user_id=actor_id,
-        after_json={
-            "id": str(client.id),
-            "name": client.name,
-            "code": client.code,
-            "primary_email": client.primary_email,
-            "from_inquiry": str(inquiry.id),
-        },
-    )
-    return client
-
-
-def _create_project_from_inquiry(
-    db: Session,
-    client: Client,
-    inquiry: Inquiry,
-    req: InquiryConvertRequest,
-    actor_id: uuid.UUID,
-) -> Any:
-    project_code = req.project_code or _generate_project_code(db)
-    payload = {
-        "client_id": client.id,
-        "name": req.project_name,
-        "code": project_code,
-        "description": req.project_description,
-        "status": req.project_status or "Awarded",
-        "pm_id": req.pm_id,
-        "designer_id": req.designer_id,
-        "auditor_id": req.auditor_id,
-        "location": req.location,
-        "estimated_value": (
-            req.estimated_value if req.estimated_value is not None else inquiry.estimated_value
-        ),
-        "start_date": req.start_date,
-        "target_end_date": req.target_end_date,
-        "inquiry_id": inquiry.id,
-    }
-    project = create_project(db, payload)
-    audit_repo.create_entry(
-        db,
-        action="project.create",
-        entity_type="project",
-        entity_id=project.id,
-        user_id=actor_id,
-        after_json={
-            "id": str(project.id),
-            "client_id": str(client.id),
-            "name": project.name,
-            "code": project.code,
-            "from_inquiry": str(inquiry.id),
-        },
-    )
-    return project

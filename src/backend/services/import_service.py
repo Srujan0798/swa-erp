@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import datetime as dt
 import os
-import structlog
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 

@@ -8,8 +8,8 @@ from src.backend.core.roles import Role
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.compliance import (
-    ComplianceChecklistItemRead,
     ComplianceChecklistItemListResponse,
+    ComplianceChecklistItemRead,
     ComplianceStandardListResponse,
     ComplianceStandardRead,
     ComplianceSummaryResponse,

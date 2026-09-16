@@ -15,6 +15,7 @@ import os
 
 from src.backend.main import app
 from src.backend.core.errors import init_sentry, capture_exception, scrub_pii, get_sentry_initialized
+from tests.conftest import redis_available
 
 
 @pytest.fixture(scope="function")
@@ -97,6 +98,10 @@ class TestHealthEndpoints:
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
+    @pytest.mark.skipif(
+        not redis_available,
+        reason="requires a running Redis; /readyz reports 503 without it (environmental, not a defect)",
+    )
     async def test_readyz_returns_healthy_when_all_up(self, client):
         """Readiness probe should return 200 when all deps are healthy."""
         response = await client.get("/readyz")

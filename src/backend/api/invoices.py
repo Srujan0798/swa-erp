@@ -85,7 +85,7 @@ def list_invoices_endpoint(
     project_id: uuid.UUID,
     current_user: User = Depends(
         require_role(Role.PM)
-    ),  # noqa: B008  # Meeting: finance not VIEWER
+    ),  # Meeting: finance not VIEWER
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),

@@ -1,20 +1,13 @@
 import os
 
 # Disable the auth rate limiter for the test suite BEFORE the app is imported.
-# The limiter (src/backend/core/rate_limit.py, added in wave-18) allows
-# AUTH_RATE_LIMIT_PER_MIN (default 5) login/refresh calls per minute per client IP.
-# Every test shares one client IP, and most test modules log in far more than 5
-# times, so without this bypass the 6th+ login returns 429 with no body token and
-# every downstream fixture dies with `KeyError: 'access_token'`.
-# wave-18's own tests re-enable it per-test via monkeypatch.setenv(..., "0"),
-# which still works because rate_limit._rate_limit_disabled() reads os.environ at
-# request time, not import time.
 os.environ.setdefault("DISABLE_AUTH_RATE_LIMIT", "1")
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+import redis
 
 from src.backend.core.security import hash_password
 from src.backend.db.base import Base
@@ -27,56 +20,86 @@ from src.backend.models.user import User
 
 TEST_DATABASE_URL = "postgresql://swa:***@localhost:5432/swa_erp_test"
 
-engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True, future=True)
+engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True, future=True, pool_size=5)
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine, expire_on_commit=False
 )
 
 
-def _reset_tables():
-    """Clear all tables and rebuild schema via create_all."""
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
-        existing = {r[0] for r in result}
-        tables = [t for t in Base.metadata.tables.keys() if t in existing]
-        if tables:
-            try:
-                conn.execute(text(f"TRUNCATE TABLE {', '.join(tables)} RESTART IDENTITY CASCADE"))
-            except Exception:
-                conn.rollback()
-                for t in tables:
-                    conn.execute(text(f"DROP TABLE IF EXISTS {t} CASCADE"))
-        conn.commit()
-    # Build schema from models. NOTE: tests do NOT validate migrations —
-    # tests/test_migrations.py does. This is intentional for speed.
-    Base.metadata.create_all(bind=engine)
-    # Seed alembic_version so readyz doesn't fail (it's alembic-managed, not in Base.metadata)
+# Compute redis availability at import time for skipif conditions
+try:
+    _r = redis.Redis.from_url(
+        os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+        socket_connect_timeout=1,
+        socket_timeout=1,
+    )
+    _r.ping()
+    redis_available = True
+except Exception:
+    redis_available = False
+
+
+@pytest.fixture(scope="session")
+def redis_available_fixture() -> bool:
+    """Fixture for tests that need to check Redis availability at runtime."""
+    return redis_available
+
+
+def _alembic_head():
+    """Return current alembic head revision string."""
     from alembic import script
     from alembic.config import Config
-    alembic_cfg = Config("src/backend/alembic.ini")
-    script_dir = script.ScriptDirectory.from_config(alembic_cfg)
-    head = script_dir.get_current_head()
-    with engine.connect() as conn:
-        conn.execute(text("CREATE TABLE IF NOT EXISTS alembic_version (version_num VARCHAR(32) NOT NULL PRIMARY KEY)"))
-        conn.execute(text(f"DELETE FROM alembic_version"))
+    cfg = Config("src/backend/alembic.ini")
+    sd = script.ScriptDirectory.from_config(cfg)
+    return sd.get_current_head()
+
+
+def _seed_alembic_version(conn=None):
+    """Create alembic_version table and seed with current head (autocommit mode)."""
+    if conn is None:
+        with engine.connect() as conn:
+            conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+            head = _alembic_head()
+            conn.execute(
+                text("CREATE TABLE IF NOT EXISTS alembic_version "
+                     "(version_num VARCHAR(32) NOT NULL PRIMARY KEY)")
+            )
+            conn.execute(text("DELETE FROM alembic_version"))
+            conn.execute(text(f"INSERT INTO alembic_version (version_num) VALUES ('{head}')"))
+    else:
+        conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+        head = _alembic_head()
+        conn.execute(
+            text("CREATE TABLE IF NOT EXISTS alembic_version "
+                 "(version_num VARCHAR(32) NOT NULL PRIMARY KEY)")
+        )
+        conn.execute(text("DELETE FROM alembic_version"))
         conn.execute(text(f"INSERT INTO alembic_version (version_num) VALUES ('{head}')"))
-        conn.commit()
+
+
+def _reset_tables():
+    """Drop all tables and rebuild schema via create_all + alembic_version seed."""
+    with engine.begin() as conn:
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
+    Base.metadata.create_all(bind=engine)
+    _seed_alembic_version()
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
+    """Create test DB schema ONCE per session."""
     with engine.begin() as conn:
         conn.execute(text("DROP SCHEMA public CASCADE"))
         conn.execute(text("CREATE SCHEMA public"))
     Base.metadata.create_all(bind=engine)
     with engine.connect() as conn:
+        _seed_alembic_version(conn)
+        conn.commit()
+    with engine.connect() as conn:
         result = conn.execute(text("SELECT tablename FROM pg_tables WHERE schemaname='public'"))
         created = [r[0] for r in result]
         print(f"[setup_test_db] Created tables: {created}")
-    yield
-    with engine.begin() as conn:
-        conn.execute(text("DROP SCHEMA public CASCADE"))
-        conn.execute(text("CREATE SCHEMA public"))
 
 
 @pytest.fixture(scope="function")
