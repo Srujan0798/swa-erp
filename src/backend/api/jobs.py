@@ -105,4 +105,3 @@ def get_job_result(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
-

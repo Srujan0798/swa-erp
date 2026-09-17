@@ -603,6 +603,11 @@ describe("api endpoint methods", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/notifications/n1/read", expect.objectContaining({ method: "POST" }));
   });
 
+  it("document references: get counters", async () => {
+    await api.getDocumentReferenceCounters();
+    expect(fetchMock).toHaveBeenCalledWith("/api/document-references/counters", expect.anything());
+  });
+
   it("builds no query string when all params are absent", async () => {
     await api.listUsers();
     expect(fetchMock).toHaveBeenCalledWith("/api/users", expect.anything());

@@ -116,8 +116,14 @@ export function InvoiceDetail({ invoice, onBack }: InvoiceDetailProps) {
                 <span className="font-mono">₹{invoice.subtotal.toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Tax ({(invoice.tax_rate * 100).toFixed(1)}%)</span>
-                <span className="font-mono">₹{invoice.tax_amount.toLocaleString("en-IN")}</span>
+                <span>
+                  GST (
+                  {(invoice.gst_percent ?? invoice.tax_rate ?? 18).toLocaleString("en-IN")}%
+                  )
+                </span>
+                <span className="font-mono">
+                  ₹{(invoice.gst_amount ?? invoice.tax_amount).toLocaleString("en-IN")}
+                </span>
               </div>
               <div className="flex justify-between font-semibold border-t pt-2">
                 <span>Total</span>

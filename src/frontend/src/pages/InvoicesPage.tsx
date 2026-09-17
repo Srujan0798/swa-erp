@@ -22,6 +22,8 @@ import {
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
 import { InvoiceCreateForm } from "@/components/financials/InvoiceCreateForm";
 import { useCurrentUser } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
+import { useUpdateInvoiceStatus } from "@/hooks/useInvoices";
 import { canManageCommercial } from "@/lib/permissions";
 import { api } from "@/lib/api";
 import type { Invoice } from "@/types/financial";
@@ -45,7 +47,9 @@ export function InvoicesPage(): ReactElement {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const { data: user } = useCurrentUser();
+  const { toast } = useToast();
   const canCreate = canManageCommercial(user);
+  const statusMutation = useUpdateInvoiceStatus();
 
   useEffect(() => {
     const fromUrl = searchParams.get("project") ?? "";
@@ -104,9 +108,16 @@ export function InvoicesPage(): ReactElement {
         </div>
         {canCreate ? (
           <Button
-            disabled={!projectId}
-            title={!projectId ? "Select a project first" : undefined}
-            onClick={() => setCreateOpen(true)}
+            onClick={() => {
+              if (!projectId) {
+                toast({
+                  title: "Select a project first, then create the invoice.",
+                  variant: "destructive",
+                });
+                return;
+              }
+              setCreateOpen(true);
+            }}
           >
             <Plus className="mr-2 h-4 w-4" />
             New Invoice
@@ -267,6 +278,13 @@ export function InvoicesPage(): ReactElement {
                   <p className="capitalize">{detail.status}</p>
                 </div>
                 <div>
+                  <p className="text-muted-foreground">GST</p>
+                  <p className="font-medium">
+                    {Number(detail.gst_percent ?? detail.tax_rate ?? 18)}% · ₹
+                    {Number(detail.gst_amount ?? detail.tax_amount).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <div>
                   <p className="text-muted-foreground">Total</p>
                   <p className="font-medium">
                     ₹{Number(detail.total).toLocaleString("en-IN")}
@@ -320,7 +338,41 @@ export function InvoicesPage(): ReactElement {
           ) : (
             <p className="text-sm text-muted-foreground">Loading…</p>
           )}
-          <DialogFooter>
+          <DialogFooter className="gap-2">
+            {canCreate && detail?.status === "draft" ? (
+              <Button
+                disabled={statusMutation.isPending}
+                onClick={() =>
+                  statusMutation.mutate(
+                    { id: detail.id, status: "sent" },
+                    {
+                      onSuccess: () => toast({ title: "Invoice marked sent" }),
+                      onError: (err) =>
+                        toast({ title: (err as Error).message, variant: "destructive" }),
+                    }
+                  )
+                }
+              >
+                Mark sent
+              </Button>
+            ) : null}
+            {canCreate && detail?.status === "sent" ? (
+              <Button
+                disabled={statusMutation.isPending}
+                onClick={() =>
+                  statusMutation.mutate(
+                    { id: detail.id, status: "paid" },
+                    {
+                      onSuccess: () => toast({ title: "Invoice marked paid" }),
+                      onError: (err) =>
+                        toast({ title: (err as Error).message, variant: "destructive" }),
+                    }
+                  )
+                }
+              >
+                Mark paid
+              </Button>
+            ) : null}
             <Button variant="outline" onClick={() => setSelectedId(null)}>
               Close
             </Button>

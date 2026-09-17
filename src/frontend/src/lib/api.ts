@@ -98,9 +98,22 @@ import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "./auth"
 
 class ApiError extends Error {
   constructor(public status: number, public body: unknown) {
-    super(`API Error: ${status}`);
+    super(formatApiError(status, body));
     this.name = "ApiError";
   }
+}
+
+function formatApiError(status: number, body: unknown): string {
+  if (body && typeof body === "object" && "detail" in body) {
+    const detail = (body as { detail: unknown }).detail;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail) && detail[0] && typeof detail[0] === "object") {
+      const first = detail[0] as { loc?: unknown; msg?: string };
+      const loc = Array.isArray(first.loc) ? first.loc.filter((x) => x !== "body").join(".") : "";
+      return first.msg ? (loc ? `${loc}: ${first.msg}` : first.msg) : `API Error: ${status}`;
+    }
+  }
+  return `API Error: ${status}`;
 }
 
 async function request<T>(
@@ -150,7 +163,14 @@ async function request<T>(
     throw new ApiError(response.status, body);
   }
 
-  return response.json();
+  if (response.status === 204 || response.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
+  const text = await response.text();
+  if (!text) {
+    return undefined as T;
+  }
+  return JSON.parse(text) as T;
 }
 
 export const api = {

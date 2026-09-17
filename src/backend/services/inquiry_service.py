@@ -6,7 +6,12 @@ import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories import audit_repo
-from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
+from src.backend.db.repositories.client_repo import (
+    create as create_client,
+)
+from src.backend.db.repositories.client_repo import (
+    get_by_id as get_client_by_id,
+)
 from src.backend.db.repositories.inquiry_repo import (
     create as create_inquiry,
 )
@@ -19,6 +24,7 @@ from src.backend.db.repositories.inquiry_repo import (
 from src.backend.db.repositories.inquiry_repo import (
     update as update_inquiry,
 )
+from src.backend.db.repositories.project_repo import create_project
 from src.backend.models.client import Client
 from src.backend.models.inquiry import Inquiry
 from src.backend.schemas.inquiry import (
@@ -50,128 +56,132 @@ def convert_inquiry(
     conversions cannot race, and a double-conversion guard rejects
     attempts on already-converted inquiries.
     """
-    from src.backend.db.repositories.client_repo import create as _create_client
-    from src.backend.db.repositories.project_repo import create_project as _create_project
-
-    # Lock the inquiry row so concurrent conversions cannot race.
-    inquiry = (
+    locked = (
         db.query(Inquiry)
         .filter(Inquiry.id == inquiry_id, Inquiry.deleted_at.is_(None))
         .with_for_update()
         .first()
     )
-    if not inquiry:
+    if not locked:
         raise InquiryConversionError(404, {"detail": "Inquiry not found"})
 
-    if inquiry.status == "Converted":
+    if locked.status == "Converted":
         raise InquiryConversionError(409, {"detail": "Inquiry already converted"})
 
-    if inquiry.status not in ("New", "In Progress", "Quoted", "Awarded"):
+    if locked.status not in ("New", "Contacted", "In Progress", "Quoted", "Awarded"):
         raise InquiryConversionError(
             400,
             {
-                "detail": f"Inquiry status '{inquiry.status}' cannot be converted. "
-                f"Allowed: New, In Progress, Quoted, Awarded"
+                "detail": f"Inquiry status '{locked.status}' cannot be converted. "
+                "Allowed: New, Contacted, In Progress, Quoted, Awarded"
             },
         )
 
-    try:
-        # Resolve client: prefer explicit client_id, else match by name
-        client: Client | None = None
-        client_source: str | None = None
-        if body.client_id:
-            client = get_client_by_id(db, body.client_id)
-            client_source = "explicit_id"
-        if client is None:
-            existing = (
-                db.query(Client)
-                .filter(
-                    Client.name.ilike(inquiry.client_name),
-                    Client.deleted_at.is_(None),
-                )
-                .first()
-            )
-            if existing:
-                client = existing
-                client_source = "name_match"
+    # Resolve client: prefer explicit client_id, else match by inquiry.client_name
+    client: Client | None = None
+    client_source: str | None = None
+    if body.client_id:
+        client = get_client_by_id(db, body.client_id)
+        client_source = "explicit_id"
 
-        if client is None:
-            client = _create_client(
-                db,
-                name=body.project_name or inquiry.client_name,
-                code=body.project_code or f"SWA-CLT-{inquiry.reference_id.split('-')[-1]}",
-                primary_email=body.client_primary_email or "import@swa.internal",
-                country=body.client_country or "India",
-                primary_phone=body.client_primary_phone,
-                client_status="Active",
-            )
-            client_source = "new"
-
-        logger.info(
-            "inquiry.convert.client_resolved",
-            inquiry_id=str(inquiry_id),
-            client_id=str(client.id),
-            client_source=client_source,
+    if client is None:
+        # Search for existing clients by the inquiry's client_name (not the project name)
+        candidates = (
+            db.query(Client)
+            .filter(Client.name.ilike(locked.client_name), Client.deleted_at.is_(None))
+            .all()
         )
+        if len(candidates) == 1:
+            client = candidates[0]
+            client_source = "name_match"
+        elif len(candidates) > 1:
+            raise InquiryConversionError(
+                300,
+                {
+                    "detail": "Ambiguous client match",
+                    "inquiry_client_name": locked.client_name,
+                    "candidates": [
+                        {"id": str(c.id), "name": c.name, "code": c.code} for c in candidates
+                    ],
+                },
+            )
 
-        # Create project under the client
-        project_payload = {
+    if client is None:
+        client = create_client(
+            db,
+            name=locked.client_name,
+            code=generate_reference_id(db, "CLT"),
+            primary_email=body.client_primary_email or "import@swa.internal",
+            country=body.client_country or "India",
+            primary_phone=body.client_primary_phone,
+            client_status="Active",
+        )
+        client_source = "new"
+
+    logger.info(
+        "inquiry.convert.client_resolved",
+        inquiry_id=str(inquiry_id),
+        client_id=str(client.id),
+        client_source=client_source,
+    )
+
+    # Create project under the client
+    project = create_project(
+        db,
+        {
             "client_id": client.id,
-            "code": body.project_code or f"SWA-PRJ-{inquiry.reference_id.split('-')[-1]}",
-            "name": body.project_name or f"{client.name} — {inquiry.reference_id}",
-            "status": body.project_status or "Lead",
-            "inquiry_id": inquiry.id,
+            "code": generate_reference_id(db, "PRJ"),
+            "name": body.project_name or f"{client.name} — {locked.reference_id}",
+            "status": body.project_status or "Awarded",
+            "inquiry_id": locked.id,
             "notes": body.project_description,
-        }
-        project = _create_project(db, project_payload)
-        logger.info(
-            "inquiry.convert.project_created",
-            inquiry_id=str(inquiry_id),
-            project_id=str(project.id),
-            project_code=project.code,
-        )
+        },
+    )
+    logger.info(
+        "inquiry.convert.project_created",
+        inquiry_id=str(inquiry_id),
+        project_id=str(project.id),
+        project_code=project.code,
+    )
 
-        # Update inquiry status
-        update_inquiry(
-            db,
-            inquiry,
-            {
-                "status": "Converted",
-                "converted_project_id": project.id,
-                "converted_client_id": client.id,
-            },
-        )
+    # Update inquiry status
+    update_inquiry(
+        db,
+        locked,
+        {
+            "status": "Converted",
+            "converted_project_id": project.id,
+            "converted_client_id": client.id,
+        },
+    )
 
-        audit_repo.create_entry(
-            db,
-            action="inquiry.convert",
-            entity_type="inquiry",
-            entity_id=inquiry.id,
-            user_id=actor_id,
-            before_json={"status": inquiry.status},
-            after_json={
-                "status": "Converted",
-                "client_id": str(client.id),
-                "project_id": str(project.id),
-            },
-        )
+    audit_repo.create_entry(
+        db,
+        action="inquiry.convert",
+        entity_type="inquiry",
+        entity_id=locked.id,
+        user_id=actor_id,
+        before_json={"status": locked.status},
+        after_json={
+            "status": "Converted",
+            "client_id": str(client.id),
+            "project_id": str(project.id),
+        },
+    )
 
-        logger.info(
-            "inquiry.converted",
-            inquiry_id=str(inquiry_id),
-            client_id=str(client.id),
-            project_id=str(project.id),
-            actor_id=str(actor_id),
-        )
+    logger.info(
+        "inquiry.converted",
+        inquiry_id=str(inquiry_id),
+        client_id=str(client.id),
+        project_id=str(project.id),
+        actor_id=str(actor_id),
+    )
 
-        return {
-            "inquiry": inquiry,
-            "client": client,
-            "project": project,
-        }
-    except Exception:
-        db.rollback()
-        raise
+    return {
+        "inquiry": locked,
+        "client": client,
+        "project": project,
+    }
 
 
 def list_inquiries_service(
@@ -219,13 +229,15 @@ def create_inquiry_service(
 def update_inquiry_service(
     db: Session,
     inquiry_id: uuid.UUID,
-    data: dict[str, Any],
+    data: dict[str, Any] | object,
     actor_id: uuid.UUID,
 ) -> Inquiry | None:
     inquiry = get_inquiry_by_id(db, inquiry_id)
     if not inquiry:
         return None
-    update_inquiry(db, inquiry, data)
+    if hasattr(data, "model_dump"):
+        data = data.model_dump()  # type: ignore[assignment]
+    update_inquiry(db, inquiry, data)  # type: ignore[arg-type]
     return inquiry
 
 

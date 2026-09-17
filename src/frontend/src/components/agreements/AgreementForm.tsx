@@ -48,7 +48,7 @@ export function AgreementForm({ initialData, onSubmit, onCancel, isLoading }: Ag
             <Label htmlFor="service_name">Service Name *</Label>
             <Input
               id="service_name"
-              placeholder="e.g. Green Building Consultancy, Energy Audit"
+              placeholder="e.g. INSUDESIGN"
               {...form.register("service_name")}
             />
             {form.formState.errors.service_name && (

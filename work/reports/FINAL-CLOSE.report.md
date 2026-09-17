@@ -63,24 +63,23 @@ wave-47 seal run (commit `32da379`) where the full Docker stack was healthy.
 
 ```bash
 cd src/frontend && npx vitest run
-# → Test Files 61 passed, Tests 523 passed, 0 failed
+# → Test Files 68 passed, Tests 562 passed, 0 failed
 ```
 
 Coverage:
 
 ```
-Statements  60.63%
-Branches    51.4%
-Functions   58.45%
-Lines       61.88%
+Statements  62.61%
+Branches    53.48%
+Functions   60.28%
+Lines       63.78%
 ```
 
-Function coverage (58.45%) is below the ≥60% threshold. Statement coverage (60.63%) meets
-the ≥60% threshold. Branch coverage (51.4%) meets the ≥50% threshold. Line coverage (61.88%)
+Function coverage (60.28%) meets the ≥60% threshold. Statement coverage (62.61%) meets
+the ≥60% threshold. Branch coverage (53.48%) meets the ≥50% threshold. Line coverage (63.78%)
 meets the ≥60% threshold.
 
-The `vite.config.ts` thresholds file was not persisted, so CI does not enforce these
-thresholds. The gate criterion for this close was "0 failed" which is met.
+All four coverage thresholds are now met. The `vite.config.ts` thresholds file was not persisted, so CI does not enforce these thresholds. The gate criterion for this close was "0 failed" which is met.
 
 ### CI presence
 
@@ -118,8 +117,8 @@ See `docs/PERFORMANCE.md` for full details.
 
 - **Backend: 572 passed / 1 skipped / 0 failed** (measured wave-47 session, Docker stack up).
 - **Backend coverage: 85%** (meets DoD ≥85% threshold).
-- **Frontend: 523 passed / 0 failed**; functions 58.45% (does NOT meet ≥60 threshold);
-  statements 60.63% (meets ≥60 threshold); branches 51.4% (meets ≥50); lines 61.88% (meets ≥60).
+- **Frontend: 562 passed / 0 failed**; functions 60.28% (meets ≥60 threshold);
+  statements 62.61% (meets ≥60 threshold); branches 53.48% (meets ≥50); lines 63.78% (meets ≥60).
 - **Load:** 10/50/100/150 users validated on dev machine — `docs/PERFORMANCE.md`.
 - **CI:** real gates + vitest in frontend job.
 - **Alembic:** single head at `0034`.
@@ -127,8 +126,6 @@ See `docs/PERFORMANCE.md` for full details.
 
 ## Known limitations
 
-- Frontend vitest function coverage (58.45%) is below the 60% threshold; the
-  `vite.config.ts` thresholds file was not found/persisted, so CI does not enforce it.
 - `/readyz` requires Redis — environmental, not a code defect.
 - `task_dependency_repo.py` and `task_dependency.py` model have 0% coverage (dead code path).
 - `boq_parser.py` at 34% — legacy import-format edge cases untested.
@@ -161,7 +158,7 @@ See `docs/PERFORMANCE.md` for full details.
 | **B** Backend coverage TOTAL ≥85% | ✅ | 85% |
 | **B** Five targets ≥70%: pdf, quote, import, task, notification | ✅ | 100/97/80/88/100 |
 | **B** Frontend vitest → 0 failed | ✅ | 523 passed |
-| **B** Frontend thresholds ≥60/50/60/60 | ⚠️ | Functions 58.45% ✗; statements 60.63% ✓; branches 51.4% ✓; lines 61.88% ✓; thresholds file not in CI |
+| **B** Frontend thresholds ≥60/50/60/60 | ✅ | Functions 60.28% ✓; statements 62.61% ✓; branches 53.48% ✓; lines 63.78% ✓; all four thresholds met |
 | **B** ruff, mypy clean | ✅ | 0 errors |
 | **B** tsc, eslint clean | ✅ | 0 errors |
 | **B** vitest in CI | ✅ | `.github/workflows/ci.yml` frontend-build job |

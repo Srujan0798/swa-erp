@@ -1,10 +1,13 @@
 import { useState, useEffect, type ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { useAgreements } from "@/hooks/useAgreements";
+import { useQuery } from "@tanstack/react-query";
+import { useAgreements, useCreateAgreement } from "@/hooks/useAgreements";
+import { api } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -14,17 +17,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { AgreementForm } from "@/components/agreements/AgreementForm";
+import { useToast } from "@/hooks/useToast";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
+import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 /**
  * Global Service Agreements inventory — maps to SWA "Service Agreements Sheet".
- * Create new SAs from Client detail; this page is for browse/search.
  */
 export function AgreementsPage(): ReactElement {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [clientId, setClientId] = useState("");
   const pageSize = 20;
+  const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const commercial = canManageCommercial(user);
+  const createMutation = useCreateAgreement();
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -36,6 +48,12 @@ export function AgreementsPage(): ReactElement {
     page_size: pageSize,
     q: debounced || undefined,
   });
+  const { data: clientsData } = useQuery({
+    queryKey: ["clients-for-agreements"],
+    queryFn: () => api.listClients({ page: 1, page_size: 100 }),
+    enabled: showCreate,
+  });
+  const clients = clientsData?.items ?? [];
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -43,13 +61,73 @@ export function AgreementsPage(): ReactElement {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Service Agreements</h1>
-        <p className="text-sm text-muted-foreground">
-          Excel <span className="font-medium">Service Agreements Sheet</span> — Agreement ID, Client,
-          Inquiry, Service Name (e.g. INSUDESIGN), Start/End, Total Tokens, Status, Notes.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Service Agreements</h1>
+          <p className="text-sm text-muted-foreground">
+            Excel <span className="font-medium">Service Agreements Sheet</span> — Agreement ID, Client,
+            Inquiry, Service Name (e.g. INSUDESIGN), Start/End, Total Tokens, Status, Notes.
+          </p>
+        </div>
+        {commercial && !showCreate ? (
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Agreement
+          </Button>
+        ) : null}
       </div>
+
+      {showCreate && commercial ? (
+        <div className="space-y-3 rounded-lg border p-4">
+          <div className="space-y-2">
+            <Label htmlFor="sa-client">Client *</Label>
+            <select
+              id="sa-client"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+            >
+              <option value="">Select client…</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.code} — {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <AgreementForm
+            initialData={{ service_name: "INSUDESIGN" }}
+            onSubmit={async (formData) => {
+              if (!clientId) {
+                toast({ title: "Select a client first", variant: "destructive" });
+                return;
+              }
+              try {
+                await createMutation.mutateAsync({
+                  client_id: clientId,
+                  service_name: formData.service_name,
+                  start_date: formData.start_date,
+                  end_date: formData.end_date || undefined,
+                  total_tokens: formData.total_tokens,
+                  status: formData.status,
+                  notes: formData.notes,
+                });
+                toast({ title: "Agreement created" });
+                setShowCreate(false);
+                setClientId("");
+                void refetch();
+              } catch (err) {
+                toast({ title: (err as Error).message, variant: "destructive" });
+              }
+            }}
+            onCancel={() => {
+              setShowCreate(false);
+              setClientId("");
+            }}
+            isLoading={createMutation.isPending}
+          />
+        </div>
+      ) : null}
 
       <Card>
         <CardContent className="pt-6">

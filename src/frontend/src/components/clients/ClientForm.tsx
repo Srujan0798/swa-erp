@@ -52,8 +52,10 @@ export function ClientForm({ initialData, onSubmit, onCancel, isLoading }: Clien
   });
 
   const handleSubmit = async (data: ClientFormData) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await onSubmit(data as any);
+    const cleaned = Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, v === "" ? undefined : v])
+    ) as ClientFormData;
+    await onSubmit(cleaned);
   };
 
   return (

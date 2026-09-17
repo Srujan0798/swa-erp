@@ -41,9 +41,7 @@ def login(
         )
         return None
 
-    access_token = create_access_token(
-        {"sub": str(user.id), "role": user.role, "token_version": user.token_version}
-    )
+    access_token = create_access_token(str(user.id), user.role, user.token_version)
     refresh_token = create_refresh_token(user.id)
 
     create_refresh_token_record(db, user.id, refresh_token, settings.JWT_REFRESH_TTL_DAYS)
@@ -79,9 +77,7 @@ def refresh_access_token(db: Session, refresh_token: str) -> AccessTokenResponse
     if not user or not user.is_active or user.deleted_at:
         return None
 
-    new_access_token = create_access_token(
-        {"sub": str(user.id), "role": user.role, "token_version": user.token_version}
-    )
+    new_access_token = create_access_token(str(user.id), user.role, user.token_version)
     new_refresh_token = create_refresh_token(user.id)
 
     create_refresh_token_record(db, user.id, new_refresh_token, settings.JWT_REFRESH_TTL_DAYS)
@@ -113,4 +109,3 @@ def logout(
     revoke_all_for_user(db, user_id)
     record_event(db, "auth.logout", user_id=user_id, ip_address=ip_address, user_agent=user_agent)
     return True
-

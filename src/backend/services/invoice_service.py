@@ -196,7 +196,9 @@ def update_invoice_status_service(
             f"Cannot transition from '{invoice.status}' to '{new_status}'. " f"Allowed: {allowed}"
         )
 
-    paid_at = date.today() if new_status == "paid" else None
+    from datetime import datetime, time
+
+    paid_at = datetime.combine(date.today(), time.min) if new_status == "paid" else None
     updated = update_invoice_status(db, invoice_id, new_status, paid_at=paid_at)
     logger.info(
         "invoice.status_changed",

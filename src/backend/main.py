@@ -125,7 +125,7 @@ def _metrics_guard(
 
 
 @app.get("/metrics", include_in_schema=False)
-def metrics_endpoint(_: None = Depends(_metrics_guard)) -> Response:  # noqa: B008
+def metrics_endpoint(_: None = Depends(_metrics_guard)) -> Response:
     return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
 
 

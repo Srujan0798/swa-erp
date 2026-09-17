@@ -18,6 +18,7 @@ def _next_invoice_number(db: Session) -> str:
     """
     now = datetime.now(tz=UTC)
     prefix = f"INV-{now:%Y%m}-"
+    db.execute(text(f"CREATE SEQUENCE IF NOT EXISTS {_SEQ_NAME}"))
     row = db.execute(text(f"SELECT nextval('{_SEQ_NAME}') AS n")).fetchone()
     if row is None:
         raise RuntimeError("db sequence nextval returned no row")

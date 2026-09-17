@@ -76,7 +76,7 @@ describe("InvoiceDetail", () => {
     render(<InvoiceDetail invoice={invoice} onBack={vi.fn()} />);
     expect(screen.getByText("INV-001")).toBeInTheDocument();
     expect(screen.getByText("Design fees")).toBeInTheDocument();
-    expect(screen.getByText("Tax (18.0%)")).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes("GST") && content.includes("18%"))).toBeInTheDocument();
     expect(screen.getAllByText("₹1,00,000").length).toBeGreaterThanOrEqual(2);
   });
 

@@ -64,4 +64,50 @@ describe("CostEntryForm", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("selects category and date fields", async () => {
+    const user = userEvent.setup();
+    render(<CostEntryForm projectId="p1" onSuccess={vi.fn()} onCancel={vi.fn()} />);
+
+    await user.selectOptions(screen.getByLabelText(/category/i), "vendor");
+    expect(screen.getByLabelText(/category/i)).toHaveValue("vendor");
+
+    const dateInput = screen.getByLabelText(/date/i);
+    await user.clear(dateInput);
+    await user.type(dateInput, "2026-01-15");
+    expect(dateInput).toHaveValue("2026-01-15");
+  });
+
+  it("calls onCancel when cancel button clicked", async () => {
+    const onCancel = vi.fn();
+    const user = userEvent.setup();
+    render(<CostEntryForm projectId="p1" onSuccess={vi.fn()} onCancel={onCancel} />);
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onCancel).toHaveBeenCalled();
+  });
+
+  it("submits with different categories", async () => {
+    const onSuccess = vi.fn();
+
+    for (const category of ["material", "vendor", "overhead", "other"]) {
+      vi.clearAllMocks();
+      const user = userEvent.setup();
+      const { unmount } = render(<CostEntryForm projectId="p1" onSuccess={onSuccess} onCancel={vi.fn()} />);
+
+      await user.selectOptions(screen.getByLabelText(/category/i), category);
+      await user.type(screen.getByLabelText(/description/i), `${category} cost`);
+      const amount = screen.getByLabelText(/amount/i);
+      await user.clear(amount);
+      await user.type(amount, "1000");
+      await user.click(screen.getByRole("button", { name: "Add Cost" }));
+
+      expect(addCostMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ category }),
+        })
+      );
+      unmount();
+    }
+  });
 });

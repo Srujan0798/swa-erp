@@ -23,7 +23,7 @@ const FLOW = [
   {
     step: "1",
     title: "Inquiry",
-    desc: "Lead / ML comes in",
+    desc: "New work comes in",
     to: "/inquiries",
     icon: Inbox,
     key: "inq" as const,

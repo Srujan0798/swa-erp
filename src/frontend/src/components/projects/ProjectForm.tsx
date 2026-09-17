@@ -75,7 +75,14 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
   });
 
   const handleSubmit = async (data: ProjectFormData) => {
-    await onSubmit(data);
+    const cleaned = { ...data };
+    for (const key of Object.keys(cleaned) as (keyof ProjectFormData)[]) {
+      const v = cleaned[key];
+      if (v === "" || v === "__none__") {
+        delete cleaned[key];
+      }
+    }
+    await onSubmit(cleaned);
   };
 
   return (
@@ -194,7 +201,7 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
                     <SelectValue placeholder="Select PM" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="__none__">None</SelectItem>
                     {pmUsers?.items.filter(u => u.role === "admin" || u.role === "pm").map((u) => (
                       <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                     ))}
@@ -208,7 +215,7 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
                     <SelectValue placeholder="Select Designer" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="__none__">None</SelectItem>
                     {designerUsers?.items.filter(u => u.role === "admin" || u.role === "designer").map((u) => (
                       <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                     ))}
@@ -222,7 +229,7 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
                     <SelectValue placeholder="Select Auditor" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="__none__">None</SelectItem>
                     {auditorUsers?.items.filter(u => u.role === "admin" || u.role === "auditor").map((u) => (
                       <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                     ))}
@@ -233,7 +240,8 @@ export function ProjectForm({ initialData, onSubmit, onCancel, isLoading }: Proj
           ) : null}
 
           <div className="p-3 bg-muted rounded-md">
-            <span className="font-medium">Status:</span> <span className="text-muted-foreground">Lead (default)</span>
+            <span className="font-medium">Status:</span>{" "}
+            <span className="text-muted-foreground">starts as Lead in the project lifecycle (Quote → Awarded → Design → …)</span>
           </div>
         </CardContent>
       </Card>

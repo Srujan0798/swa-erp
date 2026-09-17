@@ -291,8 +291,7 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 | `README.md` | Evaluator front door (60s) + verified metrics |
 | `docs/ARCHITECTURE.md` | Mermaid architecture (built vs target) |
 | `deliverables/TECHNICAL_REPORT.md` | Engineering case study |
-| `deliverables/DEMO_SCRIPT.md` | 5–10 min demo script |
-| `deliverables/MEETING_AND_GO_LIVE_GUIDE.md` | **Meeting file: full start-to-end process, live demo, questions, go-live checklist** |
+| `deliverables/MEETING_AND_GO_LIVE_GUIDE.md` | **The meeting file** — screen-share, start-to-end flow, questions, go-live |
 | `CHANGELOG.md` | Full release history (`[1.0.1]` product cut) |
 | `plan/EXECUTION.md` / `work/ACTIVE.md` | Wave status (1–31 product; 32–39 professional-grade; 40–51 hardening) |
 | `docs/DEPLOYMENT_CHECKLIST.md` | Production deploy steps (see §6) |

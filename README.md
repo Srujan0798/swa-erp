@@ -81,7 +81,7 @@ You should see **`SWA-2025-…`** IDs under **Inquiries**, **Tokens**, **Documen
 | API docs | http://127.0.0.1:8100/docs |
 
 **Do not** show SWA `make seed-demo` as the product — that is synthetic sandbox only.
-Trial script: [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).
+Meeting / screen-share: [`deliverables/MEETING_AND_GO_LIVE_GUIDE.md`](deliverables/MEETING_AND_GO_LIVE_GUIDE.md).
 Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 
 ---
@@ -93,7 +93,7 @@ Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System diagrams (built vs target marked) |
 | [`deliverables/TECHNICAL_REPORT.md`](deliverables/TECHNICAL_REPORT.md) | Engineering case study (requirements misread → recovery) |
 | [`deliverables/SUBMISSION.md`](deliverables/SUBMISSION.md) | Handover package + honest limitations |
-| [`deliverables/DEMO_SCRIPT.md`](deliverables/DEMO_SCRIPT.md) | 5–10 min live demo script |
+| [`deliverables/MEETING_AND_GO_LIVE_GUIDE.md`](deliverables/MEETING_AND_GO_LIVE_GUIDE.md) | Client meeting + screen-share + go-live (the one file) |
 | [`resources/MEETINGS_MASTER.md`](resources/MEETINGS_MASTER.md) | What the client said |
 | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) | Load-test methodology + CSVs |
 | [`work/ACTIVE.md`](work/ACTIVE.md) | Live wave status (32–51) |

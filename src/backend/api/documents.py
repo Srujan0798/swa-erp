@@ -7,6 +7,7 @@ from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.roles import Role
 from src.backend.core.storage import get_storage
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
+from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.document import (
@@ -44,6 +45,15 @@ def _check_project_exists(db: Session, project_id: uuid.UUID) -> None:
         raise HTTPException(status_code=404, detail="Project not found")
 
 
+def _require_project_access(db: Session, project_id: uuid.UUID, user: User) -> None:
+    """Raise 403 when *user* is not a member (PM/designer/auditor) of *project_id*."""
+    if not user_has_project_access(db, user.id, project_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this project's documents",
+        )
+
+
 @router.post(
     "/api/projects/{project_id}/documents",
     response_model=DocumentRead,
@@ -58,6 +68,7 @@ async def upload_document_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
     _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
 
     file_bytes = await file.read()
     if len(file_bytes) > 50 * 1024 * 1024:
@@ -87,7 +98,7 @@ def list_documents_endpoint(
     page_size: int = Query(default=20, ge=1, le=100),
     folder_id: uuid.UUID | None = Query(default=None),  # noqa: B008
 ) -> DocumentListResponse:
-    _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
     result = list_project_documents(db, project_id, page, page_size, folder_id)
     return DocumentListResponse(**result)
 
@@ -104,6 +115,7 @@ def get_document_endpoint(
     doc = get_document(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
+    _require_project_access(db, doc.project_id, current_user)
     return doc
 
 
@@ -121,7 +133,7 @@ def delete_document_endpoint(
     doc = get_document(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-
+    _require_project_access(db, doc.project_id, current_user)
     update_document(db, document_id, is_active=False)
 
 
@@ -135,6 +147,10 @@ def update_document_endpoint(
     current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
+    doc = get_document(db, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    _require_project_access(db, doc.project_id, current_user)
     result = update_document_metadata(db, document_id, body, current_user.id)
     if not result:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -155,6 +171,7 @@ async def reupload_document_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
     _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
 
     file_bytes = await file.read()
     if len(file_bytes) > 50 * 1024 * 1024:
@@ -186,6 +203,7 @@ def download_document_endpoint(
     doc = get_document(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
+    _require_project_access(db, doc.project_id, current_user)
     content = get_storage().read(doc.file_path)
     filename = doc.name or "download"
     return Response(
@@ -205,7 +223,7 @@ def get_version_history_endpoint(
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentVersionListResponse:
-    _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
     return get_version_history(db, project_id, name)
 
 
@@ -219,6 +237,10 @@ def rename_document_endpoint(
     current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentRead:
+    doc = get_document(db, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    _require_project_access(db, doc.project_id, current_user)
     result = rename_document_service(db, document_id, body.new_name, current_user.id)
     if not result:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -234,6 +256,14 @@ def move_documents_endpoint(
     current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> dict:
+    # Each document must belong to a project the user can access.
+    from src.backend.db.repositories.document_repo import get_by_id
+
+    for doc_id in body.document_ids:
+        doc = get_by_id(db, doc_id)
+        if not doc:
+            raise HTTPException(status_code=404, detail=f"Document {doc_id} not found")
+        _require_project_access(db, doc.project_id, current_user)
     try:
         count = move_documents_service(
             db, body.document_ids, body.target_folder_id, current_user.id
@@ -254,7 +284,7 @@ def create_folder_endpoint(
     current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentFolderRead:
-    _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
     data = body.model_dump()
     data["project_id"] = project_id
     return create_folder_service(db, DocumentFolderCreate(**data), current_user.id)
@@ -270,7 +300,7 @@ def list_folders_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
     parent_id: uuid.UUID | None = Query(default=None),  # noqa: B008
 ) -> list[DocumentFolderRead]:
-    _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
     return list_project_folders(db, project_id, parent_id)
 
 
@@ -316,5 +346,5 @@ def search_documents_endpoint(
     tags: str | None = Query(default=None),
     folder_id: uuid.UUID | None = Query(default=None),  # noqa: B008
 ) -> list[DocumentRead]:
-    _check_project_exists(db, project_id)
+    _require_project_access(db, project_id, current_user)
     return search_project_documents(db, project_id, q, tags, folder_id)

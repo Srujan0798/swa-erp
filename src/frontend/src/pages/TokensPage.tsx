@@ -15,11 +15,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { QueryErrorBanner } from "@/components/ui/QueryErrorBanner";
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { TokenForm } from "@/components/tokens/TokenForm";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/useToast";
+import { useCurrentUser } from "@/hooks/useAuth";
+import { canManageCommercial } from "@/lib/permissions";
+import { useCreateToken } from "@/hooks/useTokens";
+import { ArrowLeft, ArrowRight, Plus, Search } from "lucide-react";
 
 /**
  * Global Tokens inventory — maps to SWA "Tokens Sheet".
- * New tokens are created under Client → Agreement → Tokens.
  */
 export function TokensPage(): ReactElement {
   const [searchParams] = useSearchParams();
@@ -27,7 +32,13 @@ export function TokensPage(): ReactElement {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [agreementId, setAgreementId] = useState("");
   const pageSize = 20;
+  const { toast } = useToast();
+  const { data: user } = useCurrentUser();
+  const commercial = canManageCommercial(user);
+  const createMutation = useCreateToken();
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -45,20 +56,88 @@ export function TokensPage(): ReactElement {
       }),
   });
 
+  const { data: agreementsData } = useQuery({
+    queryKey: ["agreements-for-tokens"],
+    queryFn: () => api.listAgreements({ page: 1, page_size: 100 }),
+    enabled: showCreate,
+  });
+  const agreements = agreementsData?.items ?? [];
+
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Tokens</h1>
-        <p className="text-sm text-muted-foreground">
-          Excel <span className="font-medium">Tokens Sheet</span> — Date, Token ID, Agreement ID,
-          Type, Description, Status, Tokens Used, SWA employee, Project owner, Client employee.
-          Create from Client → Agreement → Tokens.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Tokens</h1>
+          <p className="text-sm text-muted-foreground">
+            Excel <span className="font-medium">Tokens Sheet</span> — Date, Token ID, Agreement ID,
+            Type, Description, Status, Tokens Used, SWA employee, Project owner, Client employee.
+          </p>
+        </div>
+        {commercial && !showCreate ? (
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Token
+          </Button>
+        ) : null}
       </div>
+
+      {showCreate && commercial ? (
+        <div className="space-y-3 rounded-lg border p-4">
+          <div className="space-y-2">
+            <Label htmlFor="tkn-agreement">Agreement *</Label>
+            <select
+              id="tkn-agreement"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              value={agreementId}
+              onChange={(e) => setAgreementId(e.target.value)}
+            >
+              <option value="">Select agreement…</option>
+              {agreements.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.reference_id} — {a.service_name} ({a.client_name || "client"})
+                </option>
+              ))}
+            </select>
+          </div>
+          <TokenForm
+            onSubmit={async (formData) => {
+              if (!agreementId) {
+                toast({ title: "Select an agreement first", variant: "destructive" });
+                return;
+              }
+              try {
+                await createMutation.mutateAsync({
+                  agreement_id: agreementId,
+                  token_date: formData.token_date,
+                  token_type: formData.token_type,
+                  description: formData.description,
+                  token_status: formData.token_status,
+                  tokens_used: formData.tokens_used,
+                  swa_employee_name: formData.swa_employee_name || undefined,
+                  project_owner_name: formData.project_owner_name || undefined,
+                  client_employee_name: formData.client_employee_name,
+                  project_id: formData.project_id || undefined,
+                });
+                toast({ title: "Token created" });
+                setShowCreate(false);
+                setAgreementId("");
+                void refetch();
+              } catch (err) {
+                toast({ title: (err as Error).message, variant: "destructive" });
+              }
+            }}
+            onCancel={() => {
+              setShowCreate(false);
+              setAgreementId("");
+            }}
+            isLoading={createMutation.isPending}
+          />
+        </div>
+      ) : null}
 
       <Card>
         <CardContent className="pt-6">
