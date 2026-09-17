@@ -25,12 +25,13 @@ deferred** as documented RISK — not hidden. Listed here so they are tracked, n
 | ID | Finding | Why parked | Class |
 |----|---------|-----------|-------|
 | SF-3 | GST default 18% schema default | India GST default intentional; documented | RISK |
-| SF-4 / SEC-02 | `/metrics` endpoint unauthenticated | VPN/internal deploy; document in SUBMISSION | CONFIRMED RISK |
+| SF-4 / SEC-02 | `/metrics` endpoint unauthenticated | VPN/internal deploy; document in SUBMISSION | CLOSED (wave-50/01: `METRICS_REQUIRE_AUTH` default True, code `8652036`, guard `tests/wave-50/test_metrics_auth.py` committed in `aa03e77`) |
 | SF-6/7 | Import rollback counter / savepoint | needs careful TDD; larger behavioral change | RISK / BUG |
 | SF-8/9 | Broad `except` masking (rfqs.py, auth_service.py) | deferred; observability gap | RISK |
 | SEC-04/05 | Time/finance read RBAC | product may want VIEWER reads; needs Viraj product call | RISK |
 | SEC-06 | JWT logout / refresh rotation | deferred | RISK |
-| SEC-07/08 | Job IDOR / document write roles | deferred | RISK |
+| SEC-07 | Job IDOR (any PM reads any export job) | deferred | CLOSED (wave-50/01: `export_jobs` ownership table + 404-on-mismatch, code `3d619b9`, guard `tests/wave-50/test_job_ownership.py` committed in `aa03e77`; admins bypass explicitly) |
+| SEC-08 | document write roles | deferred | RISK |
 | #7 import | Per-row `except` with no savepoint/rollback | needs repro with mid-import IntegrityError | MED RISK |
 | #10 | `update_db_pool_metrics` bare `except: pass` (dead/unused) | dormant; dangerous if wired later | MED RISK |
 
