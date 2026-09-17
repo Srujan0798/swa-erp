@@ -17,6 +17,11 @@ services:
     command: ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     environment:
       DEBUG: "true"
+      # Dev-only: the stock Prometheus scrape config below cannot present a
+      # JWT, so /metrics auth is relaxed on this trusted local network.
+      # Production (docker-compose.yml / docker-compose.prod.yml) keeps the
+      # secure default METRICS_REQUIRE_AUTH=true.
+      METRICS_REQUIRE_AUTH: "false"
     # Optional: uncomment if you launch uvicorn with --debugpy and want to attach an IDE
     # ports:
     #   - "5678:5678"
@@ -27,8 +32,9 @@ services:
     command: ["celery", "-A", "src.backend.workers.celery_app", "worker", "--loglevel=info", "--autoreload"]
 
   # Optional Prometheus for local metrics viewing. Scrapes backend:8000 (see prometheus.yml).
-  # NOTE: /metrics requires a JWT (src/backend/main.py), so out-of-the-box Prometheus will get
-  # 401s — run an authenticated sidecar or relax auth on the internal scrape network for dev only.
+  # NOTE: the backend in THIS file sets METRICS_REQUIRE_AUTH=false so the
+  # stock (unauthenticated) scraper works on the trusted dev network. The base
+  # and prod compose files keep the secure default (auth required).
   prometheus:
     image: prom/prometheus:latest
     volumes:

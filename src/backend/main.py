@@ -2,7 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+from sqlalchemy.orm import Session
 
 from src.backend.api.agreements import router as agreements_router
 from src.backend.api.auth import router as auth_router
@@ -33,13 +35,12 @@ from src.backend.api.tokens import router as tokens_router
 from src.backend.api.users import router as users_router
 from src.backend.api.vendors import router as vendors_router
 from src.backend.core.config import settings
-from src.backend.core.deps import get_current_user
+from src.backend.core.deps import get_current_user, security_scheme
 from src.backend.core.errors import init_sentry
 from src.backend.core.metrics import registry, setup_metrics
 from src.backend.core.middleware import RequestIdMiddleware
 from src.backend.core.rate_limit import install_auth_rate_limiter
-from src.backend.db.session import engine
-from src.backend.models.user import User
+from src.backend.db.session import engine, get_db
 
 # Setup metrics BEFORE creating the app (to avoid "Cannot add middleware after app started")
 # This creates the instrumentator and adds the middleware
@@ -108,8 +109,23 @@ if not getattr(app.state, "_swa_metrics_instrumented", False):
     app.state._swa_metrics_instrumented = True
 
 
+def _metrics_guard(
+    creds: HTTPAuthorizationCredentials = Depends(security_scheme),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> None:
+    """Gate /metrics on a valid token unless explicitly opened (SF-4/SEC-02).
+
+    Secure by default (``METRICS_REQUIRE_AUTH=True``). When the flag is set
+    false, /metrics serves openly — intended ONLY for a Prometheus scraper
+    on a trusted internal network that cannot present a JWT.
+    """
+    if not settings.METRICS_REQUIRE_AUTH:
+        return
+    get_current_user(creds, db)  # raises 401/403
+
+
 @app.get("/metrics", include_in_schema=False)
-def metrics_endpoint(_: User = Depends(get_current_user)) -> Response:  # noqa: B008
+def metrics_endpoint(_: None = Depends(_metrics_guard)) -> Response:  # noqa: B008
     return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
 
 

@@ -27,6 +27,11 @@ class Settings(BaseSettings):
 
     AUTH_RATE_LIMIT_PER_MIN: int = 5
 
+    # Secure by default: /metrics requires a valid JWT. Set explicitly false
+    # ONLY when Prometheus scrapes over a trusted internal network that
+    # cannot present a token (see docs/operational/OBSERVABILITY.md).
+    METRICS_REQUIRE_AUTH: bool = True
+
     STORAGE_BACKEND: str = "local"  # "local" | "minio"
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"

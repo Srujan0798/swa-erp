@@ -46,7 +46,15 @@ This document explains what observability data SWA ERP collects, how to read it,
 
 ## 2. Prometheus Metrics (`/metrics`)
 
-**Endpoint:** `GET /metrics` — **NOT exposed publicly**. In production, bind to localhost or protect with auth.
+**Endpoint:** `GET /metrics` — **authenticated by default** (valid JWT required,
+SF-4 / SEC-02). The gate is controlled by one setting:
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `METRICS_REQUIRE_AUTH` | `true` | `/metrics` requires a valid bearer token |
+| `METRICS_REQUIRE_AUTH=false` | — | `/metrics` serves openly — set this **only** when Prometheus scrapes over a trusted internal network that cannot present a JWT (e.g. the optional dev `prometheus` service in `docker-compose.dev.yml`, which uses a static scrape config with no auth) |
+
+**Why you would set it false (one line):** a stock Prometheus scrape config cannot mint expiring JWTs, so on a trusted/internal-only network it is simpler to open `/metrics` than to run an authenticated sidecar — never do this on an externally reachable port.
 
 **What's collected:**
 
