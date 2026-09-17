@@ -207,7 +207,7 @@ describe("InquiriesPage", () => {
       refetch: vi.fn(),
     });
     await renderPage();
-    const trashButtons = screen.getAllByRole("button", { name: "" });
+    const trashButtons = screen.getAllByRole("button", { name: "Delete inquiry INQ-001" });
     expect(trashButtons.length).toBeGreaterThan(0);
   });
 
