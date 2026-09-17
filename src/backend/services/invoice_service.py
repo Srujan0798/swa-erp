@@ -215,7 +215,13 @@ def delete_invoice_service(db: Session, invoice_id: uuid.UUID) -> bool:
         raise ValueError("Invoice not found")
     if invoice.status != "draft":
         raise ValueError("Only draft invoices can be deleted")
-    return soft_delete_invoice(db, invoice_id)
+    deleted = soft_delete_invoice(db, invoice_id)
+    logger.info(
+        "invoice.deleted",
+        invoice_id=str(invoice_id),
+        invoice_number=invoice.invoice_number,
+    )
+    return deleted
 
 
 def get_invoice_service(db: Session, invoice_id: uuid.UUID) -> dict[str, Any] | None:
