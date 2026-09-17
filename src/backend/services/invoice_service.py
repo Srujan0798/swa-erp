@@ -1,14 +1,12 @@
 import uuid
-import structlog
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 
+import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.core.config import settings
-
-logger = structlog.get_logger(__name__)
 from src.backend.db.repositories.invoice_repo import (
     create_invoice,
     generate_invoice_number,
@@ -17,7 +15,11 @@ from src.backend.db.repositories.invoice_repo import (
     soft_delete_invoice,
     update_invoice_status,
 )
+from src.backend.models.project import Project
 from src.backend.models.time_tracking import TimeEntry
+from src.backend.models.user import User
+
+logger = structlog.get_logger(__name__)
 
 
 def _compute_totals(
@@ -35,9 +37,6 @@ def _compute_totals(
 
 
 def _invoice_to_read(invoice: Any, db: Session) -> dict[str, Any]:
-    from src.backend.models.project import Project
-    from src.backend.models.user import User
-
     project = db.query(Project).filter(Project.id == invoice.project_id).first()
     user = db.query(User).filter(User.id == invoice.created_by).first()
 

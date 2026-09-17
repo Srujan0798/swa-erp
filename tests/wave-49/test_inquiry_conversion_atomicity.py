@@ -48,9 +48,9 @@ def test_convert_inquiry_rolls_back_client_on_project_failure(db_session, actor)
 
     req = InquiryConvertRequest(project_name="W49 Probe Project")
 
-    # Force project creation to fail AFTER client has been created
+# Force project creation to fail AFTER client has been created
     with patch(
-        "src.backend.services.inquiry_service.create_project",
+        "src.backend.db.repositories.project_repo.create_project",
         side_effect=RuntimeError("simulated project failure"),
     ):
         with pytest.raises(RuntimeError):

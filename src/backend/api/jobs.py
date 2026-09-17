@@ -13,6 +13,8 @@ from src.backend.workers.celery_app import app as celery_app
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
+get_current_pm = Depends(require_role(Role.PM))
+
 
 def _require_project_access(
     db: Session,
@@ -30,7 +32,7 @@ def _require_project_access(
 @router.get("/{job_id}")
 def get_job_status(
     job_id: str,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = get_current_pm,
 ) -> dict:
     result = AsyncResult(job_id, app=celery_app)
     response: dict = {"job_id": job_id, "status": result.state.lower()}
@@ -49,7 +51,7 @@ def get_job_status(
 @router.get("/{job_id}/result")
 def get_job_result(
     job_id: str,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = get_current_pm,
 ) -> Response:
     result = AsyncResult(job_id, app=celery_app)
     if result.state != "SUCCESS":
@@ -79,3 +81,4 @@ def get_job_result(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+

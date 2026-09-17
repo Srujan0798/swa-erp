@@ -23,6 +23,8 @@ from src.backend.services.invoice_service import (
     update_invoice_status_service,
 )
 
+ReqPM = require_role(Role.PM)
+
 router = APIRouter(prefix="/api", tags=["invoices"])
 
 
@@ -34,7 +36,7 @@ router = APIRouter(prefix="/api", tags=["invoices"])
 def create_invoice_endpoint(
     project_id: uuid.UUID,
     body: InvoiceCreate,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     try:
@@ -61,7 +63,7 @@ def create_invoice_endpoint(
 def generate_from_time_endpoint(
     project_id: uuid.UUID,
     body: InvoiceGenerateFromTime,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     try:
@@ -83,9 +85,7 @@ def generate_from_time_endpoint(
 )
 def list_invoices_endpoint(
     project_id: uuid.UUID,
-    current_user: User = Depends(
-        require_role(Role.PM)
-    ),  # Meeting: finance not VIEWER
+    current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
@@ -105,7 +105,7 @@ def list_invoices_endpoint(
 @router.get("/invoices/{invoice_id}", response_model=InvoiceRead)
 def get_invoice_endpoint(
     invoice_id: uuid.UUID,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     result = get_invoice_service(db, invoice_id)
@@ -118,7 +118,7 @@ def get_invoice_endpoint(
 def update_invoice_status_endpoint(
     invoice_id: uuid.UUID,
     body: InvoiceUpdateStatus,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     try:
@@ -131,7 +131,7 @@ def update_invoice_status_endpoint(
 @router.delete("/invoices/{invoice_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_invoice_endpoint(
     invoice_id: uuid.UUID,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> None:
     try:

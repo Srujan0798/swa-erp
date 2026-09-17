@@ -7,8 +7,6 @@ import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.core.quote_workflow import can_transition, get_allowed_transitions
-
-logger = structlog.get_logger(__name__)
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.boq_repo import get_by_id as get_boq_by_id
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
@@ -24,6 +22,8 @@ from src.backend.db.repositories.quote_repo import (
     update_status,
 )
 from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
+
+logger = structlog.get_logger(__name__)
 
 
 def _record_event(
@@ -377,3 +377,4 @@ def clone_to_draft(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dic
     )
 
     return _quote_to_enriched_dict(cloned, db)
+

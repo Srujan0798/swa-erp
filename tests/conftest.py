@@ -78,10 +78,29 @@ def _seed_alembic_version(conn=None):
 
 
 def _reset_tables():
-    """Drop all tables and rebuild schema via create_all + alembic_version seed."""
-    with engine.begin() as conn:
-        conn.execute(text("DROP SCHEMA public CASCADE"))
-        conn.execute(text("CREATE SCHEMA public"))
+    """Drop all tables and rebuild schema via create_all + alembic_version seed.
+
+    DROP SCHEMA ... CASCADE takes an ACCESS EXCLUSIVE lock that conflicts with
+    any concurrent transaction on the same connection — so it must run in
+    autocommit mode, not inside engine.begin(). Use a short-lived standalone
+    engine (pool_size=1, no recycling) to avoid fighting the session fixture's
+    pooled connections.
+    """
+    teardown_engine = create_engine(
+        TEST_DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=1,
+        max_overflow=0,
+        isolation_level="AUTOCOMMIT",
+        pool_recycle=0,
+        connect_args={"connect_timeout": 5},
+    )
+    try:
+        with teardown_engine.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+    finally:
+        teardown_engine.dispose()
     Base.metadata.create_all(bind=engine)
     _seed_alembic_version()
 
@@ -104,12 +123,15 @@ def setup_test_db():
 
 @pytest.fixture(scope="function")
 def db_session():
-    _reset_tables()
-    session = TestingSessionLocal()
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind=connection)
     try:
         yield session
     finally:
         session.close()
+        transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture(scope="function")

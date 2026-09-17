@@ -6,17 +6,19 @@ import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories import audit_repo
-from src.backend.db.repositories.client_repo import (
-    create as create_client,
-    get_by_id as get_client_by_id,
-)
+from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
 from src.backend.db.repositories.inquiry_repo import (
     create as create_inquiry,
+)
+from src.backend.db.repositories.inquiry_repo import (
     get_by_id as get_inquiry_by_id,
+)
+from src.backend.db.repositories.inquiry_repo import (
     list_inquiries,
+)
+from src.backend.db.repositories.inquiry_repo import (
     update as update_inquiry,
 )
-from src.backend.db.repositories.project_repo import create_project
 from src.backend.models.client import Client
 from src.backend.models.inquiry import Inquiry
 from src.backend.schemas.inquiry import (
