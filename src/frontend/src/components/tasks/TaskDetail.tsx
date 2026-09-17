@@ -252,6 +252,7 @@ export function TaskDetail({ task, open, onClose }: TaskDetailProps) {
             <div className="flex gap-2 mt-3">
               <Input
                 placeholder="Add a comment..."
+                aria-label="Add a comment"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleAddComment()}
@@ -259,6 +260,7 @@ export function TaskDetail({ task, open, onClose }: TaskDetailProps) {
               <Button
                 size="icon"
                 variant="outline"
+                aria-label="Send comment"
                 onClick={handleAddComment}
                 disabled={!commentText.trim() || commentMutation.isPending}
               >

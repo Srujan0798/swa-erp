@@ -136,6 +136,7 @@ export function AgreementsPage(): ReactElement {
             <Input
               className="pl-10"
               placeholder="Search by reference ID or service name…"
+              aria-label="Search agreements by reference ID or service name"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -232,6 +233,7 @@ export function AgreementsPage(): ReactElement {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Previous page"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
@@ -243,6 +245,7 @@ export function AgreementsPage(): ReactElement {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Next page"
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               >

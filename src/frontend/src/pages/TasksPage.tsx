@@ -179,7 +179,7 @@ export function TasksPage(): JSX.Element {
               value={projectId ?? undefined}
               onValueChange={(v) => selectProject(v)}
             >
-              <SelectTrigger className="w-72">
+              <SelectTrigger className="w-72" aria-label="Select project">
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
               <SelectContent>
@@ -199,6 +199,7 @@ export function TasksPage(): JSX.Element {
             <Input
               value={searchText}
               placeholder="Search tasks..."
+              aria-label="Search tasks"
               onChange={(e) => setSearchText(e.target.value)}
               className="w-48"
             />
@@ -323,9 +324,9 @@ export function TasksPage(): JSX.Element {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Project</Label>
+              <Label htmlFor="task-project">Project</Label>
               <Select value={createProjectId} onValueChange={setCreateProjectId}>
-                <SelectTrigger>
+                <SelectTrigger id="task-project">
                   <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
@@ -338,18 +339,18 @@ export function TasksPage(): JSX.Element {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Title</Label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+              <Label htmlFor="task-title">Title</Label>
+              <Input id="task-title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={3} />
+              <Label htmlFor="task-description">Description</Label>
+              <Textarea id="task-description" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} rows={3} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Priority</Label>
+                <Label htmlFor="task-priority">Priority</Label>
                 <Select value={newPriority} onValueChange={(v) => setNewPriority(v as TaskPriority)}>
-                  <SelectTrigger>
+                  <SelectTrigger id="task-priority">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -361,17 +362,17 @@ export function TasksPage(): JSX.Element {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Due Date</Label>
-                <Input type="date" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} />
+                <Label htmlFor="task-due-date">Due Date</Label>
+                <Input id="task-due-date" type="date" value={newDueDate} onChange={(e) => setNewDueDate(e.target.value)} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Assignee</Label>
+              <Label htmlFor="task-assignee">Assignee</Label>
               <Select
                 value={newAssigneeId || "none"}
                 onValueChange={(v) => setNewAssigneeId(v === "none" ? "" : v)}
               >
-                <SelectTrigger>
+                <SelectTrigger id="task-assignee">
                   <SelectValue placeholder="Unassigned" />
                 </SelectTrigger>
                 <SelectContent>

@@ -99,6 +99,7 @@ export function InquiriesPage() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search inquiries..."
+                aria-label="Search inquiries"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -106,6 +107,7 @@ export function InquiriesPage() {
             </div>
             <select
               className="border rounded-md px-3 text-sm bg-background"
+              aria-label="Filter inquiries by status"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value);
@@ -209,6 +211,7 @@ export function InquiriesPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label={`Delete inquiry ${inquiry.reference_id}`}
                             onClick={() => handleDelete(inquiry.id)}
                             disabled={deleteMutation.isPending}
                           >
@@ -231,6 +234,7 @@ export function InquiriesPage() {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Previous page"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
@@ -240,6 +244,7 @@ export function InquiriesPage() {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Next page"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
               >

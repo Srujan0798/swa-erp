@@ -146,6 +146,7 @@ export function TokensPage(): ReactElement {
             <Input
               className="pl-10"
               placeholder="Search by token ID or description…"
+              aria-label="Search tokens by token ID or description"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -269,6 +270,7 @@ export function TokensPage(): ReactElement {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Previous page"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
@@ -280,6 +282,7 @@ export function TokensPage(): ReactElement {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Next page"
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               >

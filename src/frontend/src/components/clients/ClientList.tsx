@@ -72,6 +72,7 @@ export function ClientList(): ReactElement {
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name or code..."
+              aria-label="Search clients by name or code"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -162,6 +163,7 @@ export function ClientList(): ReactElement {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Previous page"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
@@ -171,6 +173,7 @@ export function ClientList(): ReactElement {
               <Button
                 variant="outline"
                 size="sm"
+                aria-label="Next page"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
               >

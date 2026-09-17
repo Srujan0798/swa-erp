@@ -148,6 +148,7 @@ export function DocumentReferencesPage(): ReactElement {
               <Input
                 className="pl-10"
                 placeholder="Search by reference ID, type, or description…"
+                aria-label="Search document references"
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
