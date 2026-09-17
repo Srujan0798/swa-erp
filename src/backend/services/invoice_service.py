@@ -7,6 +7,7 @@ import structlog
 from sqlalchemy.orm import Session
 
 from src.backend.core.config import settings
+from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.invoice_repo import (
     create_invoice,
     generate_invoice_number,
@@ -123,6 +124,20 @@ def create_invoice_service(
         total=str(total),
         user_id=str(user_id),
     )
+    create_entry(
+        db,
+        action="invoice.create",
+        entity_type="invoice",
+        entity_id=invoice.id,
+        user_id=user_id,
+        after_json={
+            "invoice_number": invoice_number,
+            "project_id": str(project_id),
+            "status": "draft",
+            "subtotal": str(subtotal),
+            "total": str(total),
+        },
+    )
     return _invoice_to_read(invoice, db)
 
 
@@ -194,6 +209,7 @@ def update_invoice_status_service(
     db: Session,
     invoice_id: uuid.UUID,
     new_status: str,
+    user_id: uuid.UUID | None = None,
 ) -> dict[str, Any]:
     invoice = get_invoice_with_items(db, invoice_id)
     if not invoice:
@@ -212,6 +228,7 @@ def update_invoice_status_service(
 
     from datetime import datetime, time
 
+    before_status = invoice.status
     paid_at = datetime.combine(date.today(), time.min) if new_status == "paid" else None
     updated = update_invoice_status(db, invoice_id, new_status, paid_at=paid_at)
     logger.info(
@@ -221,10 +238,21 @@ def update_invoice_status_service(
         to_status=new_status,
         paid_at=paid_at.isoformat() if paid_at else None,
     )
+    create_entry(
+        db,
+        action="invoice.status_change",
+        entity_type="invoice",
+        entity_id=invoice_id,
+        user_id=user_id,
+        before_json={"status": before_status},
+        after_json={"status": new_status},
+    )
     return _invoice_to_read(updated, db)
 
 
-def delete_invoice_service(db: Session, invoice_id: uuid.UUID) -> bool:
+def delete_invoice_service(
+    db: Session, invoice_id: uuid.UUID, user_id: uuid.UUID | None = None
+) -> bool:
     invoice = get_invoice_with_items(db, invoice_id)
     if not invoice:
         raise ValueError("Invoice not found")
@@ -235,6 +263,15 @@ def delete_invoice_service(db: Session, invoice_id: uuid.UUID) -> bool:
         "invoice.deleted",
         invoice_id=str(invoice_id),
         invoice_number=invoice.invoice_number,
+    )
+    create_entry(
+        db,
+        action="invoice.delete",
+        entity_type="invoice",
+        entity_id=invoice_id,
+        user_id=user_id,
+        before_json={"invoice_number": invoice.invoice_number, "status": invoice.status},
+        after_json={"deleted": True},
     )
     return deleted
 
