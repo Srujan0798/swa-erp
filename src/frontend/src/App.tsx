@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppShell } from "@/components/layout/AppShell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoginPage } from "@/pages/LoginPage";
@@ -63,7 +64,8 @@ function PageLoader() {
 
 function App() {
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route
         element={
@@ -285,7 +287,8 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+      </Routes>
+    </ErrorBoundary>
   );
 }
 
