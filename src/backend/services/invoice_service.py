@@ -199,6 +199,13 @@ def update_invoice_status_service(
 
     paid_at = datetime.now(tz=UTC) if new_status == "paid" else None
     updated = update_invoice_status(db, invoice_id, new_status, paid_at=paid_at)
+    logger.info(
+        "invoice.status_changed",
+        invoice_id=str(invoice_id),
+        from_status=invoice.status,
+        to_status=new_status,
+        paid_at=paid_at.isoformat() if paid_at else None,
+    )
     return _invoice_to_read(updated, db)
 
 
