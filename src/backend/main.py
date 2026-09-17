@@ -39,7 +39,7 @@ from src.backend.core.deps import get_current_user, security_scheme
 from src.backend.core.errors import init_sentry
 from src.backend.core.metrics import registry, setup_metrics
 from src.backend.core.middleware import RequestIdMiddleware
-from src.backend.core.rate_limit import install_auth_rate_limiter
+from src.backend.core.rate_limit import install_auth_rate_limiter, install_expensive_rate_limiters
 from src.backend.db.session import engine, get_db
 
 # Setup metrics BEFORE creating the app (to avoid "Cannot add middleware after app started")
@@ -66,6 +66,7 @@ app = FastAPI(
 )
 app.add_middleware(RequestIdMiddleware)
 install_auth_rate_limiter(app)
+install_expensive_rate_limiters(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
