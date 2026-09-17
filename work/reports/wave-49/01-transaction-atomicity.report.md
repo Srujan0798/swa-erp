@@ -58,3 +58,26 @@ Re-run of exactly the 3 failing tests reproduced all 3 (`3 failed ... in 293.30s
 1. The 2 `wave-9` failures look like **later-commit drift**, not an `f26b420` regression: `reference_id_service.py` was rewritten in `fda369e` (client code now `NEWCO-1` instead of `SWA-2026-CLT-001`) and industry mapping no longer populates from inquiry. The tests assert the old contract.
 2. The atomicity-test failure (`DID NOT RAISE`) is consistent with the uncommitted `M src/backend/services/inquiry_service.py` in the dirty tree and/or the `788304d` logging refactor changing the conversion seam the test patches. Re-verify on a clean tree before blaming `f26b420`.
 3. `f26b420` itself discloses 18+ other repos still commit mid-request — atomicity covers only the Inquiry→Client→Project path.
+
+## 7. Forensic close — DID-NOT-RAISE root cause found, test GREEN (debugger pass, 2026-09-17)
+
+**Root cause (1 sentence):** the test patched the mock at the wrong seam — `src.backend.db.repositories.project_repo.create_project` (definition site) — while `src/backend/services/inquiry_service.py:27` does `from ... import create_project`, binding its own module-global reference at import time, so patching the repo attribute never rebound the name the service actually calls and the injected `RuntimeError` never fired.
+
+**Evidence (not guesses):**
+- `convert_inquiry()` (`inquiry_service.py:46-187`) contains NO `try/except` — nothing swallows exceptions; the "swallow" hypothesis is ruled out by reading the code.
+- Status allow-list is not the cause: the test builds the inquiry via `create_inquiry_service` with no status → defaults to `"New"` (`inquiry_service.py:213`), which IS in the convertible list (`:71`).
+- Client-match branch is not the cause: exactly 0-or-1 name candidates still reach `create_project(:131)`; only a >1 ambiguous match would divert, and that raises `InquiryConversionError` (a different, visible failure — not "DID NOT RAISE").
+- The §3 log line `inquiry.convert.project_created` (emitted AFTER `create_project` returns, `:143`) proves execution sailed past the mocked call site unpatched — consistent only with a dead mock seam.
+- Fix is one line in the test (`test_inquiry_conversion_atomicity.py:53`): patch target `src.backend.db.repositories.project_repo.create_project` → `src.backend.services.inquiry_service.create_project` (the use site). No service change needed — the service behavior was correct.
+
+**Raw test outputs (this pass, exclusive pytest slot verified via `ps aux | grep pytest` before each run):**
+```
+tests/wave-49/test_inquiry_conversion_atomicity.py::test_convert_inquiry_rolls_back_client_on_project_failure PASSED [100%]
+======================== 1 passed, 6 warnings in 0.55s =========================
+```
+```
+tests/wave-9/test_inquiries.py → ======================== 17 passed, 5 warnings in 2.54s ========================
+```
+(The two §3 wave-9 failures — `industry` mapping, `NEWCO-1` vs `SWA-2026-CLT-001` client-code format — are also green now; fixed by the same submission-prep commit via `industry`/`first_inquiry_id` passthrough and the reference-id contract, not by this debugger pass.)
+
+**HEAD hash:** fix + passing state committed as `4396581` (`fix: final submission prep — fix inquiry conversion atomicity, ...`); this debugger pass made NO code change (the one-line seam fix was already in the worktree and is now in HEAD) and commits ONLY this report section — committed separately, not amended.
