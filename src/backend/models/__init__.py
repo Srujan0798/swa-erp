@@ -10,6 +10,7 @@ from src.backend.models.compliance import (
 from src.backend.models.contact import Contact
 from src.backend.models.document import Document, DocumentFolder
 from src.backend.models.document_reference import DocumentReference
+from src.backend.models.export_job import ExportJob
 from src.backend.models.inquiry import Inquiry
 from src.backend.models.invoice import Invoice, InvoiceItem
 from src.backend.models.material import Material, MaterialCategory
@@ -38,6 +39,7 @@ __all__ = [
     "Document",
     "DocumentFolder",
     "DocumentReference",
+    "ExportJob",
     "Inquiry",
     "Invoice",
     "InvoiceItem",

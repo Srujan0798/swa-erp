@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
 from src.backend.db.session import get_db
+from src.backend.models.export_job import ExportJob
 from src.backend.models.user import User
 from src.backend.services.export_service import (
     export_demo_package,
@@ -23,6 +24,16 @@ from src.backend.workers.tasks import (
 router = APIRouter(prefix="/api/exports", tags=["exports"])
 
 
+def _record_export_job(db: Session, job_id: str, user: User) -> None:
+    """Persist the enqueuing user as the job owner (SEC-07).
+
+    ``GET /api/jobs/{id}`` and ``GET /api/jobs/{id}/result`` enforce this
+    ownership; without a row there is nothing to check against.
+    """
+    db.add(ExportJob(job_id=job_id, user_id=user.id))
+    db.commit()
+
+
 @router.get("/projects/{project_id}/summary.pdf")
 def project_summary_pdf(
     project_id: uuid.UUID,
@@ -32,6 +43,7 @@ def project_summary_pdf(
 ):
     if async_:
         task = generate_project_summary_pdf.delay(str(project_id))
+        _record_export_job(db, task.id, current_user)
         return Response(
             content=f'{{"job_id": "{task.id}"}}',
             media_type="application/json",
@@ -62,6 +74,7 @@ def financial_report_pdf(
         raise HTTPException(status_code=400, detail="start_date must be before end_date")
     if async_:
         task = generate_financial_report_pdf.delay(start_date.isoformat(), end_date.isoformat())
+        _record_export_job(db, task.id, current_user)
         return Response(
             content=f'{{"job_id": "{task.id}"}}',
             media_type="application/json",
@@ -85,6 +98,7 @@ def project_slides_pdf(
 ) -> Response:
     if async_:
         task = generate_project_slides_pdf.delay(str(project_id))
+        _record_export_job(db, task.id, current_user)
         return Response(
             content=f'{{"job_id": "{task.id}"}}',
             media_type="application/json",
