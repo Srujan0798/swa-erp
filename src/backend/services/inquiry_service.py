@@ -115,6 +115,8 @@ def convert_inquiry(
             country=body.client_country or "India",
             primary_phone=body.client_primary_phone,
             client_status="Active",
+            industry=body.client_industry,
+            first_inquiry_id=locked.id,
         )
         client_source = "new"
 
@@ -135,6 +137,7 @@ def convert_inquiry(
             "status": body.project_status or "Awarded",
             "inquiry_id": locked.id,
             "notes": body.project_description,
+            "estimated_value": locked.estimated_value,
         },
     )
     logger.info(

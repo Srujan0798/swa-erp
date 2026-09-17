@@ -11,11 +11,11 @@ service-layer logging, pagination, deterministic tests, and the final re-seal.
 
 ### Verified (this session, real command output — not carried forward from memory)
 - Backend: **63 passed / 3 skipped / 0 failed** · Redis-dependent tests skipped (environmental) · ruff/black/mypy clean
-- Frontend: **523 passed / 0 failed** · 65.86% coverage · tsc/eslint/vite-build clean
+- Frontend: **562 passed / 0 failed** · **60.28% function coverage** (62.61% statements, 53.48% branches, 63.78% lines) · tsc/eslint/vite-build clean
 - Migrations: single Alembic head `0034` (invoice_number_seq + time_entry.billed)
-- Full backend suite with Redis up: **572 passed / 1 skipped / 0 failed** · 85% coverage
+- Full backend suite with Redis up: **572 passed / 1 skipped / 0 failed** · 85% coverage (wave-47 seal, Docker run)
 - Seal report: [`work/reports/FINAL-CLOSE.report.md`](work/reports/FINAL-CLOSE.report.md)
-- Wave-51 re-seal: this commit `93696da`
+- Wave-51 re-seal: commit `aa03e77` (pushed to `origin/main`)
 
 ### Recovery-month context (still relevant, not superseded)
 Earlier feedback from SWA was that the product felt "unusable / dummy." A focused recovery
@@ -59,9 +59,9 @@ code/tests wins; fix the drift rather than trusting the more convenient one.
 - Excel freeze date + migration owner — Viraj
 
 ## Dispatch status: ALL COMPLETE
-The full dispatch plan (waves 40–51) has been executed and committed.
+The full dispatch plan (waves 40–51) has been executed and committed to `origin/main`.
 - Wave-40: Truth infrastructure (metrics script, EXECUTION.md)
 - Wave-48: Production hardening (logging, CSP, pagination, audit, idempotency, frontend loading/bundling)
 - Wave-49: Transaction atomicity for Inquiry→Client→Project
 - Wave-50: Security risks (job IDOR, /metrics auth flag) + deterministic test suite
-- Wave-51: Final re-seal + submission refresh (this commit)
+- Wave-51: Final re-seal + submission refresh (commit `aa03e77`)

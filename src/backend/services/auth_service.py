@@ -104,7 +104,6 @@ def logout(
     if user is not None:
         user.token_version += 1
         db.commit()
-    return True
 
     revoke_all_for_user(db, user_id)
     record_event(db, "auth.logout", user_id=user_id, ip_address=ip_address, user_agent=user_agent)

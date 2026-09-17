@@ -65,5 +65,5 @@ def test_user_model_has_required_columns():
         "created_at",
         "updated_at",
         "deleted_at",
-        "version",
+        "token_version",
     } <= cols

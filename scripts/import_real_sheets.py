@@ -97,11 +97,8 @@ def main() -> int:
     parser.add_argument(
         "--allow-stubs",
         action="store_true",
-        default=True,
-        help=(
-            "Create stub clients/projects for missing FKs (default on for real "
-            "multi-sheet import). Disable with --no-allow-stubs."
-        ),
+        default=False,
+        help="Opt in to stub clients/projects for missing FKs (default off).",
     )
     parser.add_argument(
         "--no-allow-stubs",
@@ -128,7 +125,8 @@ def main() -> int:
     try:
         if args.wipe:
             _wipe(session)
-        _ensure_admin(session)
+        if args.commit:
+            _ensure_admin(session)
 
         summary = []
         failed = False

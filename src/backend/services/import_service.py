@@ -153,8 +153,12 @@ def _client_by_name(s: Session, name: str) -> Client | None:
     return s.scalar(select(Client).where(Client.name == name, Client.deleted_at.is_(None)))
 
 
+def _is_legacy_lead_ref(ref: str) -> bool:
+    return ref.upper().startswith("LDI-") or "-LDI-" in ref.upper()
+
+
 def _inquiry_by_ref(s: Session, ref: str | None) -> Inquiry | None:
-    if not ref:
+    if not ref or _is_legacy_lead_ref(ref):
         return None
     return s.scalar(
         select(Inquiry).where(Inquiry.reference_id == ref, Inquiry.deleted_at.is_(None))
@@ -338,7 +342,7 @@ def _record_get(record: dict, *keys: str) -> Any:
 
 def _looks_like_swa_id(value: Any) -> bool:
     s = _txt(value)
-    if not s:
+    if not s or _is_legacy_lead_ref(s):
         return False
     return s.upper().startswith("SWA-") or bool(
         __import__("re").match(r"^[A-Z]{2,10}-\d", s.upper())
@@ -532,6 +536,9 @@ def _import_inquiries(s: Session, rows: list[dict], result: ImportResult) -> Non
             reference_id = _txt(d.get("Inquiry ID"))
             if not reference_id:
                 result.add_error(i, "missing Inquiry ID")
+                continue
+            if _is_legacy_lead_ref(reference_id):
+                result.skipped += 1
                 continue
             inquiry_date = _parse_date(d.get("Inquiry Date"))
             if inquiry_date is None:

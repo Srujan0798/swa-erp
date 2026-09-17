@@ -34,17 +34,17 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 
 | Area | Claim | Source |
 |------|--------|--------|
-| **Backend coverage** | **85%** overall (full suite with Redis up); all `services/*.py` ≥70% | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
+| **Backend coverage** | **85%** overall (full suite with Redis up, wave-47); **45%** measured local subset (no Redis) | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da`; local AGENT-1 |
 | **Backend suite (full, Redis up)** | **572 passed / 1 skipped / 0 failed** — 85% coverage | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
 | **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` |
 | **Frontend suite** | **523 passed / 0 failed** — measured 2026-09-15 | `npx vitest run` |
-| **Frontend coverage** | **Statements 60.63%**, **Branches 51.4%**, **Functions 58.45%**, **Lines 61.88%** (function coverage below 60% threshold) | `npx vitest run --coverage` |
+| **Frontend coverage** | **Statements 62.61%**, **Branches 53.48%**, **Functions 60.28%**, **Lines 63.78%** (function coverage **ABOVE 60% threshold**) | `npx vitest run --coverage` (this session) |
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client's Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired; `npx vitest run` gated in frontend job | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
 | **Observability** | `/metrics` (Prometheus, auth-gated by default), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
 | **Alembic** | Single head **0034** (invoice_number_seq + time_entry.billed) | `alembic heads` |
 
-**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend coverage without a fresh vitest paste. Function coverage is below the 60% threshold.
+**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Function coverage **now above 60% threshold** (60.28% measured this session). Always cite fresh vitest paste.
 
 ---
 

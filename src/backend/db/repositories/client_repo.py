@@ -50,6 +50,7 @@ def create(
     notes: str | None = None,
     industry: str | None = None,
     client_status: str = "Active",
+    first_inquiry_id: uuid.UUID | None = None,
 ) -> Client:
     client = Client(
         name=name,
@@ -67,6 +68,7 @@ def create(
         notes=notes,
         industry=industry,
         client_status=client_status,
+        first_inquiry_id=first_inquiry_id,
     )
     db.add(client)
     db.flush()

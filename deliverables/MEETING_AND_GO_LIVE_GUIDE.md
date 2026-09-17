@@ -3,7 +3,11 @@
 Share the **app** (`http://127.0.0.1:3100`), not this markdown.  
 Agent prompts live in `work/ASSIGN-TO-AGENTS.md` — not this file.
 
-Jaydeep is not here to redesign. Viraj tagged him because there is **no IT department**. Win: **one server name + 1–2 hour slot + Excel freeze name**.
+## Jaydeep — 12-minute walkthrough
+
+For Jaydeep, Viraj, and any CEO/CFO/technical attendees. Win: **one server owner + 1–2 hour assessment/install slot + Excel freeze owner**, with gaps recorded. The slot is not a go-live guarantee.
+
+**Timing:** opening 45s · app walkthrough 6m · eight questions 3m · limits 1m · close 1m15s.
 
 | | |
 |---|---|
@@ -176,7 +180,7 @@ Complete convert if they want to see it. If time is tight, cancel and say INQ-00
 
 - `SWA-2025-CLT-001` **Shabnam** — HVAC, Dormant
 - `SWA-2025-CLT-002` **Halcyon Technologies** — Pharmaceutical
-- `SWA-2025-CLT-003` **Acme air curtains Xylopia labs**
+- `SWA-2025-CLT-003` **Acme air curtains Xylopia labs** — client name taken verbatim from their own Clients sheet (two businesses on one row). NOT `seed-demo` data. If it reads oddly, say so plainly and move on.
 
 **Say:** “These names and industries come from your Clients sheet, not fake seed data. In the live OneDrive file you also have names like APEX and INNER — those are **clients**, not agreement types. We already locked that.”
 
@@ -381,7 +385,7 @@ If they go quiet: “Jaydeep — are you the server person? If yes, send me a 1�
 | Empty lists / amber banner | Re-run `make swa-live-local`. Do not show seed-demo. |
 | Convert button missing | Inquiry already Converted, or your user is not PM/admin. Use INQ-003 or log in as admin. |
 | UI not loading | Confirm you are on **:3100**. :3000 is a different app on this laptop. |
-| They say “this is dummy” | Point at `SWA-2025-SA-011` + INSUDESIGN + Shabnam / Halcyon from **their** xlsx. Offer to import **their** live file next. |
+| They say “this is dummy” | Point at `SWA-2025-SA-011` + INSUDESIGN + Shabnam / Halcyon from **their** xlsx. `CLT-003` (“Acme air curtains Xylopia labs”) is also from their Clients sheet, verbatim. Offer to import **their** live file next. |
 
 ---
 
@@ -389,7 +393,7 @@ If they go quiet: “Jaydeep — are you the server person? If yes, send me a 1�
 
 - Product **v1.0.1** — core Excel chain, GST invoices, RBAC, importer, Docker install path.
 - Quality track (CI, tests, load on a **dev** machine) is documented in `SUBMISSION.md` / `README.md`.
-- Not claimed: client-server load numbers; frontend function coverage is **below** the 60% threshold (state that if an evaluator asks).
+- Not claimed: client-server load numbers; frontend function coverage **now measured ABOVE** 60% threshold (60.35% — AGENT-1 fresh vitest run). Cite the fresh paste.
 - Remaining **client** work: server facts, Excel freeze + owner. Remaining **engineering** polish is not a meeting blocker.
 
 ---

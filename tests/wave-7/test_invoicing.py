@@ -1,7 +1,16 @@
 """Tests for Invoicing (Task 03)."""
-import pytest
+
 from datetime import date, timedelta
 from decimal import Decimal
+from uuid import UUID
+
+import pytest
+
+from src.backend.models.client import Client
+from src.backend.models.invoice import Invoice
+from src.backend.models.project import Project
+from src.backend.models.time_tracking import TimeEntry
+from src.backend.services.invoice_service import generate_from_time_entries
 
 pytestmark = pytest.mark.asyncio
 
@@ -106,7 +115,6 @@ async def test_generate_from_time_entries(authed_admin_client, db_session):
 
 async def test_generate_from_empty_entries(authed_admin_client, db_session):
     project_id = await _setup_project(authed_admin_client)
-    today = date.today()
     # Use a date range with no entries
     r = await authed_admin_client.post(
         f"/api/projects/{project_id}/invoices/generate-from-time",
@@ -116,6 +124,135 @@ async def test_generate_from_empty_entries(authed_admin_client, db_session):
         },
     )
     assert r.status_code == 400
+
+
+async def _seed_time_entries(db_session, project_id: UUID, admin_user) -> list[TimeEntry]:
+    entries = []
+    for hours, is_billable in ((Decimal("1.00"), True), (Decimal("2.00"), False)):
+        entry = TimeEntry(
+            project_id=project_id,
+            user_id=admin_user.id,
+            date=date.today(),
+            hours=hours,
+            description=f"Seed entry {len(entries)}",
+            is_billable=is_billable,
+        )
+        db_session.add(entry)
+        entries.append(entry)
+    db_session.commit()
+    for entry in entries:
+        db_session.refresh(entry)
+    return entries
+
+
+async def test_generate_excludes_nonbillable_and_marks_billed(
+    authed_admin_client, db_session, admin_user
+):
+    project_id = await _setup_project(authed_admin_client)
+    entries = await _seed_time_entries(db_session, project_id, admin_user)
+    start = (date.today() - timedelta(days=1)).isoformat()
+    end = (date.today() + timedelta(days=1)).isoformat()
+    r = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices/generate-from-time",
+        json={"start_date": start, "end_date": end},
+    )
+    assert r.status_code == 201
+    inv = r.json()
+    billed_entry_ids = [
+        UUID(item["time_entry_id"]) for item in inv["items"] if item["time_entry_id"]
+    ]
+    assert billed_entry_ids == [entries[0].id]
+    assert float(inv["subtotal"]) == 5000.00
+    assert float(inv["gst_percent"]) == 18.00
+    assert float(inv["gst_amount"]) == 900.00
+    assert float(inv["total"]) == 5900.00
+    db_session.expire_all()
+    assert db_session.get(TimeEntry, entries[0].id).is_billed is True
+    assert db_session.get(TimeEntry, entries[1].id).is_billed is False
+
+
+async def test_repeat_generation_rejected(authed_admin_client, db_session, admin_user):
+    project_id = await _setup_project(authed_admin_client)
+    entries = await _seed_time_entries(db_session, project_id, admin_user)
+    start = (date.today() - timedelta(days=1)).isoformat()
+    end = (date.today() + timedelta(days=1)).isoformat()
+    body = {"start_date": start, "end_date": end}
+    r1 = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices/generate-from-time", json=body
+    )
+    assert r1.status_code == 201
+    r2 = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices/generate-from-time", json=body
+    )
+    assert r2.status_code == 400
+    db_session.expire_all()
+    assert db_session.get(TimeEntry, entries[0].id).is_billed is True
+
+
+async def test_draft_deletion_releases_entries(authed_admin_client, db_session, admin_user):
+    project_id = await _setup_project(authed_admin_client)
+    entries = await _seed_time_entries(db_session, project_id, admin_user)
+    start = (date.today() - timedelta(days=1)).isoformat()
+    end = (date.today() + timedelta(days=1)).isoformat()
+    r = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices/generate-from-time",
+        json={"start_date": start, "end_date": end},
+    )
+    assert r.status_code == 201
+    inv_id = r.json()["id"]
+    r2 = await authed_admin_client.delete(f"/api/invoices/{inv_id}")
+    assert r2.status_code == 204
+    db_session.expire_all()
+    assert db_session.get(TimeEntry, entries[0].id).is_billed is False
+    r3 = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices/generate-from-time",
+        json={"start_date": start, "end_date": end},
+    )
+    assert r3.status_code == 201
+    assert UUID(r3.json()["items"][0]["time_entry_id"]) == entries[0].id
+
+
+async def test_generate_rolls_back_flags_on_failure(db_session, monkeypatch):
+    today = date.today()
+    project = db_session.query(Project).filter(Project.code == "TP-1").one_or_none()
+    if project is None:
+        client = db_session.query(Client).filter(Client.code == "TC").one_or_none()
+        if client is None:
+            client = Client(name="Rollback Client", code="TC", primary_email="rollback@test.com")
+            db_session.add(client)
+            db_session.commit()
+            db_session.refresh(client)
+        project = Project(client_id=client.id, name="Rollback Project", code="TP-1")
+        db_session.add(project)
+        db_session.commit()
+        db_session.refresh(project)
+    entry = TimeEntry(
+        project_id=project.id,
+        user_id=project.client_id,
+        date=today,
+        hours=Decimal("1.00"),
+        description="Rollback entry",
+        is_billable=True,
+    )
+    db_session.add(entry)
+    db_session.commit()
+    db_session.refresh(entry)
+
+    def explode(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("src.backend.services.invoice_service.create_invoice_service", explode)
+    with pytest.raises(RuntimeError, match="boom"):
+        generate_from_time_entries(
+            db_session,
+            project_id=project.id,
+            user_id=project.client_id,
+            start_date=today,
+            end_date=today,
+        )
+    db_session.expire_all()
+    assert db_session.get(TimeEntry, entry.id).is_billed is False
+    assert db_session.query(Invoice).filter(Invoice.project_id == project.id).count() == 0
 
 
 async def test_send_invoice(authed_admin_client, db_session):

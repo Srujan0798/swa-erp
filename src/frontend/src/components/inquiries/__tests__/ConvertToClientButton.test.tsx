@@ -21,9 +21,16 @@ vi.mock("@/hooks/useInquiries", () => ({
 }));
 
 const candidates = [
-  { id: "client-1", name: "Acme Corp", code: "AC-001" },
-  { id: "client-2", name: "Acme Corp", code: "AC-002" },
+  { id: "11111111-1111-4111-8111-111111111111", name: "Acme Corp", code: "AC-001" },
+  { id: "22222222-2222-4222-8222-222222222222", name: "Acme Corp", code: "AC-002" },
 ];
+const ambiguousBody = {
+  detail: {
+    detail: "Ambiguous client match",
+    inquiry_client_name: "Acme Corp",
+    candidates,
+  },
+};
 
 function renderButton() {
   return render(
@@ -37,7 +44,7 @@ function renderButton() {
 
 describe("ConvertToClientButton", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     convertMutationMock.mutateAsync.mockResolvedValue({
       inquiry: {},
       client_id: "client-new",
@@ -75,68 +82,121 @@ describe("ConvertToClientButton", () => {
 
   it("shows the ambiguous-match picker when the API returns 300 with candidates", async () => {
     const user = userEvent.setup();
-    convertMutationMock.mutateAsync.mockRejectedValue(
-      new ApiError(300, { candidates })
-    );
+    const error = new ApiError(300, ambiguousBody);
+    convertMutationMock.mutateAsync.mockRejectedValue(error);
+    convertMutationMock.isError = true;
+    convertMutationMock.error = error;
     renderButton();
 
     await user.click(screen.getByRole("button", { name: /convert to project/i }));
     await user.click(screen.getByRole("button", { name: /^convert$/i }));
 
     expect(screen.getByText(/multiple clients named/i)).toBeInTheDocument();
-    expect(screen.getAllByRole("radio")).toHaveLength(3);
+    expect(screen.getAllByRole("radio")).toHaveLength(2);
+    expect(screen.queryByLabelText(/create a new client/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/choose one or create/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/conversion failed/i)).not.toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
     expect(screen.getByText("(AC-001)")).toBeInTheDocument();
     expect(screen.getByText("(AC-002)")).toBeInTheDocument();
 
-    // Convert is disabled until a choice is made
     expect(screen.getByRole("button", { name: /^convert$/i })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: /^convert$/i }));
+    expect(convertMutationMock.mutateAsync).toHaveBeenCalledTimes(1);
   });
 
-  it("reuses an existing client when one is selected and navigates to the project", async () => {
+  it("retries with the explicitly selected client and preserves project fields", async () => {
     const user = userEvent.setup();
     convertMutationMock.mutateAsync
-      .mockRejectedValueOnce(new ApiError(300, { candidates }))
+      .mockRejectedValueOnce(new ApiError(300, ambiguousBody))
       .mockResolvedValueOnce({
         inquiry: {},
-        client_id: "client-1",
+        client_id: candidates[1].id,
         project_id: "project-42",
       });
     renderButton();
 
     await user.click(screen.getByRole("button", { name: /convert to project/i }));
+    await user.type(screen.getByLabelText(/project code/i), "AC-2026-01");
+    await user.type(screen.getByLabelText(/^location$/i), "Mumbai");
+    await user.type(screen.getByLabelText(/^description$/i), "Design work");
+    await user.type(screen.getByLabelText(/start date/i), "2026-09-17");
+    await user.type(screen.getByLabelText(/target end date/i), "2026-10-17");
     await user.click(screen.getByRole("button", { name: /^convert$/i }));
 
-    await user.click(screen.getAllByRole("radio")[0]);
+    const payload = {
+      project_name: "Acme Corp - Project",
+      project_code: "AC-2026-01",
+      project_description: "Design work",
+      location: "Mumbai",
+      start_date: "2026-09-17",
+      target_end_date: "2026-10-17",
+      estimated_value: 1500000,
+    };
+    expect(convertMutationMock.mutateAsync).toHaveBeenNthCalledWith(1, {
+      id: "inq-1",
+      payload,
+    });
+    expect(screen.getByRole("button", { name: /^convert$/i })).toBeDisabled();
+    await user.click(screen.getByRole("radio", { name: /AC-002/ }));
+    expect(screen.getByRole("button", { name: /^convert$/i })).toBeEnabled();
     await user.click(screen.getByRole("button", { name: /^convert$/i }));
 
     await waitFor(() =>
-      expect(convertMutationMock.mutateAsync).toHaveBeenCalledWith({
+      expect(convertMutationMock.mutateAsync).toHaveBeenNthCalledWith(2, {
         id: "inq-1",
-        payload: expect.objectContaining({ client_id: "client-1" }),
+        payload: { ...payload, client_id: candidates[1].id },
       })
     );
+    expect(convertMutationMock.mutateAsync).toHaveBeenCalledTimes(2);
     expect(navigateMock).toHaveBeenCalledWith("/projects/project-42");
   });
 
-  it("creates a new client when the new-client option is selected", async () => {
+  it.each([
+    null,
+    {},
+    { candidates },
+    { detail: null },
+    { detail: "Invalid conversion response" },
+    { detail: {} },
+    { detail: { candidates: [] } },
+    { detail: { candidates: "invalid" } },
+    { detail: { candidates: [null] } },
+    { detail: { candidates: [{ id: "", name: "Acme Corp", code: "AC-001" }] } },
+    { detail: { candidates: [{ id: 42, name: "Acme Corp", code: "AC-001" }] } },
+    { detail: { candidates: [{ id: candidates[0].id, name: {}, code: "AC-001" }] } },
+    { detail: { candidates: [candidates[0], { id: candidates[1].id }] } },
+  ])("surfaces malformed HTTP 300 responses: %j", async (body) => {
     const user = userEvent.setup();
-    convertMutationMock.mutateAsync.mockRejectedValue(
-      new ApiError(300, { candidates })
-    );
+    const error = new ApiError(300, body);
+    convertMutationMock.mutateAsync.mockRejectedValue(error);
+    convertMutationMock.isError = true;
+    convertMutationMock.error = error;
     renderButton();
 
     await user.click(screen.getByRole("button", { name: /convert to project/i }));
     await user.click(screen.getByRole("button", { name: /^convert$/i }));
 
-    await user.click(screen.getByLabelText(/create a new client/i));
+    expect(screen.getByText(`Conversion failed: ${error.message}`)).toBeInTheDocument();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^convert$/i })).toBeEnabled();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("requires a fresh selection if the API returns candidates again", async () => {
+    const user = userEvent.setup();
+    convertMutationMock.mutateAsync.mockRejectedValue(new ApiError(300, ambiguousBody));
+    renderButton();
+
+    await user.click(screen.getByRole("button", { name: /convert to project/i }));
+    await user.click(screen.getByRole("button", { name: /^convert$/i }));
+    await user.click(screen.getByRole("radio", { name: /AC-001/ }));
     await user.click(screen.getByRole("button", { name: /^convert$/i }));
 
-    await waitFor(() =>
-      expect(convertMutationMock.mutateAsync).toHaveBeenCalledWith({
-        id: "inq-1",
-        payload: expect.not.objectContaining({ client_id: expect.any(String) }),
-      })
-    );
+    expect(screen.getByRole("radio", { name: /AC-001/ })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: /^convert$/i })).toBeDisabled();
+    expect(convertMutationMock.mutateAsync).toHaveBeenCalledTimes(2);
+    expect(navigateMock).not.toHaveBeenCalled();
   });
 
   it("disables convert while the mutation is pending", () => {
@@ -147,16 +207,22 @@ describe("ConvertToClientButton", () => {
     expect(btn).toBeDisabled();
   });
 
-  it("renders non-300 errors inline", async () => {
+  it.each([
+    new Error("boom"),
+    new ApiError(409, { detail: "Inquiry already converted" }),
+    new ApiError(500, ambiguousBody),
+  ])("preserves non-300 errors inline: %s", async (error) => {
     const user = userEvent.setup();
-    convertMutationMock.mutateAsync.mockRejectedValue(new Error("boom"));
+    convertMutationMock.mutateAsync.mockRejectedValue(error);
     convertMutationMock.isError = true;
-    convertMutationMock.error = new Error("boom");
+    convertMutationMock.error = error;
     renderButton();
 
     await user.click(screen.getByRole("button", { name: /convert to project/i }));
     await user.click(screen.getByRole("button", { name: /^convert$/i }));
 
-    expect(screen.getByText(/conversion failed: boom/i)).toBeInTheDocument();
+    expect(screen.getByText(`Conversion failed: ${error.message}`)).toBeInTheDocument();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
   });
 });

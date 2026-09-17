@@ -15,6 +15,7 @@ from src.backend.db.repositories.invoice_repo import (
     soft_delete_invoice,
     update_invoice_status,
 )
+from src.backend.models.invoice import Invoice, InvoiceItem
 from src.backend.models.project import Project
 from src.backend.models.time_tracking import TimeEntry
 from src.backend.models.user import User
@@ -139,13 +140,22 @@ def generate_from_time_entries(
             TimeEntry.date >= start_date,
             TimeEntry.date <= end_date,
             TimeEntry.is_billable.is_(True),
+            TimeEntry.is_billed.is_(False),
             TimeEntry.deleted_at.is_(None),
+            ~db.query(InvoiceItem.id)
+            .join(Invoice)
+            .filter(InvoiceItem.time_entry_id == TimeEntry.id, Invoice.deleted_at.is_(None))
+            .exists(),
         )
+        .order_by(TimeEntry.id)
+        .populate_existing()
+        .with_for_update()
         .all()
     )
 
     if not entries:
-        raise ValueError("No billable time entries found for the given date range")
+        db.rollback()
+        raise ValueError("No unbilled billable time entries found for the given date range")
 
     # Rate from settings (DEFAULT_HOURLY_RATE_INR), not a silent magic number in logic.
     rate_per_hour = Decimal(settings.DEFAULT_HOURLY_RATE_INR)
@@ -165,15 +175,19 @@ def generate_from_time_entries(
             }
         )
 
-    return create_invoice_service(
-        db,
-        project_id=project_id,
-        user_id=user_id,
-        due_date=None,
-        notes=f"Invoice for period {start_date} to {end_date}",
-        tax_rate=tax_rate,
-        items_data=items_data,
-    )
+    try:
+        return create_invoice_service(
+            db,
+            project_id=project_id,
+            user_id=user_id,
+            due_date=None,
+            notes=f"Invoice for period {start_date} to {end_date}",
+            tax_rate=tax_rate,
+            items_data=items_data,
+        )
+    except Exception:
+        db.rollback()
+        raise
 
 
 def update_invoice_status_service(
@@ -193,7 +207,7 @@ def update_invoice_status_service(
     allowed = valid_transitions.get(invoice.status, [])
     if new_status not in allowed:
         raise ValueError(
-            f"Cannot transition from '{invoice.status}' to '{new_status}'. " f"Allowed: {allowed}"
+            f"Cannot transition from '{invoice.status}' to '{new_status}'. Allowed: {allowed}"
         )
 
     from datetime import datetime, time

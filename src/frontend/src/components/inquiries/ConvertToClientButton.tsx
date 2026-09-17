@@ -16,6 +16,31 @@ import { useConvertInquiry } from "@/hooks/useInquiries";
 import { ApiError } from "@/lib/api";
 import type { InquiryCandidateClient, InquiryConvertPayload } from "@/types/api";
 
+function getCandidateClients(error: unknown): InquiryCandidateClient[] | null {
+  if (!(error instanceof ApiError) || error.status !== 300) return null;
+  const body = error.body;
+  if (!body || typeof body !== "object" || !("detail" in body)) return null;
+  const detail = body.detail;
+  if (!detail || typeof detail !== "object" || !("candidates" in detail)) return null;
+  const matches: unknown = detail.candidates;
+  if (
+    !Array.isArray(matches) ||
+    matches.length === 0 ||
+    !matches.every(
+      (candidate): candidate is InquiryCandidateClient =>
+        candidate !== null &&
+        typeof candidate === "object" &&
+        typeof candidate.id === "string" &&
+        candidate.id.trim().length > 0 &&
+        typeof candidate.name === "string" &&
+        typeof candidate.code === "string"
+    )
+  ) {
+    return null;
+  }
+  return matches;
+}
+
 interface ConvertToClientButtonProps {
   inquiryId: string;
   inquiryClientName: string;
@@ -83,11 +108,10 @@ export function ConvertToClientButton({
       setOpen(false);
       navigate(`/projects/${result.project_id}`);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 300) {
-        const body = err.body as { candidates?: InquiryCandidateClient[] } | null;
-        if (body?.candidates) {
-          setCandidates(body.candidates);
-        }
+      const matches = getCandidateClients(err);
+      if (matches) {
+        setCandidates(matches);
+        setSelectedClientId(null);
       }
     }
   };
@@ -95,16 +119,8 @@ export function ConvertToClientButton({
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!projectName.trim()) return;
-    // selectedClientId === "new" | null → create new client; uuid → reuse
-    if (candidates && selectedClientId === null) {
-      // require explicit choice when matches exist
-      return;
-    }
-    const clientId =
-      candidates && selectedClientId && selectedClientId !== "new"
-        ? selectedClientId
-        : undefined;
-    await performConvert(clientId);
+    if (candidates && selectedClientId === null) return;
+    await performConvert(selectedClientId ?? undefined);
   };
 
   return (
@@ -122,8 +138,8 @@ export function ConvertToClientButton({
             <DialogTitle>Convert Inquiry to Project</DialogTitle>
             <DialogDescription>
               {candidates
-                ? `Multiple clients named "${inquiryClientName}" exist. Choose one or create a new client — then you always land on the new Project.`
-                : `Check client → create if missing → always land on a Project (Meeting 2). Working from "${inquiryClientName}".`}
+                ? `Multiple clients named "${inquiryClientName}" exist. Select an existing client to create the project under.`
+                : `Create a project for "${inquiryClientName}". An existing client will be reused, or a client will be created if no match exists.`}
             </DialogDescription>
           </DialogHeader>
 
@@ -152,19 +168,6 @@ export function ConvertToClientButton({
                       </span>
                     </label>
                   ))}
-                  <label className="flex cursor-pointer items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="client_match"
-                      value="new"
-                      checked={selectedClientId === "new"}
-                      onChange={() => setSelectedClientId("new")}
-                    />
-                    <span className="font-medium">Create a new client</span>
-                    <span className="text-xs text-muted-foreground">
-                      (do not reuse matches above)
-                    </span>
-                  </label>
                 </div>
               </div>
             )}
@@ -229,7 +232,7 @@ export function ConvertToClientButton({
               </div>
             </div>
 
-            {mutation.isError && !(mutation.error instanceof ApiError && (mutation.error as ApiError).status === 300) && (
+            {mutation.isError && !getCandidateClients(mutation.error) && (
               <p className="text-sm text-red-500">
                 Conversion failed: {(mutation.error as Error).message}
               </p>

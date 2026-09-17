@@ -219,8 +219,14 @@ def scratch_db():
         if engine is not None:
             try:
                 with engine.connect() as conn:
-                    conn.execute(text("DROP SCHEMA public CASCADE"))
-                    conn.execute(text("CREATE SCHEMA public"))
+                    # TRUNCATE instead of DROP SCHEMA to avoid deadlocks
+                    result = conn.execute(text("""
+                        SELECT tablename FROM pg_tables 
+                        WHERE schemaname = 'public' AND tablename != 'alembic_version'
+                    """))
+                    tables = [row[0] for row in result]
+                    if tables:
+                        conn.execute(text(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE"))
                 engine.dispose()
             except Exception:
                 pass

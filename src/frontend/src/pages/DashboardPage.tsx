@@ -38,6 +38,14 @@ const FLOW = [
   },
   {
     step: "3",
+    title: "Project",
+    desc: "Work package",
+    to: "/projects",
+    icon: FolderKanban,
+    key: "prj" as const,
+  },
+  {
+    step: "4",
     title: "Service Agreement",
     desc: "Year retainer (SA)",
     to: "/agreements",

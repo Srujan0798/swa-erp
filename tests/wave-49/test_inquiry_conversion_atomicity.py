@@ -50,7 +50,7 @@ def test_convert_inquiry_rolls_back_client_on_project_failure(db_session, actor)
 
 # Force project creation to fail AFTER client has been created
     with patch(
-        "src.backend.db.repositories.project_repo.create_project",
+        "src.backend.services.inquiry_service.create_project",
         side_effect=RuntimeError("simulated project failure"),
     ):
         with pytest.raises(RuntimeError):
