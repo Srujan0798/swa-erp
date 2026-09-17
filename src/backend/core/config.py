@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     # estimates. Not invented math — configurable via env; override per invoice
     # generate call when a project-specific rate is known.
     DEFAULT_HOURLY_RATE_INR: str = "5000.00"
+    DEFAULT_GST_RATE_INR: str = "18.00"
 
     @model_validator(mode="after")
     def _validate_production_secrets(self) -> "Settings":

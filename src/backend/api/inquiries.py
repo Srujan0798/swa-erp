@@ -77,7 +77,7 @@ def update_inquiry(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InquiryRead:
-    inquiry = update_inquiry_service(db, inquiry_id, body, current_user.id)
+    inquiry = update_inquiry_service(db, inquiry_id, body.model_dump(), current_user.id)
     if not inquiry:
         raise HTTPException(status_code=404, detail="Inquiry not found")
     return InquiryRead.model_validate(inquiry)

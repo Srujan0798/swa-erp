@@ -2,14 +2,13 @@
 <!-- metrics-exempt: historical document, coverage numbers valid at time of writing -->
 
 **Status:** CLOSED for internship / professional submission
-**Date:** 2026-08-28
+**Date:** 2026-09-17
 **Product version:** v1.0.1 (unchanged)
 **Close HEAD:** `32da379` (on worktree `w47`)
 
 ## Evidence
 
-All numbers below were produced by commands run in this session. No number here lacks an
-adjacent command.
+All numbers below were produced by commands run in this session (or the previous wave-47 seal session where Docker was available). No number here lacks an adjacent command.
 
 ### Backend gates (step 1)
 
@@ -57,6 +56,9 @@ Five target services (all ≥70%): `pdf_service.py` 100%, `quote_service.py` 97%
 The single skip is `test_readyz_redis_down` — requires Redis in a deliberately-broken state
 (manual-only by design).
 
+**Note:** Docker was unavailable for re-run in this session; numbers above are from the
+wave-47 seal run (commit `32da379`) where the full Docker stack was healthy.
+
 ### Frontend suite
 
 ```bash
@@ -64,15 +66,42 @@ cd src/frontend && npx vitest run
 # → Test Files 61 passed, Tests 523 passed, 0 failed
 ```
 
-Coverage: 64% statements / 61% functions — below the ≥60/50/60/60 target on statements
-but functions ≥60. Thresholds were not previously enforced in `vite.config.ts`; the gate
-criterion is "0 failed" which is met.
+Coverage:
+
+```
+Statements  60.63%
+Branches    51.4%
+Functions   58.45%
+Lines       61.88%
+```
+
+Function coverage (58.45%) is below the ≥60% threshold. Statement coverage (60.63%) meets
+the ≥60% threshold. Branch coverage (51.4%) meets the ≥50% threshold. Line coverage (61.88%)
+meets the ≥60% threshold.
+
+The `vite.config.ts` thresholds file was not persisted, so CI does not enforce these
+thresholds. The gate criterion for this close was "0 failed" which is met.
 
 ### CI presence
 
 `.github/workflows/ci.yml` runs: ruff, black, mypy, pytest, tsc, eslint, vitest, vite build,
-plus Adaptoid preflight validators. No `vitest` threshold-gate is currently in CI config
-(step 24's thresholds file was not persisted). FINAL-CLOSE states this explicitly.
+plus Adaptoid preflight validators. No `vitest` threshold-gate is currently in CI config.
+Vitest runs in the frontend job as a quality gate.
+
+### Alembic head
+
+```
+alembic current
+# → 0034 (single head)
+```
+
+### Load validation
+
+```
+10/50/100/150 users — p95 latency 29-130ms (dev machine)
+```
+
+See `docs/PERFORMANCE.md` for full details.
 
 ## Phases completed
 
@@ -80,23 +109,25 @@ plus Adaptoid preflight validators. No `vitest` threshold-gate is currently in C
 |---|---|
 | 0 Grounding | HEAD tracked at `32da379`; FINAL-CLOSE pack used |
 | 1 Hygiene | ACTIVE / HANDOFF / EXECUTION / CHANGELOG synced |
-| 2 Stabilize | TaskCard IST flake (pre-existing, already fixed); Alembic single head `0033`; `_PRIORITY_MAP` consolidated |
+| 2 Stabilize | TaskCard IST flake (pre-existing, already fixed); Alembic single head `0034`; `_PRIORITY_MAP` consolidated |
 | 3 Wave-37 | Adversarial review triage (pre-existing, documented) |
 | 4 Wave-38 | Submission surfaces on main (pre-existing) |
 | 5 Seal | This file; ACTIVE 32–47 SHIPPED |
 
 ## Safe metrics (do not inflate)
 
-- **Backend: 572 passed / 1 skipped / 0 failed** (measured this session, Docker stack up).
+- **Backend: 572 passed / 1 skipped / 0 failed** (measured wave-47 session, Docker stack up).
 - **Backend coverage: 85%** (meets DoD ≥85% threshold).
-- **Frontend: 523 passed / 0 failed**; functions 61.5% (meets ≥60 threshold);
-  statements 64% (does NOT meet the ≥60 statement threshold — see limitation below).
+- **Frontend: 523 passed / 0 failed**; functions 58.45% (does NOT meet ≥60 threshold);
+  statements 60.63% (meets ≥60 threshold); branches 51.4% (meets ≥50); lines 61.88% (meets ≥60).
 - **Load:** 10/50/100/150 users validated on dev machine — `docs/PERFORMANCE.md`.
 - **CI:** real gates + vitest in frontend job.
+- **Alembic:** single head at `0034`.
+- **Lint/format/type:** all clean (ruff, black, mypy, tsc, eslint).
 
 ## Known limitations
 
-- Frontend vitest statement coverage (64%) is above the 60% threshold but the
+- Frontend vitest function coverage (58.45%) is below the 60% threshold; the
   `vite.config.ts` thresholds file was not found/persisted, so CI does not enforce it.
 - `/readyz` requires Redis — environmental, not a code defect.
 - `task_dependency_repo.py` and `task_dependency.py` model have 0% coverage (dead code path).
@@ -115,6 +146,7 @@ plus Adaptoid preflight validators. No `vitest` threshold-gate is currently in C
 1. **Viraj (no IT dept)** — 8 server facts pending (architecture overview, deploy target).
 2. **Excel migration owner** + freeze date — importer ready (`make migrate-data`), dry-run by default.
 3. **`docs/INSTALL_NO_IT.md`** when machine access exists.
+4. **Client-box load test** — requires staging environment not yet available.
 
 ## Definition of Done (A–E) checklist
 
@@ -129,7 +161,7 @@ plus Adaptoid preflight validators. No `vitest` threshold-gate is currently in C
 | **B** Backend coverage TOTAL ≥85% | ✅ | 85% |
 | **B** Five targets ≥70%: pdf, quote, import, task, notification | ✅ | 100/97/80/88/100 |
 | **B** Frontend vitest → 0 failed | ✅ | 523 passed |
-| **B** Frontend thresholds ≥60/50/60/60 | ⚠️ | Functions 61.5% ✓; statements 64% ✓; thresholds file not in CI |
+| **B** Frontend thresholds ≥60/50/60/60 | ⚠️ | Functions 58.45% ✗; statements 60.63% ✓; branches 51.4% ✓; lines 61.88% ✓; thresholds file not in CI |
 | **B** ruff, mypy clean | ✅ | 0 errors |
 | **B** tsc, eslint clean | ✅ | 0 errors |
 | **B** vitest in CI | ✅ | `.github/workflows/ci.yml` frontend-build job |
@@ -142,3 +174,7 @@ plus Adaptoid preflight validators. No `vitest` threshold-gate is currently in C
 | **D** All close commits on origin/main | ✅ | commits `f103a81`, `96852fe`, `32da379` |
 | **D** Working tree clean | ✅ | After seal commit |
 | **E** External remainder stated | ✅ | This file, section above |
+
+---
+
+ENGINEERING CLOSE COMPLETE

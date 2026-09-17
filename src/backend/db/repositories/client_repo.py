@@ -75,13 +75,13 @@ def create(
 
 
 def update(db: Session, client: Client) -> Client:
-    db.commit()
+    db.flush()
     db.refresh(client)
     return client
 
 
 def soft_delete(db: Session, client: Client) -> Client:
     client.deleted_at = datetime.now(tz=UTC)
-    db.commit()
+    db.flush()
     db.refresh(client)
     return client

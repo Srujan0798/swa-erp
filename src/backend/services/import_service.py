@@ -747,7 +747,10 @@ def _import_document_references(s: Session, rows: list[dict], result: ImportResu
                 "import.documents.row_failed",
                 row=i,
                 reference_id=_txt(_record_get(d, "Doc Ref No", "DRN")) or "",
-                associated=_txt(_record_get(d, "Associated Project/Token ID", "Associated Project ID")) or "",
+                associated=_txt(
+                    _record_get(d, "Associated Project/Token ID", "Associated Project ID")
+                )
+                or "",
                 error=str(e),
             )
             result.add_error(i, str(e))
@@ -1078,10 +1081,14 @@ def import_sheet(
         cfg["fn"](session, rows, result)
         if commit:
             session.commit()
-            logger.info("import.sheet_committed", sheet_type=sheet_type, total_rows=result.total_rows)
+            logger.info(
+                "import.sheet_committed", sheet_type=sheet_type, total_rows=result.total_rows
+            )
         else:
             session.rollback()
-            logger.info("import.sheet_rolled_back", sheet_type=sheet_type, total_rows=result.total_rows)
+            logger.info(
+                "import.sheet_rolled_back", sheet_type=sheet_type, total_rows=result.total_rows
+            )
     except Exception as e:
         session.rollback()
         # Do not report inflated create/update counts after a full rollback

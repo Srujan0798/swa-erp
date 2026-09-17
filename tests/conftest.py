@@ -1,4 +1,5 @@
 import os
+import uuid
 
 # Disable the auth rate limiter for the test suite BEFORE the app is imported.
 os.environ.setdefault("DISABLE_AUTH_RATE_LIMIT", "1")
@@ -208,7 +209,9 @@ def designer_user(db_session):
 def client_factory(db_session):
     created = []
 
-    def _create(name="Test Client", code="TC-1"):
+    def _create(name="Test Client", code=None):
+        if code is None:
+            code = f"TC-{uuid.uuid4().hex[:6]}"
         c = Client(name=name, code=code, primary_email=f"{code}@test.com")
         db_session.add(c)
         db_session.commit()

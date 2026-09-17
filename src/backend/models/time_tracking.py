@@ -23,6 +23,7 @@ class TimeEntry(Base):
     hours: Mapped[Decimal] = mapped_column(Numeric(4, 2), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     is_billable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_billed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
     # Excel Time Logging Sheet columns (high-frequency)
     employee_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     employee_role: Mapped[str | None] = mapped_column(String(50), nullable=True)

@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -196,7 +196,7 @@ def update_invoice_status_service(
             f"Cannot transition from '{invoice.status}' to '{new_status}'. " f"Allowed: {allowed}"
         )
 
-    paid_at = datetime.now(tz=UTC) if new_status == "paid" else None
+    paid_at = date.today() if new_status == "paid" else None
     updated = update_invoice_status(db, invoice_id, new_status, paid_at=paid_at)
     logger.info(
         "invoice.status_changed",

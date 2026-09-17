@@ -193,9 +193,8 @@ def get_standards(
 def get_checklist_items_by_standard(
     db: Session, standard_id: uuid.UUID, page: int = 1, page_size: int = 100
 ) -> tuple[list[ComplianceChecklistItem], int]:
-    query = (
-        db.query(ComplianceChecklistItem)
-        .filter(ComplianceChecklistItem.standard_id == standard_id)
+    query = db.query(ComplianceChecklistItem).filter(
+        ComplianceChecklistItem.standard_id == standard_id
     )
     total = query.count()
     offset = (page - 1) * page_size

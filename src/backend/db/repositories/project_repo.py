@@ -109,7 +109,7 @@ def update_project(
             setattr(project, key, value)
 
     project.version += 1
-    db.commit()
+    db.flush()
     db.refresh(project)
     return project
 
@@ -119,7 +119,7 @@ def soft_delete_project(db: Session, project_id: uuid.UUID) -> bool:
     if not project:
         return False
     project.deleted_at = datetime.now(tz=UTC)
-    db.commit()
+    db.flush()
     return True
 
 

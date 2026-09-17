@@ -53,7 +53,12 @@ def list_metrics(
         query = query.filter(SustainabilityMetric.reference_id == reference_id)
     total = query.count()
     offset = (page - 1) * page_size
-    items = query.order_by(desc(SustainabilityMetric.recorded_date)).offset(offset).limit(page_size).all()
+    items = (
+        query.order_by(desc(SustainabilityMetric.recorded_date))
+        .offset(offset)
+        .limit(page_size)
+        .all()
+    )
     return items, total
 
 

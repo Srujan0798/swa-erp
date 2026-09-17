@@ -41,7 +41,9 @@ def login(
         )
         return None
 
-    access_token = create_access_token(user.id, user.role)
+    access_token = create_access_token(
+        {"sub": str(user.id), "role": user.role, "token_version": user.token_version}
+    )
     refresh_token = create_refresh_token(user.id)
 
     create_refresh_token_record(db, user.id, refresh_token, settings.JWT_REFRESH_TTL_DAYS)
@@ -77,7 +79,9 @@ def refresh_access_token(db: Session, refresh_token: str) -> AccessTokenResponse
     if not user or not user.is_active or user.deleted_at:
         return None
 
-    new_access_token = create_access_token(user.id, user.role)
+    new_access_token = create_access_token(
+        {"sub": str(user.id), "role": user.role, "token_version": user.token_version}
+    )
     new_refresh_token = create_refresh_token(user.id)
 
     create_refresh_token_record(db, user.id, new_refresh_token, settings.JWT_REFRESH_TTL_DAYS)
@@ -97,6 +101,16 @@ def logout(
     ip_address: str | None = None,
     user_agent: str | None = None,
 ) -> bool:
+    from src.backend.db.repositories.user_repo import get_by_id
+
+    # Increment token_version so all existing access tokens become invalid.
+    user = get_by_id(db, user_id)
+    if user is not None:
+        user.token_version += 1
+        db.commit()
+    return True
+
     revoke_all_for_user(db, user_id)
     record_event(db, "auth.logout", user_id=user_id, ip_address=ip_address, user_agent=user_agent)
     return True
+

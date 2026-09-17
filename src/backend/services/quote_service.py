@@ -377,4 +377,3 @@ def clone_to_draft(db: Session, quote_id: uuid.UUID, actor_id: uuid.UUID) -> dic
     )
 
     return _quote_to_enriched_dict(cloned, db)
-

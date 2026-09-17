@@ -86,7 +86,7 @@ def convert_inquiry(
             existing = (
                 db.query(Client)
                 .filter(
-                    Client.name.ilike(body.project_name or inquiry.client_name),
+                    Client.name.ilike(inquiry.client_name),
                     Client.deleted_at.is_(None),
                 )
                 .first()

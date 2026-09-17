@@ -26,9 +26,18 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid or expired token") from e
     if payload.get("type") != "access":
         raise HTTPException(status_code=401, detail="Wrong token type")
-    user = get_by_id(db, UUID(payload["sub"]))
+
+    user_id = UUID(payload["sub"])
+    user = get_by_id(db, user_id)
     if not user or not user.is_active or user.deleted_at:
         raise HTTPException(status_code=401, detail="User not active")
+
+    # Verify token_version: reject access tokens minted before a logout/rotation.
+    token_version = payload.get("v")  # str or int or None
+    if token_version is not None:
+        if user.token_version != int(token_version):
+            raise HTTPException(status_code=401, detail="Token revoked — please log in again")
+
     return user
 
 

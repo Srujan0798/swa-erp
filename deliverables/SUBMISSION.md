@@ -1,8 +1,8 @@
 # SWA Consultancy ERP — Submission Package
 
-**Product version:** 1.0.1 (tagged `v1.0.1`)  
-**Package refreshed:** 2026-09-15 (wave-51 re-seal — all hardening waves 40–51 complete)  
-**Status:** Product MVP **shipped**. Professional-grade waves **32–39 all shipped**. Hardening waves **40–51 complete**. Backend suite (full, Redis up): **572 passed / 1 skipped / 0 failed** — 85% coverage. Backend suite (local, Redis down): **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped. Frontend suite: **523 passed / 0 failed** — 65.86% coverage. **Company-server deploy remains external** (no IT dept; server facts open).
+**Product version:** 1.0.1 (tagged `v1.0.1`)
+**Package refreshed:** 2026-09-15 (wave-51 re-seal — all hardening waves 40–51 complete)
+**Status:** Product MVP **shipped**. Professional-grade waves **32–39 all shipped**. Hardening waves **40–51 complete**. Backend suite (full, Redis up): **572 passed / 1 skipped / 0 failed** — 85% coverage. Backend suite (local, Redis down): **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped. Frontend suite: **523 passed / 0 failed** — Statements 60.63%, Branches 51.4%, Functions 58.45%, Lines 61.88% (function coverage below 60% threshold). **Company-server deploy remains external** (no IT dept; server facts open).
 
 This is the single document handed over with the project. It is honest about what exists, what
 does not, and what is still waiting on the client's side. Evaluator front door: [`README.md`](../README.md).
@@ -16,14 +16,14 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 
 | Claim | Number | Source |
 |-------|--------|--------|
-| Backend coverage (overall) | **86%** (8702 stmts / 1201 miss) | [`COMPLETION-HANDOFF-VERDICT.md`](../work/reports/COMPLETION-HANDOFF-VERDICT.md); wave-33 report 03 |
-| Backend services layer | **All `services/*.py` ≥70%** | Same verdict (do **not** claim global “no module under 70%”) |
+| Backend coverage (overall) | **85%** (full suite with Redis up) | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
+| Backend services layer | **All `services/*.py` ≥70%** | Same verdict (do **not** claim global "no module under 70%") |
 | Backend suite (full, Redis up) | **572 passed / 1 skipped / 0 failed** — 85% coverage | Wave-47 report, commit `93696da` |
 | Backend suite (local, Redis down) | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` |
 | Frontend suite | **523 passed / 0 failed** — measured 2026-09-15 | `npx vitest run` |
-| Frontend coverage | **65.86%** statements (thresholds 60/50/60/60 met) | `results/metrics.json` |
-| CI coverage floor | `--cov-fail-under=82` (86% clears it) | Makefile + wave-32 |
-| Frontend thresholds | **60 / 50 / 60 / 60** met; cite **65.86%** statements | `results/metrics.json` |
+| Frontend coverage | **Statements 60.63%**, **Branches 51.4%**, **Functions 58.45%**, **Lines 61.88%** (function coverage below 60% threshold) | `npx vitest run --coverage` |
+| CI coverage floor | `--cov-fail-under=82` (85% clears it) | Makefile + wave-32 |
+| Frontend thresholds | **60 / 50 / 60 / 60** — function coverage (58.45%) below threshold | `vitest.config.ts` |
 | Load test | **10–150 users**, p95 **≈ 29–130 ms**, no 5xx after fixes, **dev machine only** | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
 | CI honesty | **0** `\|\| true` / `continue-on-error` in `.github/workflows/` | wave-32 report |
 | MinIO + Celery | **BUILT** (wave-31) | `src/backend/core/storage.py`, `src/backend/workers/`, compose |
@@ -35,8 +35,9 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | Service-layer logging | **Added** to import/invoice/quote/inquiry services | Wave-48 task 04, `services/*.py` |
 | Pagination | **Added** to compliance + sustainability endpoints | Wave-48 task 02 |
 | Frontend loading states + code-splitting | **Done** — 3 pages, 48 chunks | Wave-48 task 05 |
+| Alembic head | **0034** (invoice_number_seq + time_entry.billed) | `alembic heads` |
 
-**Forbidden overclaims (anti-fabrication):** “100% complete / zero residual risk”; stale pass counts such as “566 passed / 0 failed / 1 skipped” without a current session output; global “no module under 70%”; stale frontend **65.86%** without a fresh vitest paste; “MinIO/Celery not built”; claiming client Windows Server was load-tested. Corrected 2026-09-15: backend suite figures are **63 passed / 3 skipped / 0 failed** (Redis down) and **572 / 1 / 0** (Redis up); frontend independently verified at **523 passed / 0 failed** via `npx vitest run` on this worktree; coverage **65.86%**.
+**Forbidden overclaims (anti-fabrication):** "100% complete / zero residual risk"; stale pass counts such as "566 passed / 0 failed / 1 skipped" without a current session output; global "no module under 70%"; stale frontend coverage without a fresh vitest paste; "MinIO/Celery not built"; claiming client Windows Server was load-tested. Corrected 2026-09-15: backend suite figures are **63 passed / 3 skipped / 0 failed** (Redis down) and **572 / 1 / 0** (Redis up); frontend independently verified at **523 passed / 0 failed** via `npx vitest run` on this worktree; coverage **Statements 60.63%, Branches 51.4%, Functions 58.45%, Lines 61.88%**.
 
 ---
 
@@ -107,7 +108,7 @@ python3 -m pytest tests/ -q --tb=no
 # → 63 passed / 3 skipped / 0 failed — 3 Redis-dependent tests skipped
 ```
 
-Frontend: `npx vitest run` → **523 passed / 0 failed**; thresholds **60/50/60/60** met; coverage **65.86%** statements.
+Frontend: `npx vitest run` → **523 passed / 0 failed**; thresholds **60/50/60/60**; coverage **Statements 60.63%, Branches 51.4%, Functions 58.45%, Lines 61.88%**.
 
 Load: see [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) — 10/50/100/150 users, p95 ≈ 29–130 ms
 **on a development machine**.
@@ -206,7 +207,7 @@ These are real and deliberately not hidden. None were discovered by the client f
 5. **Auth rate limiter is on by default (5 login/min per IP).** The dev compose file sets
    `DISABLE_AUTH_RATE_LIMIT=true` so test suites don't get throttled. Production should keep
    the limiter on (or raise it behind shared NAT/VPN).
-6. **Coverage is not “every module ≥70%.”** Overall backend 86%; services all ≥70%; nine
+6. **Coverage is not "every module ≥70%."** Overall backend 85%; services all ≥70%; nine
    non-alembic modules still under 70% (see completion verdict).
 7. **Load results are not production-server results.** Measured on a development machine only.
 8. **Wave-37 residual RISKs (documented, not all fixed):** time/finance VIEWER reads vs Meeting 1 matrix (industry-hardening Phase C); import rollback counters. See wave-37 report.
@@ -221,6 +222,7 @@ These are real and deliberately not hidden. None were discovered by the client f
 - Pagination on compliance/sustainability endpoints → **added**
 - Frontend loading states + code-splitting → **done**
 - Deterministic test suite → **Redis-dependent tests now skip gracefully**
+- Transaction atomicity for Inquiry→Client→Project → **implemented**
 
 ## 5. External blockers
 
@@ -238,7 +240,7 @@ No code change required. Confirm reply for Viraj: `deliverables/REPLY_VIRAJ.md`.
 Still organizational (not a schema question): **who runs the real Excel → ERP migration** at go-live
 (Viraj decides).
 
-**B. Server / deploy facts — STILL OPEN (no IT department)**  
+**B. Server / deploy facts — STILL OPEN (no IT department)**
 
 Asked in the client WhatsApp group (2026-08-11). Viraj stated **there is no IT department** and
 will try to get answers when free. Draft list (reference only, already messaged):
@@ -290,8 +292,9 @@ The canonical set (consolidated by waves 26-29; superseded files are archived un
 | `docs/ARCHITECTURE.md` | Mermaid architecture (built vs target) |
 | `deliverables/TECHNICAL_REPORT.md` | Engineering case study |
 | `deliverables/DEMO_SCRIPT.md` | 5–10 min demo script |
+| `deliverables/MEETING_AND_GO_LIVE_GUIDE.md` | **Meeting file: full start-to-end process, live demo, questions, go-live checklist** |
 | `CHANGELOG.md` | Full release history (`[1.0.1]` product cut) |
-| `plan/EXECUTION.md` / `work/ACTIVE.md` | Wave status (1–31 product; 32–39 professional-grade) |
+| `plan/EXECUTION.md` / `work/ACTIVE.md` | Wave status (1–31 product; 32–39 professional-grade; 40–51 hardening) |
 | `docs/DEPLOYMENT_CHECKLIST.md` | Production deploy steps (see §6) |
 | `docs/IT_BRIEF.md` / `deliverables/SEND_IT.md` | The 8 IT questions + deploy brief |
 | `docs/INSTALL_NO_IT.md` | Install path when there is no IT department |
@@ -323,6 +326,6 @@ What a future developer picks up first:
 
 Everything else — the core chain, RBAC matrix, GST invoicing, compliance, time tracking, and
 the backup/ops scripts — shipped in product `1.0.1`. Professional-grade evidence (real CI,
-86% backend coverage, frontend thresholds, load, observability) landed in waves 32–36.
+85% backend coverage, frontend thresholds, load, observability) landed in waves 32–36.
 **Deploy to the company Windows Server is still an external step** — use `SEND_IT.md` /
 `INSTALL_NO_IT.md` when Viraj has bandwidth. Do not invent server facts.

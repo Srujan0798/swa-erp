@@ -13,8 +13,6 @@ def hash_password(plain: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    # A malformed/sentinel hash (e.g. "!" for accounts that must never log in)
-    # makes bcrypt raise. Fail closed instead of surfacing a 500.
     if not hashed:
         return False
     try:
@@ -60,3 +58,13 @@ def create_refresh_token(user_id: uuid.UUID) -> str:
 
 def decode_token(token: str) -> dict[str, Any]:
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+
+
+def verify_token_version(token_version_from_payload: int, user_id: uuid.UUID, db) -> bool:
+    """Return True when the token's embedded version matches the DB current version."""
+    from src.backend.db.repositories.user_repo import get_by_id
+
+    user = get_by_id(db, user_id)
+    if user is None:
+        return False
+    return user.token_version == token_version_from_payload

@@ -2,7 +2,7 @@
 
 Internal ERP for **SWA Consultancy** (Ahmedabad) — an insulation engineering firm that today runs operations across ~20 live Excel sheets on OneDrive. This system digitizes that workflow: same business logic, one system, JWT + role-based access.
 
-**Product v1.0.1 is built.** Professional-grade track **waves 32–39 shipped** (CI, coverage, frontend tests, load, observability, adversarial review + packaging, repo org). Company-server **deploy remains external** (Viraj / no IT dept). Residual ops risks are listed honestly in the wave-37 report — not claimed as “zero risk / 100% complete.”
+**Product v1.0.1 is built.** Professional-grade track **waves 32–39 shipped** (CI, coverage, frontend tests, load, observability, adversarial review + packaging, repo org). Company-server **deploy remains external** (Viraj / no IT dept). Residual ops risks are listed honestly in the wave-37 report — not claimed as "zero risk / 100% complete."
 
 ---
 
@@ -34,15 +34,17 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 
 | Area | Claim | Source |
 |------|--------|--------|
-| **Backend coverage** | **86%** overall (`8702` stmts); all `services/*.py` ≥70%; wave-33 closed five weakest services (pdf/quote/import/task/notification) | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-33/03-remaining-coverage.report.md`](work/reports/wave-33/03-remaining-coverage.report.md) |
-| **Backend suite** | **63 passed / 0 failed / 3 skipped** (Redis-dependent tests skipped) — measured 2026-09-15. The full suite with Redis up shows 572 passed / 1 skipped / 0 failed. | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
-| **Frontend suite** | **523 passed / 0 failed** — measured 2026-08-28 | `npx vitest run` |
-| **Frontend coverage** | Vitest thresholds **60/50/60/60** (stmts/branches/fns/lines) **met**; independent remeasure **~61% statements** | [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](work/reports/COMPLETION-HANDOFF-VERDICT.md), [`work/reports/wave-34/02-frontend-page-coverage.report.md`](work/reports/wave-34/02-frontend-page-coverage.report.md) |
-| **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client’s Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
-| **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
-| **Observability** | `/metrics` (Prometheus), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
+| **Backend coverage** | **85%** overall (full suite with Redis up); all `services/*.py` ≥70% | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
+| **Backend suite (full, Redis up)** | **572 passed / 1 skipped / 0 failed** — 85% coverage | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
+| **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` |
+| **Frontend suite** | **523 passed / 0 failed** — measured 2026-09-15 | `npx vitest run` |
+| **Frontend coverage** | **Statements 60.63%**, **Branches 51.4%**, **Functions 58.45%**, **Lines 61.88%** (function coverage below 60% threshold) | `npx vitest run --coverage` |
+| **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client's Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
+| **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired; `npx vitest run` gated in frontend job | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
+| **Observability** | `/metrics` (Prometheus, auth-gated by default), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
+| **Alembic** | Single head **0034** (invoice_number_seq + time_entry.billed) | `alembic heads` |
 
-**Do not claim:** “no backend module under 70%” globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend **see `results/metrics.json`** without a fresh vitest paste.
+**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Do not cite stale frontend coverage without a fresh vitest paste. Function coverage is below the 60% threshold.
 
 ---
 
@@ -70,7 +72,7 @@ make dev                 # UI :3100 · API :8100 (separate terminal OK)
 make swa-live-local      # wipe + load resources/ERP Sheets + link chain
 ```
 
-Login: `admin@swa.co.in` / `admin123!`  
+Login: `admin@swa.co.in` / `admin123!`
 You should see **`SWA-2025-…`** IDs under **Inquiries**, **Tokens**, **Document refs**.
 
 | Surface | URL |
@@ -78,8 +80,8 @@ You should see **`SWA-2025-…`** IDs under **Inquiries**, **Tokens**, **Documen
 | UI | http://127.0.0.1:3100 |
 | API docs | http://127.0.0.1:8100/docs |
 
-**Do not** show SWA `make seed-demo` as the product — that is synthetic sandbox only.  
-Trial script: [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).  
+**Do not** show SWA `make seed-demo` as the product — that is synthetic sandbox only.
+Trial script: [`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md).
 Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 
 ---
@@ -94,7 +96,7 @@ Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 | [`deliverables/DEMO_SCRIPT.md`](deliverables/DEMO_SCRIPT.md) | 5–10 min live demo script |
 | [`resources/MEETINGS_MASTER.md`](resources/MEETINGS_MASTER.md) | What the client said |
 | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) | Load-test methodology + CSVs |
-| [`work/ACTIVE.md`](work/ACTIVE.md) | Live wave status (32–39) |
+| [`work/ACTIVE.md`](work/ACTIVE.md) | Live wave status (32–51) |
 | [`work/FINAL-CLOSE/ANTI-FABRICATION.md`](work/FINAL-CLOSE/ANTI-FABRICATION.md) | Metric honesty rules |
 
 ---
@@ -107,4 +109,5 @@ Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 | Professional-grade (32–39) | **All shipped** — CI, coverage, frontend suite, load, observability, adversarial review, packaging, repo org |
 | Wave-37 independent review | **Shipped** — [`work/reports/wave-37/01-independent-review.report.md`](work/reports/wave-37/01-independent-review.report.md) (critical fixes landed; residual RISKs documented) |
 | Wave-38 submission package | **Shipped** |
+| Hardening (40–51) | **All shipped** — logging, CSP, token rotation, pagination, atomicity, IDOR, metrics auth, deterministic tests, final re-seal |
 | Company-server deploy | **External blocker** — no IT dept; server facts open ([`deliverables/SEND_IT.md`](deliverables/SEND_IT.md)) |
