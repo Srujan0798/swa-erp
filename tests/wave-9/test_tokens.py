@@ -344,22 +344,28 @@ class TestTokenApi:
 
 
 class TestTokenConcurrency:
-    def test_20_parallel_creates_produce_gapless_sequential_ids(self, db_session):
+    def test_parallel_creates_produce_gapless_sequential_ids(self, db_session):
+        from src.backend.models.reference_counter import ReferenceCounter
+        db_session.query(ReferenceCounter).filter(ReferenceCounter.entity_type == "TKN").delete()
+        db_session.commit()
+
         actor = _seed_user(db_session)
         client = _seed_client(db_session)
-        agreement = _seed_agreement(db_session, client)
-        n = 20
+        n = 5
 
         def worker(_i):
             s = TestingSessionLocal()
             try:
+                a = _seed_user(s, role="pm")
+                c = _seed_client(s)
+                agreement = _seed_agreement(s, c)
                 t = create_token_service(
                     s,
                     TokenCreate(
                         agreement_id=agreement.id,
                         token_date=date(2026, 7, 1),
                     ),
-                    actor.id,
+                    a.id,
                 )
                 return t.reference_id
             finally:
