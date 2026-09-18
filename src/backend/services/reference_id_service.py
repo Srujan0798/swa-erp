@@ -1,7 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from src.backend.models.reference_counter import ReferenceCounter
@@ -13,46 +13,23 @@ def _utc_year() -> int:
 
 def generate_reference_id(db: Session, entity_type: str) -> str:
     year = _utc_year()
-    # Lock the counter row first so concurrent callers serialize on the same
-    # (entity_type, year) row. In READ COMMITTED, SELECT FOR UPDATE blocks
-    # concurrent readers until the current txn commits/aborts, giving each
-    # caller a monotonic seq.
-    row = (
-        db.query(ReferenceCounter)
-        .filter(ReferenceCounter.entity_type == entity_type, ReferenceCounter.year == year)
-        .with_for_update()
-        .one_or_none()
-    )
-    if row is not None:
-        row.last_seq += 1
-        seq = row.last_seq
-    else:
-        # First caller for this (entity_type, year): insert at seq=1.
-        # Use ON CONFLICT as a safety net in case a concurrent txn inserted
-        # the row between our SELECT FOR UPDATE and this INSERT (shouldn't
-        # happen under FOR UPDATE, but defend anyway).
-        try:
-            new_row = ReferenceCounter(
-                id=uuid.uuid4(),
-                entity_type=entity_type,
-                year=year,
-                last_seq=1,
-            )
-            db.add(new_row)
-            db.flush()
-            seq = 1
-        except IntegrityError:
-            db.rollback()
-            # Concurrent txn won the race — re-read and bump.
-            row = (
-                db.query(ReferenceCounter)
-                .filter(ReferenceCounter.entity_type == entity_type, ReferenceCounter.year == year)
-                .with_for_update()
-                .one()
-            )
-            row.last_seq += 1
-            seq = row.last_seq
-
+    sql = text("""
+        INSERT INTO reference_counters (id, entity_type, year, last_seq)
+        VALUES (:id, :entity_type, :year, 1)
+        ON CONFLICT (entity_type, year) DO UPDATE
+        SET last_seq = reference_counters.last_seq + 1
+        RETURNING last_seq
+    """)
+    # Use a separate autocommit connection so the counter persists
+    # even if the caller's transaction rolls back (e.g., in tests).
+    bind = db.get_bind()
+    engine = bind.engine if hasattr(bind, "engine") else bind
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        result = conn.execute(sql, {"id": uuid.uuid4(), "entity_type": entity_type, "year": year})
+        row = result.fetchone()
+    if row is None:
+        raise RuntimeError("Failed to generate reference ID")
+    seq = row[0]
     return f"SWA-{year}-{entity_type}-{seq:03d}"
 
 
