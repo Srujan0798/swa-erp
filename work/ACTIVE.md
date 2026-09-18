@@ -38,18 +38,17 @@ wave-51 (final re-seal) ── SHIPPED (2026-09-15)
 | 50 | Security risks (job IDOR, /metrics auth) + deterministic test suite | **SHIPPED** ✅ | 48 | [`work/wave-50/`](wave-50/) | [`work/wave-50/01-deferred-security-risks.md`](wave-50/01-deferred-security-risks.md) |
 | 51 | Final re-seal + submission refresh | **SHIPPED** ✅ | 48-50 | [`work/wave-51/`](wave-51/) | [`work/wave-51/01-final-reseal-and-submission.md`](wave-51/01-final-reseal-and-submission.md) |
 
-**Waves 1–39, 43–51 are SHIPPED.** Engineering closed 2026-09-15.
+**Waves 1–39, 43–51 are SHIPPED.** Engineering closed 2026-09-19.
 
-## Status notes (2026-09-15 — HARDENING COMPLETE)
+## Status notes (2026-09-19 — FINAL SUBMISSION RESEAL)
 
 - All professional-grade waves **32–39 SHIPPED**.
 - Hardening waves **40–51 SHIPPED**.
 - Final close pack: [`work/FINAL-CLOSE/`](FINAL-CLOSE/).
 - Seal report: [`work/reports/FINAL-CLOSE.report.md`](reports/FINAL-CLOSE.report.md).
 - **External (not engineering):** Viraj server facts / deploy / Excel migration owner.
-- **Wave-47 seal:** gates A–E verified 2026-08-28. Backend 572 passed/1 skipped/0 failed;
-  85% coverage. Frontend 523 passed/0 failed. See `work/reports/wave-47/01-final-seal.report.md`.
-- **Wave-51 re-seal:** commit `93696da`. Backend 63/3/0 (Redis down) / 572/1/0 (Redis up); Frontend 523/0/0; 65.86% coverage.
+- **Wave-47 seal:** gates A–E verified 2026-08-28. Backend 572 passed/1 skipped/0 failed; 85% coverage. Frontend 523 passed/0 failed. See `work/reports/wave-47/01-final-seal.report.md`.
+- **Wave-51 re-seal:** commit `4396581`. Backend 63/3/0 (Redis down) / 572/1/0 (Redis up, wave-47); Frontend 586/0/0; **60.46% function coverage (threshold met)**. All static gates clean.
 
 If a wave is missing from both tables, that is a bug in this file — every wave 1-51 must
 appear in exactly one.

@@ -34,17 +34,20 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 
 | Area | Claim | Source |
 |------|--------|--------|
-| **Backend coverage** | **85%** overall (full suite with Redis up, wave-47); **45%** measured local subset (no Redis) | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da`; local AGENT-1 |
-| **Backend suite (full, Redis up)** | **572 passed / 1 skipped / 0 failed** — 85% coverage | `work/reports/wave-47/01-final-seal.report.md`, commit `93696da` |
-| **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` |
-| **Frontend suite** | **523 passed / 0 failed** — measured 2026-09-15 | `npx vitest run` |
-| **Frontend coverage** | **Statements 62.61%**, **Branches 53.48%**, **Functions 60.28%**, **Lines 63.78%** (function coverage **ABOVE 60% threshold**) | `npx vitest run --coverage` (this session) |
+| **Backend coverage** | **NOT MEASURED THIS SESSION** (Docker daemon unavailable) | — |
+| **Backend suite (full, Redis up)** | **572 passed / 1 skipped / 0 failed** — 85% coverage | `work/reports/wave-47/01-final-seal.report.md` (wave-47 seal, Docker run) |
+| **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` (wave-47) |
+| **Backend static gates** | **ruff clean, black clean, mypy clean** (159 files) | this session |
+| **Frontend suite** | **586 passed / 0 failed** (69 files) | `npx vitest run` (this session) |
+| **Frontend coverage** | **Statements 63.2%**, **Branches 55.09%**, **Functions 60.46% (ABOVE 60% threshold)**, **Lines 64.29%** | `npx vitest run --coverage` (this session) |
+| **Frontend static gates** | **tsc clean, eslint clean, vitest thresholds met** | `npx tsc --noEmit`, `npx eslint`, `npx vitest run --coverage` (this session) |
+| **Backend static gates** | **ruff clean, black clean, mypy clean** (159 files) | this session |
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client's Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired; `npx vitest run` gated in frontend job | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
 | **Observability** | `/metrics` (Prometheus, auth-gated by default), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
-| **Alembic** | Single head **0034** (invoice_number_seq + time_entry.billed) | `alembic heads` |
+| **Alembic** | Single head **0037** | `alembic -c src/backend/alembic.ini heads` (this session) |
 
-**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Function coverage **now above 60% threshold** (60.28% measured this session). Always cite fresh vitest paste.
+**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Backend full suite not re-run this session (Docker unavailable). Always cite fresh output paste.
 
 ---
 

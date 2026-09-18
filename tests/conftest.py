@@ -6,7 +6,7 @@ os.environ.setdefault("DISABLE_AUTH_RATE_LIMIT", "1")
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import sessionmaker
 import redis
 
@@ -127,12 +127,32 @@ def db_session():
     connection = engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
+    # Start a nested transaction (SAVEPOINT)
+    nested = connection.begin_nested()
+    
+    @event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(session, transaction):
+        if transaction.nested and not transaction._parent.nested:
+            session.expire_all()
+            nested = connection.begin_nested()
+    
     try:
         yield session
     finally:
         session.close()
-        transaction.rollback()
-        connection.close()
+        try:
+            nested.rollback()
+        except Exception:
+            pass
+        try:
+            transaction.rollback()
+        except Exception:
+            pass
+        try:
+            connection.close()
+        except Exception:
+            pass
+        import time; time.sleep(0.1)
 
 
 @pytest.fixture(scope="function")

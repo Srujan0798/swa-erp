@@ -5,10 +5,33 @@ import { StatsCards } from "../StatsCards";
 import { RecentProjects } from "../RecentProjects";
 import { RecentClients } from "../RecentClients";
 import { QuickActions } from "../QuickActions";
+import { DashboardPage } from "@/pages/DashboardPage";
+
+const useQueryMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: (options: { queryKey: string[] }) => useQueryMock(options),
+}));
 
 const useDashboardMock = vi.hoisted(() => vi.fn());
 const useCurrentUserMock = vi.hoisted(() => vi.fn());
 const navigateMock = vi.hoisted(() => vi.fn());
+
+function emptyList() {
+  return { data: { items: [], total: 0 }, isLoading: false, isError: false };
+}
+
+function listWithTotal(total: number) {
+  return { data: { items: [], total }, isLoading: false, isError: false };
+}
+
+function mockAllCountsZero() {
+  useQueryMock.mockImplementation((options: { queryKey: string[] }) => {
+    const key = options.queryKey[0];
+    if (typeof key === "string" && key.startsWith("dash-")) return emptyList();
+    return { data: undefined, isLoading: false };
+  });
+}
 
 vi.mock("@/hooks/useDashboard", () => ({
   useDashboard: () => useDashboardMock(),
@@ -173,5 +196,120 @@ describe("QuickActions", () => {
     );
     await user.click(screen.getByRole("button", { name: /new client/i }));
     expect(navigateMock).toHaveBeenCalledWith("/clients/new");
+  });
+});
+
+describe("DashboardPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAllCountsZero();
+    useDashboardMock.mockReturnValue({ data: undefined, isLoading: false });
+    useCurrentUserMock.mockReturnValue({ data: { role: "admin" } });
+  });
+
+  it("renders flow steps in order: Inquiry, Client, Project, SA, Token, Document Ref, Time", () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    const titles = ["Inquiry", "Client", "Project", "Service Agreement", "Token", "Document Ref", "Time log"];
+    const positions = titles.map((title) => {
+      const links = screen.getAllByRole("link");
+      const el = links.find((link) => link.textContent?.includes(title));
+      expect(el).toBeDefined();
+      return el as HTMLElement;
+    });
+    positions.forEach((el, i) => {
+      if (i > 0) {
+        const prev = positions[i - 1];
+        expect(prev.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      }
+    });
+  });
+
+  it("gates looksEmpty until all counts finished loading and covers all counts", () => {
+    useQueryMock.mockImplementation((options: { queryKey: string[] }) => {
+      const key = options.queryKey[0];
+      if (key === "dash-time") return { data: undefined, isLoading: true, isError: false };
+      if (typeof key === "string" && key.startsWith("dash-")) return emptyList();
+      return { data: undefined, isLoading: false };
+    });
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    expect(screen.queryByText(/No workflow records yet/i)).not.toBeInTheDocument();
+    expect(screen.getByText("SWA operations")).toBeInTheDocument();
+  });
+
+  it("shows empty dashboard guidance with all counts zero and no admin password or import commands", () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/No workflow records yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/admin123!/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/admin@swa.co.in/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/make swa-live-local/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/make bootstrap-real/i)).not.toBeInTheDocument();
+  });
+
+  it("links Invoice/GST and Compliance using existing routes with no fake counts", () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    const invoiceLink = screen.getByRole("link", { name: /invoice\/gst/i });
+    const complianceLink = screen.getByRole("link", { name: /^compliance$/i });
+    expect(invoiceLink).toHaveAttribute("href", "/invoices");
+    expect(complianceLink).toHaveAttribute("href", "/compliance");
+    expect(screen.queryByText(/total revenue/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/invoices?\s+\d+/i)).not.toBeInTheDocument();
+  });
+
+  it("marks files/drawings as a stub and does not claim uploads are implemented", () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Files \/ drawings/i)).toBeInTheDocument();
+    expect(screen.getByText(/placeholder/i)).toBeInTheDocument();
+    expect(screen.queryByText(/uploaded PDFs and CAD files/i)).not.toBeInTheDocument();
+  });
+
+  it("gates projectsSparse until counts ready and requires at least one other non-zero count", () => {
+    useQueryMock.mockImplementation((options: { queryKey: string[] }) => {
+      const key = options.queryKey[0];
+      if (key === "dash-prj") return listWithTotal(0);
+      if (key === "dash-tkn") return listWithTotal(2);
+      if (typeof key === "string" && key.startsWith("dash-")) return emptyList();
+      return { data: undefined, isLoading: false };
+    });
+    const first = render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Projects list looks empty/i)).toBeInTheDocument();
+    first.unmount();
+
+    useQueryMock.mockImplementation((options: { queryKey: string[] }) => {
+      const key = options.queryKey[0];
+      if (key === "dash-tkn") return { data: undefined, isLoading: true, isError: false };
+      if (key === "dash-prj") return listWithTotal(0);
+      if (typeof key === "string" && key.startsWith("dash-")) return emptyList();
+      return { data: undefined, isLoading: false };
+    });
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+    expect(screen.queryByText(/Projects list looks empty/i)).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,227 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - generic [ref=f1e10]:
+      - generic [ref=f1e11]: SWA ERP
+      - generic [ref=f1e12]: Consultancy · insulation
+    - navigation [ref=f1e13]:
+      - generic [ref=f1e14]:
+        - paragraph [ref=f1e15]: Excel workflow
+        - generic [ref=f1e16]:
+          - link "Dashboard" [ref=f1e17] [cursor=pointer]:
+            - /url: /dashboard
+          - link "1. Inquiries" [ref=f1e24] [cursor=pointer]:
+            - /url: /inquiries
+          - link "2. Clients" [ref=f1e29] [cursor=pointer]:
+            - /url: /clients
+          - link "3. Service Agreements" [ref=f1e35] [cursor=pointer]:
+            - /url: /agreements
+          - link "4. Tokens" [ref=f1e40] [cursor=pointer]:
+            - /url: /tokens
+          - link "5. Document refs" [ref=f1e47] [cursor=pointer]:
+            - /url: /document-references
+          - link "6. Projects" [ref=f1e52] [cursor=pointer]:
+            - /url: /projects
+          - link "7. Time logging" [ref=f1e56] [cursor=pointer]:
+            - /url: /time-tracking
+      - generic [ref=f1e61]:
+        - paragraph [ref=f1e62]: Delivery
+        - generic [ref=f1e63]:
+          - link "Files / drawings" [ref=f1e64] [cursor=pointer]:
+            - /url: /documents
+          - link "Tasks" [ref=f1e69] [cursor=pointer]:
+            - /url: /tasks
+          - link "Sustainability" [ref=f1e74] [cursor=pointer]:
+            - /url: /sustainability
+          - link "Compliance" [ref=f1e79] [cursor=pointer]:
+            - /url: /compliance
+      - generic [ref=f1e84]:
+        - paragraph [ref=f1e85]: More
+        - generic [ref=f1e86]:
+          - link "Vendors" [ref=f1e87] [cursor=pointer]:
+            - /url: /vendors
+          - link "Materials" [ref=f1e94] [cursor=pointer]:
+            - /url: /materials
+          - link "RFQs" [ref=f1e100] [cursor=pointer]:
+            - /url: /rfqs
+          - link "Invoices" [ref=f1e105] [cursor=pointer]:
+            - /url: /invoices
+          - link "Reports" [ref=f1e110] [cursor=pointer]:
+            - /url: /reports
+      - generic [ref=f1e114]:
+        - paragraph [ref=f1e115]: Admin
+        - link "Users" [ref=f1e117] [cursor=pointer]:
+          - /url: /users
+    - generic [ref=f1e124]:
+      - paragraph [ref=f1e125]: SWA sheet chain
+      - paragraph [ref=f1e126]: Inquiry → Client → SA → Token → Doc Ref → Time
+      - paragraph [ref=f1e127]: "Data: make swa-live-local"
+  - generic [ref=f1e128]:
+    - banner [ref=f1e129]:
+      - generic [ref=f1e130]:
+        - heading "Dashboard" [level=1] [ref=f1e131]
+        - generic [ref=f1e132]: SWA internal
+      - generic [ref=f1e133]:
+        - generic [ref=f1e134]:
+          - generic [ref=f1e135]: Srujan Patel
+          - generic [ref=f1e136]: admin
+        - button "Notifications" [ref=f1e138] [cursor=pointer]
+        - button "Logout" [ref=f1e142] [cursor=pointer]
+    - main [ref=f1e146]:
+      - generic [ref=f1e147]:
+        - generic [ref=f1e148]:
+          - generic [ref=f1e149]:
+            - heading "SWA operations" [level=1] [ref=f1e150]
+            - paragraph [ref=f1e151]:
+              - text: Your workflow — Inquiry → Client → Project → SA → Token → Document Reference → Time. Manage billing with
+              - link "Invoice/GST" [ref=f1e152] [cursor=pointer]:
+                - /url: /invoices
+              - text: and track
+              - link "Compliance" [ref=f1e153] [cursor=pointer]:
+                - /url: /compliance
+              - text: .
+          - link "New inquiry" [ref=f1e154] [cursor=pointer]:
+            - /url: /inquiries
+        - generic [ref=f1e157]:
+          - paragraph [ref=f1e158]: Projects list looks empty
+          - paragraph [ref=f1e159]:
+            - text: Workflow records are available, but no projects are listed. Review your
+            - link "inquiries" [ref=f1e160] [cursor=pointer]:
+              - /url: /inquiries
+            - text: and convert an eligible inquiry to create a project.
+        - generic [ref=f1e161]:
+          - heading "Core business chain (Excel sheets)" [level=2] [ref=f1e162]
+          - generic [ref=f1e163]:
+            - link "1 Inquiry 3 New work comes in" [ref=f1e164] [cursor=pointer]:
+              - /url: /inquiries
+              - generic [ref=f1e165]:
+                - generic [ref=f1e167]:
+                  - generic [ref=f1e168]: "1"
+                  - heading "Inquiry" [level=3] [ref=f1e169]
+                - generic [ref=f1e173]:
+                  - generic [ref=f1e174]: "3"
+                  - paragraph [ref=f1e175]: New work comes in
+            - link "2 Client 3 Create or reuse" [ref=f1e176] [cursor=pointer]:
+              - /url: /clients
+              - generic [ref=f1e177]:
+                - generic [ref=f1e179]:
+                  - generic [ref=f1e180]: "2"
+                  - heading "Client" [level=3] [ref=f1e181]
+                - generic [ref=f1e186]:
+                  - generic [ref=f1e187]: "3"
+                  - paragraph [ref=f1e188]: Create or reuse
+            - link "3 Project 0 Work package" [ref=f1e189] [cursor=pointer]:
+              - /url: /projects
+              - generic [ref=f1e190]:
+                - generic [ref=f1e192]:
+                  - generic [ref=f1e193]: "3"
+                  - heading "Project" [level=3] [ref=f1e194]
+                - generic [ref=f1e197]:
+                  - generic [ref=f1e198]: "0"
+                  - paragraph [ref=f1e199]: Work package
+            - link "4 Service Agreement 3 Year retainer (SA)" [ref=f1e200] [cursor=pointer]:
+              - /url: /agreements
+              - generic [ref=f1e201]:
+                - generic [ref=f1e203]:
+                  - generic [ref=f1e204]: "4"
+                  - heading "Service Agreement" [level=3] [ref=f1e205]
+                - generic [ref=f1e209]:
+                  - generic [ref=f1e210]: "3"
+                  - paragraph [ref=f1e211]: Year retainer (SA)
+            - link "5 Token 0 Unit of work" [ref=f1e212] [cursor=pointer]:
+              - /url: /tokens
+              - generic [ref=f1e213]:
+                - generic [ref=f1e215]:
+                  - generic [ref=f1e216]: "5"
+                  - heading "Token" [level=3] [ref=f1e217]
+                - generic [ref=f1e223]:
+                  - generic [ref=f1e224]: "0"
+                  - paragraph [ref=f1e225]: Unit of work
+            - link "6 Document Ref 0 DRN / DBR / KDR sheet" [ref=f1e226] [cursor=pointer]:
+              - /url: /document-references
+              - generic [ref=f1e227]:
+                - generic [ref=f1e229]:
+                  - generic [ref=f1e230]: "6"
+                  - heading "Document Ref" [level=3] [ref=f1e231]
+                - generic [ref=f1e235]:
+                  - generic [ref=f1e236]: "0"
+                  - paragraph [ref=f1e237]: DRN / DBR / KDR sheet
+            - link "7 Time log 0 Hours (Excel time sheet)" [ref=f1e238] [cursor=pointer]:
+              - /url: /time-tracking
+              - generic [ref=f1e239]:
+                - generic [ref=f1e241]:
+                  - generic [ref=f1e242]: "7"
+                  - heading "Time log" [level=3] [ref=f1e243]
+                - generic [ref=f1e247]:
+                  - generic [ref=f1e248]: "0"
+                  - paragraph [ref=f1e249]: Hours (Excel time sheet)
+        - generic [ref=f1e250]:
+          - generic [ref=f1e251]:
+            - heading "Total Active Projects" [level=3] [ref=f1e253]
+            - generic [ref=f1e256]: "0"
+          - generic [ref=f1e258]:
+            - heading "Total Estimated Value" [level=3] [ref=f1e260]
+            - generic [ref=f1e264]: ₹0
+          - generic [ref=f1e266]:
+            - heading "In Quote Stage" [level=3] [ref=f1e268]
+            - generic [ref=f1e272]: "0"
+          - generic [ref=f1e274]:
+            - heading "In Execution" [level=3] [ref=f1e276]
+            - generic [ref=f1e281]: "0"
+        - generic [ref=f1e283]:
+          - generic [ref=f1e284]:
+            - generic [ref=f1e285]:
+              - heading "Projects" [level=3] [ref=f1e286]
+              - link "View all" [ref=f1e287] [cursor=pointer]:
+                - /url: /projects
+            - table [ref=f1e290]:
+              - rowgroup [ref=f1e291]:
+                - row [ref=f1e292]:
+                  - columnheader "Code" [ref=f1e293]
+                  - columnheader "Name" [ref=f1e294]
+                  - columnheader "Client" [ref=f1e295]
+                  - columnheader "Status" [ref=f1e296]
+              - rowgroup [ref=f1e297]:
+                - row [ref=f1e298]:
+                  - cell "No projects — run make bootstrap-real" [ref=f1e299]
+          - generic [ref=f1e300]:
+            - generic [ref=f1e301]:
+              - heading "Clients" [level=3] [ref=f1e302]
+              - link "View all" [ref=f1e303] [cursor=pointer]:
+                - /url: /clients
+            - table [ref=f1e306]:
+              - rowgroup [ref=f1e307]:
+                - row [ref=f1e308]:
+                  - columnheader "Code" [ref=f1e309]
+                  - columnheader "Name" [ref=f1e310]
+                  - columnheader "Industry" [ref=f1e311]
+                  - columnheader "Status" [ref=f1e312]
+              - rowgroup [ref=f1e313]:
+                - row [ref=f1e314]:
+                  - cell [ref=f1e315]:
+                    - link "SWA-2025-CLT-001" [ref=f1e316] [cursor=pointer]:
+                      - /url: /clients/a3bfc8f3-19f8-4673-b5c3-b04fdb7d372b
+                  - cell "Shabham films" [ref=f1e317]
+                  - cell "Media" [ref=f1e318]
+                  - cell "Active" [ref=f1e319]
+                - row [ref=f1e320]:
+                  - cell [ref=f1e321]:
+                    - link "SWA-2025-CLT-002" [ref=f1e322] [cursor=pointer]:
+                      - /url: /clients/5f2e1e83-37a4-4683-b4ad-566b8964bc71
+                  - cell "PGPR Projects Limited" [ref=f1e323]
+                  - cell "Construction" [ref=f1e324]
+                  - cell "Active" [ref=f1e325]
+                - row [ref=f1e326]:
+                  - cell [ref=f1e327]:
+                    - link "SWA-2025-CLT-003" [ref=f1e328] [cursor=pointer]:
+                      - /url: /clients/8a63e236-9acc-4f95-ae91-3344ef97343c
+                  - cell "Level Infra & Consultants" [ref=f1e329]
+                  - cell "Infrastructure" [ref=f1e330]
+                  - cell "Active" [ref=f1e331]
+        - generic [ref=f1e332]:
+          - heading "Where things live (match the sheets)" [level=3] [ref=f1e334]
+          - generic [ref=f1e335]:
+            - paragraph [ref=f1e336]:
+              - link "Document Reference Sheet" [ref=f1e337] [cursor=pointer]:
+                - /url: /document-references
+              - text: — DRN / DBR / KDR records, separate from files and drawings.
+            - paragraph [ref=f1e338]: Files / drawings — placeholder only; PDF and CAD uploads are not available here.

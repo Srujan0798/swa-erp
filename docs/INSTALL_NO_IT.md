@@ -9,9 +9,9 @@ Safe defaults used here (change only if Viraj prefers otherwise):
 
 | Choice | Default |
 |--------|---------|
-| Containers | Docker Engine (free) + WSL2 on Windows Server |
+| Containers | Docker Engine (free) + WSL2 on Windows Server (NOT Docker Desktop) |
 | Stack | All in Docker Compose (Postgres, Redis, backend, frontend, worker) |
-| Storage | Local `uploads/` first; MinIO optional later |
+| Storage | Local `uploads/` directory default; set `STORAGE_BACKEND=minio` + `MINIO_*` env vars to enable MinIO |
 | HTTPS | Self-signed **or** plain HTTP **only on VPN** for first week (document risk) |
 | Hostname | Whatever he gives (IP is fine for v1) |
 | Backups | Our `make backup-db` / `backup-files` until company backup exists |
@@ -21,7 +21,9 @@ Safe defaults used here (change only if Viraj prefers otherwise):
 ## 0. Prerequisites (on the server)
 
 1. Windows Server with VPN access for staff (already the plan).
-2. Install **Docker Engine** (free) + enable **WSL2** / Linux containers if needed.
+2. Install **Docker Engine (free)** — NOT Docker Desktop. Enable **WSL2** / Linux containers:
+   - `wsl --install` (if not already enabled)
+   - In Docker Engine settings: *Use the WSL 2 based engine* (checked by default on Windows Server 2022+)
 3. Git (or copy the repo zip) + enough disk for images + DB + uploads (~20 GB free is comfortable).
 4. Open/free ports (defaults): `3100` (UI), `8100` (API). DB/Redis stay internal to compose unless he wants them exposed.
 
@@ -48,7 +50,7 @@ cp .env.production.example .env.production
 Edit `.env.production` at minimum:
 
 ```bash
-# Generate secrets
+# Generate secrets (run inside WSL2 Ubuntu or PowerShell with python)
 python3 -c "import secrets; print(secrets.token_hex(32))"   # → SECRET_KEY
 # set POSTGRES_PASSWORD to something strong and unique
 
@@ -65,9 +67,20 @@ If hostname is still unknown, use the server LAN IP for the first install and up
 Strip or ignore remaining `PENDING IT ANSWER` comments once you've filled real values
 for secrets + CORS + ports you actually use.
 
+**Secrets handling (Windows Server + Docker Engine):** Keep secrets in `.env.production`
+(never commit). For production hardening later, migrate to Docker secrets:
+```bash
+# Example: store secret in Docker secret, then reference in compose
+printf "real-secret-key" | docker secret create swa_secret_key -
+# In compose: SECRET_KEY_FILE=/run/secrets/swa_secret_key
+```
+But for first install, `.env.production` is fine.
+
 ---
 
 ## 3. Start the stack
+
+Run from a WSL2 Ubuntu shell (or PowerShell with `wsl` prefix):
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
@@ -76,7 +89,10 @@ docker compose -f docker-compose.prod.yml logs migrate   # must Exit 0
 curl -f http://localhost:8100/healthz                    # {"status":"ok"}
 ```
 
-Open in a browser (on VPN): `http://SERVER_IP:3100` (or the host you set).
+Open in a browser (on VPN): `http://<server-LAN-IP>:3100` (or the hostname you set).
+
+**Healthcheck details:** The backend container runs `wget -qO- http://localhost:8000/healthz` internally
+(container port 8000). From the host, the mapped port is 8100, hence `curl localhost:8100/healthz`.
 
 ---
 
@@ -98,7 +114,7 @@ make backup-db
 make backup-files
 ```
 
-Schedule daily (Task Scheduler / cron) until a company-wide backup exists.
+Schedule daily (Windows Task Scheduler / cron inside WSL2) until a company-wide backup exists.
 
 ---
 
@@ -129,7 +145,7 @@ git pull   # or drop new release
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 ```
 
-Never `down -v` in production (wipes volumes).
+Run from a WSL2 Ubuntu shell (or PowerShell with `wsl` prefix). Never `down -v` in production (wipes volumes).
 
 ---
 
@@ -141,5 +157,8 @@ Never `down -v` in production (wipes volumes).
 | UI loads, API fails | CORS_ORIGINS must match the browser URL exactly |
 | Can't pull images | Network / Docker Hub from that server |
 | Port in use | Change host ports in compose; update CORS if UI port changes |
+| WSL2 not enabled | `wsl --install` in PowerShell admin; reboot; verify `wsl -l -v` shows Ubuntu |
+| Docker Engine not using WSL2 | Docker Desktop not installed; in Docker Engine settings enable "Use the WSL 2 based engine" |
+| Secrets not loading | `.env.production` must be in repo root; no spaces around `=` in file |
 
 Longer checklist: `docs/DEPLOYMENT_CHECKLIST.md`. Ops day-to-day: `docs/runbook.md`.

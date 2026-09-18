@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime
 import pytest
 from pydantic import ValidationError
 
+from src.backend.models.audit_log import AuditLog
 from src.backend.models.client import Client
 from src.backend.models.inquiry import Inquiry
 from src.backend.models.user import User
@@ -162,6 +163,43 @@ class TestAgreementCrud:
         items, total, _, _ = list_agreements_service(db_session, 1, 20, c1.id, None, None, None)
         assert total == 2
         assert all(a.client_id == c1.id for a in items)
+
+
+class TestAgreementAuditLog:
+    def test_create_agreement_writes_audit_entry(self, db_session):
+        actor = _seed_user(db_session)
+        client = _seed_client(db_session)
+        agreement = create_agreement_service(
+            db_session,
+            ServiceAgreementCreate(
+                client_id=client.id,
+                service_name="APEX",
+                start_date=date(2026, 7, 1),
+                end_date=date(2027, 6, 30),
+                total_tokens=100,
+            ),
+            actor.id,
+        )
+        row = (
+            db_session.query(AuditLog)
+            .filter(
+                AuditLog.action == "service_agreement.create",
+                AuditLog.entity_id == agreement.id,
+            )
+            .order_by(AuditLog.id.desc())
+            .first()
+        )
+        assert row is not None
+        assert row.entity_type == "service_agreement"
+        assert row.user_id == actor.id
+        assert row.before_json is None
+        assert row.after_json == {
+            "id": str(agreement.id),
+            "reference_id": agreement.reference_id,
+            "client_id": str(client.id),
+            "service_name": "APEX",
+            "status": "Active",
+        }
 
 
 class TestAgreementDateValidation:

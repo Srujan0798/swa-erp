@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db seed-demo seed-dev smoke load-test bootstrap-real swa-live-local import-real import-real-commit
+.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db restore-files seed-demo seed-dev smoke load-test bootstrap-real swa-live-local import-real import-real-commit
 
 help:
 	@echo "swa-erp commands:"
@@ -25,7 +25,8 @@ help:
 	@echo "  make ship wave=N       — reminder to open orchestrator"
 	@echo "  make backup-db         — pg_dump → ./backups/db/ (30-day retention)"
 	@echo "  make backup-files      — tar ./uploads/ → ./backups/files/ (90-day retention)"
-	@echo "  make restore-db file=<path> — DESTRUCTIVE restore, prompts for confirmation"
+	@echo "  make restore-db file=<path>  — DRY-RUN (prints commands). Use --force to execute."
+	@echo "  make restore-files file=<path> — DRY-RUN (prints commands). Use --force to execute."
 	@echo "  make clean             — remove caches"
 	@echo "  make load-test         — run Locust load test (USERS=100 SPAWN_RATE=10 RUN_TIME=5m)"
 
@@ -163,12 +164,27 @@ backup-db:
 backup-files:
 	./scripts/backup_files.sh
 
+# Restore targets — DRY-RUN by default (prints commands, no execution).
+# To actually restore: make restore-db file=<path> FORCE=--force
+# Cadence (Meeting 2): daily DB backup / weekly files backup.
+# Suggested crontab on the prod host:
+#   0 2 * * *  cd /opt/swa-erp && make backup-db      # daily 02:00
+#   0 3 * * 0  cd /opt/swa-erp && make backup-files   # weekly Sun 03:00
 restore-db:
 	@if [ -z "$(file)" ]; then \
-		echo "Usage: make restore-db file=<path-to-backup.sql.gz>"; \
+		echo "Usage: make restore-db file=<path-to-backup.sql.gz> [FORCE=--force]"; \
+		echo "       (default is DRY-RUN — prints commands only)"; \
 		exit 1; \
 	fi
-	./scripts/restore_db.sh "$(file)"
+	./scripts/restore_db.sh "$(file)" $(FORCE)
+
+restore-files:
+	@if [ -z "$(file)" ]; then \
+		echo "Usage: make restore-files file=<path-to-backup.tar.gz> [FORCE=--force]"; \
+		echo "       (default is DRY-RUN — prints commands only)"; \
+		exit 1; \
+	fi
+	./scripts/restore_files.sh "$(file)" $(FORCE)
 
 # Load testing with Locust
 # Usage: make load-test USERS=100 SPAWN_RATE=10 RUN_TIME=5m

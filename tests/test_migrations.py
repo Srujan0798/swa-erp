@@ -218,15 +218,6 @@ def scratch_db():
     finally:
         if engine is not None:
             try:
-                with engine.connect() as conn:
-                    # TRUNCATE instead of DROP SCHEMA to avoid deadlocks
-                    result = conn.execute(text("""
-                        SELECT tablename FROM pg_tables 
-                        WHERE schemaname = 'public' AND tablename != 'alembic_version'
-                    """))
-                    tables = [row[0] for row in result]
-                    if tables:
-                        conn.execute(text(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE"))
                 engine.dispose()
             except Exception:
                 pass
@@ -234,7 +225,7 @@ def scratch_db():
             ["psql", "-h", "localhost", "-U", "swa", "-d", "postgres",
              "-c", f"DROP DATABASE {db_name}"],
             env=os.environ,
-            check=True,
+            check=False,
             capture_output=True,
             text=True,
         )

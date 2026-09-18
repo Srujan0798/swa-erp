@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 
+from src.backend.models.audit_log import AuditLog
 from src.backend.models.client import Client
 from src.backend.models.user import User
 from src.backend.schemas.inquiry import InquiryConvertRequest, InquiryCreate, InquiryUpdate
@@ -243,6 +244,36 @@ class TestConvertInquiryRejections:
         with pytest.raises(InquiryConversionError) as exc_info:
             convert_inquiry(db_session, uuid.uuid4(), req, actor.id)
         assert exc_info.value.status_code == 404
+
+
+class TestConvertAuditLog:
+    def test_convert_writes_audit_entry(self, db_session):
+        actor = _seed_user(db_session)
+        inquiry = create_inquiry_service(
+            db_session,
+            InquiryCreate(inquiry_date=date(2026, 7, 1), client_name="AuditTrailCo"),
+            actor.id,
+        )
+        req = InquiryConvertRequest(project_name="AuditTrail P", project_code="AT-1")
+        result = convert_inquiry(db_session, inquiry.id, req, actor.id)
+        row = (
+            db_session.query(AuditLog)
+            .filter(
+                AuditLog.action == "inquiry.convert",
+                AuditLog.entity_id == inquiry.id,
+            )
+            .order_by(AuditLog.id.desc())
+            .first()
+        )
+        assert row is not None
+        assert row.entity_type == "inquiry"
+        assert row.user_id == actor.id
+        assert row.before_json == {"status": "New"}
+        assert row.after_json == {
+            "status": "Converted",
+            "client_id": str(result["client"].id),
+            "project_id": str(result["project"].id),
+        }
 
 
 class TestInquiryApi:

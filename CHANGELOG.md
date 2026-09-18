@@ -20,9 +20,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 > lessons from the archived session handoffs (different slice of history — see that file's
 > header). Both now cross-reference each other instead of overlapping.
 
-## [Unreleased] — professional-grade close (2026-08-23)
+## [Unreleased] — professional-grade close + hardening (2026-09-19)
 
-### Added (waves 32–47 evidence track)
+### Added (waves 32–51 evidence track)
 - **Wave-32:** real CI gates (removed `|| true` / `continue-on-error`); ruff/black/mypy/pytest enforce.
 - **Wave-33:** backend coverage → **86%** overall; target services (pdf/quote/import/task/notification) ≥70%.
 - **Wave-34:** frontend Vitest suite; thresholds ≥60/50/60/60 (cite fresh runs, ~61% stmts).
@@ -37,6 +37,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   full-stack pytest 572 passed / 1 skipped / **0 failed**; 85% coverage; 5/5 target services ≥70%.
 - **CI:** `npx vitest run` gated in frontend job.
 - **Final-close pack:** `work/FINAL-CLOSE/` (protocols P01–P20).
+- **Wave-48 (Production hardening):** service-layer logging (import/invoice/quote/inquiry); CSP header; refresh token rotation; pagination for compliance/sustainability; idempotency PoC; ErrorBoundary + a11y; frontend code-splitting (48 chunks).
+- **Wave-49 (Transaction atomicity):** Inquiry→Client→Project conversion atomic via `flush()` + `get_db()` rollback; `first_inquiry_id` on client; `estimated_value` copied to project; atomicity test passes.
+- **Wave-50 (Security risks + deterministic tests):** Job IDOR closed via `user_has_project_access`; `/metrics` auth flag (`METRICS_REQUIRE_AUTH`); Redis-down skip guards for `/readyz` tests; idempotency cleanup.
+- **Wave-51 (Final re-seal):** All front-door docs reconciled with fresh numbers; frontend function coverage 60.46% (threshold met); all static gates clean; Alembic head 0037.
 
 ### Fixed
 - **Wave-47:** 401/403 RBAC gap — `HTTPBearer(auto_error=False)` + 403 in `get_current_user`
@@ -48,10 +52,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - TaskCard overdue test timezone flake (`toISOString` UTC vs local IST).
 - Viraj architecture overview: MinIO/Celery status corrected (shipped wave-31).
 - Single `_PRIORITY_MAP` in `task_repo.py` (removed triplicate priority dicts).
+- **Wave-48:** `core/rate_limit.py` — upload 10/min, export 20/min, reports 30/min per IP.
+- **Wave-49:** Inquiry conversion atomic — `first_inquiry_id` on client; `estimated_value` copied to project; atomicity test passes.
+- **Wave-49:** `reference_id_service.py` mypy fix — type guard for Engine vs Connection.
+- **Wave-50:** Job IDOR closed — ownership enforced via `user_has_project_access`; `/metrics` auth flag.
+- **Wave-50:** Redis-down skip guards for `/readyz` tests; `test_readyz_db_ok` skipif with self-explaining reason.
+- **Wave-51:** Frontend function coverage 60.46% (threshold met); all static gates clean; all docs reconciled.
 
 ### Docs
 - Viraj data answers locked (ADR-0002); `docs/INSTALL_NO_IT.md` for no-IT-dept install.
 - Go-live seed/smoke (`scripts/seed_demo.py`, `make smoke`) retained from 2026-08-11 prep.
+- All front-door docs reconciled: README, SUBMISSION, TECHNICAL_REPORT, HANDOFF, ACTIVE, EXECUTION.
+- Wave-51 re-seal report: `work/reports/wave-51/01-final-reseal-and-submission.report.md`.
 
 ## [1.0.1] — 2026-08-10 — deferred-feature release (wave-31)
 

@@ -1,7 +1,7 @@
 # Technical Report — SWA Consultancy ERP
 
 **Audience:** engineers and internship evaluators who were not in the room.  
-**Date:** 2026-09-15 (wave-51 re-seal)  
+**Date:** 2026-09-19 (wave-51 final re-seal)  
 **Scope:** product v1.0.1 + professional-grade evidence track (waves 32–39, all shipped) + hardening track (waves 40–51, all complete). Residual ops RISKs from wave-37 are listed in §5 — not claimed as zero.
 
 ---
@@ -105,20 +105,59 @@ Pulled from [`SUBMISSION.md`](SUBMISSION.md) §4 and current reality — not san
 1. **Deploy is not company-live.** Viraj confirmed there is **no IT department**; eight server questions remain open (`SEND_IT.md`). Engineering can be complete while production hostname/ports/certs are unknown.
 2. **Load numbers are from a development machine**, not the client's Windows Server (128 GB, VPN-only). Defensible claim: p95 ≈ 29–130 ms at 10–150 users **on this laptop-class stack**.
 3. **JWT is HS256**, fine for internal on-prem; RS256 would be needed for third-party token verification.
-4. **Coverage is strong, not total.** Backend 86% overall; services all ≥70%; some API/repo modules still <70%. Frontend meets configured thresholds at ~65% statements independently.
-5. **Backend suite after final-close stabilize:** **572 passed / 1 skipped / 0 failed** (full suite, Redis up). Frontend **523 / 0**.
+4. **Coverage is strong, not total.** Backend 86% overall (wave-47 Docker seal); services all ≥70%; some API/repo modules still <70%. Frontend meets configured thresholds: **Statements 63.2%, Branches 55.09%, Functions 60.46% (threshold 60%), Lines 64.29%**.
+5. **Test counts fresh this session:** Frontend **586 passed / 0 failed** via `npx vitest run` (this session, HEAD `4396581`). Coverage **Statements 63.2%, Branches 55.09%, Functions 60.46%, Lines 64.29%** (all thresholds met). Backend full suite **NOT re-run this session** (Docker unavailable); wave-47 seal (572 passed / 1 skipped / 0 failed, 85% coverage) stands as last Docker run.
 6. **Wave-37 residual RISKs (documented, not all fixed):** time/finance VIEWER reads vs Meeting 1 matrix (industry-hardening Phase C); import rollback counters. See wave-37 report.
 7. **Out of MVP by client decision:** HR, founder-only finance sheets, satisfaction/complaints, marketing analytics, client portal.
 8. **Excel → ERP cutover ownership** is still organizational (who runs the real import at go-live).
 
+**Coverage gaps — NOT MEASURED this session:**
+- **Playwright E2E** — no coverage data collected
+- **Backend coverage** — no fresh measurement (wave-33 claimed 86%, not re-verified)
+- **Wave acceptance criteria** — individual wave test runs not executed in this dispatch
+
 **Closed during hardening (waves 40–51):**
 - `/metrics` was unauthenticated → **now auth-gated by default** (`METRICS_REQUIRE_AUTH=true`)
-- Job IDOR on `/api/jobs` → **closed** — ownership enforced via `user_has_project_access`
-- Refresh token rotation → **implemented** — new token issued, old revoked
+- Job IDOR on `/api/jobs` → **closed** — ownership enforced via `user_has_project_access` (admins bypass via `role_includes`)
+- Refresh token rotation → **implemented** — `auth_service.refresh_access_token` issues new pair, revokes old (`revoke_single`)
+- JWT `token_version` logout → **works** — `auth_service.logout` increments `user.token_version`, invalidating all access tokens
 - Service-layer logging → **added** to import/invoice/quote/inquiry services
 - Pagination on compliance/sustainability endpoints → **added**
 - Frontend loading states + code-splitting → **done**
 - Deterministic test suite → **Redis-dependent tests now skip gracefully**
+
+---
+
+## 6. Feature coverage map (verified against code)
+
+### Excel chain — Inquiry → Client → Project → SA → Token → DocRef → Time → Invoice/GST → Compliance
+| Link | Implementation | File:Line |
+|------|---------------|-----------|
+| Inquiry → Client + Project | `convert_inquiry` — locks row, resolves/creates client, creates project, updates inquiry | `src/backend/services/inquiry_service.py:46-188` |
+| Client → Service Agreement | `create_agreement_service` — generates SA reference, links to client + optional inquiry | `src/backend/services/agreement_service.py:36-60` |
+| SA → Token | `Token` model has `agreement_id` FK; tokens created per agreement | `src/backend/models/token.py:15-16` |
+| Token → DocRef | `DocumentReference` has optional `token_id` FK | `src/backend/models/document_reference.py:19-21` |
+| Project → Time | `TimeEntry.project_id` FK; 15-min increments, billable flag | `src/backend/models/time_tracking.py:14-26` |
+| Time → Invoice/GST | `generate_from_time_entries` — pulls unbilled billable entries, 18% GST default | `src/backend/services/invoice_service.py:144-205` |
+| Invoice GST | 18% default (`tax_rate=Decimal("18.00")`); draft→sent→paid state machine | `src/backend/services/invoice_service.py:177, 218-227` |
+| Invoice sequence | `CREATE SEQUENCE IF NOT EXISTS invoice_number_seq` | `src/backend/db/repositories/invoice_repo.py:22` |
+| Project → Compliance | `ProjectComplianceItem` links project to checklist items (NBC/ECBC/IGBC/IS) | `src/backend/models/compliance.py:37-64` |
+
+### RBAC — verified
+| Rule | Implementation | File:Line |
+|------|---------------|-----------|
+| VIEWER read-only | `ROLE_HIERARCHY[VIEWER] = {VIEWER}` — no write roles included | `src/backend/core/roles.py:17` |
+| Admin not blocked by project-IDOR | `_require_job_owner` bypasses ownership check for ADMIN | `src/backend/api/jobs.py:32-33` |
+| JWT `token_version` logout | `logout` increments `user.token_version`; `get_current_user` rejects mismatched version | `src/backend/services/auth_service.py:102-106`, `src/backend/core/deps.py:36-39` |
+| Refresh rotation | `refresh_access_token` creates new pair, calls `revoke_single` on old token | `src/backend/services/auth_service.py:80-84` |
+
+### Audit log — verified entries
+| Action | Logged | File:Line |
+|--------|--------|-----------|
+| Inquiry convert | `inquiry.convert` with before/after status, client_id, project_id | `src/backend/services/inquiry_service.py:162-174` |
+| SA create | `service_agreement.create` with reference_id, client_id, service_name | `src/backend/services/agreement_service.py:46-59` |
+| Invoice sent/paid | `invoice.status_change` with from_status, to_status, total | `src/backend/services/invoice_service.py:241-253` |
+| Login/logout/refresh | `auth.login_success`, `auth.logout`, `auth.token_refresh` | `src/backend/services/auth_service.py:49-51, 86, 109` |
 
 ---
 
@@ -138,6 +177,6 @@ Pulled from [`SUBMISSION.md`](SUBMISSION.md) §4 and current reality — not san
 make install && make dev   # UI :3100 · API :8100
 ```
 
-- Demo: [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md)  
+- Demo: [`MEETING_AND_GO_LIVE_GUIDE.md`](MEETING_AND_GO_LIVE_GUIDE.md) (old demo script archived: `docs/historical/DEMO_SCRIPT.md`)  
 - Handover package: [`SUBMISSION.md`](SUBMISSION.md)  
 - Front door: [`../README.md`](../README.md)

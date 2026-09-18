@@ -160,6 +160,10 @@ Viraj: *match existing Excel logic, don’t invent a better process.*
 
 ---
 
+**Levels 4–10 paste blocks (manual dispatch):** `work/ASSIGN-L4-L10.md`
+
+---
+
 # LEVEL 4 — folders: merge / archive / compact
 
 **Gate:** L3. **Delete zero.** `git mv` only.

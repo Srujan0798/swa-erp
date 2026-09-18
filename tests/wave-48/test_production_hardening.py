@@ -129,7 +129,8 @@ async def test_invoice_status_change_writes_audit_log(authed_admin_client, db_se
     r = await authed_admin_client.post(
         f"/api/projects/{project_id}/invoices", json=_invoice_payload()
     )
-    inv_id = r.json()["id"]
+    inv = r.json()
+    inv_id = inv["id"]
     r2 = await authed_admin_client.patch(
         f"/api/invoices/{inv_id}/status", json={"status": "sent"}
     )
@@ -143,7 +144,9 @@ async def test_invoice_status_change_writes_audit_log(authed_admin_client, db_se
     assert row is not None
     assert str(row.entity_id) == inv_id
     assert row.before_json == {"status": "draft"}
-    assert row.after_json == {"status": "sent"}
+    assert row.after_json["status"] == "sent"
+    assert row.after_json["invoice_number"] == inv["invoice_number"]
+    assert float(row.after_json["total"]) == float(inv["total"])
 
 
 async def test_invoice_delete_writes_audit_log(authed_admin_client, db_session):

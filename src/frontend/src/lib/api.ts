@@ -959,6 +959,22 @@ export const api = {
 
   markNotificationRead: (id: string) =>
     request<void>(`/api/tasks/notifications/${id}/read`, { method: "POST" }),
+
+  /** Start an async export (GET with ?async=true — returns { job_id }). */
+  startExport: (url: string) =>
+    request<{ job_id: string }>(url),
+
+  /** Poll async export job status (ownership-enforced by backend). */
+  getExportJob: (jobId: string) =>
+    request<{ job_id: string; status: string; result_url?: string; error?: string }>(
+      `/api/jobs/${jobId}`,
+    ),
+
+  /** Download a completed export result as a Blob. */
+  downloadExportResult: (jobId: string) =>
+    fetch(`/api/jobs/${jobId}/result`, {
+      headers: { Authorization: `Bearer ${getAccessToken()}` },
+    }),
 };
 
 export { ApiError };

@@ -67,8 +67,12 @@ wave-1 (Foundation) ✅ SHIPPED
 | 38 | Professional submission package | **SHIPPED** ✅ | 1/1 | `—` | no single commit; code in `96852fe` wave-47 seal |
 | 39 | Repo organization | **SHIPPED** ✅ | 1/1 | `889215a` | |
 | 40-47 | Final seal passes (gates, 0-failed suite, DoD A–E) | **SHIPPED** ✅ | 5/5 | `96852fe` | on worktree `w47`; report `work/reports/wave-47/01-final-seal.report.md` |
+| 48 | Production hardening (logging, CSP, pagination, audit, idempotency, frontend loading/bundling) | **SHIPPED** ✅ | 1/1 | `af04262` | `work/reports/wave-48/01-production-hardening.report.md` |
+| 49 | Transaction atomicity for Inquiry→Client→Project | **SHIPPED** ✅ | 1/1 | `f26b420` | `work/reports/wave-49/01-transaction-atomicity.report.md` |
+| 50 | Security risks (job IDOR, /metrics auth) + deterministic test suite | **SHIPPED** ✅ | 2/2 | `8652036` | `work/reports/wave-50/02-deterministic-test-suite.report.md` |
+| 51 | Final re-seal + submission refresh | **SHIPPED** ✅ | 1/1 | `4396581` | `work/reports/wave-51/01-final-reseal-and-submission.report.md` |
 
-**Waves 1–39, 43–47 are SHIPPED.** Engineering closed 2026-08-28.
+**Waves 1–39, 43–51 are SHIPPED.** Engineering closed 2026-09-19.
 Product release remains **v1.0.1**. Deploy remains external (Viraj / no IT dept).
 
 **Note on waves 4-8:** these were committed in one mega-commit (`ed71fac`) rather than the
@@ -123,6 +127,6 @@ directly contradicted the accurate status table above; see `docs/PROJECT_HISTORY
 current, correct source of truth. See `CHANGELOG.md` for the full shipped-changes history
 instead of duplicating it here.
 
-**Active wave:** none — waves 32–39, 43–47 SHIPPED. Engineering sealed by wave-47 (2026-08-28).
-Full-stack pytest: 572 passed / 1 skipped / 0 failed. Coverage: 85%. Vitest: 523 passed / 0 failed.
+**Active wave:** none — waves 32–39, 43–51 SHIPPED (48 production-hardening, 49 atomicity, 50 security, 51 re-seal round 6 at `b20c5f5` — reseal report `work/reports/wave-51/01-final-reseal-and-submission.report.md`). Engineering sealed by wave-47 (2026-08-28).
+Full-stack pytest: 572 passed / 1 skipped / 0 failed (wave-47 Docker seal; NOT re-measured 2026-09-17 — no Docker. Same-date partitioned runs at `b20c5f5`: 571 passed / 30 failed / 9 skipped, Redis down, pytest 9 vs pinned 8.3.3). Coverage: 85% (wave-47). Vitest: 580 passed / 0 failed; coverage 65.16/55.47/62.31/66.21 (2026-09-17, at `b20c5f5`). Static: ruff/mypy clean; black/tsc/eslint FAIL (see reseal report).
 Product release remains **v1.0.1**. Deploy remains external (Viraj / no IT dept).

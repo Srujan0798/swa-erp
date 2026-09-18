@@ -50,7 +50,7 @@ timesheets_router = APIRouter(prefix="/api/timesheets", tags=["timesheets"])
 @time_entries_router.post("", response_model=TimeEntryRead, status_code=status.HTTP_201_CREATED)
 def create_time_entry(
     body: TimeEntryCreate,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role([Role.ADMIN, Role.PM, Role.DESIGNER])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> TimeEntryRead:
     return create_time_entry_service(db, current_user.id, body)
@@ -99,7 +99,7 @@ def get_time_entry(
 def update_time_entry(
     entry_id: uuid.UUID,
     body: TimeEntryUpdate,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role([Role.ADMIN, Role.PM, Role.DESIGNER])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> TimeEntryRead:
     return update_time_entry_service(db, entry_id, current_user.id, body)
@@ -108,7 +108,7 @@ def update_time_entry(
 @time_entries_router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_time_entry(
     entry_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    current_user: User = Depends(require_role([Role.ADMIN, Role.PM, Role.DESIGNER])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> None:
     delete_time_entry_service(db, entry_id, current_user.id)

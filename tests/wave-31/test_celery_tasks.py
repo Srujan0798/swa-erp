@@ -6,10 +6,16 @@ process is required. The worker module builds its own engine from
 ``_worker_db`` to use the same session factory as the rest of the suite.
 """
 
+import uuid
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from src.backend.models.client import Client
+from src.backend.models.project import Project
+from src.backend.models.task import Task
+from src.backend.models.user import User
 from src.backend.workers import tasks as worker_tasks
 from src.backend.workers.celery_app import app
 from tests.conftest import TEST_DATABASE_URL
@@ -77,8 +83,6 @@ def test_project_id(db_session, test_client_id, admin_user):
 
 
 def _add_task(db_session, project_id, title, status, created_by):
-    from src.backend.models.task import Task
-
     t = Task(
         project_id=project_id,
         title=title,
@@ -89,17 +93,89 @@ def _add_task(db_session, project_id, title, status, created_by):
     db_session.commit()
 
 
-def test_project_summary_task_produces_stored_pdf(
-    db_session, test_project_id, admin_user
-):
+@pytest.fixture(scope="function")
+def committed_project():
+    """Seed client+owner+project via an independent COMMITTED session.
+
+    Evidence (ValueError('Project not found') -> celery Retry in eager mode):
+    eager tasks read through their own connection (_worker_db), which under
+    READ COMMITTED cannot see the uncommitted rows of the transactional
+    db_session fixture. Seeding committed rows mirrors production, where the
+    worker only ever reads committed data. Cleans up after itself so the
+    shared swa_erp_test DB is not polluted for later tests.
+    """
+    s = _test_session_factory()
+    try:
+        u = User(
+            email=f"celery-owner-{uuid.uuid4().hex[:6]}@test.com",
+            name="Celery Owner",
+            password_hash="x",
+            role="pm",
+        )
+        s.add(u)
+        s.commit()
+        s.refresh(u)
+        c = Client(
+            name="Celery Test Client",
+            code=f"CEL-{uuid.uuid4().hex[:6]}",
+            primary_email="celery@test.com",
+        )
+        s.add(c)
+        s.commit()
+        s.refresh(c)
+        p = Project(
+            client_id=c.id,
+            name="Celery Test Project",
+            code=f"CELP-{uuid.uuid4().hex[:6]}",
+            status="Design",
+            pm_id=u.id,
+            location="Mumbai",
+        )
+        s.add(p)
+        s.commit()
+        s.refresh(p)
+        ids = {"project_id": p.id, "user_id": u.id}
+        yield ids
+    finally:
+        try:
+            pid = ids["project_id"]
+            s.query(Task).filter(Task.project_id == pid).delete()
+            proj = s.get(Project, pid)
+            cid = proj.client_id if proj else None
+            uid = proj.pm_id if proj else None
+            if proj is not None:
+                s.delete(proj)
+            if cid is not None:
+                cli = s.get(Client, cid)
+                if cli is not None:
+                    s.delete(cli)
+            if uid is not None:
+                usr = s.get(User, uid)
+                if usr is not None:
+                    s.delete(usr)
+            s.commit()
+        finally:
+            s.close()
+
+
+def _add_committed_task(project_id, title, status, created_by):
+    s = _test_session_factory()
+    try:
+        s.add(Task(project_id=project_id, title=title, status=status, reporter_id=created_by))
+        s.commit()
+    finally:
+        s.close()
+
+
+def test_project_summary_task_produces_stored_pdf(committed_project):
     from src.backend.core.storage import get_storage
 
-    _add_task(db_session, test_project_id, "T1", "done", admin_user.id)
-    _add_task(db_session, test_project_id, "T2", "todo", admin_user.id)
+    pid = committed_project["project_id"]
+    uid = committed_project["user_id"]
+    _add_committed_task(pid, "T1", "done", uid)
+    _add_committed_task(pid, "T2", "todo", uid)
 
-    result = worker_tasks.generate_project_summary_pdf.apply(
-        args=[str(test_project_id)]
-    )
+    result = worker_tasks.generate_project_summary_pdf.apply(args=[str(pid)])
     assert result.successful()
     stored_key = result.result
     assert isinstance(stored_key, str)
@@ -122,12 +198,14 @@ def test_financial_report_task_produces_stored_pdf():
 
 @pytest.mark.asyncio
 async def test_async_summary_endpoint_returns_job_id_then_success(
-    authed_pm_client, db_session, test_project_id, admin_user
+    authed_pm_client, committed_project
 ):
-    _add_task(db_session, test_project_id, "Async Task", "done", admin_user.id)
+    pid = committed_project["project_id"]
+    uid = committed_project["user_id"]
+    _add_committed_task(pid, "Async Task", "done", uid)
 
     r = await authed_pm_client.get(
-        f"/api/exports/projects/{test_project_id}/summary.pdf",
+        f"/api/exports/projects/{pid}/summary.pdf",
         params={"async": "true"},
     )
     assert r.status_code == 202
@@ -158,16 +236,14 @@ async def test_async_financial_report_endpoint_returns_job_id(
     assert "job_id" in r.json()
 
 
-def test_project_slides_task_produces_stored_pdf(
-    db_session, test_project_id, admin_user
-):
+def test_project_slides_task_produces_stored_pdf(committed_project):
     from src.backend.core.storage import get_storage
 
-    _add_task(db_session, test_project_id, "Slides Task", "done", admin_user.id)
+    pid = committed_project["project_id"]
+    uid = committed_project["user_id"]
+    _add_committed_task(pid, "Slides Task", "done", uid)
 
-    result = worker_tasks.generate_project_slides_pdf.apply(
-        args=[str(test_project_id)]
-    )
+    result = worker_tasks.generate_project_slides_pdf.apply(args=[str(pid)])
     assert result.successful()
     stored_key = result.result
     content = get_storage().read(stored_key)
@@ -176,12 +252,14 @@ def test_project_slides_task_produces_stored_pdf(
 
 @pytest.mark.asyncio
 async def test_async_slides_endpoint_returns_job_id(
-    authed_pm_client, db_session, test_project_id, admin_user
+    authed_pm_client, committed_project
 ):
-    _add_task(db_session, test_project_id, "Async Slides", "done", admin_user.id)
+    pid = committed_project["project_id"]
+    uid = committed_project["user_id"]
+    _add_committed_task(pid, "Async Slides", "done", uid)
 
     r = await authed_pm_client.get(
-        f"/api/exports/projects/{test_project_id}/slides.pdf",
+        f"/api/exports/projects/{pid}/slides.pdf",
         params={"async": "true"},
     )
     assert r.status_code == 202

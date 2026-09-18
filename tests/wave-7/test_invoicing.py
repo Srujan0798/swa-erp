@@ -6,6 +6,7 @@ from uuid import UUID
 
 import pytest
 
+from src.backend.models.audit_log import AuditLog
 from src.backend.models.client import Client
 from src.backend.models.invoice import Invoice
 from src.backend.models.project import Project
@@ -296,6 +297,73 @@ async def test_mark_invoice_paid(authed_admin_client, db_session):
     assert r2.status_code == 200
     assert r2.json()["status"] == "paid"
     assert r2.json()["paid_at"] is not None
+
+
+def _status_audit_rows(db_session, inv_id: str) -> list:
+    """Return this invoice's status-change audit rows, newest first."""
+    rows = (
+        db_session.query(AuditLog)
+        .filter(AuditLog.action == "invoice.status_change")
+        .order_by(AuditLog.id.desc())
+        .all()
+    )
+    return [row for row in rows if str(row.entity_id) == inv_id]
+
+
+async def test_send_invoice_writes_audit_log(authed_admin_client, db_session):
+    project_id = await _setup_project(authed_admin_client)
+    r = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices",
+        json={
+            "items": [
+                {"description": "Item", "quantity": "1.00", "rate": "1000.00"},
+            ],
+        },
+    )
+    inv = r.json()
+    r2 = await authed_admin_client.patch(
+        f"/api/invoices/{inv['id']}/status",
+        json={"status": "sent"},
+    )
+    assert r2.status_code == 200
+    rows = _status_audit_rows(db_session, inv["id"])
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.before_json == {"status": "draft"}
+    assert row.after_json["status"] == "sent"
+    assert row.after_json["invoice_number"] == inv["invoice_number"]
+    assert float(row.after_json["total"]) == float(inv["total"])
+
+
+async def test_mark_invoice_paid_writes_audit_log(authed_admin_client, db_session):
+    project_id = await _setup_project(authed_admin_client)
+    r = await authed_admin_client.post(
+        f"/api/projects/{project_id}/invoices",
+        json={
+            "items": [
+                {"description": "Item", "quantity": "1.00", "rate": "1000.00"},
+            ],
+        },
+    )
+    inv = r.json()
+    await authed_admin_client.patch(
+        f"/api/invoices/{inv['id']}/status",
+        json={"status": "sent"},
+    )
+    r2 = await authed_admin_client.patch(
+        f"/api/invoices/{inv['id']}/status",
+        json={"status": "paid"},
+    )
+    assert r2.status_code == 200
+    rows = _status_audit_rows(db_session, inv["id"])
+    assert len(rows) == 2
+    paid_row, sent_row = rows[0], rows[1]
+    assert sent_row.after_json["status"] == "sent"
+    assert sent_row.after_json["invoice_number"] == inv["invoice_number"]
+    assert paid_row.before_json == {"status": "sent"}
+    assert paid_row.after_json["status"] == "paid"
+    assert paid_row.after_json["invoice_number"] == inv["invoice_number"]
+    assert float(paid_row.after_json["total"]) == float(inv["total"])
 
 
 async def test_cannot_delete_non_draft(authed_admin_client, db_session):

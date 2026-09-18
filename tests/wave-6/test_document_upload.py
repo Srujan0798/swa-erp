@@ -74,6 +74,25 @@ def auth_headers(db_session):
 
 
 @pytest.fixture
+def viewer_headers(db_session):
+    from src.backend.core.security import create_access_token
+    from src.backend.models.user import User
+
+    user = User(
+        email=f"viewer-{uuid.uuid4().hex[:6]}@test.com",
+        name="Viewer User",
+        password_hash="x",
+        role="viewer",
+        is_active=True,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    token = create_access_token(user.id, "viewer")
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
 def pm_headers(db_session):
     from src.backend.core.security import create_access_token
     from src.backend.models.user import User
@@ -92,7 +111,7 @@ def pm_headers(db_session):
     return {"Authorization": f"Bearer {token}"}
 
 
-def _create_project(db: Session) -> uuid.UUID:
+def _create_project(db: Session, pm_id=None) -> uuid.UUID:
     from src.backend.models.project import Project
     from src.backend.models.client import Client
 
@@ -110,6 +129,7 @@ def _create_project(db: Session) -> uuid.UUID:
         name="Test Project",
         code=f"TP-{uuid.uuid4().hex[:6]}",
         status="Lead",
+        pm_id=pm_id,
     )
     db.add(project)
     db.commit()
@@ -255,7 +275,15 @@ class TestCreateFolder:
         assert names == ["A", "B", "C"]  # sorted alphabetically
 
     def test_delete_folder(self, client, pm_headers, db_session):
-        project_id = _create_project(db_session)
+        # Evidence: folder/document endpoints enforce project membership since
+        # aa03e77 (_require_project_access); the fixture PM is not auto-assigned
+        # to the helper-created project, so assign them — this test's contract
+        # is folder lifecycle, not RBAC denial (unassigned-PM denial is pinned
+        # in TestFolderWriteProjectScoping below).
+        from src.backend.models.user import User
+
+        pm = db_session.query(User).filter(User.role == "pm").one()
+        project_id = _create_project(db_session, pm_id=pm.id)
         folder_resp = client.post(
             f"/api/projects/{project_id}/folders",
             headers=pm_headers,
@@ -268,7 +296,12 @@ class TestCreateFolder:
         assert delete_resp.status_code == 204
 
     def test_delete_folder_soft_deletes_documents(self, client, pm_headers, db_session):
-        project_id = _create_project(db_session)
+        # Evidence: see test_delete_folder — PM must be a project member since
+        # aa03e77; assign them so the test exercises folder+doc lifecycle.
+        from src.backend.models.user import User
+
+        pm = db_session.query(User).filter(User.role == "pm").one()
+        project_id = _create_project(db_session, pm_id=pm.id)
 
         # Create folder
         folder_resp = client.post(
@@ -300,3 +333,137 @@ class TestCreateFolder:
         assert list_resp.status_code == 200
         items = list_resp.json()["items"]
         assert len(items) == 0
+
+
+class TestViewerCannotWriteDocuments:
+    """L6-C (access matrix, docs/flows/02_auth_rbac.md): viewer is read-only.
+
+    Every document write path is role-gated via require_role(DESIGNER|PM);
+    role_includes(VIEWER, DESIGNER/PM) is False, so all writes must 403.
+    Role dependencies fire before handler logic, so the target ids can be
+    arbitrary here.
+    """
+
+    def test_viewer_cannot_upload_document(self, client, viewer_headers, db_session):
+        project_id = _create_project(db_session)
+        resp = client.post(
+            f"/api/projects/{project_id}/documents",
+            headers=viewer_headers,
+            files=[_file_upload()],
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_reupload_document(self, client, viewer_headers, db_session):
+        project_id = _create_project(db_session)
+        resp = client.post(
+            f"/api/projects/{project_id}/documents/re-upload",
+            headers=viewer_headers,
+            data={"original_name": "report.pdf"},
+            files=[_file_upload(b"v2", "report.pdf")],
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_update_document(self, client, viewer_headers):
+        resp = client.patch(
+            f"/api/documents/{uuid.uuid4()}",
+            headers=viewer_headers,
+            json={"tags": "nope"},
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_delete_document(self, client, viewer_headers):
+        resp = client.delete(f"/api/documents/{uuid.uuid4()}", headers=viewer_headers)
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_rename_document(self, client, viewer_headers):
+        resp = client.put(
+            f"/api/documents/{uuid.uuid4()}/rename",
+            headers=viewer_headers,
+            json={"new_name": "nope.txt"},
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_move_documents(self, client, viewer_headers):
+        resp = client.put(
+            "/api/documents/move",
+            headers=viewer_headers,
+            json={"document_ids": [str(uuid.uuid4())], "target_folder_id": None},
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_create_folder(self, client, viewer_headers, db_session):
+        project_id = _create_project(db_session)
+        resp = client.post(
+            f"/api/projects/{project_id}/folders",
+            headers=viewer_headers,
+            json={"name": "Nope", "project_id": str(project_id)},
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_rename_folder(self, client, viewer_headers):
+        resp = client.put(
+            f"/api/folders/{uuid.uuid4()}/rename",
+            headers=viewer_headers,
+            json={"new_name": "Nope"},
+        )
+        assert resp.status_code == 403
+
+    def test_viewer_cannot_delete_folder(self, client, viewer_headers):
+        resp = client.delete(f"/api/folders/{uuid.uuid4()}", headers=viewer_headers)
+        assert resp.status_code == 403
+
+
+class TestFolderWriteProjectScoping:
+    """L6-C: folder rename/delete enforce project membership (aa03e77 follow-up).
+
+    Commit aa03e77 added ``_require_project_access`` to every documents
+    endpoint except ``PUT /api/folders/{id}/rename`` and
+    ``DELETE /api/folders/{id}``. The fix resolves folder -> project before
+    writing: a PM with no membership in the folder's project gets 403;
+    admins bypass (documents.py ``_require_project_access``).
+    """
+
+    def _make_folder(self, client, headers, project_id, name="Scoped"):
+        resp = client.post(
+            f"/api/projects/{project_id}/folders",
+            headers=headers,
+            json={"name": name, "project_id": str(project_id)},
+        )
+        assert resp.status_code == 201, resp.text
+        return resp.json()
+
+    def test_unassigned_pm_cannot_delete_folder(self, client, auth_headers, pm_headers, db_session):
+        project_id = _create_project(db_session)  # pm_id=None -> PM has no membership
+        folder = self._make_folder(client, auth_headers, project_id)
+        resp = client.delete(f"/api/folders/{folder['id']}", headers=pm_headers)
+        assert resp.status_code == 403
+
+    def test_unassigned_pm_cannot_rename_folder(self, client, auth_headers, pm_headers, db_session):
+        project_id = _create_project(db_session)
+        folder = self._make_folder(client, auth_headers, project_id)
+        resp = client.put(
+            f"/api/folders/{folder['id']}/rename",
+            headers=pm_headers,
+            json={"new_name": "Hacked"},
+        )
+        assert resp.status_code == 403
+
+    def test_assigned_pm_can_rename_folder(self, client, pm_headers, db_session):
+        from src.backend.models.user import User
+
+        pm = db_session.query(User).filter(User.role == "pm").one()
+        project_id = _create_project(db_session, pm_id=pm.id)
+        folder = self._make_folder(client, pm_headers, project_id)
+        resp = client.put(
+            f"/api/folders/{folder['id']}/rename",
+            headers=pm_headers,
+            json={"new_name": "Renamed OK"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["name"] == "Renamed OK"
+
+    def test_admin_can_delete_folder_in_unassigned_project(self, client, auth_headers, db_session):
+        project_id = _create_project(db_session)  # admin is not pm/designer/auditor
+        folder = self._make_folder(client, auth_headers, project_id)
+        resp = client.delete(f"/api/folders/{folder['id']}", headers=auth_headers)
+        assert resp.status_code == 204

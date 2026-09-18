@@ -108,11 +108,7 @@ def _is_upload_request(path: str, method: str) -> bool:
     """Excel/BOQ import and document uploads (POST only — GETs are reads)."""
     if method != "POST":
         return False
-    return (
-        "/boqs" in path
-        or path.endswith("/documents")
-        or path.endswith("/documents/re-upload")
-    )
+    return "/boqs" in path or path.endswith("/documents") or path.endswith("/documents/re-upload")
 
 
 def _is_export_request(path: str, _method: str) -> bool:

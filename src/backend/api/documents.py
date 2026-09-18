@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Query, Response, Up
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
-from src.backend.core.roles import Role
+from src.backend.core.roles import Role, role_includes
 from src.backend.core.storage import get_storage
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.repositories.project_repo import user_has_project_access
@@ -25,6 +25,7 @@ from src.backend.services.document_service import (
     create_new_version,
     delete_folder_service,
     get_document,
+    get_folder_service,
     get_version_history,
     list_project_documents,
     list_project_folders,
@@ -46,7 +47,15 @@ def _check_project_exists(db: Session, project_id: uuid.UUID) -> None:
 
 
 def _require_project_access(db: Session, project_id: uuid.UUID, user: User) -> None:
-    """Raise 403 when *user* is not a member (PM/designer/auditor) of *project_id*."""
+    """Raise 403 when *user* is not a member (PM/designer/auditor) of *project_id*.
+
+    Admins bypass the membership check: ADMIN is global per ROLE_HIERARCHY and
+    the codebase's explicit product call is that admins may read any scoped
+    object (cf. jobs._require_job_owner). Without this, an admin is locked out
+    of documents on every project they are not personally assigned to.
+    """
+    if role_includes(Role(user.role), Role.ADMIN):
+        return
     if not user_has_project_access(db, user.id, project_id):
         raise HTTPException(
             status_code=403,
@@ -314,6 +323,10 @@ def rename_folder_endpoint(
     current_user: User = Depends(require_role(Role.DESIGNER)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> DocumentFolderRead:
+    folder = get_folder_service(db, folder_id)
+    if not folder:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    _require_project_access(db, folder.project_id, current_user)
     result = rename_folder_service(db, folder_id, body.new_name, current_user.id)
     if not result:
         raise HTTPException(status_code=404, detail="Folder not found")
@@ -329,6 +342,10 @@ def delete_folder_endpoint(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> None:
+    folder = get_folder_service(db, folder_id)
+    if not folder:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    _require_project_access(db, folder.project_id, current_user)
     success = delete_folder_service(db, folder_id, current_user.id)
     if not success:
         raise HTTPException(status_code=404, detail="Folder not found")

@@ -13,17 +13,23 @@ def _utc_year() -> int:
 
 def generate_reference_id(db: Session, entity_type: str) -> str:
     year = _utc_year()
-    sql = text("""
+    sql = text(
+        """
         INSERT INTO reference_counters (id, entity_type, year, last_seq)
         VALUES (:id, :entity_type, :year, 1)
         ON CONFLICT (entity_type, year) DO UPDATE
         SET last_seq = reference_counters.last_seq + 1
         RETURNING last_seq
-    """)
+    """
+    )
     # Use a separate autocommit connection so the counter persists
     # even if the caller's transaction rolls back (e.g., in tests).
+    from sqlalchemy.engine import Engine
+
     bind = db.get_bind()
     engine = bind.engine if hasattr(bind, "engine") else bind
+    if not isinstance(engine, Engine):
+        raise RuntimeError("Expected SQLAlchemy Engine for reference ID generation")
     with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
         result = conn.execute(sql, {"id": uuid.uuid4(), "entity_type": entity_type, "year": year})
         row = result.fetchone()

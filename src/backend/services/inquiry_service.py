@@ -147,7 +147,8 @@ def convert_inquiry(
         project_code=project.code,
     )
 
-    # Update inquiry status
+    # Update inquiry status (capture pre-convert status first — update mutates `locked`)
+    before_status = locked.status
     update_inquiry(
         db,
         locked,
@@ -164,7 +165,7 @@ def convert_inquiry(
         entity_type="inquiry",
         entity_id=locked.id,
         user_id=actor_id,
-        before_json={"status": locked.status},
+        before_json={"status": before_status},
         after_json={
             "status": "Converted",
             "client_id": str(client.id),

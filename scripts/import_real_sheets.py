@@ -30,11 +30,26 @@ ORDER: list[tuple[str, str]] = [
     ("clients", "Clients Sheet.xlsx"),
     ("agreements", "Service Agreements Sheet.xlsx"),
     ("projects", "Project Tracking Sheet.xlsx"),
-    ("tokens", "Tokens Sheet.xlsx"),
-    ("document_references", "Document Reference Sheet.xlsx"),
-    ("time_logs", "Time Logging Sheet.xlsx"),
-    ("sustainability", "Sustainability Metrics Sheet.xlsx"),
 ]
+
+# Deliberately NOT imported (require convert to create projects first):
+#   ("tokens", "Tokens Sheet.xlsx"),
+#   ("document_references", "Document Reference Sheet.xlsx"),
+#   ("time_logs", "Time Logging Sheet.xlsx"),
+#   ("sustainability", "Sustainability Metrics Sheet.xlsx"),
+# Admin Process Digitization, Client Complaints, Client Feedback,
+# Employee Satisfaction, Employees, Hardware Issues, Training,
+# Instagram/LinkedIn/Website Metrics (marketing), Research Collaborations,
+# Research Innovations. Any new .xlsx in resources/ is ignored unless
+# explicitly added to ORDER above.
+
+# Deliberately NOT imported (out of MVP per Meeting 2 — dropped by the client):
+#   Admin Process Digitization, Client Complaints, Client Feedback,
+#   Employee Satisfaction, Employees, Hardware Issues, Training,
+#   Instagram/LinkedIn/Website Metrics (marketing), Research Collaborations,
+#   Research Innovations. Any new .xlsx in resources/ is ignored unless
+#   explicitly added to ORDER above.
+
 
 
 def _wipe(session) -> None:

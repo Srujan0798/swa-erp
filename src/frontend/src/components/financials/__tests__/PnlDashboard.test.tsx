@@ -1,8 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PnlDashboard } from "../PnlDashboard";
 
 const mockPnL = {
+  project_id: "p1",
+  project_name: "Test Project",
   total_revenue: 5000000,
   total_costs: 3500000,
   net_profit: 1500000,

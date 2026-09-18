@@ -92,6 +92,64 @@ async def test_logout_revokes_refresh(client_with_db, admin_user):
     assert r2.status_code == 401
 
 
+async def test_logout_invalidates_access_token(client_with_db, admin_user, db_session):
+    r = await client_with_db.post(
+        "/api/auth/login",
+        json={"email": "admin@swa.co.in", "password": "admin123!"},
+    )
+    access = r.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access}"}
+
+    version_before = db_session.execute(
+        text("SELECT token_version FROM users WHERE email = 'admin@swa.co.in'")
+    ).fetchone()
+    assert version_before is not None
+    # issue-time claim must match the DB version current at login
+    assert decode_token(access)["v"] == version_before[0]
+
+    r2 = await client_with_db.get("/api/auth/me", headers=headers)
+    assert r2.status_code == 200
+
+    r3 = await client_with_db.post("/api/auth/logout", headers=headers)
+    assert r3.status_code == 200
+
+    version_after = db_session.execute(
+        text("SELECT token_version FROM users WHERE email = 'admin@swa.co.in'")
+    ).fetchone()
+    assert version_after[0] == version_before[0] + 1  # logout bumped token_version
+
+    r4 = await client_with_db.get("/api/auth/me", headers=headers)
+    assert r4.status_code == 401  # outstanding access token now rejected
+
+
+async def test_refresh_rotation_revokes_old_token(client_with_db, admin_user):
+    r = await client_with_db.post(
+        "/api/auth/login",
+        json={"email": "admin@swa.co.in", "password": "admin123!"},
+    )
+    old_refresh = r.json()["refresh_token"]
+
+    r2 = await client_with_db.post(
+        "/api/auth/refresh",
+        json={"refresh_token": old_refresh},
+    )
+    assert r2.status_code == 200
+    new_refresh = r2.json()["refresh_token"]
+    assert new_refresh != old_refresh  # rotation minted a successor
+
+    r3 = await client_with_db.post(
+        "/api/auth/refresh",
+        json={"refresh_token": old_refresh},
+    )
+    assert r3.status_code == 401  # old refresh token is single-use
+
+    r4 = await client_with_db.post(
+        "/api/auth/refresh",
+        json={"refresh_token": new_refresh},
+    )
+    assert r4.status_code == 200  # successor token is usable
+
+
 async def test_audit_log_on_login(client_with_db, admin_user, db_session):
     await client_with_db.post(
         "/api/auth/login",

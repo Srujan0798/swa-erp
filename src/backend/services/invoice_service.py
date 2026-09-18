@@ -234,7 +234,7 @@ def update_invoice_status_service(
     logger.info(
         "invoice.status_changed",
         invoice_id=str(invoice_id),
-        from_status=invoice.status,
+        from_status=before_status,
         to_status=new_status,
         paid_at=paid_at.isoformat() if paid_at else None,
     )
@@ -245,7 +245,11 @@ def update_invoice_status_service(
         entity_id=invoice_id,
         user_id=user_id,
         before_json={"status": before_status},
-        after_json={"status": new_status},
+        after_json={
+            "status": new_status,
+            "invoice_number": invoice.invoice_number,
+            "total": str(invoice.total),
+        },
     )
     return _invoice_to_read(updated, db)
 

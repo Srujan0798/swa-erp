@@ -2,14 +2,7 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IndianRupee, FolderOpen, FileText, Hammer } from "lucide-react";
-
-function formatINR(value: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+import { formatMoney, formatNumber } from "@/lib/formatters";
 
 export function StatsCards() {
   const { data: stats, isLoading } = useDashboard();
@@ -19,25 +12,25 @@ export function StatsCards() {
       title: "Total Active Projects",
       value: stats?.total_active ?? 0,
       icon: FolderOpen,
-      format: (v: number) => v.toString(),
+      format: (v: number) => formatNumber(v),
     },
     {
       title: "Total Estimated Value",
       value: stats?.total_estimated_value ?? 0,
       icon: IndianRupee,
-      format: formatINR,
+      format: (v: number) => formatMoney(v, { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
     },
     {
       title: "In Quote Stage",
       value: stats?.by_status?.Quote ?? 0,
       icon: FileText,
-      format: (v: number) => v.toString(),
+      format: (v: number) => formatNumber(v),
     },
     {
       title: "In Execution",
       value: stats?.by_status?.Execution ?? 0,
       icon: Hammer,
-      format: (v: number) => v.toString(),
+      format: (v: number) => formatNumber(v),
     },
   ];
 

@@ -5,6 +5,13 @@ config files exist (`docker-compose.prod.yml`, `.env.production.example`) and
 that `docs/IT_BRIEF.md`'s 8 answers have landed (any still-open item is marked
 `PENDING IT ANSWER` in those files and must be resolved first).
 
+**Storage:** local `uploads/` directory is the default; set `STORAGE_BACKEND=minio`
+and the `MINIO_*` env vars to enable MinIO. Local uploads/ works out of the box —
+do not force MinIO on laptop demo.
+
+**Platform:** Windows Server + Docker Engine (free, NOT Docker Desktop) + WSL2 + Docker Compose.
+All commands run inside a WSL2 Ubuntu shell (or PowerShell with `wsl` prefix).
+
 ---
 
 ## 1. Pre-deployment
@@ -16,24 +23,26 @@ that `docs/IT_BRIEF.md`'s 8 answers have landed (any still-open item is marked
   - [ ] `SECRET_KEY` generated via
         `python3 -c "import secrets; print(secrets.token_hex(32))"`
   - [ ] `POSTGRES_PASSWORD` set to a strong, unique value.
-  - [ ] `CORS_ORIGINS` set to the real internal hostname (Q6).
+  - [ ] `CORS_ORIGINS` set to the real internal hostname (Q6) — e.g. `["http://<server-LAN-IP>:3100"]`.
 - [ ] **No `PENDING IT ANSWER` comments remain unresolved** in
       `docker-compose.prod.yml` or `.env.production`. Each maps to a numbered
       question in `docs/IT_BRIEF.md`:
-  - [ ] Q1 Docker Engine vs Desktop
-  - [ ] Q2 WSL2 / Linux containers
-  - [ ] Q3 free ports substituted
-  - [ ] Q4 TLS termination decided (cert source)
-  - [ ] Q6 internal web address locked
-  - [ ] Q7 postgres/redis in-compose vs native Windows
-- [ ] **Confirm target server has Docker running** and (if Windows) WSL2 enabled
-      for Linux containers.
+  - [ ] Q1 Docker Engine (free) vs Docker Desktop — confirm free Engine is used
+  - [ ] Q2 WSL2 / Linux containers enabled on Windows Server
+  - [ ] Q3 free ports substituted (UI 3100, API 8100; DB/Redis internal only)
+  - [ ] Q4 TLS termination decided (cert source — self-signed or internal CA for VPN)
+  - [ ] Q6 internal web address locked (e.g. `http://<server-LAN-IP>:3100`)
+  - [ ] Q7 postgres/redis in-compose vs native Windows — confirm in-compose
+- [ ] **Confirm target server has Docker Engine (free) running** and WSL2 enabled
+      for Linux containers (`wsl -l -v` shows Ubuntu).
 - [ ] **Pull / transfer the built images** (or confirm the host can build from
       the repo — `Dockerfile`, `Dockerfile.frontend` are unchanged from dev).
 
 ---
 
 ## 2. Deployment steps
+
+Run from a WSL2 Ubuntu shell (or PowerShell with `wsl` prefix):
 
 ```bash
 # From the repo root on the target server.
@@ -46,8 +55,8 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d --bui
 docker compose -f docker-compose.prod.yml ps        # migrate should show Exit 0
 docker compose -f docker-compose.prod.yml logs migrate
 
-# 3. Verify health.
-curl -f http://localhost:8000/healthz                # expect {"status":"ok"}
+# 3. Verify health (host port 8100 maps to container port 8000).
+curl -f http://localhost:8100/healthz                # expect {"status":"ok"}
 docker compose -f docker-compose.prod.yml ps         # all long-running svc = healthy/Up
 ```
 
@@ -85,7 +94,7 @@ known-good end to end):
 | 17 | `GET /api/reports/project-health` | 200 |
 | 18 | `GET /api/dashboard/executive` | 200 |
 
-Frontend: open the internal URL (Q6) in a browser, log in as admin, confirm the
+Frontend: open the internal URL (Q6, e.g. `http://<server-LAN-IP>:3100`) in a browser, log in as admin, confirm the
 dashboard renders and the inquiry→client→project→agreement→token→document chain
 is clickable end to end.
 
@@ -93,7 +102,7 @@ is clickable end to end.
 
 ## 4. Rollback procedure
 
-The stack is image-tagged; to revert to the previous known-good version:
+The stack is image-tagged; to revert to the previous known-good version (run from WSL2):
 
 ```bash
 # 1. Stop the current stack (keeps the prod volumes — DB data is preserved).
@@ -106,9 +115,25 @@ git checkout <previous-release-tag>
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 ```
 
-Notes:
-- Database data lives in the named volumes `swa_erp_prod_pgdata` /
-  `swa_erp_prod_redisdata`, so `down` does **not** destroy data. If a bad
-  migration is the cause, restore the pre-deployment DB backup instead of just
-  rolling images.
-- Never run `docker compose down -v` in production — that deletes the volumes.
+## 5. Backup & restore (Meeting 2 cadence)
+
+- [ ] **Daily database backup** configured and tested (Windows Task Scheduler on prod host).
+      Suggested task: Action → `wsl.exe -d Ubuntu -- bash -c "cd /mnt/c/path/to/swa-erp && make backup-db"`
+      Trigger: Daily at 02:00.
+- [ ] **Weekly file backup** configured (Windows Task Scheduler on prod host):
+      Suggested task: Action → `wsl.exe -d Ubuntu -- bash -c "cd /mnt/c/path/to/swa-erp && make backup-files"`
+      Trigger: Weekly on Sunday at 03:00.
+- [ ] **Restore dry-run verified** before go-live:
+  - `make restore-db file=<path.sql.gz>` — prints commands, exits 0 (no changes)
+  - `make restore-files file=<path.tar.gz>` — prints command, exits 0 (no changes)
+- [ ] **Actual restore tested** in a staging environment at least once:
+  - `make restore-db file=<path.sql.gz> FORCE=--force` (destructive — needs confirmation)
+  - `make restore-files file=<path.tar.gz> FORCE=--force` (overwrites uploads/)
+- [ ] **Retention policies active**:
+  - DB backups: 30-day retention (handled by `backup_db.sh`)
+  - File backups: 90-day retention (handled by `backup_files.sh`)
+
+Restoration safety:
+- Dry-run mode is the default — the target scripts print commands without executing them.
+- Actual restore requires the `--force` flag AND an interactive "yes" confirmation.
+- `restore-db` drops the public schema before restore (destructive).

@@ -42,11 +42,14 @@ ORDER = [
     ("clients", "Clients Sheet.xlsx"),
     ("agreements", "Service Agreements Sheet.xlsx"),
     ("projects", "Project Tracking Sheet.xlsx"),
-    ("tokens", "Tokens Sheet.xlsx"),
-    ("document_references", "Document Reference Sheet.xlsx"),
-    ("time_logs", "Time Logging Sheet.xlsx"),
-    ("sustainability", "Sustainability Metrics Sheet.xlsx"),
 ]
+
+# Deliberately NOT imported (require convert to create projects first):
+#   ("tokens", "Tokens Sheet.xlsx"),
+#   ("document_references", "Document Reference Sheet.xlsx"),
+#   ("time_logs", "Time Logging Sheet.xlsx"),
+#   ("sustainability", "Sustainability Metrics Sheet.xlsx"),
+
 
 USERS = [
     ("admin@swa.co.in", "Admin SWA", "admin", "admin123!"),

@@ -29,6 +29,40 @@ export function ReportsPage(): ReactElement {
   const [appliedCategory, setAppliedCategory] = useState("");
   const [showCostForm, setShowCostForm] = useState(false);
 
+  // Async export state
+  const [exportJobId, setExportJobId] = useState<string | null>(null);
+  const [exportStatus, setExportStatus] = useState<string>("");
+  const [exportError, setExportError] = useState<string>("");
+  const [exportResultUrl, setExportResultUrl] = useState<string>("");
+
+  // Poll job status once started
+  useEffect(() => {
+    if (!exportJobId) return;
+    let cancelled = false;
+    const interval = setInterval(() => {
+      void api.getExportJob(exportJobId).then(
+        (data) => {
+          if (cancelled) return;
+          setExportStatus(data.status);
+          if (data.status === "SUCCESS") {
+            setExportResultUrl(data.result_url ?? "");
+            setExportJobId(null);
+          } else if (data.status === "FAILURE") {
+            setExportError(data.error ?? "Export failed");
+            setExportJobId(null);
+          }
+        },
+        () => {
+          if (!cancelled) setExportError("Poll failed");
+        },
+      );
+    }, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [exportJobId]);
+
   useEffect(() => {
     const fromUrl = searchParams.get("project") ?? "";
     if (fromUrl !== projectId) setProjectId(fromUrl);
@@ -108,7 +142,47 @@ export function ReportsPage(): ReactElement {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            if (!projectId) return;
+            void api
+              .startExport(`/api/exports/projects/${projectId}/summary.pdf?async=true`)
+              .then((data) => {
+                setExportJobId(data.job_id);
+                setExportStatus("PENDING");
+                setExportError("");
+                setExportResultUrl("");
+              })
+              .catch((e) => setExportError(e.message));
+          }}
+        >
+          Export summary PDF
+        </Button>
       </div>
+
+      {(exportJobId || exportStatus || exportError || exportResultUrl) && (
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="text-base">Export job</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p>
+              Job: <code className="text-xs bg-muted px-1 rounded">{exportJobId ?? "—"}</code>
+            </p>
+            <p>Status: <strong>{exportStatus}</strong></p>
+            {exportError && <p className="text-destructive">{exportError}</p>}
+            {exportResultUrl && (
+              <p>
+                <a className="underline" href={exportResultUrl} target="_blank" rel="noreferrer">
+                  Download result
+                </a>
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {!projectId ? (
         <p className="text-sm text-muted-foreground">

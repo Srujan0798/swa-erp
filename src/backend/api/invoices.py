@@ -122,9 +122,7 @@ def update_invoice_status_endpoint(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> InvoiceRead:
     try:
-        result = update_invoice_status_service(
-            db, invoice_id, body.status, user_id=current_user.id
-        )
+        result = update_invoice_status_service(db, invoice_id, body.status, user_id=current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return InvoiceRead.model_validate(result)

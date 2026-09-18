@@ -23,7 +23,8 @@ class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    email: EmailStr
+    # str not EmailStr: import@swa.local is a reserved TLD; EmailStr 500s GET /api/users
+    email: str
     name: str
     role: Role
     is_active: bool

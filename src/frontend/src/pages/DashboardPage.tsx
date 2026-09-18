@@ -53,7 +53,7 @@ const FLOW = [
     key: "sa" as const,
   },
   {
-    step: "4",
+    step: "5",
     title: "Token",
     desc: "Unit of work",
     to: "/tokens",
@@ -61,20 +61,12 @@ const FLOW = [
     key: "tkn" as const,
   },
   {
-    step: "5",
+    step: "6",
     title: "Document Ref",
     desc: "DRN / DBR / KDR sheet",
     to: "/document-references",
     icon: FileText,
     key: "drn" as const,
-  },
-  {
-    step: "6",
-    title: "Project",
-    desc: "Work package",
-    to: "/projects",
-    icon: FolderKanban,
-    key: "prj" as const,
   },
   {
     step: "7",
@@ -154,10 +146,12 @@ export function DashboardPage() {
     tkn.isError ||
     drn.isError ||
     time.isError;
-  const looksEmpty =
-    !anyError && totals.inq === 0 && totals.cli === 0 && totals.sa === 0 && totals.tkn === 0;
+  const countsReady = [inq, cli, prj, sa, tkn, drn, time].every(
+    (query) => !query.isLoading && !query.isError && query.data !== undefined
+  );
+  const looksEmpty = countsReady && Object.values(totals).every((total) => total === 0);
   const projectsSparse =
-    !looksEmpty && !anyError && totals.prj === 0 && (totals.tkn > 0 || totals.drn > 0 || totals.inq > 0);
+    countsReady && !looksEmpty && totals.prj === 0 && (totals.tkn > 0 || totals.drn > 0 || totals.inq > 0);
 
   return (
     <div className="space-y-6">
@@ -165,8 +159,10 @@ export function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">SWA operations</h1>
           <p className="text-sm text-muted-foreground">
-            Your Excel workflow as a website — Inquiry → Client → SA → Token → Document Reference →
-            Time.
+            Your workflow — Inquiry → Client → Project → SA → Token → Document Reference → Time.
+            Manage billing with{" "}
+            <Link className="underline" to="/invoices">Invoice/GST</Link> and track{" "}
+            <Link className="underline" to="/compliance">Compliance</Link>.
           </p>
         </div>
         <Button asChild>
@@ -179,19 +175,10 @@ export function DashboardPage() {
 
       {looksEmpty && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm">
-          <p className="font-medium text-foreground">No SWA sheet data loaded yet</p>
+          <p className="font-medium text-foreground">No workflow records yet</p>
           <p className="mt-1 text-muted-foreground">
-            Do <strong>not</strong> use synthetic demo seed for client review. Load the real Excel
-            extract:
-          </p>
-          <pre className="mt-2 overflow-x-auto rounded bg-muted px-3 py-2 font-mono text-xs">
-            make swa-live-local
-          </pre>
-          <p className="mt-2 text-muted-foreground">
-            Then login <code className="rounded bg-muted px-1">admin@swa.co.in</code> /{" "}
-            <code className="rounded bg-muted px-1">admin123!</code> — you should see{" "}
-            <code className="rounded bg-muted px-1">SWA-2025-…</code> IDs under Inquiries, Tokens,
-            Document refs.
+            Start with a new inquiry to record incoming work. If you expected existing records,
+            contact your administrator to check your access and data setup.
           </p>
         </div>
       )}
@@ -200,13 +187,11 @@ export function DashboardPage() {
         <div className="rounded-lg border border-sky-500/40 bg-sky-500/5 px-4 py-3 text-sm">
           <p className="font-medium text-foreground">Projects list looks empty</p>
           <p className="mt-1 text-muted-foreground">
-            Sample <strong>Project Tracking</strong> sheet often has 0 rows.{" "}
-            <code className="rounded bg-muted px-1">make swa-live-local</code> links converted
-            inquiries → projects, and Doc Ref / Time imports may create stub projects. Or{" "}
+            Workflow records are available, but no projects are listed. Review your{" "}
             <Link className="underline font-medium text-foreground" to="/inquiries">
-              convert an inquiry
+              inquiries
             </Link>{" "}
-            (Meeting 2: check client → always land on Project).
+            and convert an eligible inquiry to create a project.
           </p>
         </div>
       )}
@@ -217,7 +202,7 @@ export function DashboardPage() {
           <div>
             <p className="font-medium">Could not load some counts from the API</p>
             <p className="text-destructive/80">
-              UI on port 3100 · API on 8100. Login again if needed.
+              Try refreshing the page. If the problem continues, contact your administrator.
             </p>
           </div>
         </div>
@@ -276,20 +261,14 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
           <p>
-            <span className="font-medium text-foreground">Document Reference Sheet</span> — left
-            nav <strong>5. Document refs</strong> (not “Files / drawings”).
+            <Link className="font-medium text-foreground underline" to="/document-references">
+              Document Reference Sheet
+            </Link>{" "}
+            — DRN / DBR / KDR records, separate from files and drawings.
           </p>
           <p>
-            <span className="font-medium text-foreground">Files / drawings</span> — uploaded PDFs
-            and CAD files (storage), separate from DRN numbering.
-          </p>
-          <p>
-            <span className="font-medium text-foreground">Load real Excel</span> —{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">make swa-live-local</code>
-          </p>
-          <p>
-            <span className="font-medium text-foreground">App URL</span> —{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">http://127.0.0.1:3100</code>
+            <span className="font-medium text-foreground">Files / drawings</span> — placeholder
+            only; PDF and CAD uploads are not available here.
           </p>
         </CardContent>
       </Card>

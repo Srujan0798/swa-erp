@@ -1,8 +1,13 @@
 """Tests for Time Tracking (Task 01) and Timesheet Workflow (Task 02)."""
-import pytest
+
+import uuid
 from datetime import date, timedelta
 
+import pytest
+from httpx import ASGITransport, AsyncClient
+
 from src.backend.db.session import get_db
+from src.backend.main import app
 
 pytestmark = pytest.mark.asyncio
 
@@ -311,12 +316,7 @@ async def test_cannot_edit_entry_in_approved_week(authed_admin_client, db_sessio
     assert r2.status_code == 422
 
 
-async def test_non_owner_cannot_update_entry(
-    authed_pm_client, authed_admin_client, db_session
-):
-    from httpx import ASGITransport, AsyncClient
-    from src.backend.main import app as _app
-
+async def test_non_owner_cannot_update_entry(authed_pm_client, authed_admin_client, db_session):
     project_id = await _setup_project(authed_admin_client)
     today = date.today().isoformat()
     r = await authed_admin_client.post(
@@ -330,8 +330,8 @@ async def test_non_owner_cannot_update_entry(
     )
     entry_id = r.json()["id"]
     # PM tries to update admin's entry — use a separate client
-    async with AsyncClient(transport=ASGITransport(app=_app), base_url="http://test") as pm_client:
-        _app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as pm_client:
+        app.dependency_overrides[get_db] = lambda: db_session
         r_login = await pm_client.post(
             "/api/auth/login",
             json={"email": "pm@swa.co.in", "password": "pm123!"},
@@ -342,3 +342,83 @@ async def test_non_owner_cannot_update_entry(
             json={"description": "Hacked"},
         )
         assert r2.status_code == 403
+
+
+# --- L6-FIX: viewer role gate on write endpoints ---
+# RBAC matrix (docs/flows/02_auth_rbac.md): viewer is read-only on all
+# CRUD endpoints including time-entries. These tests verify the gate added
+# via require_role([Role.PM, Role.DESIGNER]) on POST/PATCH/DELETE.
+
+
+async def test_viewer_cannot_create_time_entry(authed_viewer_client):
+    """Viewer must be denied 403 on POST /api/time-entries."""
+    r = await authed_viewer_client.post(
+        "/api/time-entries",
+        json={
+            "project_id": str(uuid.uuid4()),
+            "date": date.today().isoformat(),
+            "hours": 2.0,
+            "description": "Viewer attempt",
+        },
+    )
+    assert r.status_code == 403
+
+
+async def test_viewer_cannot_update_time_entry(
+    authed_admin_client, authed_viewer_client, db_session
+):
+    """Viewer must be denied 403 on PATCH /api/time-entries/{id}.
+
+    Entry is created via DB to avoid shared-client auth-header race; the
+    role gate fires before any ownership check, so 403 is expected regardless
+    of whether the entry belongs to the viewer.
+    """
+    from decimal import Decimal
+
+    from src.backend.models.time_tracking import TimeEntry
+
+    project_id = await _setup_project(authed_admin_client)
+    entry = TimeEntry(
+        project_id=project_id,
+        user_id=uuid.uuid4(),
+        date=date.today(),
+        hours=Decimal("2.00"),
+        description="Protected entry",
+    )
+    db_session.add(entry)
+    db_session.commit()
+    db_session.refresh(entry)
+
+    r = await authed_viewer_client.patch(
+        f"/api/time-entries/{entry.id}",
+        json={"description": "Viewer edit"},
+    )
+    assert r.status_code == 403
+
+
+async def test_viewer_cannot_delete_time_entry(
+    authed_admin_client, authed_viewer_client, db_session
+):
+    """Viewer must be denied 403 on DELETE /api/time-entries/{id}.
+
+    Entry created via DB; role gate fires before service-layer ownership
+    filter, so 403 is expected.
+    """
+    from decimal import Decimal
+
+    from src.backend.models.time_tracking import TimeEntry
+
+    project_id = await _setup_project(authed_admin_client)
+    entry = TimeEntry(
+        project_id=project_id,
+        user_id=uuid.uuid4(),
+        date=date.today(),
+        hours=Decimal("1.50"),
+        description="Protected entry",
+    )
+    db_session.add(entry)
+    db_session.commit()
+    db_session.refresh(entry)
+
+    r = await authed_viewer_client.delete(f"/api/time-entries/{entry.id}")
+    assert r.status_code == 403
