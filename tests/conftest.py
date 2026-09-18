@@ -142,14 +142,6 @@ async def client():
 
 
 @pytest.fixture(scope="function")
-async def client_with_db(db_session):
-    app.dependency_overrides[get_db] = lambda: db_session
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        yield ac
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture(scope="function")
 def admin_user(db_session):
     u = User(
         email="admin@swa.co.in",
@@ -198,6 +190,20 @@ def designer_user(db_session):
         name="Designer",
         password_hash=hash_password("designer123!"),
         role="designer",
+    )
+    db_session.add(u)
+    db_session.commit()
+    db_session.refresh(u)
+    return u
+
+
+@pytest.fixture(scope="function")
+def auditor_user(db_session):
+    u = User(
+        email="auditor@swa.co.in",
+        name="Auditor",
+        password_hash=hash_password("auditor123!"),
+        role="auditor",
     )
     db_session.add(u)
     db_session.commit()
@@ -261,44 +267,70 @@ def test_designer_user(db_session):
 
 
 @pytest.fixture(scope="function")
-async def authed_admin_client(client_with_db, admin_user):
-    r = await client_with_db.post(
-        "/api/auth/login",
-        json={"email": "admin@swa.co.in", "password": "admin123!"},
-    )
-    token = r.json()["access_token"]
-    client_with_db.headers["Authorization"] = f"Bearer {token}"
-    return client_with_db
+async def authed_admin_client(db_session, admin_user):
+    app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        r = await ac.post(
+            "/api/auth/login",
+            json={"email": "admin@swa.co.in", "password": "admin123!"},
+        )
+        token = r.json()["access_token"]
+        ac.headers["Authorization"] = f"Bearer {token}"
+        yield ac
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
-async def authed_pm_client(client_with_db, pm_user):
-    r = await client_with_db.post(
-        "/api/auth/login",
-        json={"email": "pm@swa.co.in", "password": "pm123!"},
-    )
-    token = r.json()["access_token"]
-    client_with_db.headers["Authorization"] = f"Bearer {token}"
-    return client_with_db
+async def authed_pm_client(db_session, pm_user):
+    app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        r = await ac.post(
+            "/api/auth/login",
+            json={"email": "pm@swa.co.in", "password": "pm123!"},
+        )
+        token = r.json()["access_token"]
+        ac.headers["Authorization"] = f"Bearer {token}"
+        yield ac
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
-async def authed_viewer_client(client_with_db, viewer_user):
-    r = await client_with_db.post(
-        "/api/auth/login",
-        json={"email": "viewer@swa.co.in", "password": "viewer123!"},
-    )
-    token = r.json()["access_token"]
-    client_with_db.headers["Authorization"] = f"Bearer {token}"
-    return client_with_db
+async def authed_viewer_client(db_session, viewer_user):
+    app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        r = await ac.post(
+            "/api/auth/login",
+            json={"email": "viewer@swa.co.in", "password": "viewer123!"},
+        )
+        token = r.json()["access_token"]
+        ac.headers["Authorization"] = f"Bearer {token}"
+        yield ac
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
-async def authed_designer_client(client_with_db, designer_user):
-    r = await client_with_db.post(
-        "/api/auth/login",
-        json={"email": "designer@swa.co.in", "password": "designer123!"},
-    )
-    token = r.json()["access_token"]
-    client_with_db.headers["Authorization"] = f"Bearer {token}"
-    return client_with_db
+async def authed_designer_client(db_session, designer_user):
+    app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        r = await ac.post(
+            "/api/auth/login",
+            json={"email": "designer@swa.co.in", "password": "designer123!"},
+        )
+        token = r.json()["access_token"]
+        ac.headers["Authorization"] = f"Bearer {token}"
+        yield ac
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+async def authed_auditor_client(db_session):
+    app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        r = await ac.post(
+            "/api/auth/login",
+            json={"email": "auditor@swa.co.in", "password": "auditor123!"},
+        )
+        token = r.json()["access_token"]
+        ac.headers["Authorization"] = f"Bearer {token}"
+        yield ac
+    app.dependency_overrides.clear()
