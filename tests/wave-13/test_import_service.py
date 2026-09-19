@@ -183,6 +183,10 @@ def test_cli_tokens_dry_run(tmp_path):
         capture_output=True, text=True, env=env, cwd=str(REPO),
     )
     assert proc.returncode == 0, proc.stderr
-    data = json.loads(proc.stdout)
+    # Extract JSON from stdout (logging goes to stdout from structlog)
+    import re
+    json_match = re.search(r'\{.*\}', proc.stdout, re.DOTALL)
+    assert json_match, f"No JSON found in stdout: {proc.stdout}"
+    data = json.loads(json_match.group())
     assert data["ok"] is True
     assert data["created"] == 1

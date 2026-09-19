@@ -162,6 +162,15 @@ async def client():
 
 
 @pytest.fixture(scope="function")
+async def client_with_db(db_session):
+    """Async client with DB session override for tests that need direct DB access."""
+    app.dependency_overrides[get_db] = lambda: db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
 def admin_user(db_session):
     u = User(
         email="admin@swa.co.in",

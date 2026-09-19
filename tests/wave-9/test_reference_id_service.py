@@ -6,6 +6,7 @@ from src.backend.services.reference_id_service import (
     generate_reference_id,
     get_current_seq,
 )
+from src.backend.models.reference_counter import ReferenceCounter
 from tests.conftest import TestingSessionLocal
 
 
@@ -13,26 +14,41 @@ def _make_session():
     return TestingSessionLocal()
 
 
+def _reset_reference_counters(db_session):
+    """Reset reference_counters table for test isolation."""
+    from sqlalchemy import text
+    from sqlalchemy.engine import Engine
+    bind = db_session.get_bind()
+    engine = bind.engine if hasattr(bind, "engine") else bind
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        conn.execute(text("TRUNCATE TABLE reference_counters"))
+
+
 class TestBasicGeneration:
     def test_first_id_for_new_type_is_seq_001(self, db_session):
+        _reset_reference_counters(db_session)
         rid = generate_reference_id(db_session, "TST")
         year = datetime.now(UTC).year
         assert rid == f"SWA-{year}-TST-001"
 
     def test_increments_monotonically(self, db_session):
+        _reset_reference_counters(db_session)
         year = datetime.now(UTC).year
         ids = [generate_reference_id(db_session, "TST") for _ in range(5)]
         expected = [f"SWA-{year}-TST-{i:03d}" for i in range(1, 6)]
         assert ids == expected
 
     def test_format_matches_swa_year_type_seq(self, db_session):
+        _reset_reference_counters(db_session)
         rid = generate_reference_id(db_session, "TST")
         assert re.match(r"^SWA-\d{4}-TST-\d{3}$", rid), f"bad format: {rid}"
 
     def test_get_current_seq_starts_at_zero(self, db_session):
+        _reset_reference_counters(db_session)
         assert get_current_seq(db_session, "TST") == 0
 
     def test_get_current_seq_reflects_increments(self, db_session):
+        _reset_reference_counters(db_session)
         generate_reference_id(db_session, "TST")
         generate_reference_id(db_session, "TST")
         assert get_current_seq(db_session, "TST") == 2
@@ -40,6 +56,7 @@ class TestBasicGeneration:
 
 class TestIsolationBetweenEntityTypes:
     def test_two_types_have_independent_counters(self, db_session):
+        _reset_reference_counters(db_session)
         year = datetime.now(UTC).year
         a = generate_reference_id(db_session, "AAA")
         b = generate_reference_id(db_session, "BBB")
@@ -51,6 +68,7 @@ class TestIsolationBetweenEntityTypes:
         assert b2 == f"SWA-{year}-BBB-002"
 
     def test_counter_never_collides_across_types(self, db_session):
+        _reset_reference_counters(db_session)
         seen = set()
         for t in ("AAA", "BBB", "CCC"):
             for _ in range(10):
@@ -61,11 +79,13 @@ class TestIsolationBetweenEntityTypes:
 
 class TestYearKeying:
     def test_year_is_part_of_format(self, db_session):
+        _reset_reference_counters(db_session)
         year = datetime.now(UTC).year
         rid = generate_reference_id(db_session, "TST")
         assert f"SWA-{year}-" in rid
 
     def test_counter_is_per_year(self, db_session):
+        _reset_reference_counters(db_session)
         generate_reference_id(db_session, "TST")
         assert get_current_seq(db_session, "TST") == 1
         assert get_current_seq(db_session, "TST", year=2099) == 0
@@ -75,6 +95,7 @@ class TestConcurrency:
     def test_50_parallel_calls_yield_gapless_sequential_ids(self):
         n = 50
         entity_type = "TKN"
+        _reset_reference_counters(TestingSessionLocal())
 
         def worker(_i):
             s = _make_session()

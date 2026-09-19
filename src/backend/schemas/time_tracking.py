@@ -15,7 +15,7 @@ class TimesheetStatus(StrEnum):
 
 
 class TimeEntryCreate(BaseModel):
-    project_id: uuid.UUID
+    project_id: uuid.UUID | None = None
     task_id: uuid.UUID | None = None
     date: _date
     hours: Decimal = Field(gt=0, le=24)
@@ -52,7 +52,7 @@ class TimeEntryRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    project_id: uuid.UUID
+    project_id: uuid.UUID | None
     task_id: uuid.UUID | None
     user_id: uuid.UUID
     date: _date

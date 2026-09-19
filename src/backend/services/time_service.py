@@ -101,6 +101,8 @@ def create_time_entry_service(
 ) -> TimeEntryRead:
     _validate_hours(data.hours)
 
+    if data.project_id is None:
+        raise HTTPException(status_code=422, detail="project_id is required")
     project = get_project_by_id(db, data.project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")

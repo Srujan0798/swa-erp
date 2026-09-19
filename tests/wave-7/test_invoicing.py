@@ -11,6 +11,7 @@ from src.backend.models.client import Client
 from src.backend.models.invoice import Invoice
 from src.backend.models.project import Project
 from src.backend.models.time_tracking import TimeEntry
+from src.backend.models.user import User
 from src.backend.services.invoice_service import generate_from_time_entries
 
 pytestmark = pytest.mark.asyncio
@@ -227,9 +228,24 @@ async def test_generate_rolls_back_flags_on_failure(db_session, monkeypatch):
         db_session.add(project)
         db_session.commit()
         db_session.refresh(project)
+    
+    # Get a valid user for the time entry (use first active user)
+    admin_user = db_session.query(User).filter(User.role == "admin", User.is_active == True).first()
+    if admin_user is None:
+        admin_user = User(
+            email="test_admin@test.com",
+            name="Test Admin",
+            password_hash="$2b$12$dummy",
+            role="admin",
+            is_active=True,
+        )
+        db_session.add(admin_user)
+        db_session.commit()
+        db_session.refresh(admin_user)
+    
     entry = TimeEntry(
         project_id=project.id,
-        user_id=project.client_id,
+        user_id=admin_user.id,
         date=today,
         hours=Decimal("1.00"),
         description="Rollback entry",

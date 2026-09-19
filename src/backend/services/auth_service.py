@@ -69,6 +69,9 @@ def refresh_access_token(db: Session, refresh_token: str) -> AccessTokenResponse
     user_id = uuid.UUID(payload["sub"])
     valid_token = find_valid_refresh_token(db, refresh_token, user_id)
     if not valid_token:
+        # Token reuse detected - revoke entire token family
+        revoke_all_for_user(db, user_id)
+        record_event(db, "auth.refresh_reuse_detected", user_id=user_id)
         return None
 
     from src.backend.db.repositories.user_repo import get_by_id

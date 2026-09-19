@@ -365,7 +365,7 @@ async def test_viewer_cannot_create_time_entry(authed_viewer_client):
 
 
 async def test_viewer_cannot_update_time_entry(
-    authed_admin_client, authed_viewer_client, db_session
+    authed_admin_client, authed_viewer_client, db_session, admin_user
 ):
     """Viewer must be denied 403 on PATCH /api/time-entries/{id}.
 
@@ -380,7 +380,7 @@ async def test_viewer_cannot_update_time_entry(
     project_id = await _setup_project(authed_admin_client)
     entry = TimeEntry(
         project_id=project_id,
-        user_id=uuid.uuid4(),
+        user_id=admin_user.id,
         date=date.today(),
         hours=Decimal("2.00"),
         description="Protected entry",
@@ -397,7 +397,7 @@ async def test_viewer_cannot_update_time_entry(
 
 
 async def test_viewer_cannot_delete_time_entry(
-    authed_admin_client, authed_viewer_client, db_session
+    authed_admin_client, authed_viewer_client, db_session, admin_user
 ):
     """Viewer must be denied 403 on DELETE /api/time-entries/{id}.
 
@@ -411,7 +411,7 @@ async def test_viewer_cannot_delete_time_entry(
     project_id = await _setup_project(authed_admin_client)
     entry = TimeEntry(
         project_id=project_id,
-        user_id=uuid.uuid4(),
+        user_id=admin_user.id,
         date=date.today(),
         hours=Decimal("1.50"),
         description="Protected entry",

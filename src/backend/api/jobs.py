@@ -25,14 +25,14 @@ def _require_job_owner(db: Session, job_id: str, user: User) -> None:
     any job). On mismatch we return 404, NOT 403 — a 403 would confirm the
     job id exists, which is itself a small leak.
 
-    Job ids with no ownership row (unknown ids, or rows enqueued before the
-    ownership table existed) fall through to the existing pending/404
-    handling below.
+    Unknown job IDs are rejected with 404 to prevent enumeration.
     """
     if role_includes(Role(user.role), Role.ADMIN):
         return  # admins may read any job
     owner = db.get(ExportJob, job_id)
-    if owner is not None and owner.user_id != user.id:
+    if owner is None:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+    if owner.user_id != user.id:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
 

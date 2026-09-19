@@ -21,7 +21,7 @@ def test_client_id(db_session):
 
 
 @pytest.fixture(scope="function")
-def test_project_id(db_session, test_client_id, admin_user):
+def test_project_id(db_session, test_client_id, pm_user):
     from src.backend.models.project import Project
 
     p = Project(
@@ -29,7 +29,7 @@ def test_project_id(db_session, test_client_id, admin_user):
         name="Test Export Project",
         code=f"TE-{uuid.uuid4().hex[:6]}",
         status="Design",
-        pm_id=admin_user.id,
+        pm_id=pm_user.id,
         location="Mumbai",
     )
     db_session.add(p)

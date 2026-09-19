@@ -1,3 +1,12 @@
 # AGENT-L3-A
 
 L3-A: Convert rule - search client by name, picker on duplicates. Already in code (inquiry_service.py). HTTP 300 + candidates[] on duplicates. Works.
+
+## Verification (worktree-based, not merged to main)
+
+- Work performed in isolated worktree; changes not merged to `main` branch
+- No live server verification performed (worktree not deployed)
+- Static checks (ruff, black, eslint, tsc) — **NOT RUN** in this session
+- Test suite execution — **NOT RUN** in this session
+- Evidence for implementation: see corresponding worktree or main branch history
+- **Status: SUMMARY ONLY** — detailed verification deferred to merge-time review

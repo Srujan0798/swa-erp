@@ -3,6 +3,8 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 
 import pytest
+from sqlalchemy import text
+
 
 from src.backend.models.audit_log import AuditLog
 from src.backend.models.client import Client
@@ -17,6 +19,16 @@ from src.backend.services.inquiry_service import (
     soft_delete_inquiry_service,
     update_inquiry_service,
 )
+
+
+@pytest.fixture
+def reset_refs(db_session):
+    """Reset INQ and CLT reference counters for deterministic IDs."""
+    from sqlalchemy.engine import Engine
+    bind = db_session.get_bind()
+    engine = bind.engine if hasattr(bind, "engine") else bind
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        conn.execute(text("TRUNCATE TABLE reference_counters"))
 
 
 def _seed_user(db, role="pm", email=None, name="PM User"):
@@ -65,7 +77,7 @@ class TestInquiryCrud:
         assert inquiry.reference_id == f"SWA-{year}-INQ-001"
         assert inquiry.status == "New"
 
-    def test_create_two_inquiries_increment_seq(self, db_session):
+    def test_create_two_inquiries_increment_seq(self, db_session, reset_refs):
         actor = _seed_user(db_session)
         a = create_inquiry_service(
             db_session,
@@ -184,7 +196,7 @@ class TestConvertInquiryNewClient:
         assert result["inquiry"].converted_client_id == result["client"].id
         assert result["inquiry"].converted_project_id == result["project"].id
 
-    def test_client_code_uses_reference_id_format(self, db_session):
+    def test_client_code_uses_reference_id_format(self, db_session, reset_refs):
         actor = _seed_user(db_session)
         inquiry = create_inquiry_service(
             db_session,

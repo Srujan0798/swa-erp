@@ -19,6 +19,7 @@ import {
 import { useDeleteInvoice } from "@/hooks/useInvoices";
 import type { Invoice } from "@/types/financial";
 import { Eye, Trash2 } from "lucide-react";
+import { formatMoney, formatDate } from "@/lib/formatters";
 
 interface InvoiceListProps {
   invoices: Invoice[];
@@ -93,9 +94,9 @@ export function InvoiceList({ invoices, isLoading, onView, statusFilter, onStatu
                         {invoice.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono">₹{invoice.total.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="font-mono">{formatMoney(invoice.total)}</TableCell>
                     <TableCell>
-                      {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "—"}
+                      {invoice.due_date ? formatDate(invoice.due_date) : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">

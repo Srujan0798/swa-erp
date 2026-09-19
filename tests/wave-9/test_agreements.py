@@ -8,6 +8,7 @@ from src.backend.models.audit_log import AuditLog
 from src.backend.models.client import Client
 from src.backend.models.inquiry import Inquiry
 from src.backend.models.user import User
+from src.backend.models.reference_counter import ReferenceCounter
 from src.backend.schemas.agreement import (
     ServiceAgreementCreate,
     ServiceAgreementUpdate,
@@ -19,6 +20,17 @@ from src.backend.services.agreement_service import (
     soft_delete_agreement_service,
     update_agreement_service,
 )
+from src.backend.services.reference_id_service import generate_reference_id
+
+
+def _reset_reference_counters(db_session):
+    """Reset reference_counters table for test isolation."""
+    from sqlalchemy import text
+    from sqlalchemy.engine import Engine
+    bind = db_session.get_bind()
+    engine = bind.engine if hasattr(bind, "engine") else bind
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        conn.execute(text("TRUNCATE TABLE reference_counters"))
 
 
 def _seed_user(db, role="pm"):
@@ -96,6 +108,7 @@ class TestServiceNameFreeText:
 
 class TestAgreementCrud:
     def test_create_assigns_reference_id(self, db_session):
+        _reset_reference_counters(db_session)
         actor = _seed_user(db_session)
         client = _seed_client(db_session)
         agreement = create_agreement_service(

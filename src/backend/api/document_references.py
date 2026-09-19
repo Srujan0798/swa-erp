@@ -33,9 +33,10 @@ router = APIRouter(prefix="/api/document-references", tags=["document-references
 
 def _to_read(db: Session, doc: DocumentReference) -> DocumentReferenceRead:
     read = DocumentReferenceRead.model_validate(doc)
-    project = get_project_by_id(db, doc.project_id)
-    if project is not None:
-        read.project_code = project.code
+    if doc.project_id is not None:
+        project = get_project_by_id(db, doc.project_id)
+        if project is not None:
+            read.project_code = project.code
     return read
 
 

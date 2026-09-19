@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
+from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.session import get_db
 from src.backend.models.export_job import ExportJob
 from src.backend.models.user import User
@@ -22,6 +23,20 @@ from src.backend.workers.tasks import (
 )
 
 router = APIRouter(prefix="/api/exports", tags=["exports"])
+
+
+def _require_project_access(db: Session, project_id: uuid.UUID, user: User) -> None:
+    """Raise 404 when project doesn't exist, 403 when user doesn't have access."""
+    from src.backend.db.repositories.project_repo import get_by_id
+
+    project = get_by_id(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if not user_has_project_access(db, user.id, project_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this project's exports",
+        )
 
 
 def _record_export_job(db: Session, job_id: str, user: User) -> None:
@@ -41,6 +56,7 @@ def project_summary_pdf(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
+    _require_project_access(db, project_id, current_user)
     if async_:
         task = generate_project_summary_pdf.delay(str(project_id))
         _record_export_job(db, task.id, current_user)
@@ -96,6 +112,7 @@ def project_slides_pdf(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
+    _require_project_access(db, project_id, current_user)
     if async_:
         task = generate_project_slides_pdf.delay(str(project_id))
         _record_export_job(db, task.id, current_user)
@@ -122,6 +139,7 @@ def demo_package_json(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
+    _require_project_access(db, project_id, current_user)
     try:
         data = export_demo_package(db, project_id)
     except ValueError as e:

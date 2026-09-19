@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentReferenceCreate(BaseModel):
-    project_id: uuid.UUID
+    project_id: uuid.UUID | None = None
     token_id: uuid.UUID | None = None
     doc_date: date
     document_type: str = Field(min_length=1, max_length=50)
@@ -41,7 +41,7 @@ class DocumentReferenceRead(BaseModel):
 
     id: uuid.UUID
     reference_id: str
-    project_id: uuid.UUID
+    project_id: uuid.UUID | None
     token_id: uuid.UUID | None
     doc_date: date
     document_type: str

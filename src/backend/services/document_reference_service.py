@@ -66,6 +66,8 @@ def create_document_reference_service(
     from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
     from src.backend.db.repositories.token_repo import get_by_id as get_token_by_id
 
+    if data.project_id is None:
+        raise ProjectNotFoundError(uuid.UUID(int=0))
     if not get_project_by_id(db, data.project_id):
         raise ProjectNotFoundError(data.project_id)
 

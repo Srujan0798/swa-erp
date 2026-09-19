@@ -233,6 +233,16 @@ def move_documents_service(
     project_ids = {d.project_id for d in docs}
     if len(project_ids) > 1:
         raise ValueError("All documents must belong to the same project")
+    project_id = project_ids.pop()
+
+    if target_folder_id is not None:
+        from src.backend.db.repositories.document_repo import get_folder_by_id
+
+        target_folder = get_folder_by_id(db, target_folder_id)
+        if not target_folder:
+            raise ValueError("Target folder not found")
+        if target_folder.project_id != project_id:
+            raise ValueError("Target folder must belong to the same project as the documents")
 
     count = repo_move_documents(db, document_ids, target_folder_id)
 

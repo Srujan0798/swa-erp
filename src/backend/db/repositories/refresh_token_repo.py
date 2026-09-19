@@ -36,6 +36,7 @@ def find_valid(db: Session, token: str, user_id: uuid.UUID) -> RefreshToken | No
             RefreshToken.revoked_at.is_(None),
             RefreshToken.expires_at > datetime.now(UTC),
         )
+        .with_for_update()
         .all()
     )
     for t in tokens:
