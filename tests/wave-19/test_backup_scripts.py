@@ -258,7 +258,7 @@ def test_backup_restore_roundtrip_against_scratch_db(tmp_path):
 
         # Restore with --yes to skip the prompt
         r = subprocess.run(
-            ["bash", str(RESTORE_DB), str(backup_file), "--yes"],
+            ["bash", str(RESTORE_DB), str(backup_file), "--force", "--yes"],
             capture_output=True,
             text=True,
             env=env,

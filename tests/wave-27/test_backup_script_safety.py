@@ -96,7 +96,7 @@ def test_restore_script_no_password_leak(test_db_url):
         env["DATABASE_URL"] = db_url
         
         result = subprocess.run(
-            ["bash", str(RESTORE_DB), str(backup_path), "--yes"],
+            ["bash", str(RESTORE_DB), str(backup_path), "--force", "--yes"],
             capture_output=True,
             text=True,
             env=env,
@@ -133,7 +133,7 @@ def test_restore_script_still_names_target_db(tmp_path):
     env["DATABASE_URL"] = "postgresql://swa:swa@localhost:5432/test_db"
     
     result = subprocess.run(
-        ["bash", str(RESTORE_DB), str(backup_file), "--yes"],
+        ["bash", str(RESTORE_DB), str(backup_file), "--force", "--yes"],
         capture_output=True,
         text=True,
         env=env,
@@ -214,7 +214,7 @@ def test_backup_restore_roundtrip_no_password_leak(test_db_url):
         
         # Restore with --yes
         result = subprocess.run(
-            ["bash", str(RESTORE_DB), str(backup_file), "--yes"],
+            ["bash", str(RESTORE_DB), str(backup_file), "--force", "--yes"],
             capture_output=True,
             text=True,
             env=env,
