@@ -359,10 +359,7 @@ class TestTokenApi:
 
 class TestTokenConcurrency:
     def test_parallel_creates_produce_gapless_sequential_ids(self, db_session):
-        from src.backend.models.reference_counter import ReferenceCounter
-        db_session.query(ReferenceCounter).filter(ReferenceCounter.entity_type == "TKN").delete()
-        db_session.commit()
-
+        _reset_reference_counters(db_session)
         actor = _seed_user(db_session)
         client = _seed_client(db_session)
         n = 5

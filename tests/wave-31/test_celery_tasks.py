@@ -16,6 +16,7 @@ from src.backend.models.client import Client
 from src.backend.models.project import Project
 from src.backend.models.task import Task
 from src.backend.models.user import User
+from src.backend.models.export_job import ExportJob
 from src.backend.workers import tasks as worker_tasks
 from src.backend.workers.celery_app import app
 from tests.conftest import TEST_DATABASE_URL
@@ -141,10 +142,14 @@ def committed_project():
     finally:
         try:
             pid = ids["project_id"]
+            uid = ids["user_id"]
+            # Delete export_jobs first (references user)
+            s.query(ExportJob).filter(ExportJob.user_id == uid).delete()
+            # Delete tasks
             s.query(Task).filter(Task.project_id == pid).delete()
+            # Get client_id before deleting project
             proj = s.get(Project, pid)
             cid = proj.client_id if proj else None
-            uid = proj.pm_id if proj else None
             # Delete project BEFORE client to avoid FK violation
             if proj is not None:
                 s.delete(proj)
@@ -153,10 +158,10 @@ def committed_project():
                 cli = s.get(Client, cid)
                 if cli is not None:
                     s.delete(cli)
-            if uid is not None:
-                usr = s.get(User, uid)
-                if usr is not None:
-                    s.delete(usr)
+            # Delete user (after export_jobs are deleted)
+            usr = s.get(User, uid)
+            if usr is not None:
+                s.delete(usr)
             s.commit()
         finally:
             s.close()
@@ -173,34 +178,40 @@ def _add_committed_task(project_id, title, status, created_by):
 
 @pytest.fixture(scope="function")
 async def authed_committed_client(committed_project):
-    """Authenticated client for the committed_project's PM user."""
+    """Authenticated client for the committed_project's PM user.
+    
+    Uses a dedicated session factory that can see the committed data
+    (unlike the test's transactional db_session).
+    """
     from src.backend.main import app
     from httpx import ASGITransport, AsyncClient
+    from src.backend.db.session import get_db
     
     email = committed_project["user_email"]
     password = "pm123!"
     
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        r = await ac.post(
-            "/api/auth/login",
-            json={"email": email, "password": password},
-        )
-        if r.status_code != 200:
-            # Debug: check if user exists in database
-            from src.backend.models.user import User
-            s = _test_session_factory()
-            try:
-                u = s.query(User).filter(User.email == email).first()
-                if u:
-                    print(f"DEBUG: User {email} exists in DB, hash: {u.password_hash[:20]}...")
-                else:
-                    print(f"DEBUG: User {email} NOT FOUND in DB")
-            finally:
-                s.close()
-            raise RuntimeError(f"Could not login as {email}: {r.status_code} {r.text}")
-        token = r.json()["access_token"]
-        ac.headers["Authorization"] = f"Bearer {token}"
-        yield ac
+    # Create a session factory that can see the committed data
+    def get_test_db():
+        s = _test_session_factory()
+        try:
+            yield s
+        finally:
+            s.close()
+    
+    app.dependency_overrides[get_db] = get_test_db
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            r = await ac.post(
+                "/api/auth/login",
+                json={"email": email, "password": password},
+            )
+            if r.status_code != 200:
+                raise RuntimeError(f"Could not login as {email}: {r.status_code} {r.text}")
+            token = r.json()["access_token"]
+            ac.headers["Authorization"] = f"Bearer {token}"
+            yield ac
+    finally:
+        app.dependency_overrides.pop(get_db, None)
 
 
 def test_project_summary_task_produces_stored_pdf(committed_project):
