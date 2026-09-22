@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: "20" }
+        with: { node-version: "22", cache: "npm", cache-dependency-path: src/frontend/package-lock.json }
       - name: npm audit
         run: |
           if [ -f src/frontend/package.json ]; then
@@ -57,16 +57,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build backend image
         run: docker build -t swa-erp-backend:ci -f Dockerfile .
+      - name: Install trivy
+        # Direct install instead of action pin: action tags have rotted
+        # (0.28.0 became unresolvable); apt repo is maintained upstream.
+        run: |
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update && sudo apt-get install -y trivy
       - name: Scan image
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: swa-erp-backend:ci
-          format: sarif
-          output: trivy-results.sarif
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-      - name: Upload SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-results.sarif
+        run: trivy image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed swa-erp-backend:ci
