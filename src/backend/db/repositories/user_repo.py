@@ -14,6 +14,19 @@ def get_by_id(db: Session, user_id: uuid.UUID) -> User | None:
     return db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
 
 
+def get_active_by_id(db: Session, user_id: uuid.UUID) -> User | None:
+    """Active, non-deleted user — for assignment targets and similar checks."""
+    return (
+        db.query(User)
+        .filter(
+            User.id == user_id,
+            User.is_active.is_(True),
+            User.deleted_at.is_(None),
+        )
+        .first()
+    )
+
+
 def list_users(
     db: Session,
     page: int = 1,

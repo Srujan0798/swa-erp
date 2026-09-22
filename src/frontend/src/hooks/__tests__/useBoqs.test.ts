@@ -30,6 +30,7 @@ const mockBoq = {
   parsed_by: null,
   notes: null,
   is_active: true,
+  item_count: 0,
   created_at: "2025-01-01T00:00:00Z",
 };
 

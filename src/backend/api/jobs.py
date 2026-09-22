@@ -1,6 +1,6 @@
 import uuid
 
-from celery.result import AsyncResult  # type: ignore[import-untyped]
+from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 

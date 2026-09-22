@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from fpdf import FPDF  # type: ignore[import-untyped]
+from fpdf import FPDF
 
 
 class QuotePDF(FPDF):

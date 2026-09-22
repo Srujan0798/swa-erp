@@ -2,7 +2,7 @@ import io
 import json
 from decimal import Decimal, InvalidOperation
 
-import openpyxl  # type: ignore[import-untyped]
+import openpyxl
 
 REQUIRED_COLUMNS = {"description", "unit", "quantity", "rate"}
 OPTIONAL_COLUMNS = {"category", "specification"}

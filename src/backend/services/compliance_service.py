@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.compliance_repo import (
     CHECKLIST_SEEDS,
+    bulk_create_project_items,
     create_project_compliance_item,
     get_checklist_item_by_id,
     get_checklist_items_by_standard,
@@ -175,6 +176,25 @@ def get_project_items_list(
     db: Session, project_id: uuid.UUID, standard_id: uuid.UUID | None = None
 ) -> list[dict]:
     return get_project_compliance_items(db, project_id, standard_id)
+
+
+def bulk_create_project_items_service(
+    db: Session,
+    project_id: uuid.UUID,
+    standard_id: uuid.UUID,
+    actor_id: uuid.UUID,
+) -> dict[str, Any]:
+    items = bulk_create_project_items(db, project_id, standard_id)
+    item_ids = [str(i.id) for i in items]
+    create_entry(
+        db,
+        action="compliance.items_bulk_created",
+        entity_type="project_compliance_item",
+        user_id=actor_id,
+        entity_id=project_id,
+        after_json={"standard_id": str(standard_id), "items_created": len(item_ids)},
+    )
+    return {"items_created": len(item_ids), "items": item_ids}
 
 
 def _pci_to_dict(item) -> dict[str, Any]:

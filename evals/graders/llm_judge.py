@@ -4,7 +4,7 @@ evals/graders/llm_judge.py — rubric-based grading for subjective evaluation ou
 Used ONLY for what the code-based grader cannot judge deterministically: UX clarity,
 narrative coherence of audit logs, phrasing of error messages a human reads.
 
-The rubric is explicit and enumerated below. Each criterion is scored 0–2:
+The rubric is explicit and enumerated below. Each criterion is scored 0-2:
   0 = not present / failing
   1 = partial / unclear
   2 = fully satisfactory
@@ -23,7 +23,6 @@ This keeps the grader deterministic and offline-testable.
 from __future__ import annotations
 
 from typing import Any
-
 
 # Default rubric — each criterion scored 0/1/2 by a human or external LLM call.
 DEFAULT_RUBRIC: list[dict[str, Any]] = [

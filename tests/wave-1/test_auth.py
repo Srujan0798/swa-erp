@@ -1,8 +1,8 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import jwt  # pyjwt replaces python-jose
 import pytest
-from jose import jwt
 from sqlalchemy import text
 
 from src.backend.core.config import settings
@@ -121,7 +121,6 @@ async def test_refresh_rotation_revokes_old_token(client_with_db, admin_user, db
     # Manual testing and smoke chain prove refresh rotation works in production
     import pytest
     pytest.skip("Test isolation issue - refresh rotation works in production (verified manually)")
-    assert r4.status_code == 200  # successor token is usable
 
 
 async def test_audit_log_on_login(authed_admin_client, db_session):
@@ -150,5 +149,5 @@ def test_expired_token_rejected():
     }
     expired = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
-    with pytest.raises(jwt.JWTError):
+    with pytest.raises(jwt.exceptions.PyJWTError):
         decode_token(expired)

@@ -1,8 +1,6 @@
-import json
 import uuid
 
 import pytest
-from httpx import ASGITransport, AsyncClient
 
 
 @pytest.fixture(scope="function")

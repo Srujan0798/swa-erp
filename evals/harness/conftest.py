@@ -12,7 +12,6 @@ the deterministic graders in evals/graders/code_based.py.
 from __future__ import annotations
 
 import os
-import uuid
 
 # Disable the auth rate limiter so repeated logins in one process don't 429.
 os.environ.setdefault("DISABLE_AUTH_RATE_LIMIT", "1")
@@ -22,11 +21,10 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+import src.backend.models  # noqa: F401  (register all models with Base.metadata)
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
-import src.backend.models  # noqa: F401  (register all models with Base.metadata)
-
 
 TEST_DATABASE_URL = os.environ.get(
     "EVALS_TEST_DATABASE_URL", "postgresql://swa:***@localhost:5432/swa_erp_test"

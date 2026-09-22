@@ -24,6 +24,10 @@ All commands run inside a WSL2 Ubuntu shell (or PowerShell with `wsl` prefix).
         `python3 -c "import secrets; print(secrets.token_hex(32))"`
   - [ ] `POSTGRES_PASSWORD` set to a strong, unique value.
   - [ ] `CORS_ORIGINS` set to the real internal hostname (Q6) — e.g. `["http://<server-LAN-IP>:3100"]`.
+  - [ ] `.env.production` is gitignored (never commit it) — verified 2026-09-21.
+  - [ ] Secret rotation = global logout by design: changing `SECRET_KEY`
+        invalidates all access tokens at once (no per-session revocation list
+        for access tokens; refresh-token families are revoked in DB).
 - [ ] **No `PENDING IT ANSWER` comments remain unresolved** in
       `docker-compose.prod.yml` or `.env.production`. Each maps to a numbered
       question in `docs/IT_BRIEF.md`:
@@ -126,9 +130,15 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d --bui
 - [ ] **Restore dry-run verified** before go-live:
   - `make restore-db file=<path.sql.gz>` — prints commands, exits 0 (no changes)
   - `make restore-files file=<path.tar.gz>` — prints command, exits 0 (no changes)
-- [ ] **Actual restore tested** in a staging environment at least once:
+- [x] **Actual restore tested** in a staging environment at least once:
   - `make restore-db file=<path.sql.gz> FORCE=--force` (destructive — needs confirmation)
   - `make restore-files file=<path.tar.gz> FORCE=--force` (overwrites uploads/)
+  - **Proof 2026-09-21:** `swa_erp_backup_20260919_021036.sql.gz` restored into
+    scratch DB `swa_restore_proof` via the script's exact pipeline
+    (`gunzip -c … | psql --set ON_ERROR_STOP=on --single-transaction`):
+    39 tables, 8 users, 2 projects, 5 clients, `alembic_version` present.
+    Scratch DB dropped afterwards. RPO ≈ 24h (daily), restore time < 1 min
+    for current data size.
 - [ ] **Retention policies active**:
   - DB backups: 30-day retention (handled by `backup_db.sh`)
   - File backups: 90-day retention (handled by `backup_files.sh`)

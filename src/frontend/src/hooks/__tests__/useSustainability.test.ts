@@ -72,9 +72,10 @@ describe("useCreateSustainabilityMetric", () => {
       wrapper: createWrapper(),
     });
 
-    result.current.mutate({ recorded_date: "2025-01-15", energy_saved_kwh: 5000 });
+    result.current.mutate({ project_id: "proj-1", recorded_date: "2025-01-15", energy_saved_kwh: 5000 });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(api.createSustainabilityMetric).toHaveBeenCalledWith("proj-1", {
+      project_id: "proj-1",
       recorded_date: "2025-01-15",
       energy_saved_kwh: 5000,
     });

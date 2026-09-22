@@ -26,15 +26,17 @@ const createWrapper = () => {
 };
 
 const mockPnL = {
-  revenue: 5000000,
-  costs: 3000000,
-  profit: 2000000,
-  margin: 40,
-  breakdown: {
-    materials: 1000000,
-    labor: 1500000,
-    other: 500000,
-  },
+  project_id: "proj-1",
+  project_name: "Green Tower",
+  total_revenue: 5000000,
+  total_costs: 3000000,
+  net_profit: 2000000,
+  margin_pct: 40,
+  cost_breakdown: [
+    { category: "Materials", amount: 1000000, count: 5, percentage: 33.3 },
+    { category: "Labor", amount: 1500000, count: 8, percentage: 50 },
+    { category: "Other", amount: 500000, count: 2, percentage: 16.7 },
+  ],
 };
 
 const mockCost = {
@@ -43,9 +45,8 @@ const mockCost = {
   category: "Materials",
   description: "Steel purchase",
   amount: 100000,
-  incurred_at: "2025-01-15",
+  date: "2025-01-15",
   created_at: "2025-01-15T00:00:00Z",
-  updated_at: "2025-01-15T00:00:00Z",
 };
 
 const mockCostListResponse = { items: [mockCost], total: 1, page: 1, page_size: 20 };
@@ -99,14 +100,14 @@ describe("useAddProjectCost", () => {
 
     result.current.mutate({
       projectId: "proj-1",
-      data: { category: "Materials", description: "Steel", amount: 100000, incurred_at: "2025-01-15" },
+      data: { category: "Materials", description: "Steel", amount: 100000, date: "2025-01-15" },
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(api.addProjectCost).toHaveBeenCalledWith("proj-1", {
       category: "Materials",
       description: "Steel",
       amount: 100000,
-      incurred_at: "2025-01-15",
+      date: "2025-01-15",
     });
   });
 });

@@ -447,8 +447,8 @@ export const api = {
     }),
 
   unassignTask: (taskId: string) =>
-    request<Task>(`/api/tasks/${taskId}/unassign`, {
-      method: "POST",
+    request<Task>(`/api/tasks/${taskId}/assign`, {
+      method: "DELETE",
     }),
 
   getMyTasks: (params?: { page?: number; page_size?: number; status?: string; priority?: string }) => {

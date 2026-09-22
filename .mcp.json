@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://swa:swa@localhost:5432/swa_erp?options=-c%20default_transaction_read_only%3Don"
+      ]
+    }
+  }
+}

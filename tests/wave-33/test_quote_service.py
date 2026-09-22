@@ -14,7 +14,6 @@ from decimal import Decimal
 import pytest
 
 from src.backend.models.boq import BOQ, BOQItem
-from src.backend.models.quote import Quote
 from src.backend.services import quote_service
 
 

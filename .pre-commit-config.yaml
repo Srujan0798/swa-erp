@@ -20,6 +20,10 @@ repos:
       - id: detect-private-key
       - id: check-json
       - id: check-toml
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
   - repo: local
     hooks:
       - id: os-setup-preflight

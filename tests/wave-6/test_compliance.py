@@ -6,15 +6,14 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+import src.backend.models  # noqa: F401 - registers all models
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
 from src.backend.models.compliance import (
     ComplianceChecklistItem,
     ComplianceStandard,
-    ProjectComplianceItem,
 )
-import src.backend.models  # noqa: F401 - registers all models
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
@@ -60,7 +59,11 @@ def client():
 
 def _seed_standards_direct(db: Session):
     """Seed standards directly for tests that bypass the API."""
-    from src.backend.db.repositories.compliance_repo import seed_standards, seed_checklist_items, CHECKLIST_SEEDS
+    from src.backend.db.repositories.compliance_repo import (
+        CHECKLIST_SEEDS,
+        seed_checklist_items,
+        seed_standards,
+    )
 
     standards = seed_standards(db)
     for std in standards:
@@ -159,8 +162,8 @@ class TestGetChecklistItems:
 
 class TestCreateProjectComplianceItem:
     def _create_project(self, db: Session) -> uuid.UUID:
-        from src.backend.models.project import Project
         from src.backend.models.client import Client
+        from src.backend.models.project import Project
 
         client = Client(
             name="Test Client",
@@ -235,8 +238,8 @@ class TestCreateProjectComplianceItem:
 
 class TestUpdateComplianceStatus:
     def _create_project(self, db: Session) -> uuid.UUID:
-        from src.backend.models.project import Project
         from src.backend.models.client import Client
+        from src.backend.models.project import Project
 
         client = Client(
             name="Test Client",
@@ -259,7 +262,6 @@ class TestUpdateComplianceStatus:
         return project.id
 
     def test_update_to_compliant(self, client, auth_headers, db_session):
-        from datetime import datetime, timezone
 
         project_id = self._create_project(db_session)
         _seed_standards_direct(db_session)
@@ -283,7 +285,6 @@ class TestUpdateComplianceStatus:
         assert data["status"] == "compliant"
 
     def test_duplicate_returns_409(self, client, auth_headers, db_session):
-        from datetime import datetime, timezone
 
         project_id = self._create_project(db_session)
         _seed_standards_direct(db_session)
@@ -317,8 +318,8 @@ class TestUpdateComplianceStatus:
 
 class TestReviewComplianceItem:
     def _create_project(self, db: Session) -> uuid.UUID:
-        from src.backend.models.project import Project
         from src.backend.models.client import Client
+        from src.backend.models.project import Project
 
         client = Client(
             name="Test Client",
@@ -403,8 +404,8 @@ class TestReviewComplianceItem:
 
 class TestComplianceSummary:
     def _create_project(self, db: Session) -> uuid.UUID:
-        from src.backend.models.project import Project
         from src.backend.models.client import Client
+        from src.backend.models.project import Project
 
         client = Client(
             name="Test Client",
@@ -491,8 +492,8 @@ class TestComplianceSummary:
 
 class TestDuplicateComplianceItem:
     def _create_project(self, db: Session) -> uuid.UUID:
-        from src.backend.models.project import Project
         from src.backend.models.client import Client
+        from src.backend.models.project import Project
 
         client = Client(
             name="Test Client",
@@ -534,77 +535,3 @@ class TestDuplicateComplianceItem:
         assert resp2.status_code == 409
 
 
-class TestCreateProjectComplianceItem:
-    def _create_project(self, db: Session) -> uuid.UUID:
-        from src.backend.models.project import Project
-        from src.backend.models.client import Client
-
-        client = Client(
-            name="Test Client",
-            code=f"TC-{uuid.uuid4().hex[:6]}",
-            primary_email="test@example.com",
-        )
-        db.add(client)
-        db.commit()
-        db.refresh(client)
-
-        project = Project(
-            client_id=client.id,
-            name="Test Project",
-            code=f"TP-{uuid.uuid4().hex[:6]}",
-            status="Lead",
-        )
-        db.add(project)
-        db.commit()
-        db.refresh(project)
-        return project.id
-
-    def test_create_item_pending_status(self, client, auth_headers, db_session):
-        project_id = self._create_project(db_session)
-        _seed_standards_direct(db_session)
-        cci = db_session.query(ComplianceChecklistItem).first()
-
-        resp = client.post(
-            f"/api/projects/{project_id}/compliance/items",
-            headers=auth_headers,
-            json={"checklist_item_id": str(cci.id)},
-        )
-        assert resp.status_code == 201
-        data = resp.json()
-        assert data["project_id"] == str(project_id)
-        assert data["checklist_item_id"] == str(cci.id)
-        assert data["status"] == "pending"
-
-    def test_create_item_missing_checklist_item(self, client, auth_headers, db_session):
-        project_id = self._create_project(db_session)
-        fake_id = uuid.uuid4()
-
-        resp = client.post(
-            f"/api/projects/{project_id}/compliance/items",
-            headers=auth_headers,
-            json={"checklist_item_id": str(fake_id)},
-        )
-        assert resp.status_code == 404
-
-    def test_duplicate_returns_409(self, client, auth_headers, db_session):
-        project_id = self._create_project(db_session)
-        _seed_standards_direct(db_session)
-        cci = db_session.query(ComplianceChecklistItem).first()
-
-        resp1 = client.post(
-            f"/api/projects/{project_id}/compliance/items",
-            headers=auth_headers,
-            json={"checklist_item_id": str(cci.id)},
-        )
-        assert resp1.status_code == 201
-
-        # Create another project to test if constraint is per project
-        project2 = self._create_project(db_session)
-        resp2 = client.post(
-            f"/api/projects/{project_id}/compliance/items",
-            headers=auth_headers,
-            json={"checklist_item_id": str(cci.id)},
-        )
-        # Allow duplicate creation for different projects
-        # assert resp2.status_code == 409  # Only fail if duplicate in same project
-        assert resp2.status_code in (201, 409)

@@ -3,16 +3,18 @@ from collections import defaultdict
 from datetime import date
 from decimal import Decimal
 
-from fpdf import FPDF  # type: ignore[import-untyped]
+from fpdf import FPDF
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories.client_repo import get_by_id as get_client_by_id
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
+from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.repositories.task_repo import get_task_counts_by_project, list_by_project
 from src.backend.db.repositories.time_repo import list_time_entries
 from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
 from src.backend.models.boq import BOQItem
+from src.backend.models.export_job import ExportJob
 from src.backend.models.project_cost import ProjectCost
 from src.backend.models.quote import Quote
 from src.backend.services.project_pnl_service import get_default_hourly_rate
@@ -331,6 +333,56 @@ def export_project_slides(db: Session, project_id: uuid.UUID) -> bytes:
         )
 
     return bytes(pdf.output())
+
+
+def record_export_job(db: Session, job_id: str, user_id: uuid.UUID) -> None:
+    """Persist the enqueuing user as the job owner (SEC-07).
+
+    ``GET /api/jobs/{id}`` and ``GET /api/jobs/{id}/result`` enforce this
+    ownership; without a row there is nothing to check against.
+    """
+    db.add(ExportJob(job_id=job_id, user_id=user_id))
+    db.commit()
+
+
+def require_project_access(db: Session, project_id: uuid.UUID, user_id: uuid.UUID) -> None:
+    """Raise ValueError when project doesn't exist or user doesn't have access."""
+    from src.backend.db.repositories.project_repo import get_by_id
+
+    project = get_by_id(db, project_id)
+    if not project:
+        raise ValueError("Project not found")
+    if not user_has_project_access(db, user_id, project_id):
+        raise ValueError("You do not have access to this project's exports")
+
+
+def enqueue_project_summary_pdf(db: Session, project_id: uuid.UUID, user_id: uuid.UUID) -> str:
+    """Enqueue project summary PDF generation and record export job."""
+    from src.backend.workers.tasks import generate_project_summary_pdf
+
+    task = generate_project_summary_pdf.delay(str(project_id))
+    record_export_job(db, task.id, user_id)
+    return task.id
+
+
+def enqueue_financial_report_pdf(
+    db: Session, start_date: date, end_date: date, user_id: uuid.UUID
+) -> str:
+    """Enqueue financial report PDF generation and record export job."""
+    from src.backend.workers.tasks import generate_financial_report_pdf
+
+    task = generate_financial_report_pdf.delay(start_date.isoformat(), end_date.isoformat())
+    record_export_job(db, task.id, user_id)
+    return task.id
+
+
+def enqueue_project_slides_pdf(db: Session, project_id: uuid.UUID, user_id: uuid.UUID) -> str:
+    """Enqueue project slides PDF generation and record export job."""
+    from src.backend.workers.tasks import generate_project_slides_pdf
+
+    task = generate_project_slides_pdf.delay(str(project_id))
+    record_export_job(db, task.id, user_id)
+    return task.id
 
 
 def export_demo_package(db: Session, project_id: uuid.UUID) -> dict:

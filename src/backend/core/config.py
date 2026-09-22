@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     APP_NAME: str = "swa-erp"
+    # Full semver (mirrors pyproject.toml; tests/test_api_versioning.py pins the match).
+    APP_VERSION: str = "1.0.1"
+    # API major version. Served as X-API-Version on /api/* responses.
+    # Policy (see docs/ARCHITECTURE.md): additive-only within a major;
+    # the first breaking change ships as /api/v2 URLs, v1 kept 6 months.
+    API_MAJOR_VERSION: str = "1"
     APP_ENV: str = "dev"
     DEBUG: bool = True
     SECRET_KEY: str = "change-me"

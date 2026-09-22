@@ -7,13 +7,10 @@ transition, reorder, bulk_status, assign, unassign, project_stats.
 from __future__ import annotations
 
 import uuid
-from datetime import date, timedelta
 
 import pytest
-from sqlalchemy import select
 
-from src.backend.core.task_workflow import VALID_TRANSITIONS
-from src.backend.models.task import Task, TaskComment
+from src.backend.models.task import Task
 from src.backend.models.user import User
 from src.backend.schemas.task import TaskCreate, TaskPriority, TaskUpdate
 from src.backend.services.task_service import (

@@ -1,5 +1,5 @@
 import pytest
-from httpx import AsyncClient
+
 from src.backend.core.lifecycle import ProjectStatus, can_transition
 
 pytestmark = pytest.mark.asyncio

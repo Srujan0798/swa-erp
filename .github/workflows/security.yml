@@ -14,9 +14,16 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install pip-audit
-      - run: pip-audit -r requirements.txt --strict
+      # Accepted-risk ignores (reviewed 2026-09-21, re-check on every bump):
+      # PYSEC-2026-2121 (CVE-2026-32274) + PYSEC-2026-2120 (CVE-2026-31900)
+      # affect ONLY black-the-dev-formatter (cache-file name / GH action),
+      # never shipped code. Bumping black to 26.x would reformat the tree
+      # for zero runtime benefit, so the pin stays with explicit ignores.
+      - run: pip-audit -r requirements.txt --strict --ignore-vuln PYSEC-2026-2121 --ignore-vuln PYSEC-2026-2120
 
   npm-audit:
+    # 2026-09-21: `npm audit` reports 0 vulnerabilities (vite ^6.4.3,
+    # react-router-dom ^7.18.4). Gate stays at high-only as a backstop.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,3 +50,23 @@ jobs:
       - uses: actions/checkout@v4
       - run: pip install semgrep
       - run: semgrep --config=auto src/backend/
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend image
+        run: docker build -t swa-erp-backend:ci -f Dockerfile .
+      - name: Scan image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: swa-erp-backend:ci
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif

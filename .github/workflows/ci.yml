@@ -11,7 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: { python-version: "3.11", cache: "pip" }
+      - name: Install deps
+        run: pip install -r requirements.txt
       - name: Install lint tools
         run: pip install ruff==0.6.3 black==24.8.0 mypy==1.11.2
       - name: Ruff check
@@ -52,13 +54,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: { python-version: "3.11", cache: "pip" }
       - name: Install deps
         run: pip install -r requirements.txt
       - name: Run migrations
         run: |
           if [ -d src/backend/alembic ]; then
-            cd src/backend && alembic upgrade head
+            alembic -c src/backend/alembic.ini upgrade heads
           fi
       - name: Run tests
         run: pytest tests/ -v

@@ -35,12 +35,18 @@ const mockInvoice = {
   invoice_number: "SWA-INV-001",
   status: "draft" as const,
   subtotal: 100000,
+  tax_rate: 18,
   tax_amount: 18000,
-  total_amount: 118000,
+  gst_percent: 18,
+  gst_amount: 18000,
+  total: 118000,
   currency: "INR",
+  due_date: null,
+  notes: null,
+  created_by: "user-1",
+  paid_at: null,
   created_at: "2025-01-01T00:00:00Z",
-  updated_at: "2025-01-01T00:00:00Z",
-  lines: [],
+  items: [],
 };
 
 describe("useProjectInvoices", () => {
@@ -102,9 +108,9 @@ describe("useCreateInvoice", () => {
 
     const { result } = renderHook(() => useCreateInvoice(), { wrapper: createWrapper() });
 
-    result.current.mutate({ projectId: "proj-1", data: { lines: [], currency: "INR" } });
+    result.current.mutate({ projectId: "proj-1", data: { items: [] } });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(api.createInvoice).toHaveBeenCalledWith("proj-1", { lines: [], currency: "INR" });
+    expect(api.createInvoice).toHaveBeenCalledWith("proj-1", { items: [] });
   });
 });
 

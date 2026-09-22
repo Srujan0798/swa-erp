@@ -1,13 +1,14 @@
 """Tests for RBAC and auth gap fixes - Wave 22"""
 import uuid
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-import pytest
 
+from src.backend.core.roles import Role
+from src.backend.core.security import hash_password
 from src.backend.db.session import get_db
 from src.backend.models.user import User
-from src.backend.core.security import hash_password
-from src.backend.core.roles import Role
 
 
 def create_test_user(db: Session, role: Role) -> User:

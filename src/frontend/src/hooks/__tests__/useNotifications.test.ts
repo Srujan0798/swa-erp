@@ -35,12 +35,7 @@ describe("useNotifications", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("fetches notifications with refetchInterval", async () => {
-    const response = {
-      items: [mockNotification],
-      total: 1,
-      page: 1,
-      page_size: 20,
-    };
+    const response = [mockNotification];
     vi.mocked(api.listNotifications).mockResolvedValue(response);
 
     const { result } = renderHook(() => useNotifications({ unread_only: true, page: 1, page_size: 20 }), {
@@ -53,7 +48,7 @@ describe("useNotifications", () => {
   });
 
   it("fetches notifications without params", async () => {
-    const response = { items: [mockNotification], total: 1, page: 1, page_size: 20 };
+    const response = [mockNotification];
     vi.mocked(api.listNotifications).mockResolvedValue(response);
 
     const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });

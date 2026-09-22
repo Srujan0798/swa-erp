@@ -26,10 +26,14 @@ def _env_limit(name: str, default: int) -> int:
     back to the ``<NAME>`` env var, otherwise *default*.
     """
     raw = getattr(settings, name, os.environ.get(name, default))
-    try:
-        return int(raw)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return default
+    if isinstance(raw, bool):
+        return int(raw)
+    if isinstance(raw, (int, str)):
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            pass
+    return default
 
 
 @dataclass
@@ -50,7 +54,8 @@ class IPRateLimiter:
         forwarded = request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
         return forwarded or "unknown"
 
-    def check(self, request: Request) -> tuple[bool, int]:
+    def check(self, request: Request) -> tuple[bool, int, int]:
+        """Check quota, consuming one token. Returns (allowed, retry_after_s, remaining)."""
         key = self._client_key(request)
         now = time.monotonic()
         bucket = self._buckets[key]
@@ -58,10 +63,21 @@ class IPRateLimiter:
             bucket.count = 0
             bucket.reset_at = now + self.window_seconds
         bucket.count += 1
+        remaining = max(0, self.max_requests - bucket.count)
+        reset_in = max(1, int(bucket.reset_at - now))
         if bucket.count > self.max_requests:
-            retry_after = max(1, int(bucket.reset_at - now))
-            return False, retry_after
-        return True, 0
+            return False, reset_in, 0
+        return True, 0, remaining
+
+    def quota_headers(self, request: Request, remaining: int) -> dict[str, str]:
+        """Informative headers for rate-limited paths (RFC draft style)."""
+        bucket = self._buckets.get(self._client_key(request))
+        reset_in = max(1, int(bucket.reset_at - time.monotonic())) if bucket else 60
+        return {
+            "X-RateLimit-Limit": str(self.max_requests),
+            "X-RateLimit-Remaining": str(remaining),
+            "X-RateLimit-Reset": str(reset_in),
+        }
 
 
 class AuthRateLimitMiddleware(BaseHTTPMiddleware):
@@ -77,14 +93,19 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
         if _rate_limit_disabled():
             return await call_next(request)
         if any(request.url.path.startswith(p) for p in self._RATE_LIMITED_PATHS):
-            allowed, retry_after = self.limiter.check(request)
+            allowed, retry_after, remaining = self.limiter.check(request)
+            headers = self.limiter.quota_headers(request, remaining)
             if not allowed:
+                headers["Retry-After"] = str(retry_after)
                 return Response(
                     content='{"detail":"Too many requests. Please try again later."}',
                     status_code=429,
                     media_type="application/json",
-                    headers={"Retry-After": str(retry_after)},
+                    headers=headers,
                 )
+            response = await call_next(request)
+            response.headers.update(headers)
+            return response
         return await call_next(request)
 
 
@@ -158,15 +179,19 @@ class ExpensiveEndpointRateLimitMiddleware(BaseHTTPMiddleware):
         for matcher, limiter_attr, _kind in self._RULES:
             if matcher(path, method):
                 limiter = globals()[limiter_attr]
-                allowed, retry_after = limiter.check(request)
+                allowed, retry_after, remaining = limiter.check(request)
+                headers = limiter.quota_headers(request, remaining)
                 if not allowed:
+                    headers["Retry-After"] = str(retry_after)
                     return Response(
                         content='{"detail":"Too many requests. Please try again later."}',
                         status_code=429,
                         media_type="application/json",
-                        headers={"Retry-After": str(retry_after)},
+                        headers=headers,
                     )
-                break
+                response = await call_next(request)
+                response.headers.update(headers)
+                return response
         return await call_next(request)
 
 

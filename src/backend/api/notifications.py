@@ -4,9 +4,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user
-from src.backend.db.repositories.notification_repo import NotificationRepository
 from src.backend.db.session import get_db
 from src.backend.models.user import User
+from src.backend.services.notification_service import (
+    list_notifications_service,
+    mark_notification_read_service,
+)
 
 router = APIRouter()
 
@@ -19,15 +22,13 @@ def list_notifications(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=50),
 ):
-    repo = NotificationRepository(db)
-    skip = (page - 1) * page_size
-    notifications = repo.list(
+    notifications = list_notifications_service(
+        db,
         user_id=current_user.id,
         unread_only=unread_only,
-        skip=skip,
-        limit=page_size,
+        page=page,
+        page_size=page_size,
     )
-    db.commit()
     return [
         {
             "id": str(n.id),
@@ -51,9 +52,7 @@ def mark_read(
     current_user: User = Depends(get_current_user),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
-    repo = NotificationRepository(db)
-    success = repo.mark_read(notification_id=notification_id, user_id=current_user.id)
-    db.commit()
+    success = mark_notification_read_service(db, notification_id, current_user.id)
     if not success:
         return {"updated": False}
     return {"updated": True}

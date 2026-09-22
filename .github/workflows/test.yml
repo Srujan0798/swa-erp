@@ -11,9 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: { python-version: "3.11", cache: "pip" }
       - run: pip install -r requirements.txt
-      - run: pytest tests/unit -v
+      - run: pytest tests/unit tests/wave-1 -v
 
   integration:
     runs-on: ubuntu-latest
@@ -30,19 +30,28 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://swa:swa@localhost:5432/swa_erp_test
+      REDIS_URL: redis://localhost:6379/0
       SECRET_KEY: test-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: { python-version: "3.11", cache: "pip" }
       - run: pip install -r requirements.txt
       - run: |
           if [ -d src/backend/alembic ]; then
-            cd src/backend && alembic upgrade head
+            alembic -c src/backend/alembic.ini upgrade heads
           fi
-      - run: pytest tests/integration -v
+      - run: pytest tests/integration tests/security tests/test_migrations.py -v
 
   acceptance:
     runs-on: ubuntu-latest
@@ -59,16 +68,26 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://swa:swa@localhost:5432/swa_erp_test
+      REDIS_URL: redis://localhost:6379/0
       SECRET_KEY: test-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: { python-version: "3.11", cache: "pip" }
       - run: pip install -r requirements.txt
       - run: |
           if [ -d src/backend/alembic ]; then
-            cd src/backend && alembic upgrade head
+            alembic -c src/backend/alembic.ini upgrade heads
           fi
-      - run: pytest .specify/specs/*/contracts/ -v
+      # Contract-style acceptance: RBAC gaps + production hardening + wave seals.
+      - run: pytest tests/wave-22 tests/wave-48 tests/wave-50 tests/wave-37 -v

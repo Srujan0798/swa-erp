@@ -1,15 +1,15 @@
 import uuid
-from datetime import UTC, date, datetime
 from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, date, datetime
 
 import pytest
 from pydantic import ValidationError
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from src.backend.models.agreement import ServiceAgreement
 from src.backend.models.client import Client
-from src.backend.models.token import Token
 from src.backend.models.user import User
-from src.backend.models.reference_counter import ReferenceCounter
 from src.backend.schemas.token import TokenCreate, TokenUpdate
 from src.backend.services.token_service import (
     create_token_service,
@@ -18,14 +18,18 @@ from src.backend.services.token_service import (
     soft_delete_token_service,
     update_token_service,
 )
-from src.backend.services.reference_id_service import generate_reference_id
-from tests.conftest import TestingSessionLocal
+from tests.conftest import TEST_DATABASE_URL
+
+# Separate session factory for concurrency tests that doesn't participate in pytest fixture transactions
+_concurrency_engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True, future=True)
+_concurrency_session_factory = sessionmaker(
+    autoflush=False, autocommit=False, expire_on_commit=False, bind=_concurrency_engine
+)
 
 
 def _reset_reference_counters(db_session):
     """Reset reference_counters table for test isolation."""
     from sqlalchemy import text
-    from sqlalchemy.engine import Engine
     bind = db_session.get_bind()
     engine = bind.engine if hasattr(bind, "engine") else bind
     with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
@@ -358,14 +362,35 @@ class TestTokenApi:
 
 
 class TestTokenConcurrency:
-    def test_parallel_creates_produce_gapless_sequential_ids(self, db_session):
-        _reset_reference_counters(db_session)
-        actor = _seed_user(db_session)
-        client = _seed_client(db_session)
+    def test_parallel_creates_produce_gapless_sequential_ids(self):
+        """Test that parallel token creation produces gapless sequential IDs.
+
+        This test uses a separate session factory to avoid conflicts with
+        the pytest fixture's transactional db_session.
+        """
+        # Reset counters in a dedicated session
+        s = _concurrency_session_factory()
+        try:
+            from sqlalchemy import text
+            s.execute(text("TRUNCATE TABLE reference_counters"))
+            s.commit()
+        finally:
+            s.close()
+
+        # Seed data in dedicated sessions
+        s = _concurrency_session_factory()
+        try:
+            actor = _seed_user(s, role="pm")
+            client = _seed_client(s)
+            agreement = _seed_agreement(s, client)
+            agreement_id = agreement.id
+        finally:
+            s.close()
+
         n = 5
 
         def worker(_i):
-            s = TestingSessionLocal()
+            s = _concurrency_session_factory()
             try:
                 a = _seed_user(s, role="pm")
                 c = _seed_client(s)

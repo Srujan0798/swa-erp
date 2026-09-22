@@ -41,6 +41,7 @@ const mockInquiry = {
   priority: "High",
   status: "New",
   owner_id: null,
+  technical_lead: null,
   notes: null,
   converted_client_id: null,
   converted_project_id: null,

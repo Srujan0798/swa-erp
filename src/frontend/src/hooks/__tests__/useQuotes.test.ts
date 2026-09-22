@@ -205,7 +205,7 @@ describe("useCloneQuote", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("clones quote and returns projectId", async () => {
-    vi.mocked(api.cloneQuote).mockResolvedValue({ quote: mockQuote, projectId: "proj-1" });
+    vi.mocked(api.cloneQuote).mockResolvedValue(mockQuote);
 
     const { result } = renderHook(() => useCloneQuote(), { wrapper: createWrapper() });
 

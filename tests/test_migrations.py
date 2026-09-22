@@ -18,21 +18,20 @@ from __future__ import annotations
 import os
 import subprocess
 import uuid
+from datetime import date
 from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine, text
-from datetime import date, datetime
 from sqlalchemy.orm import sessionmaker
 
-from src.backend.db.base import Base
-from src.backend.core.security import hash_password
-from src.backend.models.user import User
 import src.backend.models  # noqa: F401 - registers all models with Base.metadata
+from src.backend.core.security import hash_password
 from src.backend.models.client import Client
-from src.backend.models.project import Project
 from src.backend.models.inquiry import Inquiry
+from src.backend.models.project import Project
 from src.backend.models.time_tracking import TimeEntry
+from src.backend.models.user import User
 
 # ---------------------------------------------------------------------------
 # The dev DB — connect via SQLAlchemy (no subprocess psql needed)

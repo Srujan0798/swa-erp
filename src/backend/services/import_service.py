@@ -357,7 +357,7 @@ def read_rows(
     alt_key_fields: list[str] | None = None,
     require_swa_key: bool = False,
 ) -> list[dict]:
-    import openpyxl  # type: ignore[import-untyped]
+    import openpyxl
 
     wb = openpyxl.load_workbook(file_path, data_only=True)
     # Prefer named operational tabs when present

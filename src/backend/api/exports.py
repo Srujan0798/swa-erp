@@ -6,47 +6,20 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
-from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.session import get_db
-from src.backend.models.export_job import ExportJob
 from src.backend.models.user import User
 from src.backend.services.export_service import (
+    enqueue_financial_report_pdf,
+    enqueue_project_slides_pdf,
+    enqueue_project_summary_pdf,
     export_demo_package,
     export_financial_report,
     export_project_slides,
     export_project_summary,
-)
-from src.backend.workers.tasks import (
-    generate_financial_report_pdf,
-    generate_project_slides_pdf,
-    generate_project_summary_pdf,
+    require_project_access,
 )
 
 router = APIRouter(prefix="/api/exports", tags=["exports"])
-
-
-def _require_project_access(db: Session, project_id: uuid.UUID, user: User) -> None:
-    """Raise 404 when project doesn't exist, 403 when user doesn't have access."""
-    from src.backend.db.repositories.project_repo import get_by_id
-
-    project = get_by_id(db, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    if not user_has_project_access(db, user.id, project_id):
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have access to this project's exports",
-        )
-
-
-def _record_export_job(db: Session, job_id: str, user: User) -> None:
-    """Persist the enqueuing user as the job owner (SEC-07).
-
-    ``GET /api/jobs/{id}`` and ``GET /api/jobs/{id}/result`` enforce this
-    ownership; without a row there is nothing to check against.
-    """
-    db.add(ExportJob(job_id=job_id, user_id=user.id))
-    db.commit()
 
 
 @router.get("/projects/{project_id}/summary.pdf")
@@ -56,12 +29,14 @@ def project_summary_pdf(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
-    _require_project_access(db, project_id, current_user)
+    try:
+        require_project_access(db, project_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     if async_:
-        task = generate_project_summary_pdf.delay(str(project_id))
-        _record_export_job(db, task.id, current_user)
+        job_id = enqueue_project_summary_pdf(db, project_id, current_user.id)
         return Response(
-            content=f'{{"job_id": "{task.id}"}}',
+            content=f'{{"job_id": "{job_id}"}}',
             media_type="application/json",
             status_code=202,
         )
@@ -89,10 +64,9 @@ def financial_report_pdf(
     if start_date > end_date:
         raise HTTPException(status_code=400, detail="start_date must be before end_date")
     if async_:
-        task = generate_financial_report_pdf.delay(start_date.isoformat(), end_date.isoformat())
-        _record_export_job(db, task.id, current_user)
+        job_id = enqueue_financial_report_pdf(db, start_date, end_date, current_user.id)
         return Response(
-            content=f'{{"job_id": "{task.id}"}}',
+            content=f'{{"job_id": "{job_id}"}}',
             media_type="application/json",
             status_code=202,
         )
@@ -112,12 +86,14 @@ def project_slides_pdf(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
-    _require_project_access(db, project_id, current_user)
+    try:
+        require_project_access(db, project_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     if async_:
-        task = generate_project_slides_pdf.delay(str(project_id))
-        _record_export_job(db, task.id, current_user)
+        job_id = enqueue_project_slides_pdf(db, project_id, current_user.id)
         return Response(
-            content=f'{{"job_id": "{task.id}"}}',
+            content=f'{{"job_id": "{job_id}"}}',
             media_type="application/json",
             status_code=202,
         )
@@ -139,7 +115,10 @@ def demo_package_json(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
-    _require_project_access(db, project_id, current_user)
+    try:
+        require_project_access(db, project_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     try:
         data = export_demo_package(db, project_id)
     except ValueError as e:

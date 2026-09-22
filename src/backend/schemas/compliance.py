@@ -69,6 +69,15 @@ class ProjectComplianceItemReview(BaseModel):
     notes: str | None = None
 
 
+class ProjectComplianceItemCreate(BaseModel):
+    checklist_item_id: uuid.UUID
+
+
+class BulkCreateItemsResponse(BaseModel):
+    items_created: int
+    items: list[str]
+
+
 class ComplianceDashboardResponse(BaseModel):
     standard_name: str
     total_items: int

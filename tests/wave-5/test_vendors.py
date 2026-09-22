@@ -2,7 +2,6 @@ import uuid
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Vendor CRUD
 # ---------------------------------------------------------------------------
@@ -267,7 +266,9 @@ async def test_update_contact(authed_admin_client):
 
 
 @pytest.mark.asyncio
-async def test_delete_contact(authed_admin_client):
+async def test_delete_contact(authed_admin_client, db_session):
+    from src.backend.models.vendor import VendorContact
+
     code = f"VND-{uuid.uuid4().hex[:6]}"
     r = await authed_admin_client.post(
         "/api/vendors",
@@ -286,6 +287,11 @@ async def test_delete_contact(authed_admin_client):
     r = await authed_admin_client.get(f"/api/vendors/{vendor_id}/contacts")
     assert r.status_code == 200
     assert len(r.json()) == 0
+
+    # Soft-delete: row persists with deleted_at set
+    row = db_session.query(VendorContact).filter(VendorContact.id == contact_id).one_or_none()
+    assert row is not None
+    assert row.deleted_at is not None
 
 
 @pytest.mark.asyncio

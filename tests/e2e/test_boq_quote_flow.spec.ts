@@ -1,9 +1,27 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("BOQ & Quote flow", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    // Self-sufficient setup: ensure a project exists via the API so the
+    // flow never depends on ambient seed data.
+    const login = await request.post("http://localhost:8100/api/auth/login", {
+      data: { email: "admin@swa.local", password: "admin123!" },
+    });
+    const { access_token } = await login.json();
+    const headers = { Authorization: `Bearer ${access_token}` };
+    const code = `E2E-${Date.now()}`;
+    const client = await request.post("http://localhost:8100/api/clients", {
+      headers,
+      data: { name: "E2E Client", code: `${code}-C`, primary_email: "e2e@example.com" },
+    });
+    const clientId = (await client.json()).id;
+    await request.post("http://localhost:8100/api/projects", {
+      headers,
+      data: { name: "E2E Project", code: `${code}-P`, client_id: clientId },
+    });
+
     await page.goto("http://localhost:3100/login");
-    await page.getByLabel("Email").fill("admin@swa.co.in");
+    await page.getByLabel("Email").fill("admin@swa.local");
     await page.getByLabel("Password").fill("admin123!");
     await page.getByRole("button", { name: /sign in/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);

@@ -2,7 +2,6 @@ import json
 import uuid
 
 import pytest
-from httpx import ASGITransport, AsyncClient
 
 
 @pytest.fixture(scope="function")
@@ -21,14 +20,14 @@ def test_client_id(db_session):
 
 
 @pytest.fixture(scope="function")
-def test_project_id(db_session, test_client_id, admin_user):
+def test_project_id(db_session, test_client_id, pm_user):
     from src.backend.models.project import Project
 
     p = Project(
         client_id=test_client_id,
         name="Test Project",
         code=f"TP-{uuid.uuid4().hex[:6]}",
-        pm_id=admin_user.id,
+        pm_id=pm_user.id,
     )
     db_session.add(p)
     db_session.commit()

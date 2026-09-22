@@ -13,7 +13,32 @@ license = {text = "MIT"}
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = ["src/backend/alembic/versions", ".venv", "node_modules"]
+# Audit scope = project source only (src/, tests/, scripts/, evals/).
+# Tool-skill caches and orchestrator workbenches are not project code.
+extend-exclude = [
+  "src/backend/alembic/versions",
+  ".venv",
+  "node_modules",
+  ".adal",
+  ".agents",
+  ".claude",
+  ".codebuddy",
+  ".cursor",
+  ".joycode",
+  ".kimi-code",
+  ".playwright-mcp",
+  ".zed",
+  "work",
+  "orchestrator",
+  "attic",
+  "prompts",
+  "deliverables",
+  "resources",
+  "results",
+  "backups",
+  "uploads",
+  "schema",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "RUF"]
@@ -26,6 +51,12 @@ ignore = ["E501", "N999"]
 # shadow builtins. Only flagged by ruff >= 0.14 on `remote_side=[id]`; a `# noqa: A003`
 # there would be reported as unused by CI-pinned ruff 0.6.3 (RUF100), so it lives here.
 "src/backend/models/task.py" = ["A003"]
+# Test/dev tolerance: unused locals from AAA-style arrange blocks, uppercase
+# locals for locally-imported classes (Session/Client), unpacked-but-unread
+# pagination tuples. Style only — never enabled for src/backend/.
+"tests/*" = ["F841", "N806", "RUF059"]
+"scripts/*" = ["N806"]
+"evals/*" = ["N806"]
 
 [tool.black]
 line-length = 100
@@ -38,6 +69,13 @@ strict = false
 exclude = ["src/backend/alembic/versions", "src/backend/db/repositories/__init__.py", ".venv", "node_modules"]
 # mypy non-strict: duplicate module resolution from editable install causes
 # "source found twice" errors. strict-per-module planned for wave-33 follow-up.
+
+# Third-party libs without type stubs. Declared here instead of inline
+# `# type: ignore[import-untyped]` so missing-stub intent is centralized
+# and greppable. Revisit when stubs appear upstream.
+[[tool.mypy.overrides]]
+module = ["openpyxl.*", "fpdf.*", "celery.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

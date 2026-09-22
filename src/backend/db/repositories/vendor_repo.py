@@ -110,14 +110,24 @@ def create_contact(
 def list_contacts(db: Session, vendor_id: uuid.UUID) -> list[VendorContact]:
     return (
         db.query(VendorContact)
-        .filter(VendorContact.vendor_id == vendor_id)
+        .filter(
+            VendorContact.vendor_id == vendor_id,
+            VendorContact.deleted_at.is_(None),
+        )
         .order_by(VendorContact.is_primary.desc())
         .all()
     )
 
 
 def get_contact_by_id(db: Session, contact_id: uuid.UUID) -> VendorContact | None:
-    return db.query(VendorContact).filter(VendorContact.id == contact_id).first()
+    return (
+        db.query(VendorContact)
+        .filter(
+            VendorContact.id == contact_id,
+            VendorContact.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def update_contact(db: Session, contact: VendorContact) -> VendorContact:
@@ -127,5 +137,5 @@ def update_contact(db: Session, contact: VendorContact) -> VendorContact:
 
 
 def delete_contact(db: Session, contact: VendorContact) -> None:
-    db.delete(contact)
+    contact.deleted_at = datetime.now(UTC)
     db.commit()

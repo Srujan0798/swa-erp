@@ -2,6 +2,7 @@ import { useState, type ReactElement } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import type { Client, Contact } from "@/types/api";
 import { useToast } from "@/hooks/useToast";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { canManageCommercial, canWrite } from "@/lib/permissions";
@@ -39,8 +40,7 @@ export function ClientDetailPage(): ReactElement {
   });
 
   const updateClientMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: (payload: any) => api.updateClient(id!, payload),
+    mutationFn: (payload: Partial<Client>) => api.updateClient(id!, payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["client", id] });
       void queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -58,8 +58,7 @@ export function ClientDetailPage(): ReactElement {
   });
 
   const addContactMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: (payload: any) => api.addContact(id!, payload),
+    mutationFn: (payload: Partial<Contact>) => api.addContact(id!, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client", id] });
       setShowAddContact(false);
@@ -297,8 +296,8 @@ export function ClientDetailPage(): ReactElement {
             }}
             onSubmit={async (data) => {
               // Contacts are managed on the detail page, not via client update.
-              const payload = { ...data };
-              delete (payload as { contacts?: unknown }).contacts;
+              const { contacts: _dropped, ...payload } = data;
+              void _dropped;
               await updateClientMutation.mutateAsync(payload);
             }}
             onCancel={() => setShowEdit(false)}

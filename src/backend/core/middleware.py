@@ -7,11 +7,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = structlog.get_logger()
 
+API_VERSION_HEADER = "X-API-Version"
+
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
+        from src.backend.core.config import settings
+
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         response = Response(status_code=200)
         response.headers["X-Request-ID"] = request_id
@@ -25,6 +29,8 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
             result = await call_next(request)
             response = result
             response.headers["X-Request-ID"] = request_id
+            if request.url.path.startswith("/api/"):
+                response.headers[API_VERSION_HEADER] = settings.API_MAJOR_VERSION
             logger.info(
                 "request_end",
                 method=request.method,

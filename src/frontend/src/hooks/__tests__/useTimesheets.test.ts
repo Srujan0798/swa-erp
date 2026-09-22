@@ -32,18 +32,14 @@ const createWrapper = () => {
 const mockTimesheet = {
   id: "ts-1",
   user_id: "user-1",
-  project_id: null,
   week_start: "2025-01-13",
   week_end: "2025-01-19",
   total_hours: 40,
   billable_hours: 35,
-  non_billable_hours: 5,
-  status: "Draft" as const,
-  submitted_at: null,
+  status: "draft" as const,
   approved_at: null,
   approved_by: null,
   created_at: "2025-01-13T00:00:00Z",
-  updated_at: "2025-01-13T00:00:00Z",
 };
 
 const mockListResponse = { items: [mockTimesheet], total: 1, page: 1, page_size: 20 };
@@ -110,7 +106,7 @@ describe("useSubmitTimesheet", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("submits timesheet by id", async () => {
-    vi.mocked(api.submitTimesheet).mockResolvedValue({ ...mockTimesheet, status: "Submitted" });
+    vi.mocked(api.submitTimesheet).mockResolvedValue({ ...mockTimesheet, status: "submitted" as const });
 
     const { result } = renderHook(() => useSubmitTimesheet(), { wrapper: createWrapper() });
 
@@ -124,7 +120,7 @@ describe("useApproveTimesheet", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("approves timesheet by id", async () => {
-    vi.mocked(api.approveTimesheet).mockResolvedValue({ ...mockTimesheet, status: "Approved" });
+    vi.mocked(api.approveTimesheet).mockResolvedValue({ ...mockTimesheet, status: "approved" as const });
 
     const { result } = renderHook(() => useApproveTimesheet(), { wrapper: createWrapper() });
 
@@ -138,7 +134,7 @@ describe("useRejectTimesheet", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("rejects timesheet by id", async () => {
-    vi.mocked(api.rejectTimesheet).mockResolvedValue({ ...mockTimesheet, status: "Rejected" });
+    vi.mocked(api.rejectTimesheet).mockResolvedValue({ ...mockTimesheet, status: "rejected" as const });
 
     const { result } = renderHook(() => useRejectTimesheet(), { wrapper: createWrapper() });
 

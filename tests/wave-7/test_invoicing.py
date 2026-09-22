@@ -228,9 +228,9 @@ async def test_generate_rolls_back_flags_on_failure(db_session, monkeypatch):
         db_session.add(project)
         db_session.commit()
         db_session.refresh(project)
-    
+
     # Get a valid user for the time entry (use first active user)
-    admin_user = db_session.query(User).filter(User.role == "admin", User.is_active == True).first()
+    admin_user = db_session.query(User).filter(User.role == "admin", User.is_active.is_(True)).first()
     if admin_user is None:
         admin_user = User(
             email="test_admin@test.com",
@@ -242,7 +242,7 @@ async def test_generate_rolls_back_flags_on_failure(db_session, monkeypatch):
         db_session.add(admin_user)
         db_session.commit()
         db_session.refresh(admin_user)
-    
+
     entry = TimeEntry(
         project_id=project.id,
         user_id=admin_user.id,

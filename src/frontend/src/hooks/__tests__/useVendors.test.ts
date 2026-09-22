@@ -77,7 +77,7 @@ const mockMaterial = {
 const mockCategory = {
   id: "cat-1",
   name: "Materials",
-  parent_id: null,
+  parent_id: undefined,
   children: [],
 };
 

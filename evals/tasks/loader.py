@@ -5,8 +5,9 @@ The actual eval logic lives in evals/wave_43_evals.py (as pytest tests that
 mirror the task specs). This loader is used by the GitHub Actions workflow
 and by tools that need to enumerate the task catalog programmatically.
 """
-import yaml
 from pathlib import Path
+
+import yaml
 
 TASKS_DIR = Path(__file__).resolve().parent
 

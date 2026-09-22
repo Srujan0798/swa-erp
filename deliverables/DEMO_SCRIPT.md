@@ -1,7 +1,6 @@
 # Demo script — 5–10 minutes
 
-Tight, rehearsable walkthrough for an evaluator or Viraj call. Expanded notes:
-[`DEMO_WALKTHROUGH.md`](DEMO_WALKTHROUGH.md).
+Tight, rehearsable walkthrough for an evaluator or Viraj call.
 
 ---
 

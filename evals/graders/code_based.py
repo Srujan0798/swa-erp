@@ -32,12 +32,11 @@ from sqlalchemy.orm import Session
 from src.backend.models.agreement import ServiceAgreement
 from src.backend.models.client import Client
 from src.backend.models.document_reference import DocumentReference
-from src.backend.models.invoice import Invoice, InvoiceItem
 from src.backend.models.inquiry import Inquiry
+from src.backend.models.invoice import Invoice
 from src.backend.models.project import Project
-from src.backend.models.time_tracking import TimeEntry, Timesheet
+from src.backend.models.time_tracking import TimeEntry
 from src.backend.models.token import Token
-
 
 # ---------------------------------------------------------------------------
 # Helpers

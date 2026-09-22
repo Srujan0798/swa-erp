@@ -8,10 +8,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+import src.backend.models  # noqa: F401 - registers all models
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
-import src.backend.models  # noqa: F401 - registers all models
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
@@ -74,8 +74,8 @@ def auth_headers(db_session):
 
 
 def _create_project(db: Session) -> uuid.UUID:
-    from src.backend.models.project import Project
     from src.backend.models.client import Client
+    from src.backend.models.project import Project
 
     client_obj = Client(
         name="Test Client",

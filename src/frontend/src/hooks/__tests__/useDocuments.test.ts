@@ -42,12 +42,15 @@ const mockDocument = {
   project_id: "proj-1",
   folder_id: null,
   name: "drawing.pdf",
-  file_name: "drawing.pdf",
-  size: 1024,
-  mime_type: "application/pdf",
-  path: "/uploads/drawing.pdf",
+  file_path: "/uploads/drawing.pdf",
+  file_size: 1024,
+  content_type: "application/pdf",
+  uploaded_by: "user-1",
+  uploaded_by_name: null,
+  tags: [],
+  version: 1,
+  is_active: true,
   created_at: "2025-01-01T00:00:00Z",
-  created_by: "user-1",
 };
 
 const mockFolder = {
@@ -176,7 +179,7 @@ describe("useSearchDocuments", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("searches documents with query", async () => {
-    const response = { items: [mockDocument], total: 1, page: 1, page_size: 10 };
+    const response = { items: [mockDocument], total: 1 };
     vi.mocked(api.searchDocuments).mockResolvedValue(response);
 
     const { result } = renderHook(() => useSearchDocuments("proj-1", "drawing"), {
@@ -206,12 +209,12 @@ describe("useFolders", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("fetches folders for project", async () => {
-    vi.mocked(api.listFolders).mockResolvedValue([mockFolder]);
+    vi.mocked(api.listFolders).mockResolvedValue({ items: [mockFolder], total: 1 });
 
     const { result } = renderHook(() => useFolders("proj-1"), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual([mockFolder]);
+    expect(result.current.data).toEqual({ items: [mockFolder], total: 1 });
     expect(api.listFolders).toHaveBeenCalledWith("proj-1", undefined);
   });
 

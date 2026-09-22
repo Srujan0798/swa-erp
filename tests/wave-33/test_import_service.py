@@ -21,8 +21,6 @@ from src.backend.models import (
     ServiceAgreement,
     SustainabilityMetric,
     TimeEntry,
-    Token,
-    User,
 )
 from src.backend.services.import_service import (
     ImportResult,

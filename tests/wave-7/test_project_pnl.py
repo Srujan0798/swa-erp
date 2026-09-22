@@ -1,7 +1,7 @@
 """Tests for Project P&L (Task 04)."""
-import pytest
 from datetime import date, timedelta
-from decimal import Decimal
+
+import pytest
 
 pytestmark = pytest.mark.asyncio
 

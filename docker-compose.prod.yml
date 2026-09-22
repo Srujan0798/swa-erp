@@ -91,10 +91,38 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/healthz || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/healthz || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-swa}:${POSTGRES_PASSWORD:-changeme_change_before_prod}@postgres:5432/${POSTGRES_DB:-swa_erp}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-REPLACE_ME_IN_ENV_FILE}
+      APP_ENV: production
+      DEBUG: "false"
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    command: ["celery", "-A", "src.backend.workers.celery_app", "worker", "--loglevel=info"]
+    depends_on:
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    # Celery-aware check: the Dockerfile HEALTHCHECK probes uvicorn :8000,
+    # which does not exist in the worker.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A src.backend.workers.celery_app inspect ping | grep -q pong"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend:
     build:

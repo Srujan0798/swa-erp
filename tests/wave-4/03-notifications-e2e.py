@@ -1,9 +1,10 @@
 from uuid import uuid4
+
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from src.backend.models.user import User
 from src.backend.core.security import hash_password
+from src.backend.models.user import User
 
 
 def test_task_assign_unassign_cycle(client: TestClient, db: Session):

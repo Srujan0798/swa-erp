@@ -8,7 +8,6 @@ from src.backend.models.client import Client
 from src.backend.models.project import Project
 from src.backend.models.token import Token
 from src.backend.models.user import User
-from src.backend.models.reference_counter import ReferenceCounter
 from src.backend.schemas.document_reference import (
     DocumentReferenceCreate,
     DocumentReferenceUpdate,
@@ -22,13 +21,11 @@ from src.backend.services.document_reference_service import (
     soft_delete_document_reference_service,
     update_document_reference_service,
 )
-from src.backend.services.reference_id_service import generate_reference_id
 
 
 def _reset_reference_counters(db_session):
     """Reset reference_counters table for test isolation."""
     from sqlalchemy import text
-    from sqlalchemy.engine import Engine
     bind = db_session.get_bind()
     engine = bind.engine if hasattr(bind, "engine") else bind
     with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:

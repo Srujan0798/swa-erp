@@ -22,6 +22,7 @@ from src.backend.db.repositories.quote_repo import (
     update_status,
 )
 from src.backend.db.repositories.user_repo import get_by_id as get_user_by_id
+from src.backend.models.quote import Quote
 
 logger = structlog.get_logger(__name__)
 
@@ -45,7 +46,7 @@ def _record_event(
     )
 
 
-def _quote_to_enriched_dict(quote: Any, db: Session) -> dict[str, Any]:
+def _quote_to_enriched_dict(quote: Quote, db: Session) -> dict[str, Any]:
     creator = get_user_by_id(db, quote.created_by) if quote.created_by else None
     approver = get_user_by_id(db, quote.approved_by) if quote.approved_by else None
     project = get_project_by_id(db, quote.project_id)
@@ -101,8 +102,8 @@ def _quote_to_enriched_dict(quote: Any, db: Session) -> dict[str, Any]:
     }
 
 
-def _recalculate_totals(quote: Any) -> None:
-    quote.subtotal = sum(item.amount for item in quote.items)
+def _recalculate_totals(quote: Quote) -> None:
+    quote.subtotal = sum((item.amount for item in quote.items), Decimal("0"))
     quote.markup_amount = (quote.subtotal * quote.markup_percent / Decimal("100")).quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )

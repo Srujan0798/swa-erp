@@ -22,8 +22,8 @@ import pytest
 
 from src.backend.models.client import Client
 from src.backend.models.inquiry import Inquiry
-from src.backend.models.project import Project
 from src.backend.models.invoice import Invoice
+from src.backend.models.project import Project
 from src.backend.models.time_tracking import TimeEntry
 
 
@@ -110,8 +110,8 @@ async def test_001_inquiry_to_client_conversion(client_with_db, db_session, pm_u
 async def test_002_agreement_token_docref_chain(client_with_db, db_session, pm_user):
     """Reference IDs must be well-formed + monotonically increasing + FK-wired."""
     from src.backend.models.agreement import ServiceAgreement
-    from src.backend.models.token import Token
     from src.backend.models.document_reference import DocumentReference
+    from src.backend.models.token import Token
 
     token = (await client_with_db.post("/api/auth/login",
         json={"email": "pm@swa.co.in", "password": "pm123!"})).json()["access_token"]

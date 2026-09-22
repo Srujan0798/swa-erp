@@ -5,7 +5,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+# Fresh pip (better retry behavior) + generous network settings: CI/prod
+# builds fetch ~100 wheels and flaked on pip 24.0 defaults.
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_RETRIES=5 PIP_TIMEOUT=60
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --user -r requirements.txt
 
 FROM python:3.11-slim
 WORKDIR /app

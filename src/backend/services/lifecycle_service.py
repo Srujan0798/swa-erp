@@ -1,11 +1,46 @@
 import uuid
 from datetime import date
+from decimal import Decimal
+from typing import Any
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.backend.core.lifecycle import ProjectStatus, can_transition
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
+from src.backend.models.project import Project
+
+
+def get_project_stats(db: Session) -> dict[str, Any]:
+    """Dashboard aggregates over active, non-deleted projects.
+
+    Lives here (not in the router) so query logic stays in the service layer.
+    """
+    query = (
+        db.query(Project.status, func.count(Project.id))
+        .filter(Project.deleted_at.is_(None), Project.is_active.is_(True))
+        .group_by(Project.status)
+    )
+
+    status_counts = {status.value: 0 for status in ProjectStatus}
+    for status_val, count in query.all():
+        status_counts[status_val] = count
+
+    total_active = sum(status_counts.values())
+
+    total_estimated = (
+        db.query(func.sum(Project.estimated_value))
+        .filter(Project.deleted_at.is_(None), Project.is_active.is_(True))
+        .scalar()
+    )
+    return {
+        "total_active": total_active,
+        "by_status": status_counts,
+        "total_estimated_value": (
+            Decimal(total_estimated) if total_estimated is not None else Decimal("0")
+        ),
+    }
 
 
 def transition_project(

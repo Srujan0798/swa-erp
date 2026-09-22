@@ -4,16 +4,16 @@ Proves that if project creation fails AFTER client creation,
 the client row is rolled back (not left as an orphan).
 """
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from unittest.mock import patch
 
+from src.backend.core.security import hash_password
 from src.backend.models.client import Client
 from src.backend.models.user import User
-from src.backend.core.security import hash_password
-from src.backend.schemas.inquiry import InquiryCreate, InquiryConvertRequest
+from src.backend.schemas.inquiry import InquiryConvertRequest, InquiryCreate
 from src.backend.services.inquiry_service import convert_inquiry, create_inquiry_service
 
 TEST_DATABASE_URL = "postgresql://swa:***@localhost:5432/swa_erp_test"

@@ -1,7 +1,7 @@
 # Changelog
 
 > **Role:** Version history (Keep a Changelog) — what shipped in each release. Part of the
-> front-door set — start at [README.md](README.md).
+> front-door set — start at [README.md](../../README.md).
 
 All notable changes to this project will be documented in this file.
 

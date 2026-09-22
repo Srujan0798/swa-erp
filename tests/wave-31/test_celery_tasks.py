@@ -13,10 +13,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.backend.models.client import Client
+from src.backend.models.export_job import ExportJob
 from src.backend.models.project import Project
 from src.backend.models.task import Task
 from src.backend.models.user import User
-from src.backend.models.export_job import ExportJob
 from src.backend.workers import tasks as worker_tasks
 from src.backend.workers.celery_app import app
 from tests.conftest import TEST_DATABASE_URL
@@ -179,17 +179,18 @@ def _add_committed_task(project_id, title, status, created_by):
 @pytest.fixture(scope="function")
 async def authed_committed_client(committed_project):
     """Authenticated client for the committed_project's PM user.
-    
+
     Uses a dedicated session factory that can see the committed data
     (unlike the test's transactional db_session).
     """
-    from src.backend.main import app
     from httpx import ASGITransport, AsyncClient
+
     from src.backend.db.session import get_db
-    
+    from src.backend.main import app
+
     email = committed_project["user_email"]
     password = "pm123!"
-    
+
     # Create a session factory that can see the committed data
     def get_test_db():
         s = _test_session_factory()
@@ -197,7 +198,7 @@ async def authed_committed_client(committed_project):
             yield s
         finally:
             s.close()
-    
+
     app.dependency_overrides[get_db] = get_test_db
     try:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:

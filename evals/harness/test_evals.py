@@ -23,10 +23,10 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
+from evals.graders.code_based import get_grader
 from src.backend.core.roles import Role
 from src.backend.schemas.user import UserCreate
 from src.backend.services.user_service import create_user_service
-from evals.graders.code_based import get_grader
 
 HERE = Path(__file__).resolve().parent
 OUTCOMES = HERE.parent / "outcomes" / "pass@k.json"

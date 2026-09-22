@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+
 from tests.conftest import redis_available
 
 pytestmark = pytest.mark.asyncio
@@ -17,8 +18,9 @@ async def test_healthz(client: AsyncClient):
 )
 async def test_readyz_db_ok(client_with_db: AsyncClient):
     """DB connection works (test DB uses create_all, not migrations)."""
-    from src.backend.db.session import get_db
     from sqlalchemy import text
+
+    from src.backend.db.session import get_db
 
     # Direct DB check to avoid /readyz latency and transaction issues
     with next(get_db()) as db:

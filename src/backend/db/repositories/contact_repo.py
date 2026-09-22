@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -8,7 +9,7 @@ from src.backend.models.contact import Contact
 def list_by_client(db: Session, client_id: uuid.UUID) -> list[Contact]:
     return (
         db.query(Contact)
-        .filter(Contact.client_id == client_id)
+        .filter(Contact.client_id == client_id, Contact.deleted_at.is_(None))
         .order_by(Contact.is_primary.desc())
         .all()
     )
@@ -44,9 +45,9 @@ def update(db: Session, contact: Contact) -> Contact:
 
 
 def delete(db: Session, contact: Contact) -> None:
-    db.delete(contact)
+    contact.deleted_at = datetime.now(UTC)
     db.commit()
 
 
 def get_by_id(db: Session, contact_id: uuid.UUID) -> Contact | None:
-    return db.query(Contact).filter(Contact.id == contact_id).first()
+    return db.query(Contact).filter(Contact.id == contact_id, Contact.deleted_at.is_(None)).first()

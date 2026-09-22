@@ -1,27 +1,25 @@
-import os
-import uuid
-import tempfile
-import atexit
 import fcntl
+import os
+import tempfile
+import uuid
 
 # Disable the auth rate limiter for the test suite BEFORE the app is imported.
 os.environ.setdefault("DISABLE_AUTH_RATE_LIMIT", "1")
 
 import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy import create_engine, text, event, inspect
-from sqlalchemy.orm import sessionmaker
 import redis
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import create_engine, event, inspect, text
+from sqlalchemy.orm import sessionmaker
 
+import src.backend.models  # noqa: F401 - registers all models with Base.metadata
 from src.backend.core.security import hash_password
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
-import src.backend.models  # noqa: F401 - registers all models with Base.metadata
 from src.backend.models.client import Client
 from src.backend.models.project import Project
 from src.backend.models.user import User
-
 
 # Allow SQLite for tests that want to run without PostgreSQL (e.g., CI without Docker)
 USE_SQLITE = os.getenv("TEST_USE_SQLITE", "0") == "1"
@@ -35,7 +33,17 @@ if USE_SQLITE:
     )
 else:
     TEST_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://swa:swa@localhost:5432/swa_erp_test")
-    engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True, future=True, pool_size=5)
+    # Add statement_timeout and lock_timeout to fail fast on deadlocks/hangs
+    # These are set per-connection via connect_args
+    engine = create_engine(
+        TEST_DATABASE_URL,
+        pool_pre_ping=True,
+        future=True,
+        pool_size=5,
+        connect_args={
+            "options": "-c statement_timeout=15000 -c lock_timeout=10000"
+        },
+    )
 
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine, expire_on_commit=False
@@ -82,13 +90,13 @@ def _reset_schema_once():
     global _schema_reset_done
     if _schema_reset_done:
         return
-    
+
     lock_fd = _acquire_schema_lock()
     try:
         # Double-check after acquiring lock
         if _schema_reset_done:
             return
-        
+
         if USE_SQLITE:
             Base.metadata.create_all(bind=engine)
         else:
@@ -111,7 +119,7 @@ def _reset_schema_once():
                         conn.execute(text("CREATE SCHEMA public"))
             Base.metadata.create_all(bind=engine)
             _seed_alembic_version()
-        
+
         _schema_reset_done = True
     finally:
         _release_schema_lock(lock_fd)
@@ -181,7 +189,7 @@ def setup_test_db():
     """Create test DB schema ONCE per session. Autouse ensures it runs before any test."""
     print(f"\n[SETUP_TEST_DB] Starting session-scoped setup (PID={os.getpid()})")
     _reset_schema_once()
-    print(f"[SETUP_TEST_DB] Schema reset complete")
+    print("[SETUP_TEST_DB] Schema reset complete")
     yield
     print(f"[SETUP_TEST_DB] Teardown (PID={os.getpid()})")
     # Teardown: clean up for next session
@@ -329,6 +337,17 @@ def client_factory(db_session):
 def test_project(db_session, client_factory):
     client = client_factory()
     p = Project(client_id=client.id, name="Test Project", code="TP-1")
+    db_session.add(p)
+    db_session.commit()
+    db_session.refresh(p)
+    return p
+
+
+@pytest.fixture(scope="function")
+def test_project_with_pm(db_session, client_factory, pm_user):
+    """Project with pm_user assigned as PM."""
+    client = client_factory()
+    p = Project(client_id=client.id, name="Test Project", code="TP-1", pm_id=pm_user.id)
     db_session.add(p)
     db_session.commit()
     db_session.refresh(p)

@@ -1,6 +1,5 @@
-"""Wave 5 – RFQ Workflow end-to-end tests."""
+"""Wave 5 — RFQ Workflow end-to-end tests."""
 import pytest
-from httpx import AsyncClient
 
 pytestmark = pytest.mark.asyncio
 
@@ -8,7 +7,7 @@ pytestmark = pytest.mark.asyncio
 # ── fixtures ─────────────────────────────────────────────────────────────────
 
 
-async def _setup_project_and_vendor(authed_admin_client):
+async def _setup_project_and_vendor(authed_admin_client, pm_user):
     """Create client, project, vendor, and material using admin client (ADMIN required)."""
     # client
     r = await authed_admin_client.post("/api/clients", json={
@@ -17,9 +16,9 @@ async def _setup_project_and_vendor(authed_admin_client):
     assert r.status_code == 201
     client_id = r.json()["id"]
 
-    # project
+    # project with PM assigned
     r = await authed_admin_client.post("/api/projects", json={
-        "client_id": client_id, "name": "RFQ Project", "code": "RP-001", "status": "Lead",
+        "client_id": client_id, "name": "RFQ Project", "code": "RP-001", "status": "Lead", "pm_id": str(pm_user.id),
     })
     assert r.status_code == 201
     project_id = r.json()["id"]
@@ -58,8 +57,8 @@ async def _setup_project_and_vendor(authed_admin_client):
 # ── RFQ creation ─────────────────────────────────────────────────────────────
 
 
-async def test_create_rfq(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_create_rfq(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -74,8 +73,8 @@ async def test_create_rfq(authed_pm_client, authed_admin_client):
     assert body["items"][0]["material_name"] == "TMT Bar"
 
 
-async def test_create_rfq_requires_items(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, _, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_create_rfq_requires_items(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, _, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -84,8 +83,8 @@ async def test_create_rfq_requires_items(authed_pm_client, authed_admin_client):
     assert r.status_code == 422  # validation error: min_length=1
 
 
-async def test_list_project_rfqs(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_list_project_rfqs(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -96,8 +95,8 @@ async def test_list_project_rfqs(authed_pm_client, authed_admin_client):
     assert r.json()["total"] >= 1
 
 
-async def test_get_rfq(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_get_rfq(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     create_r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -113,9 +112,9 @@ async def test_get_rfq(authed_pm_client, authed_admin_client):
 # ── status transitions ───────────────────────────────────────────────────────
 
 
-async def test_rfq_lifecycle(authed_pm_client, authed_admin_client):
+async def test_rfq_lifecycle(authed_pm_client, authed_admin_client, pm_user):
     """Full lifecycle: draft -> sent -> responded -> awarded -> closed."""
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
 
     # create
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
@@ -134,7 +133,7 @@ async def test_rfq_lifecycle(authed_pm_client, authed_admin_client):
 
     # respond
     item_id = r.json()["items"][0]["id"]
-    r = await authed_pm_client.post(f"/api/rfqs/{rfq_id}/respond", json=[
+    r = await authed_pm_client.post(f"/api/rfqs/{rfq_id}/receive", json=[
         {"item_id": item_id, "vendor_rate": 45.50},
     ])
     assert r.status_code == 200
@@ -142,8 +141,8 @@ async def test_rfq_lifecycle(authed_pm_client, authed_admin_client):
     assert r.json()["responded_at"] is not None
     assert float(r.json()["items"][0]["vendor_rate"]) == 45.50
 
-    # compare
-    r = await authed_pm_client.post(f"/api/rfqs/{rfq_id}/compare")
+    # mark compared
+    r = await authed_pm_client.post(f"/api/rfqs/{rfq_id}/mark-compared")
     assert r.status_code == 200
     assert r.json()["status"] == "compared"
 
@@ -159,8 +158,8 @@ async def test_rfq_lifecycle(authed_pm_client, authed_admin_client):
     assert r.json()["status"] == "closed"
 
 
-async def test_rfq_cancel_from_draft(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_rfq_cancel_from_draft(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -172,8 +171,8 @@ async def test_rfq_cancel_from_draft(authed_pm_client, authed_admin_client):
     assert r2.json()["status"] == "cancelled"
 
 
-async def test_rfq_cancel_from_sent(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_rfq_cancel_from_sent(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -186,8 +185,8 @@ async def test_rfq_cancel_from_sent(authed_pm_client, authed_admin_client):
     assert r2.json()["status"] == "cancelled"
 
 
-async def test_invalid_transition_draft_to_awarded(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_invalid_transition_draft_to_awarded(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -198,8 +197,8 @@ async def test_invalid_transition_draft_to_awarded(authed_pm_client, authed_admi
     assert r2.status_code == 400  # can't go draft -> awarded
 
 
-async def test_invalid_transition_sent_to_awarded(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_invalid_transition_sent_to_awarded(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -211,8 +210,8 @@ async def test_invalid_transition_sent_to_awarded(authed_pm_client, authed_admin
     assert r2.status_code == 400  # can't go sent -> awarded
 
 
-async def test_cannot_close_draft(authed_pm_client, authed_admin_client):
-    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client)
+async def test_cannot_close_draft(authed_pm_client, authed_admin_client, pm_user):
+    project_id, vendor_id, _, material_id, _ = await _setup_project_and_vendor(authed_admin_client, pm_user)
     r = await authed_pm_client.post(f"/api/projects/{project_id}/rfqs", json={
         "project_id": project_id,
         "vendor_id": vendor_id,
@@ -226,9 +225,9 @@ async def test_cannot_close_draft(authed_pm_client, authed_admin_client):
 # ── vendor comparison ────────────────────────────────────────────────────────
 
 
-async def test_compare_vendors(authed_pm_client, authed_admin_client):
+async def test_compare_vendors(authed_pm_client, authed_admin_client, pm_user):
     project_id, vendor_id, vendor2_id, material_id, _ = await _setup_project_and_vendor(
-        authed_admin_client
+        authed_admin_client, pm_user
     )
 
     # RFQ to vendor 1
@@ -242,7 +241,7 @@ async def test_compare_vendors(authed_pm_client, authed_admin_client):
 
     # send and respond vendor 1
     await authed_pm_client.post(f"/api/rfqs/{rfq1_id}/send")
-    await authed_pm_client.post(f"/api/rfqs/{rfq1_id}/respond", json=[
+    await authed_pm_client.post(f"/api/rfqs/{rfq1_id}/receive", json=[
         {"item_id": item1_id, "vendor_rate": 42.00},
     ])
 
@@ -257,7 +256,7 @@ async def test_compare_vendors(authed_pm_client, authed_admin_client):
 
     # send and respond vendor 2
     await authed_pm_client.post(f"/api/rfqs/{rfq2_id}/send")
-    await authed_pm_client.post(f"/api/rfqs/{rfq2_id}/respond", json=[
+    await authed_pm_client.post(f"/api/rfqs/{rfq2_id}/receive", json=[
         {"item_id": item2_id, "vendor_rate": 38.50},
     ])
 

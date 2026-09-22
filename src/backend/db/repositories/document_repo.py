@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import or_
@@ -144,7 +145,14 @@ def move_documents(
 
 
 def get_folder_by_id(db: Session, folder_id: uuid.UUID) -> DocumentFolder | None:
-    return db.query(DocumentFolder).filter(DocumentFolder.id == folder_id).first()
+    return (
+        db.query(DocumentFolder)
+        .filter(
+            DocumentFolder.id == folder_id,
+            DocumentFolder.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def create_folder(db: Session, data: dict[str, Any]) -> DocumentFolder:
@@ -158,7 +166,10 @@ def create_folder(db: Session, data: dict[str, Any]) -> DocumentFolder:
 def list_folders(
     db: Session, project_id: uuid.UUID, parent_id: uuid.UUID | None = None
 ) -> list[DocumentFolder]:
-    query = db.query(DocumentFolder).filter(DocumentFolder.project_id == project_id)
+    query = db.query(DocumentFolder).filter(
+        DocumentFolder.project_id == project_id,
+        DocumentFolder.deleted_at.is_(None),
+    )
     if parent_id is not None:
         query = query.filter(DocumentFolder.parent_id == parent_id)
     else:
@@ -175,7 +186,7 @@ def delete_folder(db: Session, folder_id: uuid.UUID) -> bool:
         Document.folder_id == folder_id,
         Document.is_active.is_(True),
     ).update({"is_active": False})
-    db.delete(folder)
+    folder.deleted_at = datetime.now(UTC)
     db.commit()
     return True
 

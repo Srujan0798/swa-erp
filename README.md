@@ -34,8 +34,8 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 
 | Area | Claim | Source |
 |------|--------|--------|
-| **Backend coverage** | **NOT MEASURED THIS SESSION** (Docker daemon unavailable) | — |
-| **Backend suite (full, Redis up)** | **572 passed / 1 skipped / 0 failed** — 85% coverage | `work/reports/wave-47/01-final-seal.report.md` (wave-47 seal, Docker run) |
+| **Backend coverage** | **83.96%** total (floor `--cov-fail-under=82` met) | `pytest --cov=src/backend` (2026-09-21) |
+| **Backend suite (full, Redis up)** | **647 passed / 2 skipped / 0 failed** — **83.96%** coverage (floor 82 met) | `pytest tests/ --cov-fail-under=82` (2026-09-21 remediation session; includes new `tests/integration` + `tests/security`) |
 | **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` (wave-47) |
 | **Backend static gates** | **ruff clean, black clean, mypy clean** (159 files) | this session |
 | **Frontend suite** | **586 passed / 0 failed** (69 files) | `npx vitest run` (this session) |
@@ -45,9 +45,9 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client's Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired; `npx vitest run` gated in frontend job | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
 | **Observability** | `/metrics` (Prometheus, auth-gated by default), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
-| **Alembic** | Single head **0037** | `alembic -c src/backend/alembic.ini heads` (this session) |
+| **Alembic** | Single head **0040** | `alembic -c src/backend/alembic.ini heads` (2026-09-21) |
 
-**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Backend full suite not re-run this session (Docker unavailable). Always cite fresh output paste.
+**Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Always cite fresh output paste.
 
 ---
 

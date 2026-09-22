@@ -1,3 +1,4 @@
+import ipaddress
 import json
 import uuid as _uuid
 from datetime import date, datetime
@@ -23,12 +24,26 @@ def _make_json_safe(data: dict[str, Any] | None) -> dict[str, Any] | None:
     return json.loads(json.dumps(data, cls=_SafeEncoder))
 
 
+def _sanitize_ip(value: str | None) -> str | None:
+    """Coerce to a valid IP or None.
+
+    The column is INET; request hosts can be names ("testclient", proxy
+    hostnames). Audit must never crash the operation it records.
+    """
+    if not value:
+        return None
+    try:
+        return str(ipaddress.ip_address(value.strip().split("%")[0]))
+    except ValueError:
+        return None
+
+
 def create_entry(
     db: Session,
     action: str,
     entity_type: str,
-    user_id: Any = None,
-    entity_id: Any = None,
+    user_id: _uuid.UUID | None = None,
+    entity_id: _uuid.UUID | None = None,
     before_json: dict[str, Any] | None = None,
     after_json: dict[str, Any] | None = None,
     ip_address: str | None = None,
@@ -41,7 +56,7 @@ def create_entry(
         entity_id=entity_id,
         before_json=_make_json_safe(before_json),
         after_json=_make_json_safe(after_json),
-        ip_address=ip_address,
+        ip_address=_sanitize_ip(ip_address),
         user_agent=user_agent,
     )
     db.add(entry)

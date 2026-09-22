@@ -7,10 +7,10 @@ For real Excel sheets use:
 
 This script invents clients/projects for offline UI testing only.
 """
-import sys
 import os
-import uuid
 import random
+import sys
+import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -28,11 +28,12 @@ def main():
 
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
+
     from src.backend.core.security import hash_password
-    from src.backend.models.user import User
     from src.backend.models.client import Client
     from src.backend.models.contact import Contact
     from src.backend.models.project import Project
+    from src.backend.models.user import User
 
     engine = create_engine(db_url)
     Session = sessionmaker(bind=engine)
@@ -312,12 +313,12 @@ def main():
     # 5. CORE ID CHAIN (Inquiry → SA → Token → DocRef + time + sustainability)
     #    Mirrors what Viraj's team actually uses. Idempotent: skip if chain exists.
     # ------------------------------------------------------------------
-    from src.backend.models.inquiry import Inquiry
     from src.backend.models.agreement import ServiceAgreement
-    from src.backend.models.token import Token
     from src.backend.models.document_reference import DocumentReference
-    from src.backend.models.time_tracking import TimeEntry
+    from src.backend.models.inquiry import Inquiry
     from src.backend.models.sustainability_metric import SustainabilityMetric
+    from src.backend.models.time_tracking import TimeEntry
+    from src.backend.models.token import Token
     from src.backend.services.reference_id_service import generate_reference_id
 
     chain_marker = (

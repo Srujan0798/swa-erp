@@ -1,4 +1,4 @@
-from celery import Celery  # type: ignore[import-untyped]
+from celery import Celery
 
 from src.backend.core.config import settings
 

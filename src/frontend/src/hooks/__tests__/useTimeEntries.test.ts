@@ -28,9 +28,9 @@ const mockTimeEntry = {
   description: "Design review",
   hours: 2.5,
   is_billable: true,
-  entry_date: "2025-01-15",
+  date: "2025-01-15",
   created_at: "2025-01-15T10:00:00Z",
-  updated_at: "2025-01-15T10:00:00Z",
+  deleted_at: null,
 };
 
 describe("useTimeEntries", () => {
@@ -72,7 +72,7 @@ describe("useCreateTimeEntry", () => {
       project_id: "proj-1",
       description: "Design review",
       hours: 2.5,
-      entry_date: "2025-01-15",
+      date: "2025-01-15",
       is_billable: true,
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -80,7 +80,7 @@ describe("useCreateTimeEntry", () => {
       project_id: "proj-1",
       description: "Design review",
       hours: 2.5,
-      entry_date: "2025-01-15",
+      date: "2025-01-15",
       is_billable: true,
     });
   });

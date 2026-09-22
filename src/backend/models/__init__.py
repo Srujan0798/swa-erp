@@ -11,6 +11,7 @@ from src.backend.models.contact import Contact
 from src.backend.models.document import Document, DocumentFolder
 from src.backend.models.document_reference import DocumentReference
 from src.backend.models.export_job import ExportJob
+from src.backend.models.idempotency_key import IdempotencyKey
 from src.backend.models.inquiry import Inquiry
 from src.backend.models.invoice import Invoice, InvoiceItem
 from src.backend.models.material import Material, MaterialCategory
@@ -40,6 +41,7 @@ __all__ = [
     "DocumentFolder",
     "DocumentReference",
     "ExportJob",
+    "IdempotencyKey",
     "Inquiry",
     "Invoice",
     "InvoiceItem",

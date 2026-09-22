@@ -36,6 +36,7 @@ const mockDocRef = {
   document_type: "Drawing",
   type: "Architectural",
   author_id: null,
+  author_name: null,
   user_ref: null,
   description: "Floor plan",
   revision: "A1",

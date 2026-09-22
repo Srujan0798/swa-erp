@@ -62,7 +62,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://swa:swa@postgres:5432/swa_erp
+      DATABASE_URL: postgresql://swa:swa@host.docker.internal:5432/swa_erp
       APP_ENV: dev
     depends_on:
       postgres:
@@ -79,6 +79,9 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      # Documented workflow (README + bootstrap_real.py): containers read the
+      # host postgres seeded by `make swa-live-local`; compose postgres is
+      # schema-only scratch. Kept pointing at the host intentionally.
       DATABASE_URL: postgresql://swa:swa@host.docker.internal:5432/swa_erp
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
@@ -95,9 +98,20 @@ services:
     ports:
     - 8100:8000
     depends_on:
-    - redis
-    - minio
-    - migrate
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
   worker:
     build:
       context: .
@@ -119,9 +133,24 @@ services:
     - src.backend.workers.celery_app
     - worker
     - --loglevel=info
+    # The Dockerfile HEALTHCHECK probes uvicorn :8000, which does not exist
+    # in the worker. Override with a Celery-aware check (verified live:
+    # `celery inspect ping` returns pong).
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - celery -A src.backend.workers.celery_app inspect ping | grep -q pong
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     depends_on:
-    - redis
-    - migrate
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
   frontend:
     build:
       context: .

@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
@@ -38,7 +39,14 @@ def create_metric(
 
 
 def get_metric(db: Session, metric_id: uuid.UUID) -> SustainabilityMetric | None:
-    return db.query(SustainabilityMetric).filter(SustainabilityMetric.id == metric_id).first()
+    return (
+        db.query(SustainabilityMetric)
+        .filter(
+            SustainabilityMetric.id == metric_id,
+            SustainabilityMetric.deleted_at.is_(None),
+        )
+        .first()
+    )
 
 
 def list_metrics(
@@ -48,7 +56,10 @@ def list_metrics(
     page: int = 1,
     page_size: int = 20,
 ) -> tuple[list[SustainabilityMetric], int]:
-    query = db.query(SustainabilityMetric).filter(SustainabilityMetric.project_id == project_id)
+    query = db.query(SustainabilityMetric).filter(
+        SustainabilityMetric.project_id == project_id,
+        SustainabilityMetric.deleted_at.is_(None),
+    )
     if reference_id:
         query = query.filter(SustainabilityMetric.reference_id == reference_id)
     total = query.count()
@@ -78,6 +89,6 @@ def delete_metric(db: Session, metric_id: uuid.UUID) -> bool:
     metric = get_metric(db, metric_id)
     if not metric:
         return False
-    db.delete(metric)
+    metric.deleted_at = datetime.now(UTC)
     db.commit()
     return True

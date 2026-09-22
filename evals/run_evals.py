@@ -21,7 +21,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -200,7 +199,7 @@ def main():
     print("=" * 70)
 
     summary = write_outcomes(all_results)
-    print(f"\nOutcomes written to evals/outcomes/pass@k.json")
+    print("\nOutcomes written to evals/outcomes/pass@k.json")
     overall = sum(1 for s in summary if s["passes"] == s["trials"]) / len(summary) if summary else 0
     print(f"\nOverall deterministic pass rate: {overall:.0%}")
     for s in summary:

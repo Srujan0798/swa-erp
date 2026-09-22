@@ -1,9 +1,9 @@
 # SWA ERP — User Guide
 
 How the system is used day to day, by role. Everything below is built and works
-end to end (verified in wave-12's live API smoke test). It replaces the old
-Excel sheets with the same business flow you already use — Inquiry → Client →
-Project → Agreement → Token → Document → Time → Sustainability.
+end to end. It replaces the old Excel sheets with the same business flow you
+already use — Inquiry → Client → Project → Agreement → Token → Document →
+Time.
 
 ---
 
@@ -37,11 +37,11 @@ Every record gets a unique ID in the company format: `SWA-YYYY-XXX-001`
 
 1. Open the **Project** you're working in.
 2. Produce documents → create a **Document Reference** for each report/drawing
-   (`SWA-…-DRAWING-…` etc.). Its primary link is the **Project** (optionally a
-   Token).
+   (`SWA-…-DBR-…`, `SWA-…-CAS-…`, `SWA-…-GAD-…` etc.). Its primary link is the
+   **Project** (optionally a Token).
 3. Log your **time** on the work you did.
-4. For certification work (Reforge/DPR), create those document references — the
-   **Auditor** reviews them.
+4. For certification work (Reforge / DPR sheets), create those document
+   references — the **Auditor** reviews them.
 
 ## Auditor
 
@@ -55,8 +55,8 @@ Every record gets a unique ID in the company format: `SWA-YYYY-XXX-001`
 
 You can do **everything above**, plus:
 - **User management** — create accounts and assign the 5 roles. See the
-  *Administrator Guide* (`deliverables/handover/ADMIN_GUIDE.md`) for the exact
-  procedure; don't duplicate it here.
+  *Administrator Guide* (`ADMIN_GUIDE.md`, same folder) for the exact
+  procedure.
 - Finance / HR data is admin-only (and largely out of MVP scope).
 
 ## Viewer
@@ -79,4 +79,5 @@ or edit anything — the system enforces this.
 ## If something looks wrong
 
 Tell your **Admin** (or the person who runs the system). Common fixes are in the
-Administrator Guide's troubleshooting section. Don't edit the database directly.
+Administrator Guide's troubleshooting section (`ADMIN_GUIDE.md`, same folder).
+Don't edit the database directly.

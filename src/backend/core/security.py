@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import bcrypt
-from jose import jwt  # type: ignore[import-untyped]
+import jwt  # pyjwt replaces python-jose (CVE-2024-33663, CVE-2024-33664)
 
 from src.backend.core.config import settings
 

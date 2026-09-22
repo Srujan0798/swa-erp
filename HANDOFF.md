@@ -22,7 +22,7 @@ Earlier feedback from SWA was that the product felt "unusable / dummy." A focuse
 addressed real Excel-chain UX (not more test waves): Document References as a first-class page,
 Excel-first sidebar, full-chain dashboard, `make swa-live-local`, real field-name parity for
 Time Logging / Tokens / Service Agreements / Document References. See
-[`deliverables/VIRAJ_TRIAL_SCRIPT.md`](deliverables/VIRAJ_TRIAL_SCRIPT.md) and
+[`deliverables/MEETING_AND_GO_LIVE_GUIDE.md`](deliverables/MEETING_AND_GO_LIVE_GUIDE.md) and
 `work/reports/recovery/LOOP.md` for that history.
 
 ### Truth hierarchy

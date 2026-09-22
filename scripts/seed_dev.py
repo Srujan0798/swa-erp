@@ -10,11 +10,11 @@ Creates:
 
 WARNING: NEVER run in production. Default passwords are weak by design.
 """
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import uuid
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -29,8 +29,8 @@ def main():
     print(f"Seeding dev users into: {db_url}")
 
     try:
-        from src.backend.models.user import User
         from src.backend.core.security import hash_password
+        from src.backend.models.user import User
     except ImportError:
         print("Backend not yet built — wait for Task 01 to complete.")
         sys.exit(1)

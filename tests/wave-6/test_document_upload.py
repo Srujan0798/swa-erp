@@ -8,10 +8,10 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+import src.backend.models  # noqa: F401 - registers all models
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.main import app
-import src.backend.models  # noqa: F401 - registers all models
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
@@ -112,8 +112,8 @@ def pm_headers(db_session):
 
 
 def _create_project(db: Session, pm_id=None) -> uuid.UUID:
-    from src.backend.models.project import Project
     from src.backend.models.client import Client
+    from src.backend.models.project import Project
 
     client_obj = Client(
         name="Test Client",
@@ -294,6 +294,19 @@ class TestCreateFolder:
 
         delete_resp = client.delete(f"/api/folders/{folder_id}", headers=pm_headers)
         assert delete_resp.status_code == 204
+
+        # Soft-delete: folder row persists with deleted_at set
+        import uuid
+
+        from src.backend.models.document import DocumentFolder
+
+        row = (
+            db_session.query(DocumentFolder)
+            .filter(DocumentFolder.id == uuid.UUID(folder_id))
+            .one_or_none()
+        )
+        assert row is not None
+        assert row.deleted_at is not None
 
     def test_delete_folder_soft_deletes_documents(self, client, pm_headers, db_session):
         # Evidence: see test_delete_folder — PM must be a project member since

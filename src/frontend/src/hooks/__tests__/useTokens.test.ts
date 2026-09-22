@@ -32,6 +32,8 @@ const mockToken = {
   tokens_used: 5,
   swa_employee_id: null,
   project_owner_id: null,
+  swa_employee_name: null,
+  project_owner_name: null,
   client_employee_name: "John Doe",
   project_id: "proj-1",
   created_at: "2025-01-15T00:00:00Z",

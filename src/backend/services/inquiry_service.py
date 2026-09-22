@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import structlog
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from src.backend.db.repositories import audit_repo
@@ -233,15 +234,15 @@ def create_inquiry_service(
 def update_inquiry_service(
     db: Session,
     inquiry_id: uuid.UUID,
-    data: dict[str, Any] | object,
+    data: dict[str, Any] | BaseModel,
     actor_id: uuid.UUID,
 ) -> Inquiry | None:
     inquiry = get_inquiry_by_id(db, inquiry_id)
     if not inquiry:
         return None
-    if hasattr(data, "model_dump"):
-        data = data.model_dump()  # type: ignore[assignment]
-    update_inquiry(db, inquiry, data)  # type: ignore[arg-type]
+    if isinstance(data, BaseModel):
+        data = data.model_dump()
+    update_inquiry(db, inquiry, data)
     return inquiry
 
 

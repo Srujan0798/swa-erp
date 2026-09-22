@@ -145,7 +145,9 @@ async def test_update_contact(authed_admin_client):
     assert r3.json()["name"] == "Jane Updated"
 
 
-async def test_delete_contact(authed_admin_client):
+async def test_delete_contact(authed_admin_client, db_session):
+    from src.backend.models.contact import Contact
+
     r = await authed_admin_client.post("/api/clients", json={
         "name": "DelContactClient",
         "code": "DCC-001",
@@ -166,6 +168,11 @@ async def test_delete_contact(authed_admin_client):
         "name": "Bob Updated",
     })
     assert r4.status_code == 404
+
+    # Soft-delete: row persists with deleted_at set (business data is never hard-deleted)
+    row = db_session.query(Contact).filter(Contact.id == contact_id).one_or_none()
+    assert row is not None
+    assert row.deleted_at is not None
 
 
 async def test_viewer_cannot_create_client(authed_viewer_client):

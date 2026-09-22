@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.boq_parser import BOQParseError
 from src.backend.core.deps import get_current_user, require_role
-from src.backend.core.roles import Role
+from src.backend.core.roles import Role, role_includes
 from src.backend.core.storage import get_storage
 from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
+from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.boq import BOQListResponse, BOQRead
@@ -23,6 +24,20 @@ from src.backend.services.boq_service import (
 router = APIRouter(tags=["boqs"])
 
 
+def _require_project_access(
+    db: Session, project_id: uuid.UUID, user: User, *, read_only: bool = False
+) -> None:
+    if role_includes(Role(user.role), Role.ADMIN):
+        return
+    if role_includes(Role(user.role), Role.VIEWER) and read_only:
+        return
+    if not user_has_project_access(db, user.id, project_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this project's BOQs",
+        )
+
+
 @router.post(
     "/api/projects/{project_id}/boqs",
     response_model=BOQRead,
@@ -35,12 +50,13 @@ async def upload_boq_endpoint(
     current_user: User = Depends(require_role([Role.ADMIN, Role.PM])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> BOQRead:
+    _require_project_access(db, project_id, current_user, read_only=True)
     project = get_project_by_id(db, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    allowed = {".xlsx", ".json"}
     ext = os.path.splitext(file.filename or "")[1].lower()
+    allowed = {".xlsx", ".json"}
     if ext not in allowed:
         raise HTTPException(
             status_code=400,
@@ -78,6 +94,7 @@ def list_boqs_endpoint(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
 ) -> BOQListResponse:
+    _require_project_access(db, project_id, current_user, read_only=True)
     project = get_project_by_id(db, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -125,13 +142,12 @@ def download_boq_endpoint(
     if not result:
         raise HTTPException(status_code=404, detail="BOQ not found")
     if not result.file_path:
-        raise HTTPException(status_code=404, detail="BOQ has no stored file")
+        raise HTTPException(status_code=404, detail="No file associated with this BOQ")
     content = get_storage().read(result.file_path)
-    filename = result.file_name or "download"
     return Response(
         content=content,
         media_type="application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={"Content-Disposition": f'attachment; filename="{result.file_name}"'},
     )
 
 
@@ -141,9 +157,9 @@ def download_boq_endpoint(
 )
 def delete_boq_endpoint(
     boq_id: uuid.UUID,
-    current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
+    current_user: User = Depends(require_role([Role.ADMIN, Role.PM])),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
-) -> None:
-    success = soft_delete_boq(db, boq_id, current_user.id)
-    if not success:
-        raise HTTPException(status_code=404, detail="BOQ not found")
+):
+    soft_delete_boq(db, boq_id, current_user.id)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -38,7 +38,7 @@ def _compute_totals(
     return subtotal, tax_amount, total, gst_percent, gst_amount
 
 
-def _invoice_to_read(invoice: Any, db: Session) -> dict[str, Any]:
+def _invoice_to_read(invoice: Invoice, db: Session) -> dict[str, Any]:
     project = db.query(Project).filter(Project.id == invoice.project_id).first()
     user = db.query(User).filter(User.id == invoice.created_by).first()
 
@@ -231,6 +231,8 @@ def update_invoice_status_service(
     before_status = invoice.status
     paid_at = datetime.combine(date.today(), time.min) if new_status == "paid" else None
     updated = update_invoice_status(db, invoice_id, new_status, paid_at=paid_at)
+    if updated is None:
+        raise ValueError("Invoice not found")
     logger.info(
         "invoice.status_changed",
         invoice_id=str(invoice_id),

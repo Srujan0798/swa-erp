@@ -5,7 +5,6 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import text
 
-
 from src.backend.models.audit_log import AuditLog
 from src.backend.models.client import Client
 from src.backend.models.user import User
@@ -24,7 +23,6 @@ from src.backend.services.inquiry_service import (
 @pytest.fixture
 def reset_refs(db_session):
     """Reset INQ and CLT reference counters for deterministic IDs."""
-    from sqlalchemy.engine import Engine
     bind = db_session.get_bind()
     engine = bind.engine if hasattr(bind, "engine") else bind
     with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:

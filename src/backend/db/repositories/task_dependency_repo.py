@@ -24,7 +24,8 @@ class TaskDependencyRepository:
         result = await self.session.execute(stmt)
         # AsyncResult is stubbed as generic Result; DELETE/UPDATE return a
         # CursorResult at runtime which does expose rowcount.
-        return result.rowcount > 0  # type: ignore[attr-defined]
+        rowcount: int = getattr(result, "rowcount", 0) or 0
+        return rowcount > 0
 
     async def get_direct_dependencies(self, task_id: UUID) -> list[UUID]:
         stmt = select(TaskDependency.depends_on_task_id).where(TaskDependency.task_id == task_id)

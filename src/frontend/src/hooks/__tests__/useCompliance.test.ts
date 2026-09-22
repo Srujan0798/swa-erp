@@ -31,37 +31,39 @@ const createWrapper = () => {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
 
-const mockStandard = { id: "std-1", name: "NBC 2016", code: "NBC" };
+const mockStandard = { id: "std-1", name: "NBC 2016", version: "2016", description: null };
 
 const mockChecklistItem = {
   id: "item-1",
   standard_id: "std-1",
-  clause: "Fire safety",
-  description: "Provide fire extinguishers",
   category: "Fire",
+  requirement: "Provide fire extinguishers",
+  description: "Fire safety clause",
   is_mandatory: true,
-}
+};
 
 const mockComplianceSummary = {
-  total_items: 10,
-  compliant: 7,
-  non_compliant: 2,
-  pending: 1,
+  project_id: "proj-1",
+  standards: [],
+  overall_percentage: 70,
 };
 
 const mockComplianceItem = {
   id: "ci-1",
   project_id: "proj-1",
-  standard_id: "std-1",
-  clause: "Fire safety",
-  description: "Provide fire extinguishers",
-  category: "Fire",
-  status: "Pending",
-  notes: null,
+  checklist_item_id: "item-1",
+  status: "pending" as const,
   evidence_document_id: null,
+  notes: null,
+  reviewed_by: null,
+  reviewed_at: null,
+  standard_name: "NBC 2016",
+  category: "Fire",
+  requirement: "Provide fire extinguishers",
+  is_mandatory: true,
 };
 
-const mockComplianceItemUpdate = { id: "ci-1", ...mockComplianceItem, status: "Compliant" };
+const mockComplianceItemUpdate = { ...mockComplianceItem, id: "ci-1", status: "compliant" as const };
 
 describe("useStandards", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -144,9 +146,9 @@ describe("useUpdateComplianceItem", () => {
 
     const { result } = renderHook(() => useUpdateComplianceItem(), { wrapper: createWrapper() });
 
-    result.current.mutate({ itemId: "ci-1", data: { status: "Compliant" } });
+    result.current.mutate({ itemId: "ci-1", data: { status: "compliant" } });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(api.updateComplianceItem).toHaveBeenCalledWith("ci-1", { status: "Compliant" });
+    expect(api.updateComplianceItem).toHaveBeenCalledWith("ci-1", { status: "compliant" });
   });
 
   it("passes notes and evidence_document_id", async () => {
@@ -156,11 +158,11 @@ describe("useUpdateComplianceItem", () => {
 
     result.current.mutate({
       itemId: "ci-1",
-      data: { status: "Compliant", notes: "Checked", evidence_document_id: "doc-1" },
+      data: { status: "compliant", notes: "Checked", evidence_document_id: "doc-1" },
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(api.updateComplianceItem).toHaveBeenCalledWith("ci-1", {
-      status: "Compliant",
+      status: "compliant",
       notes: "Checked",
       evidence_document_id: "doc-1",
     });

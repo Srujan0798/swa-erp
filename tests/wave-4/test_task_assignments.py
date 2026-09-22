@@ -1,17 +1,15 @@
+import uuid
+
 import pytest
 from httpx import AsyncClient
-import uuid
 from sqlalchemy import text
 
-from src.backend.models.user import User
-from src.backend.core.roles import Role
 from src.backend.models.project import Project
-from src.backend.schemas.task import TaskStatus
-from tests.conftest import TestingSessionLocal
+from src.backend.models.user import User
 
 
 @pytest.mark.asyncio
-async def test_assign_task(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, test_designer_user: User):
+async def test_assign_task(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, test_designer_user: User):
     task_data = {
         "title": "Test Task for Assignment",
         "description": "Test task for assignment",
@@ -19,7 +17,7 @@ async def test_assign_task(authed_pm_client: AsyncClient, test_project: Project,
         "assignee_id": None,
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -45,7 +43,7 @@ async def test_assign_task(authed_pm_client: AsyncClient, test_project: Project,
 
 
 @pytest.mark.asyncio
-async def test_unassign_task(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, test_designer_user: User):
+async def test_unassign_task(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, test_designer_user: User):
     task_data = {
         "title": "Test Task for Unassignment",
         "description": "Test task for unassignment",
@@ -53,7 +51,7 @@ async def test_unassign_task(authed_pm_client: AsyncClient, test_project: Projec
         "assignee_id": str(test_designer_user.id),
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -74,7 +72,7 @@ async def test_unassign_task(authed_pm_client: AsyncClient, test_project: Projec
 
 
 @pytest.mark.asyncio
-async def test_assign_invalid_user(authed_pm_client: AsyncClient, test_project: Project, pm_user: User):
+async def test_assign_invalid_user(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User):
     task_data = {
         "title": "Test Task for Invalid Assignment",
         "description": "Test task for invalid assignment",
@@ -82,7 +80,7 @@ async def test_assign_invalid_user(authed_pm_client: AsyncClient, test_project: 
         "assignee_id": None,
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -100,12 +98,9 @@ async def test_assign_invalid_user(authed_pm_client: AsyncClient, test_project: 
 
 
 @pytest.mark.asyncio
-async def test_assign_inactive_user(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, admin_user: User):
-    session = TestingSessionLocal()
+async def test_assign_inactive_user(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, admin_user: User, db_session):
     admin_user.is_active = False
-    session.merge(admin_user)
-    session.commit()
-    session.close()
+    db_session.commit()
 
     task_data = {
         "title": "Test Task for Inactive Assignment",
@@ -114,7 +109,7 @@ async def test_assign_inactive_user(authed_pm_client: AsyncClient, test_project:
         "assignee_id": None,
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -129,15 +124,12 @@ async def test_assign_inactive_user(authed_pm_client: AsyncClient, test_project:
     assert response.status_code == 400
     assert "Assignee not found or inactive" in response.json()["detail"]
 
-    session = TestingSessionLocal()
     admin_user.is_active = True
-    session.merge(admin_user)
-    session.commit()
-    session.close()
+    db_session.commit()
 
 
 @pytest.mark.asyncio
-async def test_unassign_no_assignee(authed_pm_client: AsyncClient, test_project: Project, pm_user: User):
+async def test_unassign_no_assignee(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User):
     task_data = {
         "title": "Test Task for Unassign No Assignee",
         "description": "Test task for unassign when no assignee",
@@ -145,7 +137,7 @@ async def test_unassign_no_assignee(authed_pm_client: AsyncClient, test_project:
         "assignee_id": None,
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -158,7 +150,7 @@ async def test_unassign_no_assignee(authed_pm_client: AsyncClient, test_project:
 
 
 @pytest.mark.asyncio
-async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, test_designer_user: User):
+async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, test_designer_user: User):
     # PM creates a task
     task_data = {
         "title": "Test Task for Unauthorized Assignment",
@@ -167,7 +159,7 @@ async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project: 
         "assignee_id": None,
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -177,7 +169,9 @@ async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project: 
     # No auth header at all — should get 403
     # FastAPI HTTPBearer(auto_error=True) returns 403 when Authorization header is absent entirely.
     # 401 is reserved for malformed/invalid credentials. This asserts the real production behaviour.
-    from httpx import ASGITransport, AsyncClient as _AsyncClient
+    from httpx import ASGITransport
+    from httpx import AsyncClient as _AsyncClient
+
     from src.backend.main import app
     async with _AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as unauthed:
         assign_data = {"assignee_id": str(test_designer_user.id)}
@@ -189,7 +183,7 @@ async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project: 
 
 
 @pytest.mark.asyncio
-async def test_my_tasks_returns_assigned_only(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, test_designer_user: User):
+async def test_my_tasks_returns_assigned_only(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, test_designer_user: User):
     # Create tasks assigned to different users
     task1_data = {
         "title": "Task for Designer",
@@ -198,7 +192,7 @@ async def test_my_tasks_returns_assigned_only(authed_pm_client: AsyncClient, tes
         "assignee_id": str(test_designer_user.id),
     }
     response1 = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task1_data,
     )
     assert response1.status_code == 201
@@ -211,7 +205,7 @@ async def test_my_tasks_returns_assigned_only(authed_pm_client: AsyncClient, tes
         "assignee_id": str(pm_user.id),
     }
     response2 = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task2_data,
     )
     assert response2.status_code == 201
@@ -228,7 +222,7 @@ async def test_my_tasks_returns_assigned_only(authed_pm_client: AsyncClient, tes
 
 
 @pytest.mark.asyncio
-async def test_my_tasks_with_status_filter(authed_pm_client: AsyncClient, test_project: Project, pm_user: User):
+async def test_my_tasks_with_status_filter(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User):
     task1_data = {
         "title": "Todo Task for PM",
         "description": "Todo task",
@@ -236,7 +230,7 @@ async def test_my_tasks_with_status_filter(authed_pm_client: AsyncClient, test_p
         "assignee_id": str(pm_user.id),
     }
     response1 = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task1_data,
     )
     assert response1.status_code == 201
@@ -249,7 +243,7 @@ async def test_my_tasks_with_status_filter(authed_pm_client: AsyncClient, test_p
         "assignee_id": str(pm_user.id),
     }
     response2 = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task2_data,
     )
     assert response2.status_code == 201
@@ -263,7 +257,7 @@ async def test_my_tasks_with_status_filter(authed_pm_client: AsyncClient, test_p
     assert response.status_code == 200
 
     # Verify tasks exist in different statuses via project stats
-    response = await authed_pm_client.get(f"/api/projects/{test_project.id}/tasks/stats")
+    response = await authed_pm_client.get(f"/api/projects/{test_project_with_pm.id}/tasks/stats")
     assert response.status_code == 200
     stats = response.json()
     assert stats["in_progress"] >= 1
@@ -276,7 +270,7 @@ async def test_my_tasks_with_status_filter(authed_pm_client: AsyncClient, test_p
 
 
 @pytest.mark.asyncio
-async def test_my_tasks_with_priority_filter(authed_pm_client: AsyncClient, test_project: Project, pm_user: User):
+async def test_my_tasks_with_priority_filter(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User):
     task1_data = {
         "title": "Low Priority Task for PM",
         "description": "Low priority",
@@ -284,7 +278,7 @@ async def test_my_tasks_with_priority_filter(authed_pm_client: AsyncClient, test
         "assignee_id": str(pm_user.id),
     }
     response1 = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task1_data,
     )
     assert response1.status_code == 201
@@ -297,7 +291,7 @@ async def test_my_tasks_with_priority_filter(authed_pm_client: AsyncClient, test
         "assignee_id": str(pm_user.id),
     }
     response2 = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task2_data,
     )
     assert response2.status_code == 201
@@ -314,7 +308,7 @@ async def test_my_tasks_with_priority_filter(authed_pm_client: AsyncClient, test
 
 
 @pytest.mark.asyncio
-async def test_my_tasks_stats(authed_pm_client: AsyncClient, test_project: Project, pm_user: User):
+async def test_my_tasks_stats(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User):
     tasks_data = [
         {"title": "Todo 1", "priority": "medium"},
         {"title": "Todo 2", "priority": "medium"},
@@ -323,7 +317,7 @@ async def test_my_tasks_stats(authed_pm_client: AsyncClient, test_project: Proje
         td["description"] = f"Description for {td['title']}"
         td["assignee_id"] = str(pm_user.id)
         response = await authed_pm_client.post(
-            f"/api/projects/{test_project.id}/tasks",
+            f"/api/projects/{test_project_with_pm.id}/tasks",
             json=td,
         )
         assert response.status_code == 201
@@ -354,7 +348,7 @@ async def test_my_tasks_stats(authed_pm_client: AsyncClient, test_project: Proje
 
 
 @pytest.mark.asyncio
-async def test_project_task_stats(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, test_designer_user: User):
+async def test_project_with_pm_task_stats(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, test_designer_user: User):
     task1_data = {
         "title": "P1 Todo",
         "description": "Task 1",
@@ -362,7 +356,7 @@ async def test_project_task_stats(authed_pm_client: AsyncClient, test_project: P
         "assignee_id": str(pm_user.id),
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task1_data,
     )
     assert response.status_code == 201
@@ -374,7 +368,7 @@ async def test_project_task_stats(authed_pm_client: AsyncClient, test_project: P
         "assignee_id": str(test_designer_user.id),
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task2_data,
     )
     assert response.status_code == 201
@@ -385,7 +379,7 @@ async def test_project_task_stats(authed_pm_client: AsyncClient, test_project: P
         json={"to_status": "in_progress"},
     )
 
-    response = await authed_pm_client.get(f"/api/projects/{test_project.id}/tasks/stats")
+    response = await authed_pm_client.get(f"/api/projects/{test_project_with_pm.id}/tasks/stats")
     assert response.status_code == 200
     data = response.json()
     assert data["total"] >= 2
@@ -394,7 +388,7 @@ async def test_project_task_stats(authed_pm_client: AsyncClient, test_project: P
 
 
 @pytest.mark.asyncio
-async def test_assign_audit_log(authed_pm_client: AsyncClient, test_project: Project, pm_user: User, test_designer_user: User, db_session):
+async def test_assign_audit_log(authed_pm_client: AsyncClient, test_project_with_pm: Project, pm_user: User, test_designer_user: User, db_session):
     task_data = {
         "title": "Test Task for Audit Log",
         "description": "Test task for audit log",
@@ -402,7 +396,7 @@ async def test_assign_audit_log(authed_pm_client: AsyncClient, test_project: Pro
         "assignee_id": None,
     }
     response = await authed_pm_client.post(
-        f"/api/projects/{test_project.id}/tasks",
+        f"/api/projects/{test_project_with_pm.id}/tasks",
         json=task_data,
     )
     assert response.status_code == 201
@@ -416,7 +410,6 @@ async def test_assign_audit_log(authed_pm_client: AsyncClient, test_project: Pro
     )
     assert response.status_code == 200
 
-    from sqlalchemy import text
     result = db_session.execute(
         text("SELECT action, after_json FROM audit_log WHERE entity_type = 'task' AND entity_id = :task_id AND action = 'task.assign'"),
         {"task_id": task_id},

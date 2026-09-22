@@ -1,7 +1,9 @@
 # Conventions
 
 ## Code
-- **Python:** ruff + black + mypy strict (see `pyproject.toml`); 3.11+; PEP 604 unions ok
+- **Python:** ruff + black + mypy (non-strict, see `pyproject.toml`; third-party
+  missing-stub modules declared in per-module overrides, zero inline
+  `# type: ignore` outside `alembic/versions`); 3.11+; PEP 604 unions ok
 - **TypeScript:** strict mode; no `any`; explicit return types on exports; eslint + prettier
 - **DB:** SQLAlchemy 2 declarative; Alembic migrations for every schema change
 - **Tests:** pytest for backend, Playwright for E2E, Vitest for frontend units
@@ -13,6 +15,17 @@
 - **Repository convention** (`src/backend/db/repositories/<entity>_repo.py`): expose
   `list_*`, `get_by_id`, `create`, `update`, `soft_delete`. Soft-delete is via a `deleted_at`
   column — never a hard delete of business data.
+- **Soft-delete matrix** (audited 2026-09-21, migration `0038`): `deleted_at` on
+  agreement, boq, client, contact, document_reference, document_folder,
+  inquiry, invoice, material, project, project_cost, quote, rfq, task,
+  time entry, token, user, vendor, vendor_contact, sustainability_metric.
+  Documents deactivate via `is_active` (versions preserved); a `deleted_at`
+  column was deliberately removed by migration `0026` — do not re-add it.
+  **Deliberately hard (never add soft-delete here):** `audit_log` (immutable trail),
+  `reference_counters` (monotonic), `refresh_tokens` (short-lived session artifacts),
+  `export_jobs` (ephemeral; Celery backend is source of truth), `task_dependencies`
+  (edge rows, cascade with tasks), `notifications` (ephemeral user data),
+  compliance standards/checklists (admin reference data).
 - **Reference-ID service** (`src/backend/services/reference_id_service.py`):
   `generate_reference_id(db: Session, entity_type: str) -> str` returns
   `SWA-{year}-{TYPE}-{seq:03d}`, atomically and race-safe via `INSERT … ON CONFLICT` on

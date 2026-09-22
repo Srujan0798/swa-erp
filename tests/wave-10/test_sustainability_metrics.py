@@ -66,7 +66,9 @@ async def test_update_sustainability_metric(authed_pm_client, test_project):
     assert data["compliant_with_green_standards"] is True
 
 
-async def test_delete_sustainability_metric(authed_pm_client, test_project):
+async def test_delete_sustainability_metric(authed_pm_client, test_project, db_session):
+    from src.backend.models.sustainability_metric import SustainabilityMetric
+
     project_id = str(test_project.id)
     created = await authed_pm_client.post(
         f"/api/projects/{project_id}/sustainability/metrics",
@@ -83,6 +85,11 @@ async def test_delete_sustainability_metric(authed_pm_client, test_project):
         f"/api/projects/{project_id}/sustainability/metrics/{metric_id}"
     )
     assert r.status_code == 404
+
+    # Soft-delete: row persists with deleted_at set
+    row = db_session.query(SustainabilityMetric).filter(SustainabilityMetric.id == metric_id).one_or_none()
+    assert row is not None
+    assert row.deleted_at is not None
 
 
 async def test_create_requires_pm_role(authed_viewer_client, test_project):

@@ -13,18 +13,17 @@ Weight distribution based on SWA staff activities (from MEETINGS_MASTER.md):
 - 5% authentication (login/refresh)
 """
 import random
-import uuid
 from datetime import date, timedelta
-from locust import HttpUser, task, between, events
-from locust.exception import StopUser
+
+from locust import HttpUser, between, events, task
 
 
 class AuthenticatedUser(HttpUser):
     """Base class with authentication handling."""
-    
+
     abstract = True  # Don't instantiate this base class
     wait_time = between(1, 3)  # Think time between requests
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.token = None
@@ -34,18 +33,18 @@ class AuthenticatedUser(HttpUser):
         self.project_ids = []
         self.client_ids = []
         self.task_ids = []
-    
+
     def on_start(self):
         """Login and fetch reference data on start."""
         self.login()
         if self.token:
             self.fetch_reference_data()
-    
+
     def login(self):
         """Authenticate and store tokens."""
         email = getattr(self, 'test_email', 'pm@swa.local')
         password = getattr(self, 'test_password', 'pm123!')
-        
+
         with self.client.post(
             "/api/auth/login",
             json={"email": email, "password": password},
@@ -60,12 +59,12 @@ class AuthenticatedUser(HttpUser):
                 response.success()
             else:
                 response.failure(f"Login failed: {response.status_code} - {response.text}")
-    
+
     def refresh_access_token(self):
         """Refresh the access token."""
         if not self.refresh_token:
             return False
-        
+
         with self.client.post(
             "/api/auth/refresh",
             json={"refresh_token": self.refresh_token},
@@ -81,7 +80,7 @@ class AuthenticatedUser(HttpUser):
             else:
                 response.failure(f"Token refresh failed: {response.status_code}")
                 return False
-    
+
     def fetch_reference_data(self):
         """Fetch project and client IDs for use in subsequent requests."""
         # Fetch projects
@@ -96,7 +95,7 @@ class AuthenticatedUser(HttpUser):
                 response.success()
             else:
                 response.failure(f"Failed to fetch projects: {response.status_code}")
-        
+
         # Fetch clients
         with self.client.get(
             "/api/clients?page_size=100",
@@ -113,7 +112,7 @@ class AuthenticatedUser(HttpUser):
 
 class PMUser(AuthenticatedUser):
     """Project Manager - Full access user.
-    
+
     Typical PM workflow:
     1. Check executive dashboard (high priority)
     2. Browse project list and details
@@ -123,15 +122,15 @@ class PMUser(AuthenticatedUser):
     6. Create inquiries/BOQs occasionally
     """
     weight = 5  # 50% of users are PMs
-    
+
     test_email = "pm@swa.local"
     test_password = "pm123!"
-    
+
     def on_start(self):
         super().on_start()
         # PMs start by checking the executive dashboard
         self.check_executive_dashboard()
-    
+
     @task(15)
     def check_executive_dashboard(self):
         """Primary dashboard - most frequent PM action."""
@@ -139,7 +138,7 @@ class PMUser(AuthenticatedUser):
             "/api/dashboard/executive",
             name="/api/dashboard/executive"
         )
-    
+
     @task(10)
     def check_project_health_report(self):
         """Project health report."""
@@ -147,7 +146,7 @@ class PMUser(AuthenticatedUser):
             "/api/reports/project-health",
             name="/api/reports/project-health"
         )
-    
+
     @task(10)
     def list_projects(self):
         """List projects with pagination."""
@@ -156,7 +155,7 @@ class PMUser(AuthenticatedUser):
             f"/api/projects?page={page}&page_size=20",
             name="/api/projects (list paginated)"
         )
-    
+
     @task(8)
     def get_project_detail(self):
         """View a specific project detail."""
@@ -167,7 +166,7 @@ class PMUser(AuthenticatedUser):
             f"/api/projects/{project_id}",
             name="/api/projects/{id} (detail)"
         )
-    
+
     @task(6)
     def list_clients(self):
         """List clients."""
@@ -176,7 +175,7 @@ class PMUser(AuthenticatedUser):
             f"/api/clients?page={page}&page_size=20",
             name="/api/clients (list paginated)"
         )
-    
+
     @task(4)
     def get_client_detail(self):
         """View a specific client detail."""
@@ -187,7 +186,7 @@ class PMUser(AuthenticatedUser):
             f"/api/clients/{client_id}",
             name="/api/clients/{id} (detail)"
         )
-    
+
     @task(4)
     def list_my_tasks(self):
         """List my tasks."""
@@ -195,7 +194,7 @@ class PMUser(AuthenticatedUser):
             "/api/tasks/my-tasks?page=1&page_size=20",
             name="/api/tasks/my-tasks (list)"
         )
-    
+
     @task(3)
     def list_timesheets(self):
         """List timesheets for approval."""
@@ -203,7 +202,7 @@ class PMUser(AuthenticatedUser):
             "/api/timesheets?page=1&page_size=20",
             name="/api/timesheets (list)"
         )
-    
+
     @task(2)
     def create_inquiry(self):
         """Create a new inquiry (periodic write)."""
@@ -220,7 +219,7 @@ class PMUser(AuthenticatedUser):
                 client_name = resp.json().get("name", "Unknown Client")
             else:
                 client_name = "Unknown Client"
-        
+
         self.client.post(
             "/api/inquiries",
             json={
@@ -234,7 +233,7 @@ class PMUser(AuthenticatedUser):
             },
             name="/api/inquiries (create)"
         )
-    
+
     @task(2)
     def create_project(self):
         """Create a new project (periodic write)."""
@@ -252,7 +251,7 @@ class PMUser(AuthenticatedUser):
             },
             name="/api/projects (create)"
         )
-    
+
     @task(2)
     def generate_project_summary_pdf(self):
         """Generate project summary PDF (heavy operation)."""
@@ -263,7 +262,7 @@ class PMUser(AuthenticatedUser):
             f"/api/exports/projects/{project_id}/summary.pdf",
             name="/api/exports/projects/{id}/summary.pdf"
         )
-    
+
     @task(1)
     def generate_financial_report_pdf(self):
         """Generate financial report PDF (heavy operation)."""
@@ -273,7 +272,7 @@ class PMUser(AuthenticatedUser):
             f"/api/exports/reports/financial.pdf?start_date={start_date}&end_date={end_date}",
             name="/api/exports/reports/financial.pdf"
         )
-    
+
     @task(1)
     def export_project_slides(self):
         """Export project slides (heavy operation)."""
@@ -288,7 +287,7 @@ class PMUser(AuthenticatedUser):
 
 class DesignerUser(AuthenticatedUser):
     """Designer - Project execution focused.
-    
+
     Typical Designer workflow:
     1. View assigned projects
     2. View/update tasks
@@ -297,10 +296,10 @@ class DesignerUser(AuthenticatedUser):
     5. Submit timesheets
     """
     weight = 3  # 30% of users are Designers
-    
+
     test_email = "pm@swa.local"  # Reuse PM for now since we only seeded 2 users
     test_password = "pm123!"
-    
+
     @task(12)
     def list_my_projects(self):
         """List projects."""
@@ -308,7 +307,7 @@ class DesignerUser(AuthenticatedUser):
             "/api/projects?page=1&page_size=20",
             name="/api/projects (list) [designer]"
         )
-    
+
     @task(10)
     def get_project_detail(self):
         """View project detail."""
@@ -319,7 +318,7 @@ class DesignerUser(AuthenticatedUser):
             f"/api/projects/{project_id}",
             name="/api/projects/{id} (detail) [designer]"
         )
-    
+
     @task(8)
     def list_project_tasks(self):
         """List tasks for a project."""
@@ -330,7 +329,7 @@ class DesignerUser(AuthenticatedUser):
             f"/api/projects/{project_id}/tasks?page=1&page_size=20",
             name="/api/projects/{id}/tasks (list) [designer]"
         )
-    
+
     @task(6)
     def get_task_detail(self):
         """View task detail."""
@@ -351,7 +350,7 @@ class DesignerUser(AuthenticatedUser):
                         f"/api/tasks/{task_id}",
                         name="/api/tasks/{id} (detail) [designer]"
                     )
-    
+
     @task(5)
     def create_time_entry(self):
         """Log time entry (periodic write)."""
@@ -381,7 +380,7 @@ class DesignerUser(AuthenticatedUser):
                         },
                         name="/api/time-entries (create) [designer]"
                     )
-    
+
     @task(4)
     def list_time_entries(self):
         """List time entries."""
@@ -389,7 +388,7 @@ class DesignerUser(AuthenticatedUser):
             "/api/time-entries?page=1&page_size=20",
             name="/api/time-entries (list) [designer]"
         )
-    
+
     @task(3)
     def list_timesheets(self):
         """List timesheets."""
@@ -397,7 +396,7 @@ class DesignerUser(AuthenticatedUser):
             "/api/timesheets?page=1&page_size=20",
             name="/api/timesheets (list) [designer]"
         )
-    
+
     @task(2)
     def generate_timesheet(self):
         """Generate weekly timesheet."""
@@ -407,7 +406,7 @@ class DesignerUser(AuthenticatedUser):
             f"/api/timesheets/generate?week_start={week_start}",
             name="/api/timesheets/generate [designer]"
         )
-    
+
     @task(1)
     def view_documents(self):
         """View project documents."""
@@ -422,17 +421,17 @@ class DesignerUser(AuthenticatedUser):
 
 class ViewerUser(AuthenticatedUser):
     """Viewer - Read-only access.
-    
+
     Typical Viewer workflow:
     1. Check dashboards
     2. Browse project/client lists
     3. View details (no writes)
     """
     weight = 2  # 20% of users are Viewers
-    
+
     test_email = "pm@swa.local"  # Reuse PM for now
     test_password = "pm123!"
-    
+
     @task(15)
     def check_executive_dashboard(self):
         """Check executive dashboard."""
@@ -440,7 +439,7 @@ class ViewerUser(AuthenticatedUser):
             "/api/dashboard/executive",
             name="/api/dashboard/executive [viewer]"
         )
-    
+
     @task(10)
     def list_projects(self):
         """List projects."""
@@ -449,7 +448,7 @@ class ViewerUser(AuthenticatedUser):
             f"/api/projects?page={page}&page_size=20",
             name="/api/projects (list) [viewer]"
         )
-    
+
     @task(8)
     def get_project_detail(self):
         """View project detail."""
@@ -460,7 +459,7 @@ class ViewerUser(AuthenticatedUser):
             f"/api/projects/{project_id}",
             name="/api/projects/{id} (detail) [viewer]"
         )
-    
+
     @task(6)
     def list_clients(self):
         """List clients."""
@@ -469,7 +468,7 @@ class ViewerUser(AuthenticatedUser):
             f"/api/clients?page={page}&page_size=20",
             name="/api/clients (list) [viewer]"
         )
-    
+
     @task(5)
     def get_client_detail(self):
         """View client detail."""
@@ -480,7 +479,7 @@ class ViewerUser(AuthenticatedUser):
             f"/api/clients/{client_id}",
             name="/api/clients/{id} (detail) [viewer]"
         )
-    
+
     @task(4)
     def check_utilization_report(self):
         """Check utilization report."""
@@ -488,7 +487,7 @@ class ViewerUser(AuthenticatedUser):
             "/api/reports/utilization",
             name="/api/reports/utilization [viewer]"
         )
-    
+
     @task(3)
     def check_revenue_report(self):
         """Check revenue report."""

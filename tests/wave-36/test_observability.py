@@ -8,13 +8,19 @@ Tests for:
 - Sentry runs cleanly without SENTRY_DSN (no-op mode)
 - PII/secret scrubbing works
 """
-import pytest
-from httpx import AsyncClient, ASGITransport
-from unittest.mock import patch, MagicMock
 import os
+from unittest.mock import patch
 
+import pytest
+from httpx import ASGITransport, AsyncClient
+
+from src.backend.core.errors import (
+    capture_exception,
+    get_sentry_initialized,
+    init_sentry,
+    scrub_pii,
+)
 from src.backend.main import app
-from src.backend.core.errors import init_sentry, capture_exception, scrub_pii, get_sentry_initialized
 from tests.conftest import redis_available
 
 
@@ -136,7 +142,7 @@ class TestErrorTracking:
         """init_sentry() should return False when no DSN is set."""
         # Ensure no DSN is set
         os.environ.pop("SENTRY_DSN", None)
-        
+
         result = init_sentry()
         assert result is False
         assert not get_sentry_initialized()
@@ -144,7 +150,7 @@ class TestErrorTracking:
     def test_init_sentry_with_dsn_returns_true(self):
         """init_sentry() should return True when DSN is set."""
         os.environ["SENTRY_DSN"] = "https://test@test.ingest.sentry.io/123"
-        
+
         result = init_sentry()
         assert result is True
         assert get_sentry_initialized()
@@ -153,7 +159,7 @@ class TestErrorTracking:
         """capture_exception should not crash when Sentry not initialized."""
         os.environ.pop("SENTRY_DSN", None)
         init_sentry()  # Returns False
-        
+
         # Should not raise any exception
         try:
             capture_exception(ValueError("test error"))
@@ -164,7 +170,7 @@ class TestErrorTracking:
         """capture_exception should work when Sentry is initialized."""
         os.environ["SENTRY_DSN"] = "https://test@test.ingest.sentry.io/123"
         init_sentry()
-        
+
         # Mock sentry_sdk to verify it's called
         with patch("src.backend.core.errors.sentry_sdk.capture_exception") as mock_capture:
             capture_exception(ValueError("test error"))
@@ -247,7 +253,7 @@ class TestErrorTracking:
         """App should not crash when triggering an error without SENTRY_DSN."""
         # Ensure no DSN
         os.environ.pop("SENTRY_DSN", None)
-        
+
         # This endpoint doesn't exist but we can test by triggering an exception
         # in a different way - we'll just verify the app handles errors normally
         response = await client.get("/healthz")

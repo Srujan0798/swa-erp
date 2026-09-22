@@ -3,9 +3,8 @@
 ## Login
 Open the internal address in your browser:
 
-> **Login URL:** `PENDING IT ANSWER (Q6)` — the internal hostname IT confirms
-> (e.g. `http://erp.swa.local`). Ask your admin / IT for the exact link once
-> deployment is done.
+> **Login URL:** to be confirmed — the internal hostname (e.g. `http://erp.swa.local`)
+> will be shared by your admin once installation is done.
 
 Log in with the username and password your **Admin** gave you.
 
@@ -20,11 +19,10 @@ Log in with the username and password your **Admin** gave you.
 - **Viewer** — Browse clients, projects, and documents read-only.
 
 ## Where to get help
-- **Detailed walkthrough:** `deliverables/handover/USER_GUIDE.md`
-- **Admin procedures (users, imports, backups, health):**
-  `deliverables/handover/ADMIN_GUIDE.md`
-- **How the system is built (forwardable to IT):**
-  `deliverables/handover/ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md`
+All four documents are in this folder:
+- **Detailed walkthrough:** `USER_GUIDE.md`
+- **Admin procedures (users, imports, backups, health):** `ADMIN_GUIDE.md`
+- **How the system is built (for IT):** `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md`
 
 ## Access problems?
 Contact the person who administers the system (your **Admin**). They create

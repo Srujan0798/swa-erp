@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from src.backend.core.security import hash_password
 from src.backend.db.repositories.audit_repo import create_entry
 from src.backend.db.repositories.user_repo import create as create_user
-from src.backend.db.repositories.user_repo import get_by_id, list_users
+from src.backend.db.repositories.user_repo import get_active_by_id, get_by_id, list_users
 from src.backend.db.repositories.user_repo import soft_delete as soft_delete_user
 from src.backend.db.repositories.user_repo import update as update_user
 from src.backend.models.user import User
@@ -47,6 +47,11 @@ def create_user_service(db: Session, data: UserCreate, actor_id: uuid.UUID | Non
 
 def get_user_service(db: Session, user_id: uuid.UUID) -> User | None:
     return get_by_id(db, user_id)
+
+
+def get_active_user_service(db: Session, user_id: uuid.UUID) -> User | None:
+    """Active, non-deleted user or None — owns the assignee-eligibility query."""
+    return get_active_by_id(db, user_id)
 
 
 def update_user_service(

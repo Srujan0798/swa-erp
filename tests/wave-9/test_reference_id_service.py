@@ -2,26 +2,40 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 from src.backend.services.reference_id_service import (
     generate_reference_id,
     get_current_seq,
 )
-from src.backend.models.reference_counter import ReferenceCounter
-from tests.conftest import TestingSessionLocal
+from tests.conftest import TEST_DATABASE_URL
 
-
-def _make_session():
-    return TestingSessionLocal()
+# Separate session factory for concurrency tests
+_concurrency_engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True, future=True)
+_concurrency_session_factory = sessionmaker(
+    autoflush=False, autocommit=False, expire_on_commit=False, bind=_concurrency_engine
+)
 
 
 def _reset_reference_counters(db_session):
     """Reset reference_counters table for test isolation."""
     from sqlalchemy import text
-    from sqlalchemy.engine import Engine
     bind = db_session.get_bind()
     engine = bind.engine if hasattr(bind, "engine") else bind
     with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
         conn.execute(text("TRUNCATE TABLE reference_counters"))
+
+
+def _reset_reference_counters_concurrency():
+    """Reset reference_counters using the concurrency session factory."""
+    s = _concurrency_session_factory()
+    try:
+        from sqlalchemy import text
+        s.execute(text("TRUNCATE TABLE reference_counters"))
+        s.commit()
+    finally:
+        s.close()
 
 
 class TestBasicGeneration:
@@ -95,10 +109,10 @@ class TestConcurrency:
     def test_50_parallel_calls_yield_gapless_sequential_ids(self):
         n = 50
         entity_type = "TKN"
-        _reset_reference_counters(TestingSessionLocal())
+        _reset_reference_counters_concurrency()
 
         def worker(_i):
-            s = _make_session()
+            s = _concurrency_session_factory()
             try:
                 return generate_reference_id(s, entity_type)
             finally:
@@ -122,7 +136,7 @@ class TestConcurrency:
         seqs = sorted(int(rid.split("-")[-1]) for rid in ids)
         assert seqs == list(range(1, n + 1)), f"expected 1..{n}, got {seqs}"
 
-        verify = _make_session()
+        verify = _concurrency_session_factory()
         try:
             final = get_current_seq(verify, entity_type)
         finally:

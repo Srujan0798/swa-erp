@@ -18,7 +18,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm --dir src/frontend run dev",
+    command: "npm --prefix src/frontend run dev",
     url: "http://localhost:3100",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
