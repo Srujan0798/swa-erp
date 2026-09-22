@@ -19,7 +19,7 @@ def get_current_user(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> User:
     if creds is None:
-        raise HTTPException(status_code=403, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Authentication required")
     try:
         payload = decode_token(creds.credentials)
     except Exception as e:

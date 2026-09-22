@@ -88,7 +88,9 @@ def list_rfqs_endpoint(
     rfq_status: str | None = Query(default=None, alias="status"),
 ) -> RFQListResponse:
     _require_project_access(db, project_id, current_user, read_only=True)
-    return list_project_rfqs(db, project_id, page=page, page_size=page_size, status=rfq_status)
+    return list_project_rfqs(
+        db, project_id, page=page, page_size=page_size, status=rfq_status
+    )
 
 
 @router.get(
@@ -132,9 +134,16 @@ def receive_response_endpoint(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> RFQRead:
-    result = receive_response(db, rfq_id, [item.model_dump() for item in body], current_user.id)
+    try:
+        result = receive_response(
+            db, rfq_id, [item.model_dump() for item in body], current_user.id
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     if not result:
-        raise HTTPException(status_code=404, detail="RFQ not found or cannot receive response")
+        raise HTTPException(
+            status_code=404, detail="RFQ not found or cannot receive response"
+        )
     return result
 
 
@@ -172,7 +181,9 @@ def compare_rfqs_endpoint(
         try:
             mat_ids = [uuid.UUID(m.strip()) for m in material_ids.split(",")]
         except ValueError as e:
-            raise HTTPException(status_code=400, detail="Invalid material_ids format") from e
+            raise HTTPException(
+                status_code=400, detail="Invalid material_ids format"
+            ) from e
     return compare_rfq(db, rfq.project_id, mat_ids)
 
 
@@ -192,7 +203,9 @@ def compare_project_rfqs_endpoint(
         try:
             mat_ids = [uuid.UUID(m.strip()) for m in material_ids.split(",")]
         except ValueError as e:
-            raise HTTPException(status_code=400, detail="Invalid material_ids format") from e
+            raise HTTPException(
+                status_code=400, detail="Invalid material_ids format"
+            ) from e
     return compare_rfq(db, project_id, mat_ids)
 
 

@@ -68,9 +68,9 @@ async def test_unauthorized_401(client_with_db):
     ]
     for endpoint in endpoints:
         r = await client_with_db.get(endpoint)
-        # FastAPI HTTPBearer(auto_error=True) returns 403 when Authorization header is absent entirely.
-        # 401 is reserved for malformed/invalid credentials. This asserts the real production behaviour.
-        assert r.status_code == 403, f"{endpoint} should return 403 without auth"
+        # Missing/invalid credentials raise 401 (deps.get_current_user);
+        # 403 is reserved for authenticated-but-forbidden users.
+        assert r.status_code == 401, f"{endpoint} should return 401 without auth"
 
 
 async def test_invalid_date_range_422(authed_admin_client):

@@ -166,9 +166,9 @@ async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project_w
     task = response.json()
     task_id = task["id"]
 
-    # No auth header at all — should get 403
-    # FastAPI HTTPBearer(auto_error=True) returns 403 when Authorization header is absent entirely.
-    # 401 is reserved for malformed/invalid credentials. This asserts the real production behaviour.
+    # No auth header at all — should get 401
+    # Missing/invalid credentials raise 401 (deps.get_current_user);
+    # 403 is reserved for authenticated-but-forbidden users.
     from httpx import ASGITransport
     from httpx import AsyncClient as _AsyncClient
 
@@ -179,7 +179,7 @@ async def test_assign_unauthorized(authed_pm_client: AsyncClient, test_project_w
             f"/api/tasks/{task_id}/assign",
             json=assign_data,
         )
-        assert response.status_code == 403
+        assert response.status_code == 401
 
 
 @pytest.mark.asyncio

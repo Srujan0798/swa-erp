@@ -2,13 +2,16 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  retries: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 1 : 1,
+  timeout: 60_000,
+  reporter: "line",
   use: {
-    baseURL: "http://localhost:3100",
+    // E2E runs against an isolated scratch stack (scripts/run_e2e.sh) via
+    // E2E_BASE_URL; default is the local dev server on :3100.
+    baseURL: process.env.E2E_BASE_URL || "http://localhost:3100",
     trace: "on-first-retry",
   },
   projects: [
@@ -18,8 +21,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm --prefix src/frontend run dev",
-    url: "http://localhost:3100",
+    command: process.env.E2E_WEB_CMD || "npm --prefix src/frontend run dev",
+    url: process.env.E2E_BASE_URL || "http://localhost:3100",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },

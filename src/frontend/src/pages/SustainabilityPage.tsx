@@ -121,7 +121,7 @@ export function SustainabilityPage() {
   const [projectId, setProjectId] = useState<string>("");
   const { data } = useQuery<ProjectListResponse>({
     queryKey: ["projects-all"],
-    queryFn: () => api.listProjects({ page_size: 200 }),
+    queryFn: () => api.listProjects({ page_size: 100 }),
   });
   const projects = data?.items ?? [];
 

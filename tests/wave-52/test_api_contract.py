@@ -61,4 +61,4 @@ async def test_all_api_routes_deny_anonymous(client_with_db):
 
 async def test_metrics_deny_anonymous(client_with_db):
     r = await client_with_db.get("/metrics")
-    assert r.status_code == 403, r.text
+    assert r.status_code == 401, r.text

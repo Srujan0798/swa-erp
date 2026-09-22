@@ -288,7 +288,7 @@ describe("api endpoint methods", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/t1/assign", expect.objectContaining({ method: "POST" }));
 
     await api.unassignTask("t1");
-    expect(fetchMock).toHaveBeenCalledWith("/api/tasks/t1/unassign", expect.objectContaining({ method: "POST" }));
+    expect(fetchMock).toHaveBeenCalledWith("/api/tasks/t1/assign", expect.objectContaining({ method: "DELETE" }));
 
     await api.getMyTasks({ page: 1, page_size: 20, status: "todo", priority: "high" });
     expect(fetchMock).toHaveBeenCalledWith("/api/tasks/my-tasks?page=1&page_size=20&status=todo&priority=high", expect.anything());
