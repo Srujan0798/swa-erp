@@ -38,6 +38,10 @@ def create_project_service(
     data: ProjectCreate,
     actor_id: uuid.UUID,
 ) -> dict[str, Any]:
+    # Auto-assign the creator as PM when unspecified so the creator can work
+    # on the project (membership gates tasks/invoices/costs on pm_id).
+    if data.pm_id is None:
+        data = data.model_copy(update={"pm_id": actor_id})
     _require_assignable_user(db, data.pm_id, "pm_id")
     _require_assignable_user(db, data.designer_id, "designer_id")
     _require_assignable_user(db, data.auditor_id, "auditor_id")

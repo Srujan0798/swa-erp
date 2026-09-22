@@ -1,4 +1,4 @@
-# SWA ERP — Architecture (as built, verified 2026-09-21)
+# SWA ERP — Architecture (as built, verified **2026-09-22 seal session**)
 
 > This file describes the system **as it exists in this repo**, not a target
 > vision. Anything planned-but-unbuilt is listed in §7, not drawn as real.
@@ -30,7 +30,7 @@ api/<entity>.py        FastAPI routers: auth, validation, HTTP mapping ONLY
   → services/<entity>_service.py   business logic, audit entries, commits
     → db/repositories/<entity>_repo.py   queries: list_*, get_by_id, create, update, soft_delete
       → models/<entity>.py         SQLAlchemy 2 declarative (UUID PKs)
-        → postgres                 Alembic migrations (single head; 0038 now)
+        → postgres                 Alembic migrations (single head; **0043** as of 2026-09-22 seal)
 ```
 
 Cross-cutting: `core/` (config, security/JWT, deps, rate_limit, middleware
@@ -71,8 +71,9 @@ Auth endpoints IP-rate-limited; uploads/exports/reports throttled per IP.
 
 React 18 · Vite · TypeScript strict · Tailwind + shadcn/ui · TanStack Query.
 Route-level code splitting (`React.lazy` + `Suspense` + `ErrorBoundary`).
-Hooks (`useX`) wrap `lib/api.ts`; 69 vitest files, 586 tests. No `any` in
-production code; hook-test mocks are type-checked by `tsc` (no excludes).
+Hooks (`useX`) wrap `lib/api.ts`. No `any` in production code; hook-test mocks are
+type-checked by `tsc` (no excludes). Test/coverage numbers live only in `README.md`
+**after a re-run this session** — never copied here.
 
 ## 6. Data & integrity rules
 
@@ -90,8 +91,77 @@ production code; hook-test mocks are type-checked by `tsc` (no excludes).
 |---|---|
 | Multi-tenancy / org isolation | **Absent** — single-tenant internal tool by design |
 | API versioning | **Header strategy (v1)** — `X-API-Version` on `/api/*`, OpenAPI version = package version; additive-only within a major; first breaking change ships `/api/v2`, v1 kept 6 months |
-| Idempotency keys on POST | **`Idempotency-Key` on invoice create / generate-from-time / status** — replay stored response, same-key-different-body rejected 422, 24h TTL (`idempotency_keys`, migration 0042) |
+| Idempotency keys on POST | **`Idempotency-Key` on invoice create / generate-from-time / status** — replay stored response, same-key-different-body rejected 422, 24h TTL (`idempotency_keys`; migrations 0042/0043) |
 | Blue-green / canary / feature flags | **Absent** — compose up/down + migrate; rollback = restore from backup |
-| E2E (Playwright) | **49/49 passed** (login flow, dashboard, BOQ/quote flow, page smokes) on the rebuilt stack; gated in CI via `e2e.yml` |
+| E2E (Playwright) | Gated in CI via `e2e.yml`; last local seal numbers only in `README.md` after re-run |
 | Contract / property / mutation tests | **Partial** — hypothesis property tests (`test_properties.py`) + auth-coverage contract sweep (`test_api_contract.py`) live; mutation testing deferred |
 | Offline / multi-region DR | **Absent** — single host; RPO ≈ 24h via daily backups (restore proven) |
+
+## 8. Module → wave map + failure points (merged from plan/ARCHITECTURE.md)
+
+Source: former `plan/ARCHITECTURE.md` unique tables (archived under `docs/historical/`).
+
+### Modules (src/backend/api/)
+
+| Module | Responsibility | Wave |
+|---|---|---|
+| `auth.py` / `users.py` / `health.py` | Login, refresh, roles, `/healthz` | 1 |
+| `clients.py` / `projects.py` / `lifecycle.py` | CRM-lite + lifecycle | 2 |
+| `boqs.py` / `quotes.py` | BOQ ingest, quote version/PDF | 3 |
+| `tasks.py` | Tasks, deps, kanban | 4 |
+| `vendors.py` / `materials.py` / `rfqs.py` | Vendor + RFQ | 5 |
+| `documents.py` / `compliance.py` | Files + NBC/ECBC/IGBC/IS | 6 |
+| `time_tracking.py` / `invoices.py` / `project_pnl.py` | Time + money | 7 |
+| `reports.py` / `exports.py` | Dashboards + export jobs | 8 |
+| `inquiries.py` / `agreements.py` / `tokens.py` / `document_references.py` | **Core ID chain (client MVP)** | 9 |
+| `sustainability_metrics.py` | Green metrics | 10 |
+| `notifications.py` | In-app notifications | 17 |
+
+### Integrations (MVP)
+
+| Integration | How |
+|---|---|
+| Email | Celery + SMTP/Resend when configured |
+| PDF | WeasyPrint |
+| Excel | openpyxl (BOQ upload / report export) |
+| Storage | local `uploads/` default; MinIO via `STORAGE_BACKEND=minio` |
+| Jobs | Celery + Redis |
+
+### Failure points (honest)
+
+| Failure | Mitigation |
+|---|---|
+| DB down | pool + `/readyz` fail; API 503 |
+| Worker crash | compose worker restart; job retry |
+| Malformed BOQ | schema validation; no partial insert |
+| Session expired | refresh rotation; 401 → login |
+| Upload too large | size cap + clear error |
+| Two PMs edit same project | **Gap:** `Project` has no `version` optimistic lock (BOQ/Document/Quote/User do) |
+| Currency / TZ | `Decimal(18,2)`; UTC store, Asia/Kolkata display |
+| Migration mistake | never edit applied revisions; restore backup |
+
+### Validation points
+
+| Layer | Validates |
+|---|---|
+| Frontend form | required/format |
+| API | Pydantic types + enums |
+| Service | lifecycle + RBAC + business rules |
+| DB | NOT NULL / FK / UNIQUE / CHECK |
+| Background | large BOQ parse |
+
+### Auth notes (merged)
+
+- HS256 JWT only (no RS256 in tree) — adequate single-instance with strong `SECRET_KEY`.
+- bcrypt cost 12; rotating refresh + reuse detection; `token_version` global revoke.
+- Roles: `admin` / `pm` / `designer` / `auditor` / `viewer` (`core/roles.py`).
+- `/metrics` auth-gated; `/healthz` + `/readyz` public probes.
+
+### Observability truth (updated this seal — plan table was stale)
+
+- structlog: **built**
+- Prometheus `/metrics` + auth flag: **built** (wave-36/50) — plan said “not implemented”
+- Sentry SDK: **built**, active only if `SENTRY_DSN` set
+- `audit_log`: **built**
+- fluentd central ship: **not built**
+

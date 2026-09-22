@@ -74,7 +74,7 @@ Work was sequenced in **waves** — scoped briefs under `work/wave-N/`, acceptan
 | Wave | What it proved | Evidence |
 |------|----------------|----------|
 | **32** | CI gates are real — removed all `\|\| true` / `continue-on-error` from GitHub workflows; wired pip-audit, npm audit, semgrep; `make verify` | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](../work/reports/wave-32/01-real-ci-quality-gates.report.md) |
-| **33** | Backend coverage raised; overall **86%**; all service modules ≥70%; five former weak services (pdf/quote/import/task/notification) closed | [`work/reports/wave-33/03-remaining-coverage.report.md`](../work/reports/wave-33/03-remaining-coverage.report.md), [`work/reports/COMPLETION-HANDOFF-VERDICT.md`](../work/reports/COMPLETION-HANDOFF-VERDICT.md) |
+| **33** | Backend coverage raised; overall **86%**; all service modules ≥70%; five former weak services (pdf/quote/import/task/notification) closed | [`work/reports/wave-33/03-remaining-coverage.report.md`](../work/reports/wave-33/03-remaining-coverage.report.md), [`docs/historical/COMPLETION-HANDOFF-VERDICT.md`](../docs/historical/COMPLETION-HANDOFF-VERDICT.md) |
 | **34** | Real frontend Vitest suite; thresholds **60/50/60/60** met; cite **~61%** statements on independent remeasure | [`work/reports/wave-34/02-frontend-page-coverage.report.md`](../work/reports/wave-34/02-frontend-page-coverage.report.md) + verdict |
 | **35** | Locust load at 10/50/100/150 users on a **dev machine**; p95 ≈ 29–130 ms; no 5xx after fixes | [`docs/PERFORMANCE.md`](../docs/PERFORMANCE.md) |
 | **36** | Prometheus metrics, readiness, optional Sentry | [`docs/operational/OBSERVABILITY.md`](../docs/operational/OBSERVABILITY.md), wave-36 report 02 |
@@ -94,7 +94,7 @@ Work was sequenced in **waves** — scoped briefs under `work/wave-N/`, acceptan
 | **50** | Security risks (job IDOR, /metrics auth flag) + deterministic test suite | **Shipped** | wave-50 reports |
 | **51** | Final re-seal + submission refresh | **Shipped** | this commit |
 
-**Anti-fabrication:** this project documents past over-claims (wrong pass counts, “module X done” when files were missing). Closing rules live in [`work/FINAL-CLOSE/ANTI-FABRICATION.md`](../work/FINAL-CLOSE/ANTI-FABRICATION.md). Metrics in the README and this report use only verified wording (e.g. **not** “no backend module under 70%” globally — nine non-alembic modules remain under that line).
+**Anti-fabrication:** this project documents past over-claims (wrong pass counts, “module X done” when files were missing). Closing rules live in [`docs/historical/ANTI-FABRICATION.md`](../docs/historical/ANTI-FABRICATION.md). Metrics in the README and this report use only verified wording (e.g. **not** “no backend module under 70%” globally — nine non-alembic modules remain under that line).
 
 ---
 

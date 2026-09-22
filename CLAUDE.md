@@ -47,7 +47,8 @@ Internal ERP for SWA Consultancy: manage clients, projects, quotations/BOQ workf
 - `make ship wave=N` — close wave pipeline
 
 ## Where things live
-- Strategy: `plan/{PRD,ARCHITECTURE,EXECUTION}.md`
+- Strategy: `plan/{PRD,EXECUTION}.md` (`plan/ARCHITECTURE` merged into `docs/ARCHITECTURE.md` §8)
+- **Production seal:** `docs/SEAL_PROTOCOL.md` + `work/reports/seal/{MD_CENSUS,GRAPHIFY,01-truth}*.md`
 - Specs: `.specify/specs/wave-N/{spec,plan,tasks,contracts}/`
 - Apparatus: `orchestrator/{commands,skills,agents,hooks,recipes,rules}/`
 - Bridge: `work/wave-N/` (briefs) → `work/reports/wave-N/` (reports)

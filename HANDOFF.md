@@ -9,14 +9,19 @@
 hardening (waves 40–51) landed truth-infrastructure guardrails, audit logging, CSP/token rotation,
 service-layer logging, pagination, deterministic tests, atomicity fix, IDOR fix, and final re-seal.
 
-### Verified (this session, real command output — not carried forward from memory)
-- Backend static gates: **ruff clean, black clean, mypy clean** (2026-09-22) · tsc/eslint/vite-build clean
-- Backend suite: **654 passed** (2026-09-22); prior wave-47 Docker seal: 572 passed / 1 skipped / 0 failed · 85% coverage
-- Frontend: **600 passed / 0 failed** (2026-09-22) · coverage at 2026-09-19 reseal: **60.46% functions** (63.2% statements, 55.09% branches, 64.29% lines) · tsc/eslint/vite-build clean
-- Migrations: single Alembic head `0042`
-- Prod deploy: `docker-compose.prod.yml` + `.env.production` validated (secrets pre-filled, gitignored); files sent to company group 2026-09-22 — awaiting 8 IT answers (Docker/WSL2/ports/HTTPS/backups/URL/DB-location/deploy)
+### Verified (2026-09-22 seal session — real command output, not memory)
+- Backend static: **ruff clean, black clean** (`python3 -m ruff/black check src/backend/`)
+- Backend suite: **673 passed, 2 skipped, 0 failed** (`python3 -m pytest tests/ -q`, 184.34s, Docker stack up)
+- Frontend: tsc clean, eslint clean, vitest **0 failed** · functions **62.28%**, statements 65.73%, branches 59.1%, lines 67.11% (`npx vitest run --coverage`)
+- Migrations: single Alembic head **0043** (`alembic -c src/backend/alembic.ini heads`)
+- Seal artifacts: `docs/SEAL_PROTOCOL.md`, `work/reports/seal/{MD_CENSUS,GRAPHIFY,01-truth,02-sheet-parity}.md`
+- Not claimed this session: backend coverage %, Playwright director-path traces, sheet-parity completion, production deploy
+
+### Prior wave metrics (historical — do not paste as current)
+- Wave-47 Docker seal: 572 passed / 1 skipped / 0 failed · 85% coverage · frontend 60.46% functions (wave-51)
+- Prod deploy files: `docker-compose.prod.yml` + `.env.production` — awaiting 8 IT answers (external)
 - Seal report: [`work/reports/FINAL-CLOSE.report.md`](work/reports/FINAL-CLOSE.report.md)
-- Wave-51 re-seal: commit `4396581` (pushed to `origin/main`)
+- Wave-51 re-seal: commit `4396581`
 
 ### Recovery-month context (still relevant, not superseded)
 Earlier feedback from SWA was that the product felt "unusable / dummy." A focused recovery
@@ -49,6 +54,7 @@ code/tests wins; fix the drift rather than trusting the more convenient one.
    were on a dev machine, not the client's server.
 
 ## Where to start a new session
+0. **Production seal:** [`docs/SEAL_PROTOCOL.md`](docs/SEAL_PROTOCOL.md) → census/graphify under `work/reports/seal/`
 1. This file → deploy/import help only unless a bug is reported
 2. `README.md` for the evaluator view
 3. [`deliverables/MEETING_AND_GO_LIVE_GUIDE.md`](deliverables/MEETING_AND_GO_LIVE_GUIDE.md) for the one ops path
@@ -58,6 +64,7 @@ code/tests wins; fix the drift rather than trusting the more convenient one.
 ## Open decisions (external)
 - Server/deploy 8 facts — Viraj
 - Excel freeze date + migration owner — Viraj
+- GitHub PAT rotation (O1) · project `postgres` MCP approve (O2) · historical secrets (O3) — user
 
 ## Dispatch status: ALL COMPLETE
 The full dispatch plan (waves 40–51) has been executed and committed to `origin/main`.

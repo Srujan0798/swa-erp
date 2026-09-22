@@ -21,7 +21,9 @@
 - **Financials** — Decimal(18,2), INR default, multi-currency ready, invoicing, payments
 
 ### Technical Foundations
-- **Auth** — JWT + RBAC (roles: admin, pm, engineer, vendor, viewer)
+- **Auth** — JWT + RBAC. **Roles in production code** (`src/backend/core/roles.py`): `admin`, `pm`, `designer`, `auditor`, `viewer`.
+  (Older SCOPE text listing `engineer`/`vendor` was stale — do not reintroduce without an ADR.)
+  Hierarchy: admin ⊃ pm ⊃ {designer, auditor} ⊃ viewer.
 - **API** — FastAPI, OpenAPI spec, Pydantic v2 schemas
 - **Database** — PostgreSQL, SQLAlchemy 2, Alembic migrations
 - **Frontend** — React 18, Vite, TypeScript strict, TailwindCSS, shadcn/ui, TanStack Query

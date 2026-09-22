@@ -88,7 +88,7 @@ this file — it is the contract.
 
 | # | Concern | Why it matters | Full intent | Status |
 |---|---------|----------------|-------------|--------|
-| F1 | Waves 1–51 all accounted for exactly once | Orchestration integrity | ACTIVE.md vs ARCHIVE.md no orphans | **Done** — all SHIPPED |
+| F1 | Waves 1–51 all accounted for exactly once | Orchestration integrity | ACTIVE.md vs ARCHIVE.md no orphans | **Done** — all SHIPPED; seal track documented in `docs/SEAL_PROTOCOL.md` |
 | F2 | Soft-delete matrix must match code | Data integrity | ADR-0003 + conventions.md agree | **Done** |
 | F3 | API versioning + idempotency shipped shape differs from original proposal — document as-built | Docs shouldn't lie | ADR-0004 records shipped header + Postgres store | **Done** |
 | F4 | Redis rejected for idempotency (must survive flush) | Correctness | Postgres `idempotency_keys` | **Done** |
@@ -96,17 +96,18 @@ this file — it is the contract.
 | F6 | Audit log immutable (no soft-delete) | Regulatory | Migration 0041 | **Done** |
 | F7 | Document deleted_at deliberately removed (0026) — never re-add | Two delete mechanisms compete | Documented | **Done** |
 | F8 | Dirty working tree not from this task | Don't touch unrelated WIP | `deps.py`, frontend package files, e2e specs, SustainabilityPage, playwright.config.ts, root `package.json` left alone | **Respected** |
-| F9 | Frontend coverage threshold 60% (60.46% at wave-51) | Quality bar | Don't regress | **Standing** |
+| F9 | Frontend coverage threshold 60% (re-run: functions **62.28%** 2026-09-22) | Quality bar | Don't regress | **Standing** — re-run each seal session |
 | F10 | External blockers must not stall engineering | Viraj server facts, Excel freeze | Document as external | **Standing** (HANDOFF.md) |
 
 ## G. ECC harness-audit residual (27/39)
 
 | # | Concern | Why it matters | Full intent | Status |
 |---|---------|----------------|-------------|--------|
-| G1 | No project-local `.claude/` tailoring in swa-erp | Tool-coverage score | Add hooks/commands/skills/settings scoped to repo | **Pending** |
-| G2 | No durable project memory file (`.claude/memory.md` / `docs/adr/`) | Memory persistence score | Add memory + ADRs (ADRs exist under `docs/decisions/`, audit wants `docs/adr/` path or memory.md) | **Pending** |
-| G3 | No project-local hook settings for prompt/tool guardrails | Security-guardrail score | Add `.claude/settings.json` hooks | **Pending** |
+| G1 | No project-local `.claude/` tailoring in swa-erp | Tool-coverage score | Add hooks/commands/skills/settings scoped to repo | **Pending** (audit residual) |
+| G2 | No durable project memory file (`.claude/memory.md` / `docs/adr/`) | Memory persistence score | Add memory + ADRs (ADRs exist under `docs/decisions/`, audit wants `docs/adr/` path or memory.md) | **Pending** (audit residual) |
+| G3 | No project-local hook settings for prompt/tool guardrails | Security-guardrail score | Add `.claude/settings.json` hooks | **Pending** (audit residual) |
 | G4 | Don't chase score for its own sake | Only fix real gaps | | **Standing** |
+| G5 | Seal protocol Phase 0–3 incomplete for director cutover | Company OS replacement needs proof, not vibes | Follow `docs/SEAL_PROTOCOL.md`; census+graphify+truth **started**; sheet-parity + director path + Phase 3 boxes **open** | **In progress** — see SEAL_PROTOCOL §7 |
 
 ## H. Open / blocked items
 
@@ -121,7 +122,7 @@ this file — it is the contract.
 
 ---
 
-**Count:** 5 (A) + 16 (B) + 6 (C) + 15 (D) + 6 (E) + 10 (F) + 4 (G) + 6 (H) = **68 tracked concerns**
+**Count:** 5 (A) + 16 (B) + 6 (C) + 15 (D) + 6 (E) + 10 (F) + 5 (G) + 6 (H) = **69 tracked concerns**
 (plus sub-items folded into rows above; reconstructed set — correct any row rather than assuming completeness.
 **Post-refinement note:** intentionally excludes transient skill-scan / glob-loop session noise that
 was not part of the heartfelt concern set; those remain out of scope.)

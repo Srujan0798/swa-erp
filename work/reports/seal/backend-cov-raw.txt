@@ -1,0 +1,480 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.3, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/srujansai/Desktop/swa-erp
+configfile: pyproject.toml
+plugins: schemathesis-4.27.5, Faker-40.15.0, cov-7.1.0, locust-2.43.4, xdist-3.8.0, timeout-2.4.0, asyncio-1.3.0, hypothesis-6.152.2, langsmith-0.8.18, anyio-4.13.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 675 items
+
+tests/integration/test_core_id_chain.py .                                [  0%]
+tests/security/test_api_versioning.py ...                                [  0%]
+tests/security/test_authz_boundaries.py ......                           [  1%]
+tests/test_migrations.py ...........................                     [  5%]
+tests/unit/test_laya_gate_rules.py .......                               [  6%]
+tests/wave-1/test_auth.py ........s...                                   [  8%]
+tests/wave-1/test_skeleton.py .....                                      [  9%]
+tests/wave-1/test_users.py ..............                                [ 11%]
+tests/wave-10/test_sustainability_metrics.py .....                       [ 11%]
+tests/wave-13/test_import_service.py ............                        [ 13%]
+tests/wave-18/test_invoice_gst.py ....                                   [ 14%]
+tests/wave-18/test_security_hardening.py ...........                     [ 15%]
+tests/wave-19/test_backup_scripts.py .....                               [ 16%]
+tests/wave-2/test_clients.py ............                                [ 18%]
+tests/wave-2/test_lifecycle.py .....                                     [ 19%]
+tests/wave-2/test_projects.py .......                                    [ 20%]
+tests/wave-2/test_stats.py .                                             [ 20%]
+tests/wave-22/test_rbac_gaps.py ........................................ [ 26%]
+.                                                                        [ 26%]
+tests/wave-23/test_correctness_fixes.py ......                           [ 27%]
+tests/wave-27/test_backup_script_safety.py ....                          [ 27%]
+tests/wave-3/test_boq_versions.py .....                                  [ 28%]
+tests/wave-31/test_celery_tasks.py .........                             [ 29%]
+tests/wave-31/test_storage_backend.py ...................                [ 32%]
+tests/wave-33/test_import_service.py .......................             [ 36%]
+tests/wave-33/test_notification_service.py ..........                    [ 37%]
+tests/wave-33/test_pdf_service.py .............                          [ 39%]
+tests/wave-33/test_quote_service.py ......................               [ 42%]
+tests/wave-33/test_task_service.py ....................................  [ 48%]
+tests/wave-36/test_observability.py .........s.......................... [ 53%]
+.                                                                        [ 53%]
+tests/wave-37/test_storage_path_safety.py ...                            [ 54%]
+tests/wave-4/test_task_assignments.py ............                       [ 55%]
+tests/wave-48/test_production_hardening.py .......                       [ 56%]
+tests/wave-49/test_inquiry_conversion_atomicity.py .                     [ 57%]
+tests/wave-5/test_materials.py .....................                     [ 60%]
+tests/wave-5/test_rfqs.py .............                                  [ 62%]
+tests/wave-5/test_vendors.py .....................                       [ 65%]
+tests/wave-50/test_job_ownership.py ......                               [ 66%]
+tests/wave-50/test_metrics_auth.py ....                                  [ 66%]
+tests/wave-52/test_api_contract.py ..                                    [ 66%]
+tests/wave-52/test_idempotency_keys.py ......                            [ 67%]
+tests/wave-52/test_properties.py ......                                  [ 68%]
+tests/wave-6/test_compliance.py ..............                           [ 70%]
+tests/wave-6/test_document_management.py .............                   [ 72%]
+tests/wave-6/test_document_upload.py .......................             [ 76%]
+tests/wave-7/test_invoicing.py ................                          [ 78%]
+tests/wave-7/test_project_pnl.py ..........                              [ 80%]
+tests/wave-7/test_time_tracking.py ................                      [ 82%]
+tests/wave-7/test_timesheet_workflow.py ..........                       [ 83%]
+tests/wave-8/test_exports.py ......                                      [ 84%]
+tests/wave-8/test_reports_api.py ........                                [ 85%]
+tests/wave-8/test_reports_service.py ............                        [ 87%]
+tests/wave-9/test_agreements.py ...............                          [ 89%]
+tests/wave-9/test_document_references.py .......................         [ 93%]
+tests/wave-9/test_inquiries.py ..................                        [ 96%]
+tests/wave-9/test_reference_id_service.py ..........                     [ 97%]
+tests/wave-9/test_tokens.py .................                            [100%]
+
+=============================== warnings summary ===============================
+../../Library/Python/3.14/lib/python/site-packages/prometheus_fastapi_instrumentator/instrumentation.py:302
+../../Library/Python/3.14/lib/python/site-packages/prometheus_fastapi_instrumentator/instrumentation.py:302
+../../Library/Python/3.14/lib/python/site-packages/prometheus_fastapi_instrumentator/instrumentation.py:302
+../../Library/Python/3.14/lib/python/site-packages/prometheus_fastapi_instrumentator/instrumentation.py:302
+  /Users/srujansai/Library/Python/3.14/lib/python/site-packages/prometheus_fastapi_instrumentator/instrumentation.py:302: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+tests/integration/test_core_id_chain.py::test_core_id_chain_end_to_end
+tests/wave-1/test_skeleton.py::test_readyz_db_ok
+tests/wave-36/test_observability.py::TestHealthEndpoints::test_readyz_returns_healthy_when_all_up
+tests/wave-36/test_observability.py::TestHealthEndpoints::test_readyz_structure
+tests/wave-36/test_observability.py::TestIntegration::test_metrics_scraping_under_load
+tests/wave-36/test_observability.py::TestIntegration::test_metrics_scraping_under_load
+tests/wave-36/test_observability.py::TestIntegration::test_metrics_scraping_under_load
+tests/wave-36/test_observability.py::TestIntegration::test_metrics_scraping_under_load
+tests/wave-36/test_observability.py::TestIntegration::test_metrics_scraping_under_load
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/alembic/config.py:612: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+tests/integration/test_core_id_chain.py: 1 warning
+tests/security/test_authz_boundaries.py: 2 warnings
+tests/wave-1/test_auth.py: 7 warnings
+tests/wave-1/test_users.py: 14 warnings
+tests/wave-10/test_sustainability_metrics.py: 5 warnings
+tests/wave-18/test_invoice_gst.py: 4 warnings
+tests/wave-18/test_security_hardening.py: 4 warnings
+tests/wave-2/test_clients.py: 12 warnings
+tests/wave-2/test_lifecycle.py: 4 warnings
+tests/wave-2/test_projects.py: 7 warnings
+tests/wave-2/test_stats.py: 1 warning
+tests/wave-22/test_rbac_gaps.py: 38 warnings
+tests/wave-23/test_correctness_fixes.py: 3 warnings
+tests/wave-3/test_boq_versions.py: 5 warnings
+tests/wave-31/test_celery_tasks.py: 6 warnings
+tests/wave-31/test_storage_backend.py: 3 warnings
+tests/wave-36/test_observability.py: 7 warnings
+tests/wave-4/test_task_assignments.py: 12 warnings
+tests/wave-48/test_production_hardening.py: 3 warnings
+tests/wave-5/test_materials.py: 21 warnings
+tests/wave-5/test_rfqs.py: 13 warnings
+tests/wave-5/test_vendors.py: 21 warnings
+tests/wave-50/test_job_ownership.py: 6 warnings
+tests/wave-50/test_metrics_auth.py: 1 warning
+tests/wave-52/test_idempotency_keys.py: 5 warnings
+tests/wave-6/test_compliance.py: 14 warnings
+tests/wave-6/test_document_management.py: 13 warnings
+tests/wave-6/test_document_upload.py: 23 warnings
+tests/wave-7/test_invoicing.py: 15 warnings
+tests/wave-7/test_project_pnl.py: 10 warnings
+tests/wave-7/test_time_tracking.py: 16 warnings
+tests/wave-7/test_timesheet_workflow.py: 10 warnings
+tests/wave-8/test_exports.py: 5 warnings
+tests/wave-8/test_reports_api.py: 7 warnings
+tests/wave-9/test_agreements.py: 4 warnings
+tests/wave-9/test_document_references.py: 6 warnings
+tests/wave-9/test_inquiries.py: 5 warnings
+tests/wave-9/test_tokens.py: 4 warnings
+  /Users/srujansai/Library/Python/3.14/lib/python/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 29 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/integration/test_core_id_chain.py: 1 warning
+tests/security/test_authz_boundaries.py: 2 warnings
+tests/wave-1/test_auth.py: 5 warnings
+tests/wave-1/test_users.py: 14 warnings
+tests/wave-10/test_sustainability_metrics.py: 5 warnings
+tests/wave-18/test_invoice_gst.py: 4 warnings
+tests/wave-18/test_security_hardening.py: 4 warnings
+tests/wave-2/test_clients.py: 12 warnings
+tests/wave-2/test_lifecycle.py: 4 warnings
+tests/wave-2/test_projects.py: 7 warnings
+tests/wave-2/test_stats.py: 1 warning
+tests/wave-22/test_rbac_gaps.py: 38 warnings
+tests/wave-23/test_correctness_fixes.py: 3 warnings
+tests/wave-3/test_boq_versions.py: 5 warnings
+tests/wave-31/test_celery_tasks.py: 6 warnings
+tests/wave-31/test_storage_backend.py: 3 warnings
+tests/wave-36/test_observability.py: 7 warnings
+tests/wave-4/test_task_assignments.py: 12 warnings
+tests/wave-48/test_production_hardening.py: 3 warnings
+tests/wave-5/test_materials.py: 21 warnings
+tests/wave-5/test_rfqs.py: 13 warnings
+tests/wave-5/test_vendors.py: 21 warnings
+tests/wave-50/test_job_ownership.py: 6 warnings
+tests/wave-50/test_metrics_auth.py: 1 warning
+tests/wave-52/test_idempotency_keys.py: 5 warnings
+tests/wave-6/test_compliance.py: 14 warnings
+tests/wave-6/test_document_management.py: 13 warnings
+tests/wave-6/test_document_upload.py: 23 warnings
+tests/wave-7/test_invoicing.py: 15 warnings
+tests/wave-7/test_project_pnl.py: 10 warnings
+tests/wave-7/test_time_tracking.py: 16 warnings
+tests/wave-7/test_timesheet_workflow.py: 10 warnings
+tests/wave-8/test_exports.py: 5 warnings
+tests/wave-8/test_reports_api.py: 7 warnings
+tests/wave-9/test_agreements.py: 4 warnings
+tests/wave-9/test_document_references.py: 6 warnings
+tests/wave-9/test_inquiries.py: 5 warnings
+tests/wave-9/test_tokens.py: 4 warnings
+  /Users/srujansai/Library/Python/3.14/lib/python/site-packages/jwt/api_jwt.py:370: InsecureKeyLengthWarning: The HMAC key is 29 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+tests/security/test_api_versioning.py::test_openapi_version_matches_package
+  tests/security/test_api_versioning.py:17: PytestWarning: The test <Function test_openapi_version_matches_package> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_openapi_version_matches_package():
+
+tests/security/test_authz_boundaries.py::test_audit_log_is_append_only
+  tests/security/test_authz_boundaries.py:46: PytestWarning: The test <Function test_audit_log_is_append_only> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_audit_log_is_append_only(db_session):
+
+tests/wave-1/test_auth.py::test_role_hierarchy
+  tests/wave-1/test_auth.py:134: PytestWarning: The test <Function test_role_hierarchy> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_role_hierarchy():
+
+tests/wave-1/test_auth.py::test_expired_token_rejected
+  tests/wave-1/test_auth.py:141: PytestWarning: The test <Function test_expired_token_rejected> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_expired_token_rejected():
+
+tests/wave-1/test_skeleton.py::test_user_model_has_required_columns
+  tests/wave-1/test_skeleton.py:56: PytestWarning: The test <Function test_user_model_has_required_columns> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_user_model_has_required_columns():
+
+tests/wave-33/test_notification_service.py::test_emit_without_reference
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/sqlalchemy/sql/compiler.py:2367: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x115845030>
+    return row_fn(
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pydantic/v1/typing.py:77: DeprecationWarning: ForwardRef._evaluate is a private API and is retained for compatibility, but will be removed in Python 3.16. Use ForwardRef.evaluate() or typing.evaluate_forward_ref() instead.
+    return cast(Any, type_)._evaluate(globalns, localns, type_params=(), recursive_guard=set())
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/langchain_openai/chat_models/__init__.py:1: LangChainDeprecationWarning: As of langchain-core 0.3.0, LangChain uses pydantic v2 internally. The langchain_core.pydantic_v1 module was a compatibility shim for pydantic v1, and should no longer be used. Please update the code to import from Pydantic directly.
+  
+  For example, replace imports like: `from langchain_core.pydantic_v1 import BaseModel`
+  with: `from pydantic import BaseModel`
+  or the v1 compatibility namespace if you are working in a code base that has not been fully upgraded to pydantic 2 yet. 	from pydantic.v1 import BaseModel
+  
+    from langchain_openai.chat_models.azure import AzureChatOpenAI
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/langchain_openai/chat_models/base.py:190: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ChatOpenAI(BaseChatModel):
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
+  * 'allow_population_by_field_name' has been renamed to 'validate_by_name'
+    warnings.warn(message, UserWarning)
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/langchain_openai/llms/base.py:64: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class BaseOpenAI(BaseLLM):
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_init_sentry_with_dsn_returns_true
+  /Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/langgraph/checkpoint/base/__init__.py:18: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+    from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
+tests/wave-36/test_observability.py::TestErrorTracking::test_capture_exception_with_dsn
+  /Users/srujansai/Desktop/swa-erp/src/backend/core/errors.py:143: DeprecationWarning: sentry_sdk.push_scope is deprecated and will be removed in the next major version. Please consult our migration guide to learn how to migrate to the new API: https://docs.sentry.io/platforms/python/migration/1.x-to-2.x#scope-pushing
+    with sentry_sdk.push_scope() as scope:
+
+tests/wave-52/test_idempotency_keys.py::test_create_replay_no_duplicate
+tests/wave-52/test_idempotency_keys.py::test_same_key_different_body_rejected
+tests/wave-52/test_idempotency_keys.py::test_status_update_replay
+tests/wave-52/test_idempotency_keys.py::test_different_users_same_key_independent
+  /Users/srujansai/Desktop/swa-erp/src/backend/services/idempotency_service.py:98: SAWarning: nested transaction already deassociated from connection
+    db.commit()
+
+tests/wave-52/test_idempotency_keys.py::test_create_replay_no_duplicate
+tests/wave-52/test_idempotency_keys.py::test_same_key_different_body_rejected
+tests/wave-52/test_idempotency_keys.py::test_status_update_replay
+tests/wave-52/test_idempotency_keys.py::test_different_users_same_key_independent
+tests/wave-52/test_idempotency_keys.py::test_lost_insert_race_replays_stored_response
+  /Users/srujansai/Desktop/swa-erp/tests/conftest.py:220: SAWarning: nested transaction already deassociated from connection
+    nested.rollback()
+
+tests/wave-6/test_compliance.py: 14 warnings
+  /Users/srujansai/Desktop/swa-erp/tests/wave-6/test_compliance.py:49: SAWarning: Cannot correctly sort tables; there are unresolvable cycles between tables "clients, inquiries, projects", which is usually caused by mutually dependent foreign key constraints.  Foreign key constraints involving these tables will not be considered; this warning may raise an error in a future release.
+    for table in reversed(Base.metadata.sorted_tables):
+
+tests/wave-6/test_document_management.py: 13 warnings
+  /Users/srujansai/Desktop/swa-erp/tests/wave-6/test_document_management.py:46: SAWarning: Cannot correctly sort tables; there are unresolvable cycles between tables "clients, inquiries, projects", which is usually caused by mutually dependent foreign key constraints.  Foreign key constraints involving these tables will not be considered; this warning may raise an error in a future release.
+    for table in reversed(Base.metadata.sorted_tables):
+
+tests/wave-6/test_document_upload.py: 23 warnings
+  /Users/srujansai/Desktop/swa-erp/tests/wave-6/test_document_upload.py:46: SAWarning: Cannot correctly sort tables; there are unresolvable cycles between tables "clients, inquiries, projects", which is usually caused by mutually dependent foreign key constraints.  Foreign key constraints involving these tables will not be considered; this warning may raise an error in a future release.
+    for table in reversed(Base.metadata.sorted_tables):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.14.3-final-0 _______________
+
+Name                                                                           Stmts   Miss  Cover
+--------------------------------------------------------------------------------------------------
+src/backend/__init__.py                                                            3      0   100%
+src/backend/alembic/versions/0001_initial.py                                      24     14    42%
+src/backend/alembic/versions/0002_add_clients_and_contacts.py                     18      8    56%
+src/backend/alembic/versions/0003_add_projects.py                                 18      8    56%
+src/backend/alembic/versions/0004_add_boqs.py                                     18      8    56%
+src/backend/alembic/versions/0005_add_quotes.py                                   20     10    50%
+src/backend/alembic/versions/0006_add_tasks.py                                    22     12    45%
+src/backend/alembic/versions/0007_add_vendors.py                                  18      8    56%
+src/backend/alembic/versions/0008_add_materials.py                                20     10    50%
+src/backend/alembic/versions/0009_add_rfqs.py                                     22     12    45%
+src/backend/alembic/versions/0010_add_documents.py                                24     14    42%
+src/backend/alembic/versions/0011_add_compliance.py                               24     14    42%
+src/backend/alembic/versions/0012_add_time_tracking.py                            22     12    45%
+src/backend/alembic/versions/0013_add_invoices.py                                 20     10    50%
+src/backend/alembic/versions/0014_add_project_costs.py                            16      6    62%
+src/backend/alembic/versions/0015_add_reference_counters.py                       14      4    71%
+src/backend/alembic/versions/0016_add_inquiries_and_agreements.py                 32     22    31%
+src/backend/alembic/versions/0017_patch_client_fields.py                          20     10    50%
+src/backend/alembic/versions/0018_add_sustainability_metrics.py                   14      4    71%
+src/backend/alembic/versions/0019_add_tokens.py                                   20     10    50%
+src/backend/alembic/versions/0020_add_document_references.py                      20     10    50%
+src/backend/alembic/versions/0021_align_tasks_with_model.py                       50     40    20%
+src/backend/alembic/versions/0022_align_documents_with_model.py                   16      6    62%
+src/backend/alembic/versions/0023_align_notifications_with_model.py               22     12    45%
+src/backend/alembic/versions/0024_align_timesheet_audit_log_with_model.py         14      4    71%
+src/backend/alembic/versions/0025_add_invoice_gst.py                              14      5    64%
+src/backend/alembic/versions/0026_remove_deleted_at_from_documents.py             11      3    73%
+src/backend/alembic/versions/0027_add_project_version.py                          11      2    82%
+src/backend/alembic/versions/0028_merge_all_heads.py                              11      2    82%
+src/backend/alembic/versions/0029_merge_remaining_head.py                         11      2    82%
+src/backend/alembic/versions/0030_drop_first_lead_id.py                           15      6    60%
+src/backend/alembic/versions/0031_time_excel_fields_and_inquiry_tech_lead.py      33     24    27%
+src/backend/alembic/versions/0032_token_docref_excel_names.py                     29     20    31%
+src/backend/alembic/versions/0033_project_client_excel_fields.py                  54     44    19%
+src/backend/alembic/versions/0034_invoice_number_sequence.py                      20     11    45%
+src/backend/alembic/versions/0035_export_job_ownership.py                         14      4    71%
+src/backend/alembic/versions/0036_token_version_and_is_billed.py                  38     29    24%
+src/backend/alembic/versions/0037_nullable_project_time_docref.py                 12      4    67%
+src/backend/alembic/versions/0038_soft_delete_contact_folder_metric.py            16      6    62%
+src/backend/alembic/versions/0039_drop_dead_documents_version.py                  10      2    80%
+src/backend/alembic/versions/0040_align_documents_model.py                        13      5    62%
+src/backend/alembic/versions/0041_audit_log_immutable.py                          14      6    57%
+src/backend/alembic/versions/0042_idempotency_keys.py                             14      4    71%
+src/backend/alembic/versions/0043_idempotency_composite_pk.py                     12      4    67%
+src/backend/api/__init__.py                                                       15      0   100%
+src/backend/api/agreements.py                                                     46     14    70%
+src/backend/api/auth.py                                                           35      1    97%
+src/backend/api/boqs.py                                                           77     14    82%
+src/backend/api/clients.py                                                        70      9    87%
+src/backend/api/compliance.py                                                     67     12    82%
+src/backend/api/document_references.py                                            65     13    80%
+src/backend/api/documents.py                                                     140     14    90%
+src/backend/api/exports.py                                                        64      9    86%
+src/backend/api/health.py                                                         50     12    76%
+src/backend/api/inquiries.py                                                      43     11    74%
+src/backend/api/invoices.py                                                       77      5    94%
+src/backend/api/jobs.py                                                           54     10    81%
+src/backend/api/lifecycle.py                                                      36      1    97%
+src/backend/api/materials.py                                                      69      5    93%
+src/backend/api/notifications.py                                                  18      6    67%
+src/backend/api/project_pnl.py                                                    27      1    96%
+src/backend/api/projects.py                                                       46      6    87%
+src/backend/api/quotes.py                                                         95     58    39%
+src/backend/api/reports.py                                                        26      0   100%
+src/backend/api/rfqs.py                                                          119     27    77%
+src/backend/api/sustainability_metrics.py                                         47     18    62%
+src/backend/api/tasks.py                                                          84     17    80%
+src/backend/api/time_tracking.py                                                  65     18    72%
+src/backend/api/tokens.py                                                         44     11    75%
+src/backend/api/users.py                                                          59      8    86%
+src/backend/api/vendors.py                                                        71      6    92%
+src/backend/core/__init__.py                                                       0      0   100%
+src/backend/core/boq_parser.py                                                   104     69    34%
+src/backend/core/config.py                                                        34      1    97%
+src/backend/core/deps.py                                                          36      2    94%
+src/backend/core/errors.py                                                        64     16    75%
+src/backend/core/exceptions.py                                                    10     10     0%
+src/backend/core/lifecycle.py                                                     13      0   100%
+src/backend/core/metrics.py                                                       35      9    74%
+src/backend/core/middleware.py                                                    27      3    89%
+src/backend/core/quote_workflow.py                                                 5      0   100%
+src/backend/core/rate_limit.py                                                   112      9    92%
+src/backend/core/rfq_workflow.py                                                   5      1    80%
+src/backend/core/roles.py                                                         10      0   100%
+src/backend/core/security.py                                                      38     12    68%
+src/backend/core/storage.py                                                       75      1    99%
+src/backend/core/task_workflow.py                                                  8      1    88%
+src/backend/db/__init__.py                                                         0      0   100%
+src/backend/db/base.py                                                             3      0   100%
+src/backend/db/repositories/__init__.py                                            0      0   100%
+src/backend/db/repositories/agreement_repo.py                                     43     11    74%
+src/backend/db/repositories/audit_repo.py                                         31      5    84%
+src/backend/db/repositories/boq_repo.py                                           51      6    88%
+src/backend/db/repositories/client_repo.py                                        30      0   100%
+src/backend/db/repositories/compliance_repo.py                                   118     25    79%
+src/backend/db/repositories/contact_repo.py                                       21      1    95%
+src/backend/db/repositories/document_reference_repo.py                            43      3    93%
+src/backend/db/repositories/document_repo.py                                      90      6    93%
+src/backend/db/repositories/inquiry_repo.py                                       39      7    82%
+src/backend/db/repositories/invoice_repo.py                                       86     13    85%
+src/backend/db/repositories/material_repo.py                                      77      6    92%
+src/backend/db/repositories/notification_repo.py                                  34     18    47%
+src/backend/db/repositories/project_cost_repo.py                                  39      7    82%
+src/backend/db/repositories/project_repo.py                                       92     10    89%
+src/backend/db/repositories/quote_repo.py                                         77     12    84%
+src/backend/db/repositories/refresh_token_repo.py                                 28      1    96%
+src/backend/db/repositories/report_repo.py                                        48      1    98%
+src/backend/db/repositories/rfq_repo.py                                           84     18    79%
+src/backend/db/repositories/sustainability_metric_repo.py                         38      3    92%
+src/backend/db/repositories/task_dependency_repo.py                               46     46     0%
+src/backend/db/repositories/task_repo.py                                         178     48    73%
+src/backend/db/repositories/time_repo.py                                          78     15    81%
+src/backend/db/repositories/token_repo.py                                         43      4    91%
+src/backend/db/repositories/user_repo.py                                          38      4    89%
+src/backend/db/repositories/vendor_repo.py                                        51      1    98%
+src/backend/db/session.py                                                         15      0   100%
+src/backend/main.py                                                               98      0   100%
+src/backend/models/__init__.py                                                    26      0   100%
+src/backend/models/agreement.py                                                   21      0   100%
+src/backend/models/audit_log.py                                                   19      0   100%
+src/backend/models/boq.py                                                         35      0   100%
+src/backend/models/client.py                                                      29      0   100%
+src/backend/models/compliance.py                                                  35      0   100%
+src/backend/models/contact.py                                                     18      0   100%
+src/backend/models/document.py                                                    31      0   100%
+src/backend/models/document_reference.py                                          25      0   100%
+src/backend/models/export_job.py                                                  11      0   100%
+src/backend/models/idempotency_key.py                                             19      0   100%
+src/backend/models/inquiry.py                                                     27      0   100%
+src/backend/models/invoice.py                                                     39      0   100%
+src/backend/models/material.py                                                    23      0   100%
+src/backend/models/notification.py                                                17      0   100%
+src/backend/models/project.py                                                     36      0   100%
+src/backend/models/project_cost.py                                                22      0   100%
+src/backend/models/quote.py                                                       48      0   100%
+src/backend/models/reference_counter.py                                           12      0   100%
+src/backend/models/refresh_token.py                                               14      0   100%
+src/backend/models/rfq.py                                                         40      0   100%
+src/backend/models/sustainability_metric.py                                       23      0   100%
+src/backend/models/task.py                                                        54      0   100%
+src/backend/models/task_dependency.py                                             12     12     0%
+src/backend/models/time_tracking.py                                               49      0   100%
+src/backend/models/token.py                                                       25      0   100%
+src/backend/models/user.py                                                        22      0   100%
+src/backend/models/vendor.py                                                      34      0   100%
+src/backend/schemas/__init__.py                                                   30      0   100%
+src/backend/schemas/agreement.py                                                  26      0   100%
+src/backend/schemas/auth.py                                                       10      0   100%
+src/backend/schemas/boq.py                                                        30      0   100%
+src/backend/schemas/client.py                                                     46      0   100%
+src/backend/schemas/common.py                                                      6      0   100%
+src/backend/schemas/compliance.py                                                 34      0   100%
+src/backend/schemas/contact.py                                                    16      0   100%
+src/backend/schemas/document.py                                                   32      0   100%
+src/backend/schemas/document_reference.py                                         36      0   100%
+src/backend/schemas/inquiry.py                                                    55      0   100%
+src/backend/schemas/invoice.py                                                    26      0   100%
+src/backend/schemas/material.py                                                   31      0   100%
+src/backend/schemas/notification.py                                               15      0   100%
+src/backend/schemas/pnl.py                                                        19      0   100%
+src/backend/schemas/project.py                                                    69      0   100%
+src/backend/schemas/quote.py                                                      35      0   100%
+src/backend/schemas/report.py                                                     12      0   100%
+src/backend/schemas/rfq.py                                                        44      0   100%
+src/backend/schemas/sustainability_metric.py                                      27      0   100%
+src/backend/schemas/task.py                                                       82     18    78%
+src/backend/schemas/time_tracking.py                                              60      0   100%
+src/backend/schemas/token.py                                                      32      0   100%
+src/backend/schemas/user.py                                                       17      0   100%
+src/backend/schemas/vendor.py                                                     43      0   100%
+src/backend/services/__init__.py                                                   5      0   100%
+src/backend/services/agreement_service.py                                         39      6    85%
+src/backend/services/audit_service.py                                              5      0   100%
+src/backend/services/auth_service.py                                              54      5    91%
+src/backend/services/boq_service.py                                               67     18    73%
+src/backend/services/client_service.py                                            69     17    75%
+src/backend/services/compliance_service.py                                        79     11    86%
+src/backend/services/contact_service.py                                           42      7    83%
+src/backend/services/document_reference_service.py                                59      3    95%
+src/backend/services/document_service.py                                         118     11    91%
+src/backend/services/export_service.py                                           276     11    96%
+src/backend/services/idempotency_service.py                                       46      4    91%
+src/backend/services/import_service.py                                           594    127    79%
+src/backend/services/inquiry_service.py                                           83      2    98%
+src/backend/services/invoice_service.py                                           90      3    97%
+src/backend/services/laya_gate.py                                                 36     19    47%
+src/backend/services/lifecycle_service.py                                         43      9    79%
+src/backend/services/material_service.py                                          96      5    95%
+src/backend/services/notification_service.py                                      34      9    74%
+src/backend/services/pdf_service.py                                               96      0   100%
+src/backend/services/project_pnl_service.py                                       67      6    91%
+src/backend/services/project_service.py                                           67      9    87%
+src/backend/services/quote_service.py                                            130      4    97%
+src/backend/services/reference_id_service.py                                      27      5    81%
+src/backend/services/report_service.py                                            51      1    98%
+src/backend/services/rfq_service.py                                              135      9    93%
+src/backend/services/sustainability_metric_service.py                             20      0   100%
+src/backend/services/task_service.py                                             121      4    97%
+src/backend/services/time_service.py                                             128     18    86%
+src/backend/services/token_service.py                                             37      1    97%
+src/backend/services/user_service.py                                              50      8    84%
+src/backend/services/vendor_service.py                                            92     12    87%
+src/backend/workers/__init__.py                                                    0      0   100%
+src/backend/workers/celery_app.py                                                  5      0   100%
+src/backend/workers/tasks.py                                                      44      7    84%
+--------------------------------------------------------------------------------------------------
+TOTAL                                                                           9171   1543    83%
+=========== 673 passed, 2 skipped, 767 warnings in 168.65s (0:02:48) ===========

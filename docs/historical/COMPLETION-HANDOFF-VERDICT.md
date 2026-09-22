@@ -197,8 +197,8 @@ into a short WhatsApp/email for Viraj. Ask only the 8 questions. No architecture
 
 ## Execution pack (user-confirmed full close)
 
-**Start:** [`work/FINAL-CLOSE/README.md`](../FINAL-CLOSE/README.md)  
-**Paste to Claude:** [`work/FINAL-CLOSE/prompts/PASTE-TO-CLAUDE.md`](../FINAL-CLOSE/prompts/PASTE-TO-CLAUDE.md)  
-**Human ops:** [`work/FINAL-CLOSE/HUMAN-PLAYBOOK.md`](../FINAL-CLOSE/HUMAN-PLAYBOOK.md)
+**Start:** [`attic/final-close/README.md`](../../attic/final-close/README.md)  
+**Paste to Claude:** [`attic/final-close/prompts/PASTE-TO-CLAUDE.md`](../../attic/final-close/prompts/PASTE-TO-CLAUDE.md)  
+**Human ops:** [`attic/final-close/HUMAN-PLAYBOOK.md`](../../attic/final-close/HUMAN-PLAYBOOK.md)
 
 Path locked: **hygiene → stabilize → wave-37 → wave-38 → seal**.

@@ -10,8 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Python 3.14 on PURPOSE: black's f-string parser (PEP 701) formats
+      # differently per interpreter — CI must match .pre-commit-config.yaml's
+      # runtime (the developer's python3) or the two disagree forever.
+      # ruff is a rust binary; mypy is pinned to python_version=3.11 in
+      # pyproject, so target semantics stay 3.11 regardless.
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11", cache: "pip" }
+        with: { python-version: "3.14", cache: "pip" }
       - name: Install deps
         run: pip install -r requirements.txt
       - name: Install lint tools

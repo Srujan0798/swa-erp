@@ -69,7 +69,7 @@ def auth_headers(db_session):
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
-    token = create_access_token(user.id, "admin")
+    token = create_access_token(user.id, "admin", user.token_version)
     return {"Authorization": f"Bearer {token}"}
 
 

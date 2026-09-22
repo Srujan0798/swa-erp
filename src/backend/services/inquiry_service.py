@@ -86,10 +86,14 @@ def convert_inquiry(
         client_source = "explicit_id"
 
     if client is None:
-        # Search for existing clients by the inquiry's client_name (not the project name)
+        # Search for existing clients by the inquiry's client_name (not the project name).
+        # LIKE metacharacters are escaped so %/_ in client names match literally.
+        pattern = (
+            locked.client_name.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        )
         candidates = (
             db.query(Client)
-            .filter(Client.name.ilike(locked.client_name), Client.deleted_at.is_(None))
+            .filter(Client.name.ilike(pattern), Client.deleted_at.is_(None))
             .all()
         )
         if len(candidates) == 1:
@@ -97,7 +101,7 @@ def convert_inquiry(
             client_source = "name_match"
         elif len(candidates) > 1:
             raise InquiryConversionError(
-                300,
+                409,
                 {
                     "detail": "Ambiguous client match",
                     "inquiry_client_name": locked.client_name,

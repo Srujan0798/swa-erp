@@ -4,6 +4,8 @@ Internal ERP for **SWA Consultancy** (Ahmedabad) — an insulation engineering f
 
 **Product v1.0.1 is built.** Professional-grade track **waves 32–39 shipped** (CI, coverage, frontend tests, load, observability, adversarial review + packaging, repo org). Company-server **deploy remains external** (Viraj / no IT dept). Residual ops risks are listed honestly in the wave-37 report — not claimed as "zero risk / 100% complete."
 
+**Production seal (director cutover):** follow [`docs/SEAL_PROTOCOL.md`](docs/SEAL_PROTOCOL.md) — Graphify census + hostile truth suite + sheet-parity + director path. Metrics in this file are only numbers re-run in the seal session cited in the table.
+
 ---
 
 ## The core business flow
@@ -34,10 +36,10 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 
 | Area | Claim | Source |
 |------|--------|--------|
-| **Backend coverage** | **83.96%** total (floor `--cov-fail-under=82` met) | `pytest --cov=src/backend` (2026-09-21) |
-| **Backend suite (full, Redis up)** | **654 passed** (floor `--cov-fail-under=82` met) | `pytest tests/` (2026-09-22; includes `tests/integration` + `tests/security` + `tests/wave-52`) |
-| **E2E (Playwright)** | **49/49 passed in 41s** (login flow, dashboard, BOQ/quote flow, page smokes) | `npx playwright test --project=chromium` against rebuilt stack (2026-09-22); gated in CI `e2e.yml` |
-| **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` (wave-47) |
+| **Frontend (vitest, functions)** | **62.28%** functions · 65.73% statements · 59.1% branches · 67.11% lines · **0 failed** | `npx vitest run --coverage` (2026-09-22 seal session) |
+| **Backend suite (full, Docker up)** | **673 passed, 2 skipped, 0 failed** | `python3 -m pytest tests/ -q` (2026-09-22 seal session, 184s) |
+| **Migrations** | Single Alembic head **0043** | `alembic -c src/backend/alembic.ini heads` (2026-09-22) |
+| **Production seal protocol** | Phase 0 census/graphify + hostile truth gates documented | [`docs/SEAL_PROTOCOL.md`](docs/SEAL_PROTOCOL.md) |
 | **Backend static gates** | **ruff clean, black clean, mypy clean** (162 files); repo-wide `ruff check .` clean | this session |
 | **Frontend suite** | **600 passed / 0 failed** (76 files) | `npx vitest run` (2026-09-22) |
 | **Frontend coverage** | **Statements 65.72%**, **Branches 59.05%**, **Functions 62.37%**, **Lines 67.03%** | `npx vitest run --coverage` (2026-09-22) |
@@ -45,7 +47,8 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client's Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
 | **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit (strict, 2 documented dev-only ignores) / npm audit (**0 vulnerabilities**) / semgrep + Trivy / gitleaks wired; pip + npm caching; E2E gated in `e2e.yml`; Dependabot weekly | workflows on disk 2026-09-22; scans re-run locally |
 | **Observability** | `/metrics` (Prometheus, auth-gated by default), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
-| **Alembic** | Single head **0042** (audit-log immutability trigger 0041; idempotency keys 0042); `alembic check` clean | `alembic -c src/backend/alembic.ini heads && check` (2026-09-22) |
+| **Alembic** | Single head **0043**; `alembic check` clean | `alembic -c src/backend/alembic.ini heads && check` (2026-09-22) |
+| **Backend coverage** | **83%** (`TOTAL 9171 1543`); suite **673 passed, 2 skipped, 0 failed** | `python3 -m pytest tests/ -q --cov=src/backend --cov-report=term` → `work/reports/seal/backend-cov-raw.txt` (2026-09-22, 168.65s) |
 
 **Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Always cite fresh output paste.
 
@@ -100,7 +103,7 @@ Real data notes: [`docs/REAL_DATA.md`](docs/REAL_DATA.md).
 | [`resources/MEETINGS_MASTER.md`](resources/MEETINGS_MASTER.md) | What the client said |
 | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) | Load-test methodology + CSVs |
 | [`work/ACTIVE.md`](work/ACTIVE.md) | Live wave status (32–51) |
-| [`work/FINAL-CLOSE/ANTI-FABRICATION.md`](work/FINAL-CLOSE/ANTI-FABRICATION.md) | Metric honesty rules |
+| [`docs/historical/ANTI-FABRICATION.md`](docs/historical/ANTI-FABRICATION.md) | Metric honesty rules |
 
 ---
 

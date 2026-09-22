@@ -31,6 +31,8 @@ def create_access_token(
         user_id = uuid.UUID(payload_in["sub"]) if "sub" in payload_in else uuid.uuid4()
         role = role or payload_in.get("role", "viewer")
         token_version = payload_in.get("token_version", token_version)
+    if token_version is None:
+        raise ValueError("token_version is required for access tokens (revocation check)")
     now = datetime.now(UTC)
     payload: dict[str, Any] = {
         "sub": str(user_id),
@@ -38,9 +40,8 @@ def create_access_token(
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=settings.JWT_ACCESS_TTL_MIN)).timestamp()),
         "type": "access",
+        "v": int(token_version),
     }
-    if token_version is not None:
-        payload["v"] = int(token_version)
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 

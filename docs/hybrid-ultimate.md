@@ -6,7 +6,7 @@
 >
 > Merges three streams: **Decisions DONE**, **Intentions still open**, and **Concerns**
 > (full list with status in [concernSS.md](concernSS.md)). Hand-over in
-> [../handoff3.md](../handoff3.md).
+> [../handoff3.md](../handoff3.md). **Production seal protocol:** [SEAL_PROTOCOL.md](SEAL_PROTOCOL.md).
 
 ---
 
@@ -109,5 +109,7 @@
 ## 4. One-line status
 
 **Setup wired (3 harnesses, MCP, skills); LAYA slice implemented + selftest/unit tests green
-+ EN/HI dry-run done (eval n=12 acc 0.75 — expand set); ERP router wiring still hard-stopped;
-research picks (addyosmani, code-compass) + audit residuals open; PAT rotate + postgres approve still yours.**
++ EN/HI dry-run done (eval n=12 acc 0.75 — expand set); production seal package started
+(`docs/SEAL_PROTOCOL.md`, MD census 169, graphify queries, truth suite 673/0 backend +
+frontend clean this session); ERP router wiring still hard-stopped; research picks
+(addyosmani, code-compass) + sheet-parity/director-path open; PAT rotate + postgres approve still yours.**

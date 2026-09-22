@@ -1,7 +1,8 @@
 # handoff3.md — Session handover (cross-harness + LAYA + concerns)
 
-> Third-generation handoff. Read order: this file → [docs/hybrid-ultimate.md](docs/hybrid-ultimate.md)
-> → [docs/concernSS.md](docs/concernSS.md). Older context: `HANDOFF.md` (repo waves/external blockers).
+> Third-generation handoff. Read order: **production seal first** [`docs/SEAL_PROTOCOL.md`](docs/SEAL_PROTOCOL.md)
+> → [docs/hybrid-ultimate.md](docs/hybrid-ultimate.md) → [docs/concernSS.md](docs/concernSS.md).
+> Repo session switch: `HANDOFF.md`. Older context: wave history in `work/ARCHIVE.md`.
 
 ---
 
@@ -20,9 +21,12 @@
 - skills-health **214/214**; graphify **4/4** (Cursor gap fixed); Superpowers not reinstalled.
 - gitleaks in pre-commit; dead/duplicate config files archived.
 - `.venv-laya` + `laya 0.3.5` + `Router(preload=True)` verified; warnings documented.
-- **Three deliverables exist:** `docs/concernSS.md`, `docs/hybrid-ultimate.md`, this file.
-- **LAYA slice written:** packs + gate + `laya_gate.py` + ADR-0005 + skill + dry-run +
-  labeled eval scaffold + 7/7 unit tests; import discipline verified (only `laya_gate.py`).
+- **LAYA slice:** packs + gate + `laya_gate.py` + ADR-0005 + skill + dry-run + eval scaffold + 7/7 unit tests.
+- **Production seal Phase 0+1 partial:** `docs/SEAL_PROTOCOL.md`, MD census (169), graphify queries,
+  archives (dispatch-24h + FINAL-CLOSE pack), OBSERVABILITY filled, SCOPE roles fixed, ARCHITECTURE merged §8.
+- **Truth this session:** backend 673 passed/2 skipped/0 failed; frontend tsc+eslint+vitest clean
+  (functions 62.28%); alembic head 0043.
+- Three deliverables exist: `docs/concernSS.md`, `docs/hybrid-ultimate.md`, this file.
 - Dirty tree in swa-erp (deps.py, frontend, e2e, Makefile, etc.) **left untouched** — not part of this work.
 
 ## 3. What is NOT done (next agent starts here)

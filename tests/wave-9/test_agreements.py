@@ -266,7 +266,7 @@ class TestAgreementApi:
     ):
         from src.backend.core.security import create_access_token
 
-        token = create_access_token(admin_user.id)
+        token = create_access_token(admin_user.id, admin_user.token_version)
         client = authed_pm_client
         client.headers["Authorization"] = f"Bearer {token}"
         r = await client.post(
@@ -303,7 +303,7 @@ class TestAgreementApi:
     ):
         from src.backend.core.security import create_access_token
 
-        token = create_access_token(admin_user.id)
+        token = create_access_token(admin_user.id, admin_user.token_version)
         client = authed_pm_client
         client.headers["Authorization"] = f"Bearer {token}"
         r = await client.post(

@@ -8,13 +8,25 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
 from src.backend.core.lifecycle import ProjectStatus
-from src.backend.core.roles import Role
+from src.backend.core.roles import Role, role_includes
+from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.project import ProjectRead
 from src.backend.services.lifecycle_service import transition_project
 
 router = APIRouter(prefix="/api/projects", tags=["lifecycle"])
+
+
+def _require_project_access(db: Session, project_id: uuid.UUID, user: User) -> None:
+    """Raise 403 when user is not a member of project_id. Admins bypass."""
+    if role_includes(Role(user.role), Role.ADMIN):
+        return
+    if not user_has_project_access(db, user.id, project_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this project's lifecycle",
+        )
 
 
 class TransitionRequest(BaseModel):
@@ -35,6 +47,7 @@ def transition(
     current_user: User = Depends(require_role(Role.PM)),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
+    _require_project_access(db, project_id, current_user)
     try:
         project = transition_project(db, project_id, body.to_status, current_user.id, body.reason)
     except ValueError as e:

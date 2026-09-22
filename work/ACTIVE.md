@@ -40,15 +40,17 @@ wave-51 (final re-seal) ── SHIPPED (2026-09-15)
 
 **Waves 1–39, 43–51 are SHIPPED.** Engineering closed 2026-09-19.
 
-## Status notes (2026-09-19 — FINAL SUBMISSION RESEAL)
+## Status notes (2026-09-19 — FINAL SUBMISSION RESEAL) · seal track 2026-09-22
 
 - All professional-grade waves **32–39 SHIPPED**.
 - Hardening waves **40–51 SHIPPED**.
-- Final close pack: [`work/FINAL-CLOSE/`](FINAL-CLOSE/).
+- Final close pack archived: `attic/final-close/` (ANTI-FAB copy: `docs/historical/ANTI-FABRICATION.md`).
 - Seal report: [`work/reports/FINAL-CLOSE.report.md`](reports/FINAL-CLOSE.report.md).
+- **Production seal track (new):** [`docs/SEAL_PROTOCOL.md`](../docs/SEAL_PROTOCOL.md) · census/graphify/truth under [`work/reports/seal/`](reports/seal/).
 - **External (not engineering):** Viraj server facts / deploy / Excel migration owner.
 - **Wave-47 seal:** gates A–E verified 2026-08-28. Backend 572 passed/1 skipped/0 failed; 85% coverage. Frontend 523 passed/0 failed. See `work/reports/wave-47/01-final-seal.report.md`.
 - **Wave-51 re-seal:** commit `4396581`. Backend 63/3/0 (Redis down) / 572/1/0 (Redis up, wave-47); Frontend 586/0/0; **60.46% function coverage (threshold met)**. All static gates clean.
+- **2026-09-22 session re-run:** backend **673 passed / 2 skipped / 0 failed**; frontend tsc+eslint clean, vitest 0 failed, functions **62.28%**; alembic head **0043**.
 
 If a wave is missing from both tables, that is a bug in this file — every wave 1-51 must
 appear in exactly one.

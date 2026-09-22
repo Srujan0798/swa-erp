@@ -50,3 +50,9 @@ Every wave 1-31 is SHIPPED and appears here; every wave appears in exactly one o
 **Note:** The per-wave folders (`work/wave-N/` and `work/reports/wave-N/` for N=1..31)
 were removed during the wave-39 repository reorganization to reduce clutter. The
 historical record is preserved in this table and in git history.
+
+## Seal-session archive moves (2026-09-22)
+- work/reports/dispatch-24h/* → attic/dispatch-24h/ (49 NOISE files)
+- work/FINAL-CLOSE/* → attic/final-close/ (ANTI-FAB also at docs/historical/)
+- plan/ARCHITECTURE.md → merged into docs/ARCHITECTURE.md §8 → docs/historical/ARCHITECTURE-plan.md
+- VALIDATION_REPORT.md, work/STATE.md, ASSIGN-* → docs/historical/

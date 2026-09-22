@@ -33,10 +33,12 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="User not active")
 
     # Verify token_version: reject access tokens minted before a logout/rotation.
-    token_version = payload.get("v")  # str or int or None
-    if token_version is not None:
-        if user.token_version != int(token_version):
-            raise HTTPException(status_code=401, detail="Token revoked — please log in again")
+    # The `v` claim is required (fail closed): tokens minted without it cannot
+    # be version-checked and are treated as revoked, never trusted until expiry.
+    if "v" not in payload:
+        raise HTTPException(status_code=401, detail="Token revoked — please log in again")
+    if user.token_version != int(payload["v"]):
+        raise HTTPException(status_code=401, detail="Token revoked — please log in again")
 
     return user
 

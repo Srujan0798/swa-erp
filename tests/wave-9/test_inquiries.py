@@ -223,7 +223,7 @@ class TestConvertInquiryAmbiguity:
         req = InquiryConvertRequest(project_name="P", project_code="P-1")
         with pytest.raises(InquiryConversionError) as exc_info:
             convert_inquiry(db_session, inquiry.id, req, actor.id)
-        assert exc_info.value.status_code == 300
+        assert exc_info.value.status_code == 409
         body = exc_info.value.body
         assert body["inquiry_client_name"] == "Acme"
         assert len(body["candidates"]) == 2
@@ -336,12 +336,12 @@ class TestInquiryApi:
         assert "project_id" in data
 
     @pytest.mark.asyncio
-    async def test_convert_endpoint_ambiguous_returns_300(
+    async def test_convert_endpoint_ambiguous_returns_409(
         self, authed_pm_client, admin_user, db_session
     ):
         from src.backend.core.security import create_access_token
 
-        token = create_access_token(admin_user.id)
+        token = create_access_token(admin_user.id, admin_user.token_version)
         client_with_admin = authed_pm_client
         client_with_admin.headers["Authorization"] = f"Bearer {token}"
         for code in ("AMB-1", "AMB-2"):

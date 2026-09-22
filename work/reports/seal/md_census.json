@@ -1,0 +1,1185 @@
+[
+  {
+    "path": "resources/MEETINGS_MASTER.md",
+    "bytes": 25510,
+    "mtime": "2026-08-23",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/SUBMISSION.md",
+    "bytes": 21768,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/MEETING_AND_GO_LIVE_GUIDE.md",
+    "bytes": 18885,
+    "mtime": "2026-09-17",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/PERFORMANCE.md",
+    "bytes": 15451,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/BACKEND_TEST_AUDIT_REPORT.md",
+    "bytes": 14709,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/TECHNICAL_REPORT.md",
+    "bytes": 14649,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/concernSS.md",
+    "bytes": 13756,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/CHANGELOG.md",
+    "bytes": 13416,
+    "mtime": "2026-09-22",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "VALIDATION_REPORT.md",
+    "bytes": 12671,
+    "mtime": "2026-09-22",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/ASSIGN-LEVELS.md",
+    "bytes": 11699,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "plan/ARCHITECTURE.md",
+    "bytes": 10720,
+    "mtime": "2026-09-20",
+    "class": "DUP",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/EXECUTION.md",
+    "bytes": 10645,
+    "mtime": "2026-09-19",
+    "class": "DUP",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/COMPLETION-HANDOFF-VERDICT.md",
+    "bytes": 10283,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-36/02-post-merge-fixes.report.md",
+    "bytes": 9404,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/IT_BRIEF.md",
+    "bytes": 9399,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-48/04-service-layer-logging.report.md",
+    "bytes": 8904,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/AGENT_DISPATCH_GUIDE.md",
+    "bytes": 8803,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/decisions/0002-core-id-chain-gap.md",
+    "bytes": 8194,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/PROTOCOLS.md",
+    "bytes": 8091,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-50/01-deferred-security-risks.report.md",
+    "bytes": 8045,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "plan/EXECUTION.md",
+    "bytes": 7959,
+    "mtime": "2026-09-20",
+    "class": "DUP",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/ULTIMATE-CLOSE-GUIDE.md",
+    "bytes": 7932,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/flows/02_auth_rbac.md",
+    "bytes": 7863,
+    "mtime": "2026-08-28",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "prompts/advanced-audit-v2.md",
+    "bytes": 7714,
+    "mtime": "2026-09-21",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-39/01-repo-organization.report.md",
+    "bytes": 7638,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "resources/EXCEL_SHEETS_INVENTORY.md",
+    "bytes": 7519,
+    "mtime": "2026-08-07",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/HIERARCHY.md",
+    "bytes": 7420,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/handover/ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md",
+    "bytes": 7414,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/DEPLOYMENT_CHECKLIST.md",
+    "bytes": 7359,
+    "mtime": "2026-09-21",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-39/01-repo-organization.md",
+    "bytes": 7246,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "README.md",
+    "bytes": 7187,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/STATE.md",
+    "bytes": 7102,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "decisions/OPEN_ITEMS_FROM_MEETINGS.md",
+    "bytes": 6899,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/FINAL-CLOSE.report.md",
+    "bytes": 6645,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-35/01-performance-load-validation.report.md",
+    "bytes": 6624,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/conventions.md",
+    "bytes": 6516,
+    "mtime": "2026-09-21",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/ASSIGN-L4-L10.md",
+    "bytes": 6398,
+    "mtime": "2026-09-17",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-51/01-final-reseal-and-submission.report.md",
+    "bytes": 6385,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/hybrid-ultimate.md",
+    "bytes": 6309,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-32/01-real-ci-quality-gates.report.md",
+    "bytes": 6283,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "plan/PRD.md",
+    "bytes": 6061,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-48/05-frontend-loading-states-and-bundle-splitting.report.md",
+    "bytes": 5901,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-51/01-final-reseal-and-submission.md",
+    "bytes": 5819,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-50/02-deterministic-test-suite.report.md",
+    "bytes": 5767,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/SUBMISSION_REPORT.md",
+    "bytes": 5746,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/INSTALL_NO_IT.md",
+    "bytes": 5733,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-46/01-truth-reconciliation.md",
+    "bytes": 5717,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/SCOPE_GUARD.md",
+    "bytes": 5634,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-50/01-deferred-security-risks.md",
+    "bytes": 5626,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-38/01-submission-package.report.md",
+    "bytes": 5548,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "prompts/live-validation-prompt.md",
+    "bytes": 5531,
+    "mtime": "2026-09-22",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-38/01-submission-package.md",
+    "bytes": 5303,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "handoff3.md",
+    "bytes": 5199,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-43/01-evals.report.md",
+    "bytes": 5188,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "scripts/codex/README.md",
+    "bytes": 5038,
+    "mtime": "2026-09-22",
+    "class": "DUP",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-33/03-remaining-coverage.report.md",
+    "bytes": 4949,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/ARCHITECTURE.md",
+    "bytes": 4911,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-46/01-truth-reconciliation.report.md",
+    "bytes": 4907,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-36/02-post-merge-fixes.md",
+    "bytes": 4838,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/decisions/0004-api-versioning-idempotency.md",
+    "bytes": 4828,
+    "mtime": "2026-09-21",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-32/01-real-ci-quality-gates.md",
+    "bytes": 4769,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-49/01-transaction-atomicity.md",
+    "bytes": 4654,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L6-A.md",
+    "bytes": 4625,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-49/01-transaction-atomicity.report.md",
+    "bytes": 4579,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-48/03-token-security-hygiene.report.md",
+    "bytes": 4575,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-50/02-deterministic-test-suite.md",
+    "bytes": 4529,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/cleanup/FINAL_VERIFICATION.md",
+    "bytes": 4523,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/ACTIVE.md",
+    "bytes": 4492,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-48/01-production-hardening.md",
+    "bytes": 4459,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "decisions/SHOW_AND_ASK.md",
+    "bytes": 4435,
+    "mtime": "2026-09-21",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "HANDOFF.md",
+    "bytes": 4418,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": ".specify/memory/constitution.md",
+    "bytes": 4340,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/prompts/PASTE-TO-CLAUDE.md",
+    "bytes": 4334,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-33/02-backend-coverage-redo.md",
+    "bytes": 4243,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/historical/HANDOFF.md",
+    "bytes": 4228,
+    "mtime": "2026-09-22",
+    "class": "DUP",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-35/01-performance-load-validation.md",
+    "bytes": 4215,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "AGENTS.md",
+    "bytes": 4204,
+    "mtime": "2026-08-22",
+    "class": "STUB",
+    "symlink": true
+  },
+  {
+    "path": "CLAUDE.md",
+    "bytes": 4204,
+    "mtime": "2026-08-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "KIMI.md",
+    "bytes": 4204,
+    "mtime": "2026-08-22",
+    "class": "STUB",
+    "symlink": true
+  },
+  {
+    "path": "work/wave-36/01-observability.md",
+    "bytes": 4201,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-37/01-independent-review.md",
+    "bytes": 4183,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/ARCHIVE.md",
+    "bytes": 4121,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-47/01-final-seal.report.md",
+    "bytes": 4092,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/SEND_IT.md",
+    "bytes": 4067,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-34/02-frontend-page-coverage.md",
+    "bytes": 4026,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-34/01-frontend-test-suite.md",
+    "bytes": 3989,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-47/01-final-seal.md",
+    "bytes": 3986,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "decisions/VIRAJ_DECISIONS.md",
+    "bytes": 3961,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "decisions/DECISION_INDEX.md",
+    "bytes": 3873,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L3-D.md",
+    "bytes": 3867,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-37/01-independent-review.report.md",
+    "bytes": 3811,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L7-B.md",
+    "bytes": 3805,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-48/05-frontend-loading-states-and-bundle-splitting.md",
+    "bytes": 3749,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/decisions/0001-tech-stack.md",
+    "bytes": 3746,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-1.md",
+    "bytes": 3627,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/DOCS_MAP.md",
+    "bytes": 3616,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-33/01-backend-coverage.md",
+    "bytes": 3568,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "decisions/IT_DECISIONS.md",
+    "bytes": 3445,
+    "mtime": "2026-09-21",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-48/02-pagination-idempotency.report.md",
+    "bytes": 3330,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L3-B.md",
+    "bytes": 3249,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "docs/decisions/0003-soft-delete-exceptions.md",
+    "bytes": 3150,
+    "mtime": "2026-09-21",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/handover/USER_GUIDE.md",
+    "bytes": 3071,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/handover/ADMIN_GUIDE.md",
+    "bytes": 3007,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/TASK-CATEGORIES.md",
+    "bytes": 2996,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/README.md",
+    "bytes": 2994,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-38/_draft-metrics.md",
+    "bytes": 2954,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-48/02-pagination-idempotency.md",
+    "bytes": 2909,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-48/04-service-layer-logging.md",
+    "bytes": 2891,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L6-C.md",
+    "bytes": 2880,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/DEMO_SCRIPT.md",
+    "bytes": 2794,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/wave-48/03-token-security-hygiene.md",
+    "bytes": 2762,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "docs/decisions/0005-system-1-gates-at-boundary.md",
+    "bytes": 2677,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L8-B.md",
+    "bytes": 2585,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/HUMAN-PLAYBOOK.md",
+    "bytes": 2508,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/performance-runs/README.md",
+    "bytes": 2494,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/wave-34/02-frontend-page-coverage.report.md",
+    "bytes": 2393,
+    "mtime": "2026-09-19",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L5-A.md",
+    "bytes": 2364,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L6-B.md",
+    "bytes": 2299,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/prompts/CONTINUE-SESSIONS.md",
+    "bytes": 2287,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "docs/REAL_DATA.md",
+    "bytes": 2255,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/ANTI-FABRICATION.md",
+    "bytes": 2176,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "HOW_TO_RUN.md",
+    "bytes": 2154,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L6-D.md",
+    "bytes": 1993,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L7-C.md",
+    "bytes": 1974,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/FINAL-CLOSE/DEFINITION-OF-DONE.md",
+    "bytes": 1896,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L9-B.md",
+    "bytes": 1884,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L6-FIX.md",
+    "bytes": 1846,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L3-E.md",
+    "bytes": 1836,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "orchestrator/ROLE.md",
+    "bytes": 1808,
+    "mtime": "2026-09-20",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L8-A.md",
+    "bytes": 1789,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L1-C.md",
+    "bytes": 1641,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L5-C.md",
+    "bytes": 1610,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L7-D.md",
+    "bytes": 1606,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/WORKER_PROMPT.md",
+    "bytes": 1572,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L8-C.md",
+    "bytes": 1494,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "deliverables/handover/TRAINING_ONE_PAGER.md",
+    "bytes": 1452,
+    "mtime": "2026-09-22",
+    "class": "CANON",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L7-A.md",
+    "bytes": 1429,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/TASK_TEMPLATE.md",
+    "bytes": 1394,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L9-A.md",
+    "bytes": 1378,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L4-C.md",
+    "bytes": 1319,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L5-E.md",
+    "bytes": 1261,
+    "mtime": "2026-09-21",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L9-C.md",
+    "bytes": 1199,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L5-D.md",
+    "bytes": 1116,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L8-D.md",
+    "bytes": 1028,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L5-B.md",
+    "bytes": 1000,
+    "mtime": "2026-09-19",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L1-B.md",
+    "bytes": 840,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L1-E.md",
+    "bytes": 789,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L1-A.md",
+    "bytes": 753,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L10-D.md",
+    "bytes": 749,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L10-B.md",
+    "bytes": 744,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L10-C.md",
+    "bytes": 736,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L4-A.md",
+    "bytes": 736,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L10-A.md",
+    "bytes": 712,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L1-F.md",
+    "bytes": 700,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L1-D.md",
+    "bytes": 692,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L2-E.md",
+    "bytes": 686,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L4-B.md",
+    "bytes": 670,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L2-F.md",
+    "bytes": 669,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L3-C.md",
+    "bytes": 668,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L2-D.md",
+    "bytes": 663,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L2-A.md",
+    "bytes": 653,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L3-A.md",
+    "bytes": 652,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L2-C.md",
+    "bytes": 637,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L4-D.md",
+    "bytes": 618,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L2-B.md",
+    "bytes": 610,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": "work/REPORT_TEMPLATE.md",
+    "bytes": 593,
+    "mtime": "2026-09-20",
+    "class": "WAVE",
+    "symlink": false
+  },
+  {
+    "path": "work/reports/dispatch-24h/AGENT-L4-E.md",
+    "bytes": 589,
+    "mtime": "2026-09-20",
+    "class": "NOISE",
+    "symlink": false
+  },
+  {
+    "path": ".pytest_cache/README.md",
+    "bytes": 302,
+    "mtime": "2026-09-21",
+    "class": "DUP",
+    "symlink": false
+  },
+  {
+    "path": "docs/operational/OBSERVABILITY.md",
+    "bytes": 85,
+    "mtime": "2026-09-19",
+    "class": "CANON",
+    "symlink": false
+  }
+]
