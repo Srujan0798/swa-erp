@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const BASE = "http://localhost:3100";
+import { BASE, API } from "./helpers";
 let projectCode = "";
 let projectId = "";
 
@@ -8,13 +8,13 @@ test.describe("BOQ & Quote flow", () => {
   test.beforeEach(async ({ page, request }) => {
     // Self-sufficient setup: ensure a fresh project exists via the API so the
     // flow never depends on ambient seed data.
-    const login = await request.post("http://localhost:8100/api/auth/login", {
+    const login = await request.post(`${API}/api/auth/login`, {
       data: { email: "admin@swa.local", password: "admin123!" },
     });
     const { access_token } = await login.json();
     const headers = { Authorization: `Bearer ${access_token}` };
     const code = `E2E-${Date.now()}`;
-    const client = await request.post("http://localhost:8100/api/clients", {
+    const client = await request.post(`${API}/api/clients`, {
       headers,
       data: {
         name: "E2E Client",
@@ -23,7 +23,7 @@ test.describe("BOQ & Quote flow", () => {
       },
     });
     const clientId = (await client.json()).id;
-    const proj = await request.post("http://localhost:8100/api/projects", {
+    const proj = await request.post(`${API}/api/projects`, {
       headers,
       data: { name: "E2E Project", code: `${code}-P`, client_id: clientId },
     });

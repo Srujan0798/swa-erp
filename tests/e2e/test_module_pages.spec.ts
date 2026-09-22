@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const BASE = "http://localhost:3100";
+import { BASE } from "./helpers";
 const ts = new Date().getTime();
 
 async function login(page: Page) {

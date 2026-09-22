@@ -1,0 +1,285 @@
+{
+  "n_labeled": 12,
+  "accuracy": 0.75,
+  "per_pack": {
+    "swa.inbound_email": {
+      "correct": 2,
+      "labeled": 4,
+      "acc": 0.5
+    },
+    "harness.prompt_guard": {
+      "correct": 4,
+      "labeled": 4,
+      "acc": 1.0
+    },
+    "swa.sheet_row_risk": {
+      "correct": 2,
+      "labeled": 2,
+      "acc": 1.0
+    },
+    "controlplane.admission": {
+      "correct": 1,
+      "labeled": 2,
+      "acc": 0.5
+    }
+  },
+  "warning": "Small hand-labeled set — expand before trusting; base near-chance zero-shot.",
+  "hard_stop": "Do not wire ERP routers from this report alone.",
+  "items": [
+    {
+      "id": "mail_en_001",
+      "pack": "swa.inbound_email",
+      "lang": "en",
+      "correct": 0,
+      "labeled": 2,
+      "routing": "english",
+      "gate_escalate": true,
+      "gate_reasons": [
+        "category:low_confidence(0.146<0.7)",
+        "urgency:low_confidence(0.324<0.7)"
+      ],
+      "detail": {
+        "category": {
+          "ok": false,
+          "answer": {
+            "type": "choice",
+            "choice": "other",
+            "probabilities": {
+              "sales": 0.0932,
+              "projects": 0.166,
+              "finance_admin": 0.0888,
+              "compliance": 0.0671,
+              "technical": 0.2078,
+              "spam": 0.0115,
+              "other": 0.3656
+            },
+            "confidence": 0.1462,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "needs_reply": {
+          "ok": false,
+          "answer": {
+            "type": "noul",
+            "noul": 0.1658,
+            "confidence": 0.8342,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "mail_hi_001",
+      "pack": "swa.inbound_email",
+      "lang": "hi",
+      "correct": 2,
+      "labeled": 2,
+      "routing": "multilingual",
+      "gate_escalate": true,
+      "gate_reasons": [
+        "is_phishing:low_confidence(0.566<0.7)",
+        "is_phishing:noul_gray_band(0.434)"
+      ],
+      "detail": {
+        "category": {
+          "ok": true,
+          "answer": {
+            "type": "choice",
+            "choice": "finance_admin",
+            "probabilities": {
+              "sales": 0.0014,
+              "projects": 0.0012,
+              "finance_admin": 0.9473,
+              "compliance": 0.0319,
+              "technical": 0.0044,
+              "spam": 0.0124,
+              "other": 0.0014
+            },
+            "confidence": 0.8633,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "needs_reply": {
+          "ok": true,
+          "answer": {
+            "type": "noul",
+            "noul": 0.7255,
+            "confidence": 0.7255,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "guard_en_001",
+      "pack": "harness.prompt_guard",
+      "lang": "en",
+      "correct": 2,
+      "labeled": 2,
+      "routing": "english",
+      "gate_escalate": true,
+      "gate_reasons": [
+        "sensitive_data:low_confidence(0.566<0.7)",
+        "sensitive_data:noul_gray_band(0.566)",
+        "harm_severity:low_confidence(0.225<0.7)"
+      ],
+      "detail": {
+        "jailbreak": {
+          "ok": true,
+          "answer": {
+            "type": "noul",
+            "noul": 1.0,
+            "confidence": 1.0,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "prompt_injection": {
+          "ok": true,
+          "answer": {
+            "type": "noul",
+            "noul": 1.0,
+            "confidence": 1.0,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "guard_en_002",
+      "pack": "harness.prompt_guard",
+      "lang": "en",
+      "correct": 2,
+      "labeled": 2,
+      "routing": "english",
+      "gate_escalate": true,
+      "gate_reasons": [
+        "harm_severity:low_confidence(0.246<0.7)"
+      ],
+      "detail": {
+        "jailbreak": {
+          "ok": true,
+          "answer": {
+            "type": "noul",
+            "noul": 0.0,
+            "confidence": 1.0,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "prompt_injection": {
+          "ok": true,
+          "answer": {
+            "type": "noul",
+            "noul": 0.0705,
+            "confidence": 0.9295,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "sheet_en_001",
+      "pack": "swa.sheet_row_risk",
+      "lang": "en",
+      "correct": 2,
+      "labeled": 2,
+      "routing": "english",
+      "gate_escalate": true,
+      "gate_reasons": [
+        "risk:low_confidence(0.156<0.7)",
+        "issue:low_confidence(0.018<0.7)"
+      ],
+      "detail": {
+        "looks_anomalous": {
+          "ok": true,
+          "answer": {
+            "type": "noul",
+            "noul": 0.7988,
+            "confidence": 0.7988,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "issue": {
+          "ok": true,
+          "answer": {
+            "type": "choice",
+            "choice": "quantity_outlier",
+            "probabilities": {
+              "unit_mismatch": 0.1666,
+              "quantity_outlier": 0.2896,
+              "code_mismatch": 0.204,
+              "duplicate": 0.1443,
+              "none": 0.1955
+            },
+            "confidence": 0.0182,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "admit_en_001",
+      "pack": "controlplane.admission",
+      "lang": "en",
+      "correct": 1,
+      "labeled": 2,
+      "routing": "english",
+      "gate_escalate": true,
+      "gate_reasons": [
+        "admit:low_confidence(0.613<0.7)",
+        "risk:low_confidence(0.180<0.7)",
+        "action_class:low_confidence(0.652<0.7)"
+      ],
+      "detail": {
+        "admit": {
+          "ok": false,
+          "answer": {
+            "type": "noul",
+            "noul": 0.6125,
+            "confidence": 0.6125,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        },
+        "action_class": {
+          "ok": true,
+          "answer": {
+            "type": "choice",
+            "choice": "irreversible",
+            "probabilities": {
+              "read_only": 0.0072,
+              "reversible_write": 0.083,
+              "external_notify": 0.0116,
+              "irreversible": 0.856,
+              "other": 0.0423
+            },
+            "confidence": 0.6517,
+            "action": {
+              "act_probability": 1.0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

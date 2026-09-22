@@ -39,12 +39,12 @@ When all tasks in a wave are merged:
 ```text
 /ship wave-N
 ```
-Runs integration tests, opens a PR, updates `plan/EXECUTION.md`, bumps `CHANGELOG.md`.
+Runs the orchestrator ship flow (Makefile `ship` is a reminder target; update `plan/EXECUTION.md` during ship).
 
 ## Local dev (running the app)
 ```bash
 make install      # python venv + node deps + db
-make dev          # start backend (8000) + frontend (3000) + postgres + redis
+make dev          # UI :3100 · API :8100 + postgres + redis
 make migrate name="add_client_table"  # create new Alembic migration
 make migrate-up   # apply migrations
 make test         # full test suite (unit + integration)

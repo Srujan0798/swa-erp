@@ -38,6 +38,7 @@ extend-exclude = [
   "backups",
   "uploads",
   "schema",
+  "scripts/codex",
 ]
 
 [tool.ruff.lint]
@@ -74,7 +75,7 @@ exclude = ["src/backend/alembic/versions", "src/backend/db/repositories/__init__
 # `# type: ignore[import-untyped]` so missing-stub intent is centralized
 # and greppable. Revisit when stubs appear upstream.
 [[tool.mypy.overrides]]
-module = ["openpyxl.*", "fpdf.*", "celery.*"]
+module = ["openpyxl.*", "fpdf.*", "celery.*", "laya.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

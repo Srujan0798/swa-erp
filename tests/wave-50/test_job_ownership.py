@@ -120,8 +120,8 @@ async def test_admin_bypasses_ownership_check(enqueued_job_id, authed_admin_clie
 
 
 @pytest.mark.asyncio
-async def test_unknown_job_id_still_returns_pending(authed_pm_client):
-    """Jobs with no ownership row keep the legacy pending/404 handling."""
+async def test_unknown_job_id_returns_404(authed_pm_client):
+    """Jobs with no ownership row are rejected — Celery PENDING is not proof
+    of ownership (AsyncResult(any_uuid).state is PENDING for unknown IDs)."""
     r = await authed_pm_client.get(f"/api/jobs/{uuid.uuid4()}")
-    assert r.status_code == 200
-    assert r.json()["status"] == "pending"
+    assert r.status_code == 404

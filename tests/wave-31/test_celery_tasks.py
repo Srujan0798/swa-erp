@@ -329,12 +329,11 @@ async def test_sync_path_unchanged(authed_committed_client, committed_project):
 
 
 @pytest.mark.asyncio
-async def test_job_status_unknown_job_returns_pending(authed_committed_client):
+async def test_job_status_unknown_job_returns_404(authed_committed_client):
     import uuid
 
     r = await authed_committed_client.get(f"/api/jobs/{uuid.uuid4()}")
-    assert r.status_code == 200
-    assert r.json()["status"] == "pending"
+    assert r.status_code == 404
 
 
 @pytest.mark.asyncio

@@ -1,8 +1,9 @@
 import { test, expect, type Page, type Browser } from "@playwright/test";
 
+import { BASE } from "./helpers";
+
 let browser: Browser;
 let page: Page;
-const BASE = "http://localhost:3100";
 
 test.beforeAll(async ({ browser: b }) => {
   browser = b;

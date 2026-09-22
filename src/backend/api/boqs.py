@@ -113,6 +113,7 @@ def get_boq_endpoint(
     result = get_boq_detail(db, boq_id)
     if not result:
         raise HTTPException(status_code=404, detail="BOQ not found")
+    _require_project_access(db, result.project_id, current_user, read_only=True)
     return result
 
 
@@ -126,8 +127,11 @@ def get_boq_items_endpoint(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
 ):
-    result = get_boq_items_paginated(db, boq_id, page=page, page_size=page_size)
-    return result
+    boq = get_boq_detail(db, boq_id)
+    if not boq:
+        raise HTTPException(status_code=404, detail="BOQ not found")
+    _require_project_access(db, boq.project_id, current_user, read_only=True)
+    return get_boq_items_paginated(db, boq_id, page=page, page_size=page_size)
 
 
 @router.get(
@@ -141,6 +145,7 @@ def download_boq_endpoint(
     result = get_boq_detail(db, boq_id)
     if not result:
         raise HTTPException(status_code=404, detail="BOQ not found")
+    _require_project_access(db, result.project_id, current_user, read_only=True)
     if not result.file_path:
         raise HTTPException(status_code=404, detail="No file associated with this BOQ")
     content = get_storage().read(result.file_path)

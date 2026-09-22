@@ -92,6 +92,6 @@ production code; hook-test mocks are type-checked by `tsc` (no excludes).
 | API versioning | **Header strategy (v1)** — `X-API-Version` on `/api/*`, OpenAPI version = package version; additive-only within a major; first breaking change ships `/api/v2`, v1 kept 6 months |
 | Idempotency keys on POST | **`Idempotency-Key` on invoice create / generate-from-time / status** — replay stored response, same-key-different-body rejected 422, 24h TTL (`idempotency_keys`, migration 0042) |
 | Blue-green / canary / feature flags | **Absent** — compose up/down + migrate; rollback = restore from backup |
-| E2E (Playwright specs exist) | Exists, **not gated in CI** yet |
-| Contract / property / mutation tests | **Partial** — hypothesis property tests (`test_properties.py`) + auth-coverage contract sweep (`test_api_contract.py`) live; full stateful API fuzzing and mutation testing deferred |
+| E2E (Playwright) | **49/49 passed** (login flow, dashboard, BOQ/quote flow, page smokes) on the rebuilt stack; gated in CI via `e2e.yml` |
+| Contract / property / mutation tests | **Partial** — hypothesis property tests (`test_properties.py`) + auth-coverage contract sweep (`test_api_contract.py`) live; mutation testing deferred |
 | Offline / multi-region DR | **Absent** — single host; RPO ≈ 24h via daily backups (restore proven) |

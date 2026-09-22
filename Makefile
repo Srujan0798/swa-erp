@@ -1,4 +1,4 @@
-.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db restore-files seed-demo seed-dev smoke load-test bootstrap-real swa-live-local import-real import-real-commit
+.PHONY: help install dev dev-services test test-wave test-unit test-integration test-e2e lint format migrate migrate-up dispatch ship clean backup-db backup-files restore-db restore-files seed-demo seed-dev smoke load-test load-test-10 load-test-50 load-test-100 load-test-150 metrics verify verify-truth import-data bootstrap-real swa-live-local import-real import-real-commit
 
 help:
 	@echo "swa-erp commands:"
@@ -61,7 +61,7 @@ verify-truth: metrics
 	bash orchestrator/scripts/validate_execution.sh
 
 test-e2e:
-	@if [ -f playwright.config.ts ]; then npx playwright test tests/e2e/; else echo "Playwright not yet configured (Task 04)"; fi
+	bash scripts/run_e2e.sh
 
 lint:
 	python3 -m ruff check src/backend/
@@ -143,9 +143,6 @@ bootstrap-real:
 # Alias — prefer this name when talking to SWA / evaluators
 swa-live-local: bootstrap-real
 	@echo "(Alias of bootstrap-real — preferred name for SWA trials)"
-
-smoke:
-	python3 scripts/smoke_chain.py
 
 ship:
 	@echo "Open Claude Code or Kimi in the project root and run:"

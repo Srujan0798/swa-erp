@@ -3,17 +3,18 @@
 > **Role:** Session / orchestrator-switching protocol. Part of the front-door set — start at
 > [README.md](README.md).
 
-## Current state (2026-09-19 — final submission reseal)
+## Current state (2026-09-22 — files sent to company group; awaiting 8 IT answers)
 
 **Engine version:** v1.0.1. Professional-grade track (waves 32–39) **all shipped**. Post-seal
 hardening (waves 40–51) landed truth-infrastructure guardrails, audit logging, CSP/token rotation,
 service-layer logging, pagination, deterministic tests, atomicity fix, IDOR fix, and final re-seal.
 
 ### Verified (this session, real command output — not carried forward from memory)
-- Backend static gates: **ruff clean, black clean, mypy clean** (159 files) · tsc/eslint/vite-build clean
-- Frontend: **586 passed / 0 failed** (69 files) · **60.46% function coverage** (63.2% statements, 55.09% branches, 64.29% lines) · tsc/eslint/vite-build clean
-- Migrations: single Alembic head `0037` (nullable project time docref)
-- Full backend suite with Redis up: **572 passed / 1 skipped / 0 failed** · 85% coverage (wave-47 seal, Docker run) — **NOT re-run this session** (Docker unavailable)
+- Backend static gates: **ruff clean, black clean, mypy clean** (2026-09-22) · tsc/eslint/vite-build clean
+- Backend suite: **654 passed** (2026-09-22); prior wave-47 Docker seal: 572 passed / 1 skipped / 0 failed · 85% coverage
+- Frontend: **600 passed / 0 failed** (2026-09-22) · coverage at 2026-09-19 reseal: **60.46% functions** (63.2% statements, 55.09% branches, 64.29% lines) · tsc/eslint/vite-build clean
+- Migrations: single Alembic head `0042`
+- Prod deploy: `docker-compose.prod.yml` + `.env.production` validated (secrets pre-filled, gitignored); files sent to company group 2026-09-22 — awaiting 8 IT answers (Docker/WSL2/ports/HTTPS/backups/URL/DB-location/deploy)
 - Seal report: [`work/reports/FINAL-CLOSE.report.md`](work/reports/FINAL-CLOSE.report.md)
 - Wave-51 re-seal: commit `4396581` (pushed to `origin/main`)
 
@@ -50,7 +51,7 @@ code/tests wins; fix the drift rather than trusting the more convenient one.
 ## Where to start a new session
 1. This file → deploy/import help only unless a bug is reported
 2. `README.md` for the evaluator view
-3. `MASTER-FLOW.md` for the one ops path
+3. [`deliverables/MEETING_AND_GO_LIVE_GUIDE.md`](deliverables/MEETING_AND_GO_LIVE_GUIDE.md) for the one ops path
 4. To re-verify from scratch: `python3 -m pytest tests/ -q --tb=no` with Postgres (+ Redis for
    full green) running; `cd src/frontend && npx vitest run` for the frontend suite.
 

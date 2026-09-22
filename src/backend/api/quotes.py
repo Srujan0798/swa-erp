@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
-from src.backend.core.roles import Role
+from src.backend.core.roles import Role, role_includes
+from src.backend.db.repositories.project_repo import user_has_project_access
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.quote import (
@@ -34,6 +35,20 @@ router = APIRouter(prefix="/api", tags=["quotes"])
 
 def _quote_response(data: dict[str, Any]) -> QuoteRead:
     return QuoteRead.model_validate(data)
+
+
+def _require_project_access(
+    db: Session, project_id: uuid.UUID, user: User, *, read_only: bool = True
+) -> None:
+    if role_includes(Role(user.role), Role.ADMIN):
+        return
+    if role_includes(Role(user.role), Role.VIEWER) and read_only:
+        return
+    if not user_has_project_access(db, user.id, project_id):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have access to this project's quotes",
+        )
 
 
 @router.post(
@@ -201,6 +216,7 @@ def download_quote_pdf_endpoint(
     data = get_quote(db, quote_id)
     if not data:
         raise HTTPException(status_code=404, detail="Quote not found")
+    _require_project_access(db, data["project_id"], current_user)
 
     pdf_bytes = generate_quote_pdf(data)
     filename = f"quote-{quote_id}.pdf"

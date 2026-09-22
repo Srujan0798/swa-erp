@@ -14,8 +14,8 @@ export default defineConfig({
     port: 3100,
     strictPort: true,
     proxy: {
-      "/api": "http://localhost:8100",
-      "/healthz": "http://localhost:8100",
+      "/api": process.env.BACKEND_URL || "http://localhost:8100",
+      "/healthz": process.env.BACKEND_URL || "http://localhost:8100",
     },
   },
 });

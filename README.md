@@ -35,17 +35,17 @@ Every number below traces to a wave report or independent re-verify. Safe wordin
 | Area | Claim | Source |
 |------|--------|--------|
 | **Backend coverage** | **83.96%** total (floor `--cov-fail-under=82` met) | `pytest --cov=src/backend` (2026-09-21) |
-| **Backend suite (full, Redis up)** | **647 passed / 2 skipped / 0 failed** — **83.96%** coverage (floor 82 met) | `pytest tests/ --cov-fail-under=82` (2026-09-21 remediation session; includes new `tests/integration` + `tests/security`) |
+| **Backend suite (full, Redis up)** | **654 passed** (floor `--cov-fail-under=82` met) | `pytest tests/` (2026-09-22; includes `tests/integration` + `tests/security` + `tests/wave-52`) |
+| **E2E (Playwright)** | **49/49 passed in 41s** (login flow, dashboard, BOQ/quote flow, page smokes) | `npx playwright test --project=chromium` against rebuilt stack (2026-09-22); gated in CI `e2e.yml` |
 | **Backend suite (local, Redis down)** | **63 passed / 3 skipped / 0 failed** — Redis-dependent tests skipped | `results/metrics.json` (wave-47) |
-| **Backend static gates** | **ruff clean, black clean, mypy clean** (159 files) | this session |
-| **Frontend suite** | **586 passed / 0 failed** (69 files) | `npx vitest run` (this session) |
-| **Frontend coverage** | **Statements 63.2%**, **Branches 55.09%**, **Functions 60.46% (ABOVE 60% threshold)**, **Lines 64.29%** | `npx vitest run --coverage` (this session) |
-| **Frontend static gates** | **tsc clean, eslint clean, vitest thresholds met** | `npx tsc --noEmit`, `npx eslint`, `npx vitest run --coverage` (this session) |
-| **Backend static gates** | **ruff clean, black clean, mypy clean** (159 files) | this session |
+| **Backend static gates** | **ruff clean, black clean, mypy clean** (162 files); repo-wide `ruff check .` clean | this session |
+| **Frontend suite** | **600 passed / 0 failed** (76 files) | `npx vitest run` (2026-09-22) |
+| **Frontend coverage** | **Statements 65.72%**, **Branches 59.05%**, **Functions 62.37%**, **Lines 67.03%** | `npx vitest run --coverage` (2026-09-22) |
+| **Frontend static gates** | **tsc clean (zero excludes), eslint clean, vitest thresholds met** | `npx tsc --noEmit`, `npx eslint`, `npx vitest run --coverage` (2026-09-22) |
 | **Load** | **10 / 50 / 100 / 150** concurrent users on a **dev machine**; aggregate **p95 ≈ 29–130 ms**; **no server 5xx** after harness fix. **Not** the client's Windows Server. | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), wave-35 |
-| **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit / npm audit / semgrep wired; `npx vitest run` gated in frontend job | [`work/reports/wave-32/01-real-ci-quality-gates.report.md`](work/reports/wave-32/01-real-ci-quality-gates.report.md) |
+| **CI** | Real fail gates — **0** `\|\| true` / `continue-on-error` in `.github/workflows/`; coverage floor `--cov-fail-under=82`; pip-audit (strict, 2 documented dev-only ignores) / npm audit (**0 vulnerabilities**) / semgrep + Trivy / gitleaks wired; pip + npm caching; E2E gated in `e2e.yml`; Dependabot weekly | workflows on disk 2026-09-22; scans re-run locally |
 | **Observability** | `/metrics` (Prometheus, auth-gated by default), `/healthz` + `/readyz`, optional Sentry (`SENTRY_DSN`) | [`docs/operational/OBSERVABILITY.md`](docs/operational/OBSERVABILITY.md), wave-36 |
-| **Alembic** | Single head **0040** | `alembic -c src/backend/alembic.ini heads` (2026-09-21) |
+| **Alembic** | Single head **0042** (audit-log immutability trigger 0041; idempotency keys 0042); `alembic check` clean | `alembic -c src/backend/alembic.ini heads && check` (2026-09-22) |
 
 **Do not claim:** "no backend module under 70%" globally (9+ non-alembic modules still under — see verdict). Always cite fresh output paste.
 

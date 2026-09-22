@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const BASE = "http://localhost:3100";
+import { BASE } from "./helpers";
 const ts = new Date().getTime();
 const EMAIL = `e2e-client-${ts}@swa.co.in`;
 

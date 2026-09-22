@@ -28,7 +28,7 @@
 | Reforge ID format | Meeting 1 §7 | `VIRAJ_DECISIONS.md` #7 | Viraj |
 | Compliance versions | Meeting 2 §12 | `VIRAJ_DECISIONS.md` #8 | Viraj + Auditor |
 | Windows Server 100% | Meeting 2 §1 | `VIRAJ_DECISIONS.md` #6 | Viraj → IT |
-| Architecture for IT | Meeting 2 §11 | `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` | Viraj → IT |
+| Architecture for IT | Meeting 2 §11 | `deliverables/handover/ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` | Viraj → IT |
 | IT 8 questions | Meeting 2 §4 | `SEND_IT.md` | Viraj → IT |
 | Migration owner | Meeting 2 §7 / ADR-0002 #4 | `VIRAJ_DECISIONS.md` #1 | Viraj |
 
@@ -56,10 +56,10 @@
 | `VIRAJ_DECISIONS.md` | Your decision log — fill this |
 | `IT_DECISIONS.md` | IT's 8 questions — forward to Vikrant |
 | `OPEN_ITEMS_FROM_MEETINGS.md` | Full context from both meetings |
-| `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` | Forward to IT with SEND_IT.md |
-| `SEND_IT.md` | 8 questions for IT — forward to Vikrant |
+| `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` (`deliverables/handover/`) | Forward to IT with SEND_IT.md |
+| `SEND_IT.md` (`deliverables/`) | 8 questions for IT — sent 2026-09-22, awaiting answers |
 | `SHOW_AND_ASK.md` | Demo script + what to ask live |
-| `DEMO_SCRIPT.md` | 10-min demo walkthrough |
+| `DEMO_SCRIPT.md` (`deliverables/`) | 10-min demo walkthrough |
 | `SMOKE_CHAIN` | `python3 scripts/smoke_chain.py` (live proof) |
 
 ---
@@ -91,4 +91,4 @@ Viraj reads VIRAJ_DECISIONS.md
 
 ---
 
-*Updated: 2026-09-21 | All code gates pass | Decision files ready for Viraj/IT*
+*Updated: 2026-09-22 | All code gates pass | Files sent to company group — awaiting 8 IT answers*

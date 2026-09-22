@@ -1,21 +1,21 @@
 # Open Items from Client Meetings — Requires Viraj/IT Input
 
-**Status as of 2026-09-21**
+**Status as of 2026-09-22**
 
 ---
 
 ## Critical Items Blocking Go-Live
 
-### 1. Architecture Summary for Viraj → IT  ✅ **PRODUCED**
+### 1. Architecture Summary for Viraj → IT  ✅ **SENT 2026-09-22**
 **File:** `deliverables/handover/ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md`
-**Status:** ✅ Produced — ready for Viraj to forward to IT
-**Action:** Viraj forwards this to IT with the 8 questions from `deliverables/SEND_IT.md`
+**Status:** ✅ Produced and sent to the company group 2026-09-22
+**Action:** Await IT responses; re-send only if no reply
 
 ---
 
 ### 2. IT Con-Call & 8 Factual Answers  🔴 **BLOCKING DEPLOY**
 **Owner:** Viraj → IT (Vikrant)
-**Status:** ❌ Not yet answered
+**Status:** 📮 Brief sent 2026-09-22 — **awaiting the 8 answers**
 **Required:** 8 specific answers from IT (see `deliverables/SEND_IT.md`):
 
 1. **Docker** — Installed? Free Engine or paid Desktop?
@@ -95,7 +95,7 @@
 
 | # | Action | Owner | Blocking? |
 |---|--------|-------|-----------|
-| 1 | Forward `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` to IT with `SEND_IT.md` | Viraj | 🔴 Yes (deployment blocked) |
+| 1 | Forward `ARCHITECTURE_OVERVIEW_FOR_VIRAJ.md` to IT with `SEND_IT.md` | Viraj | ✅ Sent 2026-09-22 — awaiting responses |
 | 2 | Get 8 IT answers from IT team | Viraj → IT | 🔴 Yes (deployment blocked) |
 | 3 | Name migration owner (who runs real Excel import) | Viraj | 🔴 Yes (go-live blocked) |
 | 4 | Confirm 4th Agreement ID question resolution | Viraj | 🟡 Clarify |

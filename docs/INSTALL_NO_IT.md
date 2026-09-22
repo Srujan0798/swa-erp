@@ -91,7 +91,7 @@ curl -f http://localhost:8100/healthz                    # {"status":"ok"}
 
 Open in a browser (on VPN): `http://<server-LAN-IP>:3100` (or the hostname you set).
 
-**Healthcheck details:** The backend container runs `wget -qO- http://localhost:8000/healthz` internally
+**Healthcheck details:** The backend container runs `curl -f http://localhost:8000/healthz` internally
 (container port 8000). From the host, the mapped port is 8100, hence `curl localhost:8100/healthz`.
 
 ---
