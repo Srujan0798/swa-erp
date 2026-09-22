@@ -23,7 +23,7 @@
     "@radix-ui/react-select": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.15",
-    "@tanstack/react-query": "^5.51.21",
+    "@tanstack/react-query": "^5.103.1",
     "@types/babel__generator": "^7.27.0",
     "@types/babel__template": "^7.4.4",
     "@types/babel__traverse": "^7.28.0",
