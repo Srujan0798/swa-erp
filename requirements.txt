@@ -21,7 +21,7 @@ pypdf==6.19.0
 weasyprint==70.0
 minio==7.2.7
 locust==2.43.4
-prometheus-fastapi-instrumentator==6.1.0
+prometheus-fastapi-instrumentator==8.1.0
 sentry-sdk==2.68.0
 # Explicit transitive pins (trivy HIGH findings otherwise; jaraco.context path traversal, wheel privilege escalation)
 jaraco.context==6.1.0
