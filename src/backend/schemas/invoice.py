@@ -7,8 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class InvoiceItemCreate(BaseModel):
     description: str = Field(min_length=1)
-    quantity: Decimal
-    rate: Decimal
+    quantity: Decimal = Field(gt=0, le=1_000_000)
+    rate: Decimal = Field(gt=0, le=10_000_000)
     category: str | None = None
     time_entry_id: uuid.UUID | None = None
 

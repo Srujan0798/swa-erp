@@ -1,6 +1,8 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.backend.core.deps import get_current_user, require_role
@@ -29,6 +31,8 @@ from src.backend.services.rfq_service import (
 )
 
 router = APIRouter(tags=["rfqs"])
+
+logger = logging.getLogger(__name__)
 
 
 def _require_project_access(
@@ -71,8 +75,13 @@ def create_rfq_endpoint(
             items_data=items_data,
             created_by=current_user.id,
         )
-    except Exception as e:
+    except IntegrityError as e:
+        raise HTTPException(status_code=409, detail="RFQ violates a data constraint") from e
+    except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        logger.exception("RFQ creation failed")
+        raise HTTPException(status_code=400, detail="RFQ creation failed") from e
 
 
 @router.get(

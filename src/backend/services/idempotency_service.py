@@ -13,6 +13,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.backend.models.idempotency_key import IdempotencyKey
@@ -70,17 +71,29 @@ def replay_or_execute(
             return existing.status_code, dict(existing.response_body), True
 
     status_code, body = execute()
-    db.add(
-        IdempotencyKey(
-            key=key,
-            user_id=user_id,
-            method=method,
-            path=path,
-            request_hash=request_hash,
-            status_code=status_code,
-            response_body=body,
-            expires_at=now + TTL,
+    try:
+        with db.begin_nested():
+            db.add(
+                IdempotencyKey(
+                    key=key,
+                    user_id=user_id,
+                    method=method,
+                    path=path,
+                    request_hash=request_hash,
+                    status_code=status_code,
+                    response_body=body,
+                    expires_at=now + TTL,
+                )
+            )
+            db.flush()
+    except IntegrityError:
+        stored = (
+            db.query(IdempotencyKey)
+            .filter(IdempotencyKey.key == key, IdempotencyKey.user_id == user_id)
+            .first()
         )
-    )
+        if stored is not None and stored.request_hash == request_hash and stored.expires_at > now:
+            return stored.status_code, dict(stored.response_body), True
+        raise IdempotencyError("idempotency_key_reuse") from None
     db.commit()
     return status_code, body, False

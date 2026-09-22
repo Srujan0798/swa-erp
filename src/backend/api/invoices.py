@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from src.backend.core.deps import require_role
 from src.backend.core.roles import Role
+from src.backend.db.repositories.project_repo import get_by_id as get_project_by_id
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.invoice import (
@@ -79,6 +80,10 @@ def create_invoice_endpoint(
     current_user: User = Depends(ReqPM),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> Response:
+    project = get_project_by_id(db, project_id)
+    if not project or project.deleted_at:
+        raise HTTPException(status_code=404, detail="Project not found")
+
     def _execute() -> tuple[int, dict[str, Any]]:
         try:
             items_data = [item.model_dump() for item in body.items]

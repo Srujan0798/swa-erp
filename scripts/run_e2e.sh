@@ -33,8 +33,9 @@ psql -U swa -d postgres -c "CREATE DATABASE ${SCRATCH_DB};" >/dev/null
 echo "=== 2/6 migrate scratch ==="
 DATABASE_URL="$SCRATCH_URL" alembic -c src/backend/alembic.ini upgrade heads
 
-echo "=== 3/6 seed scratch users ==="
+echo "=== 3/6 seed scratch users (dev + demo cover all spec credentials) ==="
 DATABASE_URL="$SCRATCH_URL" python3 scripts/seed_dev.py
+DATABASE_URL="$SCRATCH_URL" python3 scripts/seed_demo.py
 
 echo "=== 4/6 boot isolated backend :${BACKEND_PORT} ==="
 DISABLE_AUTH_RATE_LIMIT=true DATABASE_URL="$SCRATCH_URL" \

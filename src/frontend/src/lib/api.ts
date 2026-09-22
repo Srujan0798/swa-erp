@@ -116,6 +116,34 @@ function formatApiError(status: number, body: unknown): string {
   return `API Error: ${status}`;
 }
 
+let refreshInFlight: Promise<boolean> | null = null;
+
+function refreshAccessTokenSingleFlight(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = (async (): Promise<boolean> => {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) return false;
+      try {
+        const refreshResponse = await fetch("/api/auth/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        if (!refreshResponse.ok) return false;
+        const tokens: AccessTokenResponse & { refresh_token?: string } =
+          await refreshResponse.json();
+        setTokens(tokens.access_token, tokens.refresh_token ?? refreshToken);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+  }
+  return refreshInFlight;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -131,30 +159,18 @@ async function request<T>(
 
   let response = await fetch(path, { ...options, headers });
 
-  if (response.status === 401) {
-    const refresh = getRefreshToken();
-    if (refresh) {
-      try {
-        const refreshResponse = await fetch("/api/auth/refresh", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refresh_token: refresh }),
-        });
-        if (refreshResponse.ok) {
-          const tokens: AccessTokenResponse & { refresh_token?: string } = await refreshResponse.json();
-          setTokens(tokens.access_token, tokens.refresh_token ?? refresh);
-          headers["Authorization"] = `Bearer ${tokens.access_token}`;
-          response = await fetch(path, { ...options, headers });
-        } else {
-          clearTokens();
-          window.location.href = "/login";
-          throw new ApiError(401, null);
-        }
-      } catch {
-        clearTokens();
-        window.location.href = "/login";
-        throw new ApiError(401, null);
+  if (response.status === 401 && getRefreshToken()) {
+    const refreshed = await refreshAccessTokenSingleFlight();
+    if (refreshed) {
+      const newToken = getAccessToken();
+      if (newToken) {
+        headers["Authorization"] = `Bearer ${newToken}`;
       }
+      response = await fetch(path, { ...options, headers });
+    } else {
+      clearTokens();
+      window.location.href = "/login";
+      throw new ApiError(401, null);
     }
   }
 

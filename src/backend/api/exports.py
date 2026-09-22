@@ -71,7 +71,10 @@ def financial_report_pdf(
             status_code=202,
         )
 
-    pdf_bytes = export_financial_report(db, start_date, end_date)
+    try:
+        pdf_bytes = export_financial_report(db, start_date, end_date)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
